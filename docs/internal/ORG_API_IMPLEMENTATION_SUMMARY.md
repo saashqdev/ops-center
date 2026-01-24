@@ -23,7 +23,7 @@ Successfully implemented the **Organization API** for Ops-Center with all 9 requ
 ## Files Created
 
 ### 1. Main API Implementation
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_api.py`
 **Lines**: 598 lines
 **Description**: FastAPI router with all 9 organization endpoints
 
@@ -36,7 +36,7 @@ Successfully implemented the **Organization API** for Ops-Center with all 9 requ
 - Detailed logging for all operations
 
 ### 2. Integration Guide
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/ORG_API_INTEGRATION.md`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_API_INTEGRATION.md`
 **Lines**: 450+ lines
 **Description**: Complete integration and deployment guide
 
@@ -49,7 +49,7 @@ Successfully implemented the **Organization API** for Ops-Center with all 9 requ
 - Frontend integration examples
 
 ### 3. Quick Test Script
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_org_api_quick.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_org_api_quick.py`
 **Lines**: 180 lines
 **Description**: Automated verification script
 
@@ -567,9 +567,9 @@ The Organization API is **complete and ready for integration**. All 9 required e
 **Status**: ✅ PRODUCTION READY
 
 **Files Delivered**:
-1. `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_api.py`
-2. `/home/muut/Production/UC-Cloud/services/ops-center/ORG_API_INTEGRATION.md`
-3. `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_org_api_quick.py`
+1. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_api.py`
+2. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_API_INTEGRATION.md`
+3. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_org_api_quick.py`
 
 **Integration**: Add 2 lines to server.py and restart
 

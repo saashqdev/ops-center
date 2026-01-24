@@ -791,7 +791,7 @@ async def _test_api_key_validation(provider: str, api_key: str):
 
 1. **Create the file**:
    ```bash
-   touch /home/muut/Production/UC-Cloud/services/ops-center/backend/llm_config_api.py
+   touch /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/llm_config_api.py
    # Copy the template above into it
    ```
 

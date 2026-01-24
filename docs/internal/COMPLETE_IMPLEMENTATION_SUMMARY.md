@@ -201,7 +201,7 @@ This document summarizes **all changes made today** to fix the Subscription Mana
 
 1. **Frontend build** - Currently building (ETA: 1-2 minutes)
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    # Build is running: npm run build
    # Then: cp -r dist/* public/
    ```

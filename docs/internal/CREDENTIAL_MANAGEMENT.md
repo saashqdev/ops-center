@@ -72,7 +72,7 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 
 ### 2. Add to Environment
 
-Add to `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`:
+Add to `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`:
 
 ```bash
 # Secret Encryption Key (44 characters, base64-encoded)
@@ -429,7 +429,7 @@ print(f"   - Failed: {result['failed']}")
 
 ```bash
 # Update .env.auth
-vim /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Change:
 ENCRYPTION_KEY=OLD_KEY

@@ -191,7 +191,7 @@ The final 10% of Ops-Center development is **COMPLETE** and **DEPLOYED**. All cr
    ```bash
    curl -X POST https://api.brigade.your-domain.com/api/agents \
      -H "Authorization: Bearer $ADMIN_TOKEN" \
-     -d @/home/muut/Production/UC-Cloud/services/ops-center/atlas/architecture/atlas-agent.json
+     -d @/home/ubuntu/Ops-Center-OSS/src/services/ops-center/atlas/architecture/atlas-agent.json
    ```
 
 2. **Deploy monitoring services** (if needed):
@@ -248,7 +248,7 @@ The final 10% of Ops-Center development is **COMPLETE** and **DEPLOYED**. All cr
 ## 📞 Support
 
 **Documentation**:
-- Main: `/home/muut/Production/UC-Cloud/services/ops-center/CLAUDE.md`
+- Main: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/CLAUDE.md`
 - Subscription Guide: `docs/SUBSCRIPTION_MANAGEMENT_GUIDE.md`
 - Atlas Guide: `atlas/docs/INTEGRATION_GUIDE.md`
 - E2E Test Report: `/tmp/e2e_results_final.md`

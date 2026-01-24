@@ -379,7 +379,7 @@ Based on code review and industry best practices, these areas may need attention
 
 1. **Run Automated Tests**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    npm install playwright @axe-core/playwright
    npx playwright test tests/mobile/
    ```
@@ -453,7 +453,7 @@ Based on code review and industry best practices, these areas may need attention
 **For Developers**:
 ```bash
 # 1. Install dependencies
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm install playwright @axe-core/playwright lighthouse
 
 # 2. Ensure Ops-Center is running
@@ -826,7 +826,7 @@ const NETWORK_PRESETS = {
 - **Engineering Manager**
 
 **Documentation Location**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 **GitHub Issues**:
 - Create issues with label: `mobile-responsiveness`

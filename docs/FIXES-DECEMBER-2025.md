@@ -221,7 +221,7 @@ RESULTS: 11/11 passed
 
 ```bash
 # 1. Frontend build
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 NODE_OPTIONS='--max-old-space-size=4096' npx vite build
 
 # 2. Deploy to public directory

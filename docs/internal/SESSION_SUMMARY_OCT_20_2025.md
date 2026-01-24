@@ -407,7 +407,7 @@ GET  /api/v1/llm/health                     # Health check
 **LiteLLM Integration** (Week 1 starts):
 1. Run database initialization:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
    python scripts/initialize_litellm_db.py
    ```
 2. Obtain provider API keys:
@@ -550,7 +550,7 @@ GET  /api/v1/llm/health                     # Health check
 **License**: MIT
 
 **For Development**:
-- Working Directory: `/home/muut/Production/UC-Cloud/services/ops-center`
+- Working Directory: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 - Backend: `backend/` (FastAPI)
 - Frontend: `src/` (React + Vite)
 - Database: PostgreSQL (`unicorn_db`)

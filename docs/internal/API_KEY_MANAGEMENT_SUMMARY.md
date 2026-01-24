@@ -22,7 +22,7 @@ Implemented comprehensive API key management system for the Ops-Center with thre
 
 **Purpose**: Allow users to generate API keys to call Unicorn Commander API from external applications (Postman, curl, custom integrations).
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/uc_api_keys.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/uc_api_keys.py`
 
 **Base Path**: `/api/v1/account/uc-api-keys`
 
@@ -113,7 +113,7 @@ curl -X DELETE https://your-domain.com/api/v1/account/uc-api-keys/uuid-here \
 
 **Purpose**: Admin-only management of system-level provider API keys (OpenRouter, provisioning key, LiteLLM master key).
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/platform_keys_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/platform_keys_api.py`
 
 **Base Path**: `/api/v1/admin/platform-keys`
 
@@ -221,7 +221,7 @@ curl https://your-domain.com/api/v1/admin/platform-keys/openrouter/decrypted \
 
 ### 3. LiteLLM Configuration Update Guide
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/LITELLM_CONFIG_UPDATE.md`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LITELLM_CONFIG_UPDATE.md`
 
 Comprehensive guide for updating LiteLLM proxy to use the OpenRouter API key stored in the database.
 
@@ -739,19 +739,19 @@ Response:
 ### Created Files
 
 1. **`uc_api_keys.py`** (504 lines)
-   - Location: `/home/muut/Production/UC-Cloud/services/ops-center/backend/`
+   - Location: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/`
    - Purpose: UC API key management endpoints
 
 2. **`platform_keys_api.py`** (431 lines)
-   - Location: `/home/muut/Production/UC-Cloud/services/ops-center/backend/`
+   - Location: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/`
    - Purpose: Platform key management endpoints (admin-only)
 
 3. **`LITELLM_CONFIG_UPDATE.md`** (detailed guide)
-   - Location: `/home/muut/Production/UC-Cloud/services/ops-center/`
+   - Location: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
    - Purpose: Instructions for updating LiteLLM configuration
 
 4. **`API_KEY_MANAGEMENT_SUMMARY.md`** (this file)
-   - Location: `/home/muut/Production/UC-Cloud/services/ops-center/`
+   - Location: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
    - Purpose: Complete implementation summary and reference
 
 ### Modified Files

@@ -331,8 +331,8 @@ WHERE key_alias = 'ops-center-service';
 - Documentation: https://docs.litellm.ai/docs/proxy/virtual_keys
 
 **Ops-Center Access Control**:
-- Tier management: `/home/muut/Production/UC-Cloud/services/ops-center/docs/TIER_PRICING_STRATEGY.md`
-- API documentation: `/home/muut/Production/UC-Cloud/services/ops-center/docs/API_REFERENCE.md`
+- Tier management: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/TIER_PRICING_STRATEGY.md`
+- API documentation: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/API_REFERENCE.md`
 
 **Database Schema**:
 - LiteLLM tables: `LiteLLM_VerificationToken`, `LiteLLM_Config`

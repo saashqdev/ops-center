@@ -1,7 +1,7 @@
 # Migration API Implementation Summary
 
 **Status**: ✅ COMPLETE
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/migration_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migration_api.py`
 **Epic**: 1.7 - NameCheap Integration & Migration Workflow
 **Date**: October 22, 2025
 

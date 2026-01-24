@@ -3,7 +3,7 @@
 **Date**: January 12, 2025
 **Status**: Phase 1 MVP Complete (Backend + Database)
 **Team**: System Architecture Designer
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 
@@ -675,7 +675,7 @@ The Dynamic Pricing System MVP backend is **production-ready** with:
 
 ## Contact & Support
 
-**Documentation Location**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Documentation Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 **Key Files**:
 - Migration: `backend/migrations/create_dynamic_pricing.sql`

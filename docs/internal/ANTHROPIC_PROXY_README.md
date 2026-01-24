@@ -109,7 +109,7 @@ Complete test suite with 7 test cases:
 
 Run tests:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 python3 tests/test_anthropic_proxy.py
 ```
 
@@ -123,7 +123,7 @@ Full-featured MCP connector for local tool execution:
 
 Run connector:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 python3 scripts/mcp_connector.py \
   --user-id <your-user-id> \
   --api-key <your-api-key> \
@@ -211,7 +211,7 @@ services:
 ### 3. Restart Services
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker-compose -f docker-compose.direct.yml restart
 ```
 
@@ -259,7 +259,7 @@ claude-code \
 ### WebSocket Method (Recommended)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Set your credentials
 export MCP_USER_ID="your-user-id"
@@ -423,7 +423,7 @@ curl http://localhost:4000/health
 
 1. **Deploy to Production**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    docker-compose -f docker-compose.direct.yml up -d
    ```
 

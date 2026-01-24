@@ -266,7 +266,7 @@ dist/assets/AccountAPIKeys-HsxRsWc_.js        26.33 kB │ gzip:   6.11 kB
 
 **Build Command**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 ```
 

@@ -149,7 +149,7 @@ async def shutdown():
 ### 3. Frontend Build and Deploy
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Build frontend (includes updated SubscriptionUsage.jsx)
 npm run build
@@ -215,7 +215,7 @@ curl -s http://localhost:8084/api/v1/usage/current \
 ### Run Automated Tests
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Run usage tracking tests
 python3 tests/test_usage_tracking.py
@@ -352,7 +352,7 @@ print('Initialized successfully')
 docker ps | grep redis
 
 # Check Redis host in .env.auth
-grep REDIS_HOST /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+grep REDIS_HOST /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Test Redis connection
 docker exec ops-center-direct python3 -c "

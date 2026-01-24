@@ -3,7 +3,7 @@
 **Date**: January 12, 2025
 **Status**: PRODUCTION READY
 **Team**: Dynamic Pricing GUI Team Lead
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 
@@ -438,7 +438,7 @@ INFO:     Uvicorn running on http://0.0.0.0:8084 (Press CTRL+C to quit)
 
 ```bash
 # Build frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 
 # Deploy to public

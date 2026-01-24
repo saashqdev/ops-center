@@ -598,7 +598,7 @@ cat /tmp/qa_api_results.txt
 ### Step 3: Frontend Component Discovery (AFTER API TESTS)
 ```bash
 # Search for components
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 find src/pages -name "*.jsx" | grep -i "invite\|credit\|pricing\|subscription"
 find src/components -name "*.jsx" | grep -i "invite\|credit\|pricing\|tier"
 ```

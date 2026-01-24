@@ -229,7 +229,7 @@ GET /admin/subscription/success?session_id={CHECKOUT_SESSION_ID}
 ## Files Modified
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── src/pages/subscription/SubscriptionPlan.jsx  [MODIFIED]
 ├── public/                                      [UPDATED]
 │   ├── index.html

@@ -15,7 +15,7 @@
 **Solution**: Added slowapi rate limiting middleware
 
 **Files Modified**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py`
 
 **Changes**:
 ```python
@@ -56,7 +56,7 @@ docker logs ops-center-direct 2>&1 | grep "Rate limiting enabled"
 **Solution**: Added audit logging to admin credit deduction endpoint
 
 **Files Modified**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/credit_api.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/credit_api.py`
 
 **Changes**:
 ```python
@@ -93,7 +93,7 @@ docker logs ops-center-direct 2>&1 | grep "AUDIT: Admin credit deduction"
 **Solution**: Added proper error handling with fallback to user_id
 
 **Files Modified**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_api.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_api.py`
 
 **Changes**:
 ```python
@@ -131,7 +131,7 @@ except Exception as e:
 **Solution**: Query database first, fallback to hardcoded plans if DB unavailable
 
 **Files Modified**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/billing_api.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/billing_api.py`
 
 **Changes**:
 ```python
@@ -199,11 +199,11 @@ curl -s http://localhost:8084/api/v1/billing/plans | jq '.source'
 **Solution**: Created input validation middleware to block dangerous patterns
 
 **Files Created**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/middleware/__init__.py`
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/middleware/validation.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/middleware/__init__.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/middleware/validation.py`
 
 **Files Modified**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py`
 
 **Middleware Implementation**:
 ```python

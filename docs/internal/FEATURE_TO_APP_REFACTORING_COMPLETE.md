@@ -219,7 +219,7 @@ If issues are discovered, rollback is possible:
 2. **Code Rollback**:
    ```bash
    # Revert Git commits
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    git revert HEAD~3..HEAD
 
    # Rebuild and deploy
@@ -314,4 +314,4 @@ All success criteria met:
 **Refactoring Status**: ✅ COMPLETE AND DEPLOYED
 
 **Contact**: Ops-Center Development Team
-**Documentation**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Documentation**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`

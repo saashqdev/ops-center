@@ -223,7 +223,7 @@ The Ops-Center organizational billing system has been successfully deployed usin
 The `slowapi` dependency fix needs to be persisted:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.direct.yml build
 docker compose -f docker-compose.direct.yml up -d
 ```
@@ -308,7 +308,7 @@ The LoopNet agent has everything needed to integrate organizational billing:
 ## Files & Locations
 
 ### Deployment Checklist
-- `/home/muut/Production/UC-Cloud/services/ops-center/OPS_CENTER_DEPLOYMENT_CHECKLIST.md` - Master checklist
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/OPS_CENTER_DEPLOYMENT_CHECKLIST.md` - Master checklist
 
 ### Database Reports
 - `/tmp/org_billing_deployment_report.md` - Complete database deployment (621 lines)
@@ -320,12 +320,12 @@ The LoopNet agent has everything needed to integrate organizational billing:
 - `/tmp/BACKEND_TESTING_REPORT.md` - Complete testing report (700+ lines)
 
 ### Integration Documentation
-- `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md` - Complete guide (2,380 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_INTEGRATION_SUMMARY.md` - Executive summary (531 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_QUICK_START.md` - Quick reference (315 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md` - Complete guide (2,380 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_INTEGRATION_SUMMARY.md` - Executive summary (531 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_QUICK_START.md` - Quick reference (315 lines)
 
 ### Migration Files
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/create_org_billing.sql` - Original migration (501 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/create_org_billing.sql` - Original migration (501 lines)
 - `/tmp/create_org_billing_fixed.sql` - Fixed migration with VARCHAR compatibility
 
 ---

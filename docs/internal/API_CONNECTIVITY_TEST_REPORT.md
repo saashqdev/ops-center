@@ -304,7 +304,7 @@ localStorage.removeItem('user')
 **Solution**:
 ```bash
 # Rebuild frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 

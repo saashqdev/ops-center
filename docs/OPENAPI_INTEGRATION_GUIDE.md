@@ -193,7 +193,7 @@ When endpoints are added or modified:
 
 ```bash
 # Navigate to backend directory
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Run endpoint extractor
 python3 scripts/simple_endpoint_extractor.py

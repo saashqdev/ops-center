@@ -569,7 +569,7 @@ app.add_middleware(CompressionMiddleware)
 #### Performance Lighthouse Test
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run test:mobile:performance
 ```
 
@@ -657,7 +657,7 @@ cp /path/to/logo.png public/logos/uc-logo-512.png
 ### Step 1: Build Frontend
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm install
 npm run build
 ```

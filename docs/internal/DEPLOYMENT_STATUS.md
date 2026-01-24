@@ -127,7 +127,7 @@ http://localhost:8084/admin/llm-hub
 ### Quick Rollback
 ```bash
 # Restore previous frontend build (if needed)
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git checkout HEAD~1 public/
 docker restart ops-center-direct
 ```
@@ -135,7 +135,7 @@ docker restart ops-center-direct
 ### Full Rollback
 ```bash
 # Revert all changes
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git revert HEAD
 npm run build
 cp -r dist/* public/
@@ -242,7 +242,7 @@ docker restart ops-center-direct
 
 **Working Directory**:
 ```
-/home/muut/Production/UC-Cloud/services/ops-center
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ```
 
 **Container Name**:

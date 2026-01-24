@@ -532,7 +532,7 @@ DEFAULT_PLANS = [
 
 ### Backend Files
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/backend/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/
 ├── subscription_management_api.py    (NEW - 782 lines)
 ├── subscription_manager.py           (ENHANCED - added Stripe helpers)
 ├── server.py                         (UPDATED - registered new router)
@@ -542,7 +542,7 @@ DEFAULT_PLANS = [
 
 ### Frontend Files
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/
 ├── App.jsx                           (UPDATED - added 3 routes)
 └── pages/subscription/
     ├── SubscriptionPlan.jsx          (ENHANCED - added action buttons)

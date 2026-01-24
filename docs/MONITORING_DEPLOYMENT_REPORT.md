@@ -406,7 +406,7 @@ docker logs ops-center-direct --tail 200
 # - Configuration errors
 
 # Step 5: If persistent, rebuild container
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.direct.yml build
 docker compose -f docker-compose.direct.yml up -d
 ```
@@ -466,7 +466,7 @@ docker exec ops-center-direct pip install prometheus-client==0.19.0 prometheus-f
 ## File Structure Summary
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── monitoring/
 │   ├── docker-compose.monitoring.yml          ✅ Created
 │   ├── prometheus/
@@ -737,7 +737,7 @@ All monitoring infrastructure has been successfully designed, implemented, and d
 
 ## Appendix A: File Locations
 
-All files created in `/home/muut/Production/UC-Cloud/services/ops-center/`:
+All files created in `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`:
 
 1. `monitoring/docker-compose.monitoring.yml` - 203 lines
 2. `monitoring/prometheus/prometheus.yml` - 204 lines
@@ -761,7 +761,7 @@ All files created in `/home/muut/Production/UC-Cloud/services/ops-center/`:
 
 ```bash
 # Deploy monitoring
-cd /home/muut/Production/UC-Cloud/services/ops-center/monitoring
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/monitoring
 docker compose -f docker-compose.monitoring.yml up -d
 
 # Check status

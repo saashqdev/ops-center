@@ -255,7 +255,7 @@ brew install stripe/stripe-cli/stripe  # macOS
 
 ```bash
 # Navigate to project
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Run all tests with coverage
 pytest backend/tests/ --cov=backend --cov-report=html --cov-report=term

@@ -103,7 +103,7 @@ curl http://localhost:8084/api/v1/alerts/history
 
 3. **Add to Environment**:
    ```bash
-   # File: /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+   # File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
    # Add these lines:
    GRAFANA_API_KEY=<paste-your-token-here>
@@ -180,7 +180,7 @@ curl http://localhost:8084/api/v1/monitoring/grafana/dashboards
 Run complete test suite to verify 90%+ pass rate:
 ```bash
 # Run all tests
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 -m pytest tests/test_email_alerts.py -v
 python3 -m pytest tests/test_logs_search.py -v
 python3 -m pytest tests/test_grafana_api.py -v

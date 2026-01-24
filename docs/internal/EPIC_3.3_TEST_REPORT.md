@@ -249,7 +249,7 @@ ERROR: Invalid model name passed in model=qwen/qwen3-coder:free
 **Frontend Check Needed**:
 ```bash
 # Check if route exists
-grep -r "llm-hub/models" /home/muut/Production/UC-Cloud/services/ops-center/src/
+grep -r "llm-hub/models" /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/
 ```
 
 ### Test Case 8: Tier-Based Markup

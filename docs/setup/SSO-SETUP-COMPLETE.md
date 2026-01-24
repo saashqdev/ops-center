@@ -109,7 +109,7 @@ All three identity providers are configured and enabled in uchub realm:
 Run the verification script to check all configuration:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 python3 verify_uchub_sso.py
 ```
 
@@ -283,7 +283,7 @@ docker exec uchub-keycloak /opt/keycloak/bin/kcadm.sh update clients/<client-uui
 Apply custom branding to Keycloak login pages:
 ```bash
 # Deploy custom theme
-/home/muut/Production/UC-Cloud/services/ops-center/deploy-keycloak-theme.sh
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/deploy-keycloak-theme.sh
 ```
 
 ### 3. Configure Additional Identity Providers
@@ -342,7 +342,7 @@ grep KEYCLOAK_ADMIN_PASSWORD docker-compose.direct.yml
 ### Verification Commands
 ```bash
 # Run full verification
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 python3 verify_uchub_sso.py
 
 # Check identity providers

@@ -150,7 +150,7 @@ class OrgManager:
 
     def __init__(
         self,
-        data_dir: str = "/app/data"  # Container path (was: /home/muut/Production/UC-Cloud/services/ops-center/backend/data)
+        data_dir: str = "/app/data"  # Container path (was: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data)
     ):
         """
         Initialize OrgManager

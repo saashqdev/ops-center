@@ -5,14 +5,14 @@
 This document provides instructions for integrating the new Organization API (`org_api.py`) into the Ops-Center backend server.
 
 **Created**: October 22, 2025
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_api.py`
 **Status**: Ready for Integration
 
 ---
 
 ## 1. Import the Router
 
-Add this import to `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py`:
+Add this import to `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py`:
 
 ```python
 # Add this import near the top with other router imports (around line 70-80)
@@ -357,7 +357,7 @@ After integration, verify:
 
 ```bash
 # 1. Navigate to ops-center directory
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # 2. Edit server.py to add the two lines above
 vim backend/server.py
@@ -459,6 +459,6 @@ For issues or questions:
 
 ---
 
-**File Location**: `/home/muut/Production/UC-Cloud/services/ops-center/ORG_API_INTEGRATION.md`
-**API File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_api.py`
+**File Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_API_INTEGRATION.md`
+**API File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_api.py`
 **Status**: Ready for Integration

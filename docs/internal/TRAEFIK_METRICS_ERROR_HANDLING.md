@@ -305,9 +305,9 @@ This implementation follows the **System.jsx pattern**:
 
 ## File Locations
 
-- **Source**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/TraefikMetrics.jsx`
+- **Source**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/TraefikMetrics.jsx`
 - **Build Log**: `/tmp/build-traefik-metrics.log`
-- **Deployed**: `/home/muut/Production/UC-Cloud/services/ops-center/public/`
+- **Deployed**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/`
 
 ---
 

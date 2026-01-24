@@ -134,7 +134,7 @@ GET /api/v1/llm/byok/keys/{provider}/usage
 **Test Suite**: `test_byok_api.sh` (12 tests)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 ./test_byok_api.sh
 ```
 

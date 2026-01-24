@@ -512,7 +512,7 @@ volumes:
 ### 3. **Service Restart**
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Restart ops-center to load new module
 docker restart ops-center-direct
@@ -621,10 +621,10 @@ The system provides:
 ---
 
 **Files Created**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/backup_rclone.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/backup_rclone.py`
 
 **Files Modified**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/storage_backup_api.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/storage_backup_api.py`
 
 **Total Implementation**: 1,469 lines of production-ready code
 **Status**: ✅ COMPLETE

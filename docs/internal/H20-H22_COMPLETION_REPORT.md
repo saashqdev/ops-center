@@ -164,7 +164,7 @@
 
 **Usage**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 bash scripts/test_backend_apis.sh
 ```
 

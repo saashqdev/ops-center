@@ -4,7 +4,7 @@
 **Date**: 2025-10-20
 **Status**: READY FOR DEPLOYMENT (with 1 critical dependency fix)
 **Agent**: Pre-Launch Verification Agent
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 
@@ -273,7 +273,7 @@ ModuleNotFoundError: No module named 'litellm'
 
 **Mitigation** (5 minutes):
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Add dependency
 echo "litellm>=1.40.0" >> backend/requirements.txt
@@ -344,7 +344,7 @@ HTTPException: Provider 'groq' not configured or API key missing
 
 **Mitigation** (10 minutes):
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Create environment file
 cat > .env.litellm << 'EOF'
@@ -454,7 +454,7 @@ ERROR: failed to solve: failed to read dockerfile: open backend/Dockerfile.wilme
 
 **Mitigation** (5 minutes):
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Create Dockerfile.wilmer
 cat > Dockerfile.wilmer << 'EOF'
@@ -500,7 +500,7 @@ ls -lh backend/Dockerfile.wilmer
 
 **Step 1: Fix Critical Dependency** (5 min)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 echo "litellm>=1.40.0" >> backend/requirements.txt
 docker compose -f docker-compose.direct.yml build
 ```
@@ -565,7 +565,7 @@ docker logs ops-center-direct | grep -i "litellm\|byok"
 
 **Run Basic Tests**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ./test_litellm_basic.sh
 ```
 

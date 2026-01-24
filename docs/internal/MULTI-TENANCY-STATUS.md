@@ -139,7 +139,7 @@ KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_USER", os.getenv("KEYCLOAK_A
 ## 🗂️ File Structure
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── backend/
 │   ├── server.py (Registration endpoint: lines 3411-3730)
 │   ├── org_manager.py (Organization CRUD: 651 lines)

@@ -210,13 +210,13 @@
 
 **Sprint 1 Changes** (✅ Tested & Ready):
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker restart ops-center-direct
 ```
 
 **Sprint 3 Changes** (✅ Tested & Ready):
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker restart ops-center-direct
 ./backend/TEST_NEW_ENDPOINTS.sh
 ```

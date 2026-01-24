@@ -74,7 +74,7 @@ This guide explains how to configure Cloudflare DNS management in UC-Cloud Ops-C
 
 1. **Edit Environment File**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    vim .env.auth
    ```
 

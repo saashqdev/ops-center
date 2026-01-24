@@ -436,7 +436,7 @@ Unexpected server error with error details in `detail` field.
 Run the comprehensive test script:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 ./TEST_NEW_ENDPOINTS.sh
 ```
 

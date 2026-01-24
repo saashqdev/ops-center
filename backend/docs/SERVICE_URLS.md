@@ -357,7 +357,7 @@ docker logs --tail 100 -t unicorn-open-webui
 ### Test SSO Authentication
 ```bash
 # Run automated SSO verification
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 python3 verify_uchub_sso.py
 ```
 
@@ -407,7 +407,7 @@ docker exec uchub-keycloak /opt/keycloak/bin/kcadm.sh get users \
 **Regenerate API key:**
 ```bash
 # Run ops-center API key generation script
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 scripts/generate_api_key.py --user-id USER_UUID --service amanuensis
 ```
 

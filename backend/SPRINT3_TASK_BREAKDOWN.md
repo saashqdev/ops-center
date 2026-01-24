@@ -1,7 +1,7 @@
 # Sprint 3: Backend API Implementation
 
 **Team Lead**: Sprint 3 Team Lead
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 **Date**: October 25, 2025
 
 ---

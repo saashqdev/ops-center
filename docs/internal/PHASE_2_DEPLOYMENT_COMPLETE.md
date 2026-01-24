@@ -315,7 +315,7 @@ app.include_router(payment_methods_router)
 
 ## 📁 **File Locations**
 
-All files are in `/home/muut/Production/UC-Cloud/services/ops-center/`:
+All files are in `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`:
 
 **Backend**:
 - `backend/usage_tracking.py`

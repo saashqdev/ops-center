@@ -41,11 +41,11 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
 
 ## Files Created
 
-1. ✅ **Creation Script**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/create_test_users.py`
-2. ✅ **Test Script**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_tier_access.sh`
-3. ✅ **Credentials**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_users.json`
-4. ✅ **Documentation**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/TEST_USERS_GUIDE.md`
-5. ✅ **Report**: `/home/muut/Production/UC-Cloud/services/ops-center/BLOCKER3_COMPLETION_REPORT.md`
+1. ✅ **Creation Script**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/create_test_users.py`
+2. ✅ **Test Script**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_tier_access.sh`
+3. ✅ **Credentials**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_users.json`
+4. ✅ **Documentation**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/TEST_USERS_GUIDE.md`
+5. ✅ **Report**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/BLOCKER3_COMPLETION_REPORT.md`
 
 ---
 
@@ -67,7 +67,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
 ### View Credentials
 
 ```bash
-cat /home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_users.json
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_users.json
 ```
 
 ---
@@ -84,7 +84,7 @@ cat /home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_users.
 
 **Once implemented**, run:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 ./test_tier_access.sh
 ```
 

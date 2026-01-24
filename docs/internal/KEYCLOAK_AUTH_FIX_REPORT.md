@@ -233,7 +233,7 @@ environment:
 
 ```bash
 # 1. Edit the file
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 vim backend/keycloak_integration.py
 
 # 2. Change line 43 from:

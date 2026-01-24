@@ -406,7 +406,7 @@ Setup automatic daily backups:
 crontab -e
 
 # Add daily backup at 2 AM
-0 2 * * * /home/muut/Production/UC-Cloud/services/ops-center/scripts/database/backup_database.sh >> /var/log/ops-center-backup.log 2>&1
+0 2 * * * /home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/database/backup_database.sh >> /var/log/ops-center-backup.log 2>&1
 ```
 
 ### Using Systemd Timer
@@ -435,7 +435,7 @@ Description=Ops-Center Database Backup Service
 
 [Service]
 Type=oneshot
-ExecStart=/home/muut/Production/UC-Cloud/services/ops-center/scripts/database/backup_database.sh
+ExecStart=/home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/database/backup_database.sh
 User=muut
 Group=muut
 EOF
@@ -579,8 +579,8 @@ df -h /home/muut/backups/
 ## Emergency Contacts
 
 **Backup Location**: `/home/muut/backups/database/`
-**Scripts Location**: `/home/muut/Production/UC-Cloud/services/ops-center/scripts/database/`
-**Documentation**: `/home/muut/Production/UC-Cloud/services/ops-center/docs/`
+**Scripts Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/database/`
+**Documentation**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
 
 **Database Container**: `unicorn-postgresql`
 **Application Container**: `ops-center-direct`

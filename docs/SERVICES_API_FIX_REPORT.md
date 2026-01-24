@@ -220,7 +220,7 @@ Authorization: Bearer {token}
 ### Build and Deploy Steps
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # 1. Build frontend
 npm run build

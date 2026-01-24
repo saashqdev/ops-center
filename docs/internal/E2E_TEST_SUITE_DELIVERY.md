@@ -27,7 +27,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 ### 1. Configuration Files
 
 #### `playwright.config.js`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/playwright.config.js`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/playwright.config.js`
 **Lines**: 110
 **Purpose**: Main Playwright configuration
 **Features**:
@@ -39,7 +39,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 - HTTPS error handling
 
 #### `.env.test.example`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/.env.test.example`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.test.example`
 **Lines**: 20
 **Purpose**: Environment configuration template
 **Variables**:
@@ -49,7 +49,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 - PLAYWRIGHT_TIMEOUT
 
 #### `package.json` (Updated)
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/package.json`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/package.json`
 **Changes**: Added 15+ new E2E test scripts
 **Scripts Added**:
 ```json
@@ -73,7 +73,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 ### 2. Test Suite
 
 #### `tests/e2e/ops-center.spec.js`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/e2e/ops-center.spec.js`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/e2e/ops-center.spec.js`
 **Lines**: 800+
 **Tests**: 37+ organized in 9 test suites
 
@@ -139,7 +139,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 ### 3. Helper Modules
 
 #### `tests/e2e/helpers/auth.js`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/e2e/helpers/auth.js`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/e2e/helpers/auth.js`
 **Lines**: 110
 **Purpose**: Keycloak SSO authentication helpers
 
@@ -157,7 +157,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 - Error handling
 
 #### `tests/e2e/helpers/api.js`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/e2e/helpers/api.js`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/e2e/helpers/api.js`
 **Lines**: 150
 **Purpose**: API testing utilities
 
@@ -175,7 +175,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 - Error detection
 
 #### `tests/e2e/helpers/accessibility.js`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/e2e/helpers/accessibility.js`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/e2e/helpers/accessibility.js`
 **Lines**: 280
 **Purpose**: Accessibility testing (WCAG 2.1)
 
@@ -199,7 +199,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 ### 4. Documentation
 
 #### `tests/e2e/README.md`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/e2e/README.md`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/e2e/README.md`
 **Lines**: 500+
 **Purpose**: Complete setup and usage guide
 
@@ -216,7 +216,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 - Resources
 
 #### `tests/e2e/QUICK_START.md`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/e2e/QUICK_START.md`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/e2e/QUICK_START.md`
 **Lines**: 120
 **Purpose**: 5-minute quick start guide
 
@@ -230,7 +230,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 - Troubleshooting
 
 #### `tests/e2e/TEST_SUITE_SUMMARY.md`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/e2e/TEST_SUITE_SUMMARY.md`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/e2e/TEST_SUITE_SUMMARY.md`
 **Lines**: 600+
 **Purpose**: Comprehensive test suite summary
 
@@ -258,7 +258,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 ### 5. CI/CD Integration
 
 #### `.github/workflows/e2e-tests.yml`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/.github/workflows/e2e-tests.yml`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.github/workflows/e2e-tests.yml`
 **Lines**: 350+
 **Purpose**: GitHub Actions workflow
 
@@ -295,7 +295,7 @@ A comprehensive Playwright E2E test suite has been created for the Ops-Center da
 ### 1. One-Time Setup
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install Playwright browsers
 npm run playwright:install
@@ -475,7 +475,7 @@ services/ops-center/
 
 ### 1. Initial Setup (Required)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run playwright:install
 cp .env.test.example .env.test
 # Edit .env.test with credentials

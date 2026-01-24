@@ -1694,7 +1694,7 @@ Capture screenshots for:
 
 ```bash
 # 1. Ensure services running
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.direct.yml ps
 
 # 2. Tail logs for testing
@@ -1853,7 +1853,7 @@ The subscription payment flow is considered **PRODUCTION READY** when:
 - **Keycloak Admin**: https://auth.your-domain.com/admin/uchub/console/
 - **Stripe Dashboard**: https://dashboard.stripe.com/test
 - **GitHub Repository**: https://github.com/Unicorn-Commander/UC-Cloud
-- **Documentation**: `/home/muut/Production/UC-Cloud/services/ops-center/docs/`
+- **Documentation**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
 
 ### Support
 - **Stripe Support**: https://support.stripe.com

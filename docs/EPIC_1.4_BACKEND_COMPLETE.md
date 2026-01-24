@@ -763,7 +763,7 @@ boto3>=1.28.0        # For S3-compatible cloud storage
 ### Install Dependencies
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 pip install apscheduler boto3
 ```
 
@@ -954,7 +954,7 @@ docker restart ops-center-direct
 **Solution**:
 ```bash
 # Check .env.auth
-grep CLOUD_BACKUP_ENABLED /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+grep CLOUD_BACKUP_ENABLED /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Enable cloud backups
 # Edit .env.auth and set:
@@ -1007,7 +1007,7 @@ docker restart ops-center-direct
 **Solution**:
 ```bash
 # Verify credentials in .env.auth
-grep CLOUD_BACKUP /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+grep CLOUD_BACKUP /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Test S3 connection
 docker exec ops-center-direct python3 -c "
@@ -1142,20 +1142,20 @@ async def cleanup_storage(request):
 
 ### New Files
 
-1. `/home/muut/Production/UC-Cloud/services/ops-center/backend/storage_backup_api.py` (678 lines)
+1. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/storage_backup_api.py` (678 lines)
    - Complete FastAPI router with all endpoints
    - Storage management (info, volumes, cleanup, optimize, health)
    - Backup management (list, create, restore, delete, verify, config, download)
    - Helper functions for cleanup and verification
 
-2. `/home/muut/Production/UC-Cloud/services/ops-center/backend/backup_scheduler.py` (286 lines)
+2. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/backup_scheduler.py` (286 lines)
    - APScheduler integration
    - Cron-based scheduling
    - Email notifications
    - Automatic backup execution
    - Scheduler lifecycle management
 
-3. `/home/muut/Production/UC-Cloud/services/ops-center/backend/cloud_backup.py` (570 lines)
+3. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/cloud_backup.py` (570 lines)
    - S3-compatible storage integration
    - Multi-provider support (AWS S3, Backblaze B2, Wasabi, MinIO)
    - Upload/download with multipart support
@@ -1164,12 +1164,12 @@ async def cleanup_storage(request):
 
 ### Modified Files
 
-1. `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py`
+1. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py`
    - Added `storage_backup_api` import and router registration
    - Added `backup_scheduler` import and startup/shutdown hooks
    - Registered storage/backup endpoints at `/api/v1/storage` and `/api/v1/backups`
 
-2. `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
+2. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
    - Added cloud backup configuration section
    - 10 new environment variables for S3 integration
 

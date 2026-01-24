@@ -644,7 +644,7 @@ paths:
 **Auto-Generation**:
 The spec is auto-generated from FastAPI routes using:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 scripts/simple_endpoint_extractor.py
 ```
 
@@ -1429,7 +1429,7 @@ dist/assets/ApiDocumentation-CntClLMq.js             2,470.28 kB │ gzip: 714.0
 
 ```bash
 # 1. Install dependencies
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm install swagger-ui-react redoc
 # Installed in 4s
 

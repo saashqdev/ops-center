@@ -10,23 +10,23 @@
 
 ```bash
 # Traefik endpoints (C10, C11, C12, C13)
-/home/muut/Production/UC-Cloud/services/ops-center/backend/traefik_api.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/traefik_api.py
 
 # Brigade proxy endpoints (H23)
-/home/muut/Production/UC-Cloud/services/ops-center/backend/brigade_api.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/brigade_api.py
 
 # Server registration
-/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 ```
 
 ### Testing
 
 ```bash
 # Automated test script
-/home/muut/Production/UC-Cloud/services/ops-center/backend/TEST_NEW_ENDPOINTS.sh
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/TEST_NEW_ENDPOINTS.sh
 
 # Run tests
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 ./TEST_NEW_ENDPOINTS.sh
 ```
 
@@ -38,7 +38,7 @@ cd /home/muut/Production/UC-Cloud/services/ops-center/backend
 
 ```bash
 # Complete endpoint specifications
-/home/muut/Production/UC-Cloud/services/ops-center/docs/SPRINT3_API_DOCUMENTATION.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/SPRINT3_API_DOCUMENTATION.md
 
 # Endpoint details, examples, testing instructions
 ```
@@ -47,16 +47,16 @@ cd /home/muut/Production/UC-Cloud/services/ops-center/backend
 
 ```bash
 # Completion report (detailed)
-/home/muut/Production/UC-Cloud/services/ops-center/docs/SPRINT3_COMPLETION_REPORT.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/SPRINT3_COMPLETION_REPORT.md
 
 # Final summary (executive)
-/home/muut/Production/UC-Cloud/services/ops-center/SPRINT3_FINAL_SUMMARY.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/SPRINT3_FINAL_SUMMARY.md
 
 # Task breakdown (planning)
-/home/muut/Production/UC-Cloud/services/ops-center/backend/SPRINT3_TASK_BREAKDOWN.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/SPRINT3_TASK_BREAKDOWN.md
 
 # Quick reference (this file)
-/home/muut/Production/UC-Cloud/services/ops-center/SPRINT3_FILE_REFERENCE.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/SPRINT3_FILE_REFERENCE.md
 ```
 
 ---
@@ -67,7 +67,7 @@ cd /home/muut/Production/UC-Cloud/services/ops-center/backend
 
 ```bash
 # Test all endpoints
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 ./TEST_NEW_ENDPOINTS.sh
 
 # Test individual endpoint
@@ -95,7 +95,7 @@ docker logs ops-center-direct | grep "endpoints registered"
 
 ```bash
 # View commit
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git log -1 --stat
 
 # Show changes

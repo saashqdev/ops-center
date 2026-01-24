@@ -409,7 +409,7 @@
 ### Pre-Deployment
 - [ ] 7.1 Create production backup:
   ```bash
-  cd /home/muut/Production/UC-Cloud/services/ops-center
+  cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
   tar -czf /home/muut/backups/ops-center-backup-$(date +%Y%m%d-%H%M%S).tar.gz .
   ```
 - [ ] 7.2 Review all environment variables

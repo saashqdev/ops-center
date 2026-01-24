@@ -566,14 +566,14 @@ curl -X GET http://localhost:8084/api/v1/byok/keys \
 
 1. **Backup Current Production**:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    tar -czf ops-center-backup-$(date +%Y%m%d-%H%M%S).tar.gz .
    mv ops-center-backup-*.tar.gz /home/muut/backups/
    ```
 
 2. **Build Frontend**:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    npm run build
    ```
 
@@ -598,7 +598,7 @@ curl -X GET http://localhost:8084/api/v1/byok/keys \
 ```bash
 cd /home/muut/backups
 tar -xzf ops-center-backup-[timestamp].tar.gz -C /tmp/ops-center-rollback
-rsync -av /tmp/ops-center-rollback/ /home/muut/Production/UC-Cloud/services/ops-center/
+rsync -av /tmp/ops-center-rollback/ /home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 docker-compose restart ops-center-direct
 ```
 

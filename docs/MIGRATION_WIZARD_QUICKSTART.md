@@ -501,7 +501,7 @@ curl -X POST "https://your-domain.com/api/v1/migration/migration/mig_abc123/roll
 **Solutions**:
 ```bash
 # 1. Verify credentials in .env.auth
-cat /home/muut/Production/UC-Cloud/services/ops-center/.env.auth | grep NAMECHEAP
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth | grep NAMECHEAP
 
 # 2. Restart container to reload credentials
 docker restart ops-center-direct

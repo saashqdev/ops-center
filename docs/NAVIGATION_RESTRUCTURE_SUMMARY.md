@@ -31,7 +31,7 @@ Restructured navigation menu following proper RBAC principles:
 
 ### 1. Layout.jsx Updates
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/components/Layout.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/Layout.jsx`
 
 #### Added Account Section (Lines 305-353)
 ```javascript
@@ -168,7 +168,7 @@ return {
 
 ### 2. Routes Verification
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/App.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/App.jsx`
 
 All required routes already existed:
 
@@ -512,7 +512,7 @@ If rollback is needed, revert Layout.jsx changes:
 
 ```bash
 # Restore from git (if committed)
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git checkout HEAD~1 src/components/Layout.jsx
 
 # Rebuild and deploy

@@ -319,7 +319,7 @@ Before starting menu refinement, verify current functionality:
 docker ps --filter "name=ops-center\|uchub-keycloak\|unicorn-lago"
 
 # Verify SSO configuration
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 python3 verify_uchub_sso.py
 
 # Check ops-center logs
@@ -332,7 +332,7 @@ curl -I https://your-domain.com
 ### Start Frontend Development
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Check current routes and components
 ls -la src/pages/

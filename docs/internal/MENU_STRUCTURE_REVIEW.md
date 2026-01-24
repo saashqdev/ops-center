@@ -5707,7 +5707,7 @@ const PROVIDER_LOGOS = {
 
 **Verification Needed**:
 ```bash
-ls -la /home/muut/Production/UC-Cloud/services/ops-center/public/assets/providers/
+ls -la /home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/assets/providers/
 ```
 
 **Recommendation**: Either create logo files or use provider color backgrounds with initials
@@ -6441,7 +6441,7 @@ const handleExport = async (format) => {
 **Verification**:
 ```bash
 # Check if component exists
-ls -la /home/muut/Production/UC-Cloud/services/ops-center/src/components/PowerLevelSelector.jsx
+ls -la /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/PowerLevelSelector.jsx
 
 # If not found, create or remove import
 ```
@@ -7317,7 +7317,7 @@ POST /api/v1/admin/system/local-users
 **Verification Needed**:
 ```bash
 # Check if backend endpoints exist
-grep -r "local-users" /home/muut/Production/UC-Cloud/services/ops-center/backend/
+grep -r "local-users" /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/
 ```
 
 **Recommendation**: Verify backend implementation exists
@@ -7493,7 +7493,7 @@ disabled={selectedUser.username === currentUser.username}
 
 **Check backend implementation**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 find backend/ -name "*.py" -exec grep -l "local-users" {} \;
 ```
 

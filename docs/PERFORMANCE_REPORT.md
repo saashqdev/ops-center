@@ -388,7 +388,7 @@ LIMIT 10;
 ### Phase 1: Setup (10 minutes)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # 1. Install testing tools
 pip install locust

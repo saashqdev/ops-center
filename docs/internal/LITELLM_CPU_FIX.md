@@ -136,7 +136,7 @@ services:
 ```
 
 2. **Set environment variables:**
-Create `/home/muut/Production/UC-Cloud/services/ops-center/.env.litellm`:
+Create `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.litellm`:
 ```bash
 LITELLM_MASTER_KEY=<generated>
 POSTGRES_PASSWORD=<from main .env>
@@ -146,7 +146,7 @@ OPENROUTER_API_KEY=<optional>
 
 3. **Recreate container:**
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.litellm.yml up -d litellm-proxy
 ```
 
@@ -187,8 +187,8 @@ When creating new PostgreSQL containers:
 ## Related Documentation
 
 - PostgreSQL init scripts: `/home/muut/UC-1-Hub/scripts/create-multiple-postgres-databases.sh`
-- LiteLLM config: `/home/muut/Production/UC-Cloud/services/ops-center/docker-compose.litellm.yml`
-- Ops-Center main config: `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
+- LiteLLM config: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docker-compose.litellm.yml`
+- Ops-Center main config: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
 
 ## Support
 

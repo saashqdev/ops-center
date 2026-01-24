@@ -149,7 +149,7 @@ STRIPE_SECRET_KEY=sk_test_51QwxFKDzk9HqAZnH...
 **Verification Needed**:
 ```bash
 # Check what's actually in .env.auth
-grep "STRIPE" /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+grep "STRIPE" /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 ```
 
 **Expected Output**:
@@ -909,7 +909,7 @@ STRIPE_API_KEY = os.getenv("STRIPE_SECRET_KEY", "")  # ✅ Match actual env var 
 **Verification**:
 ```bash
 # Check environment file
-grep "STRIPE" /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+grep "STRIPE" /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Should output:
 # STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -1482,7 +1482,7 @@ docker exec ops-center-direct env | grep LAGO
 
 1. **Update Backend Files**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Edit files (use the fixes from Phase 1)
 vim backend/stripe_integration.py
@@ -1540,7 +1540,7 @@ If critical issues occur after deployment:
 
 ```bash
 # 1. Restore code
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git stash
 docker restart ops-center-direct
 

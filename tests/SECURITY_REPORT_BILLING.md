@@ -598,13 +598,13 @@ After addressing these issues, the system will meet enterprise security standard
 
 ## Test Artifacts
 
-**Test Report File**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/SECURITY_REPORT_BILLING.md`
-**Test Script**: `/home/muut/Production/UC-Cloud/services/ops-center/tests/security_test_billing.py`
+**Test Report File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/SECURITY_REPORT_BILLING.md`
+**Test Script**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/security_test_billing.py`
 **Run Command**: `python3 tests/security_test_billing.py`
 
 **Re-run Tests After Fixes**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 python3 tests/security_test_billing.py > tests/security_results_$(date +%Y%m%d).txt
 ```
 

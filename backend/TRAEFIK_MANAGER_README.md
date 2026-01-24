@@ -602,7 +602,7 @@ from pydantic import BaseModel, Field, field_validator, ValidationError  # ❌ N
 docker exec ops-center-direct pip install pydantic
 
 # Or add to requirements.txt
-echo "pydantic>=2.0.0" >> /home/muut/Production/UC-Cloud/services/ops-center/requirements.txt
+echo "pydantic>=2.0.0" >> /home/ubuntu/Ops-Center-OSS/src/services/ops-center/requirements.txt
 ```
 
 ## Testing
@@ -611,7 +611,7 @@ echo "pydantic>=2.0.0" >> /home/muut/Production/UC-Cloud/services/ops-center/req
 
 ```bash
 # Run built-in tests
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 traefik_manager.py
 
 # Expected output:

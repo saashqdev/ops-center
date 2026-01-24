@@ -9,7 +9,7 @@
 
 ```bash
 # 1. Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # 2. Run database migration
 docker cp backend/migrations/create_llm_tables.sql unicorn-postgresql:/tmp/
@@ -46,7 +46,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "SELECT 1;"
 
 # Check current working directory
 pwd
-# Should be: /home/muut/Production/UC-Cloud/services/ops-center
+# Should be: /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ```
 
 ### Step 2: Run Database Migration
@@ -95,7 +95,7 @@ python3 -c "from cryptography.fernet import Fernet; print('BYOK_ENCRYPTION_KEY='
 **Add to .env.auth**:
 ```bash
 # Edit .env.auth
-nano /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+nano /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Add these lines at the end:
 # ============================================================================
@@ -124,14 +124,14 @@ docker exec ops-center-direct printenv | grep -E "(BYOK|LITELLM|LLM_)"
 
 Check if server.py already includes health monitor:
 ```bash
-grep -n "llm_health_monitor" /home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+grep -n "llm_health_monitor" /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 ```
 
 **If not found**, add health monitor registration:
 
 ```bash
 # Edit server.py
-nano /home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+nano /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 
 # Add these imports near the top:
 # from llm_health_monitor import LLMHealthMonitor

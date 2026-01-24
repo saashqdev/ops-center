@@ -24,7 +24,7 @@ This document describes the complete development infrastructure for the unified 
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Copy development environment
 cp .env.development .env

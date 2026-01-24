@@ -23,7 +23,7 @@ LiteLLM provides multi-provider LLM routing with intelligent model selection, cr
 ### Step 1: Fix Critical Dependency (5 min)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Add litellm package
 echo "litellm>=1.40.0" >> backend/requirements.txt
@@ -58,7 +58,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "\dt litellm*"
 
 ```bash
 # Create environment file
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 cat > .env.litellm << 'EOF'
 # Master Key (REQUIRED)

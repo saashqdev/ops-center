@@ -36,7 +36,7 @@ Get admin session token:
 
 Run tests:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 ./test_provider_keys_api.sh "YOUR_SESSION_TOKEN"
 ```
 

@@ -438,8 +438,8 @@ GET    /api/v1/tier/comparison             # Compare tiers
 
 ---
 
-**Full Audit Report**: `/home/muut/Production/UC-Cloud/services/ops-center/BACKEND_AUDIT_REPORT.md`
-**Summary**: `/home/muut/Production/UC-Cloud/services/ops-center/BACKEND_AUDIT_SUMMARY.md`
+**Full Audit Report**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/BACKEND_AUDIT_REPORT.md`
+**Summary**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/BACKEND_AUDIT_SUMMARY.md`
 
 **Total Endpoints**: 452
 **Backend Completion**: 92%

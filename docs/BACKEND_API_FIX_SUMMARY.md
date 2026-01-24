@@ -477,7 +477,7 @@ CLOUDFLARE_API_TOKEN=0LVXYAzHsGRtxn1Qe0_ItTlCFGxW9iogQCmsegC_
 
 3. **Update Configuration**:
    ```bash
-   vim /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+   vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
    # Update CLOUDFLARE_API_TOKEN line
    docker restart ops-center-direct
    ```

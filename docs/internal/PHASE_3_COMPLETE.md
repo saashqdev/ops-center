@@ -476,7 +476,7 @@ If issues arise, rollback by:
 ### Frontend (Phase 3)
 1. Restore from previous build:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    git checkout HEAD~1 src/pages/llm/
    git checkout HEAD~1 src/components/Layout.jsx
    npm run build

@@ -31,7 +31,7 @@ This report documents the complete implementation of the Revenue Analytics syste
 
 ### Module Overview
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/revenue_analytics.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/revenue_analytics.py`
 **Lines of Code**: 620
 **Dependencies**: FastAPI, SQLAlchemy, NumPy, SciPy, Redis
 
@@ -492,7 +492,7 @@ pip install fastapi sqlalchemy psycopg2-binary redis numpy scipy
 
 ### Component Overview
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/RevenueAnalytics.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/RevenueAnalytics.jsx`
 **Lines of Code**: 550
 **Framework**: React 18 + Material-UI v5 + Chart.js
 
@@ -808,7 +808,7 @@ const chartColors = {
 
 ```bash
 # Navigate to ops-center backend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Check if dependencies are installed
 docker exec ops-center-direct pip list | grep -E "numpy|scipy"
@@ -866,7 +866,7 @@ curl http://localhost:8084/api/v1/analytics/revenue/overview
 **Step 1: Install Frontend Dependencies**
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install chart.js and react-chartjs-2 if not already installed
 npm install chart.js react-chartjs-2

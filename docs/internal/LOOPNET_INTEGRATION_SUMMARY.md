@@ -10,7 +10,7 @@
 
 A comprehensive **82-page integration guide** for the LoopNet agent to integrate with Ops-Center's organizational billing system.
 
-**File Location**: `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md`
+**File Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md`
 
 ---
 
@@ -496,7 +496,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "
 - Attach relevant logs
 
 **Documentation**:
-- **Full Guide**: `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md`
+- **Full Guide**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md`
 - **Deployment Checklist**: `OPS_CENTER_DEPLOYMENT_CHECKLIST.md`
 - **API Implementation**: `backend/org_billing_api.py`
 

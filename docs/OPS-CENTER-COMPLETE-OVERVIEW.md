@@ -350,7 +350,7 @@ All in one self-hosted, MIT-licensed platform that you fully control.
 **Website**: https://your-domain.com
 **License**: MIT
 
-**Repository**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Repository**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 **Documentation**: `/services/ops-center/docs/`
 
 ---

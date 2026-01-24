@@ -174,7 +174,7 @@ curl -X POST http://localhost:8084/api/v1/logs/search/advanced \
 
 ### 3. Run Test Suite
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 -m pytest tests/test_email_alerts.py -v
 python3 -m pytest tests/test_logs_search.py -v
 ```

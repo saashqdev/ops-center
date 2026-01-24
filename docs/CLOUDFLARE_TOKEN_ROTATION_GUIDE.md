@@ -30,9 +30,9 @@ The current Cloudflare API token (`0LVXYAzHsGRtxn1Qe0_ItTlCFGxW9iogQCmsegC_`) ha
 ## Files Containing Exposed Token
 
 ### Configuration Files (CRITICAL)
-1. `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
-2. `/home/muut/Production/UC-Cloud/services/ops-center/backend/cloudflare_manager.py`
-3. `/home/muut/Production/UC-Cloud/services/ops-center/backend/secret_manager.py`
+1. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
+2. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/cloudflare_manager.py`
+3. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/secret_manager.py`
 
 ### Documentation Files
 4. `EPIC_1.6_DEPLOYMENT_COMPLETE.md`
@@ -114,11 +114,11 @@ New Token: cf_xyz123abc456def789ghi012jkl345mno678pqr901stu234vwx567yza890
 
 #### Update Environment File
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
 
 ```bash
 # Edit file
-vim /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Find line with CLOUDFLARE_API_TOKEN
 # Change from:
@@ -131,7 +131,7 @@ CLOUDFLARE_API_TOKEN=cf_xyz123abc456def789ghi012jkl345mno678pqr901stu234vwx567yz
 #### Restart Container
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker restart ops-center-direct
 ```
 
@@ -213,7 +213,7 @@ FILES=(
   "tests/unit/test_cloudflare_manager.py"
 )
 
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 for file in "${FILES[@]}"; do
   if [ -f "$file" ]; then
@@ -230,7 +230,7 @@ echo "⚠️  You already updated those with the new token in Step 2"
 ### Run Cleanup
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 chmod +x cleanup-token-references.sh
 ./cleanup-token-references.sh
 ```
@@ -243,7 +243,7 @@ chmod +x cleanup-token-references.sh
 
 ```bash
 # Search for old token (should only appear in this guide now)
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 grep -r "0LVXYAzHsGRtxn1Qe0_ItTlCFGxW9iogQCmsegC_" . --exclude-dir=node_modules
 
 # Expected result: Only this guide (CLOUDFLARE_TOKEN_ROTATION_GUIDE.md)
@@ -270,7 +270,7 @@ grep -r "0LVXYAzHsGRtxn1Qe0_ItTlCFGxW9iogQCmsegC_" . --exclude-dir=node_modules
 ### Check Git History
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Search git history for exposed token
 git log -S "0LVXYAzHsGRtxn1Qe0_ItTlCFGxW9iogQCmsegC_" --all --pretty=format:"%H %s"
@@ -357,7 +357,7 @@ docker logs ops-center-direct --tail 50
 docker exec ops-center-direct printenv | grep CLOUDFLARE_API_TOKEN
 
 # Rebuild if needed
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.direct.yml build
 docker compose -f docker-compose.direct.yml up -d
 ```

@@ -246,7 +246,7 @@ Ctrl + Shift + R (hard reload)
 
 **Solution**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct
@@ -360,7 +360,7 @@ docker exec -i uchub-postgres psql -U unicorn -d unicorn_db < /path/to/add_vip_f
 **Project Owner**: admin@example.com
 **Organization**: Magic Unicorn Unconventional Technology & Stuff Inc
 **Project**: UC-Cloud / Ops-Center
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 

@@ -14,7 +14,7 @@ This implementation transforms the generic "Extensions Marketplace" into a **rea
 ## 📦 Files Created
 
 ### 1. **uc_cloud_services_catalog.sql**
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/sql/uc_cloud_services_catalog.sql`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/sql/uc_cloud_services_catalog.sql`
 
 **Purpose**: Production-ready SQL file to populate the marketplace with real UC-Cloud services
 
@@ -27,7 +27,7 @@ This implementation transforms the generic "Extensions Marketplace" into a **rea
 - ✅ Additional tracking tables for analytics
 
 ### 2. **SERVICE_URLS.md**
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/SERVICE_URLS.md`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/SERVICE_URLS.md`
 
 **Purpose**: Complete documentation of service access, authentication, and integration
 
@@ -40,7 +40,7 @@ This implementation transforms the generic "Extensions Marketplace" into a **rea
 - ✅ Troubleshooting guides
 
 ### 3. **SERVICES_CATALOG_SUMMARY.md** (this file)
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/SERVICES_CATALOG_SUMMARY.md`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/SERVICES_CATALOG_SUMMARY.md`
 
 **Purpose**: Implementation summary and deployment guide
 
@@ -254,7 +254,7 @@ Service configuration and access details:
 
 ```bash
 # Backup before applying changes
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 docker exec ops-center-postgres pg_dump -U unicorn_ops unicorn_ops_db > backup_before_catalog_$(date +%Y%m%d_%H%M%S).sql
 ```
 

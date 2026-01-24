@@ -646,7 +646,7 @@ const scrollToSection = () => {
 ### Step 1: Build Frontend
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install any missing dependencies (none required for this delivery)
 npm install

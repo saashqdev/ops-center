@@ -611,7 +611,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "\dt"
 **Fix**:
 ```bash
 # Run Alembic migrations
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 alembic upgrade head
 ```
 
@@ -1040,7 +1040,7 @@ This integration test report identifies **6 critical integration issues** that m
 **Test Suite Version**: 1.0
 **Python Dependencies**: httpx, asyncpg
 **Execution Time**: 1.08s
-**Report Location**: `/home/muut/Production/UC-Cloud/services/ops-center/TEST_REPORT_INTEGRATION.md`
+**Report Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/TEST_REPORT_INTEGRATION.md`
 
 ---
 

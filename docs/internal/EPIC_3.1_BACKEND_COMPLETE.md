@@ -321,7 +321,7 @@ POST   /api/v1/admin/llm/providers/{id}/test   # Test provider connection
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Run migration script
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -f /app/migrations/create_llm_tables.sql

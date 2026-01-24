@@ -80,7 +80,7 @@ function LLMManagement() {
 
 1. **Component** (already exists):
    ```
-   /home/muut/Production/UC-Cloud/services/ops-center/src/components/ProviderKeysSection.jsx
+   /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/ProviderKeysSection.jsx
    ```
    - **Size**: 31,345 bytes
    - **Lines**: 794 lines
@@ -88,7 +88,7 @@ function LLMManagement() {
 
 2. **Usage Guide** (just created):
    ```
-   /home/muut/Production/UC-Cloud/services/ops-center/src/components/llm/PROVIDER_KEYS_SECTION_USAGE.md
+   /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/llm/PROVIDER_KEYS_SECTION_USAGE.md
    ```
    - **Comprehensive documentation**
    - **Usage examples**
@@ -360,7 +360,7 @@ docker restart ops-center-direct
 **Fix**:
 ```jsx
 // Check file exists
-ls /home/muut/Production/UC-Cloud/services/ops-center/src/components/ProviderKeysSection.jsx
+ls /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/ProviderKeysSection.jsx
 
 // Use correct import path
 import ProviderKeysSection from '../components/ProviderKeysSection';
@@ -402,17 +402,17 @@ The `ProviderKeysSection` component is **complete, production-ready, and already
 
 **Component**:
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/components/ProviderKeysSection.jsx
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/ProviderKeysSection.jsx
 ```
 
 **Usage Guide**:
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/components/llm/PROVIDER_KEYS_SECTION_USAGE.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/llm/PROVIDER_KEYS_SECTION_USAGE.md
 ```
 
 **Integration Example** (create if needed):
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/pages/LLMManagement.jsx
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/LLMManagement.jsx
 ```
 
 ---

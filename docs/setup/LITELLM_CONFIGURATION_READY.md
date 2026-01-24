@@ -13,7 +13,7 @@ All LiteLLM configuration files have been prepared and are ready for user to add
 
 ### 1. `.env.litellm` ✅
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/.env.litellm`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.litellm`
 **Size**: 6.2 KB (comprehensive template)
 
 **Generated Keys**:
@@ -40,7 +40,7 @@ All LiteLLM configuration files have been prepared and are ready for user to add
 
 ### 2. `LITELLM_SETUP_INSTRUCTIONS.md` ✅
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/LITELLM_SETUP_INSTRUCTIONS.md`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LITELLM_SETUP_INSTRUCTIONS.md`
 **Size**: 18 KB (comprehensive guide)
 
 **Sections**:
@@ -100,7 +100,7 @@ OPENROUTER_API_KEY=sk-or-v1-...
 ### Step 2: Deploy LiteLLM
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Start LiteLLM stack
 docker compose -f docker-compose.litellm.yml up -d
@@ -370,7 +370,7 @@ docker logs unicorn-litellm-wilmer --tail 100
   - OpenRouter: https://openrouter.ai/docs
   - Together AI: https://docs.together.ai/
 - **UC-Cloud Docs**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
-- **Ops-Center Docs**: `/home/muut/Production/UC-Cloud/services/ops-center/CLAUDE.md`
+- **Ops-Center Docs**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/CLAUDE.md`
 
 ---
 

@@ -24,7 +24,7 @@ This directory contains comprehensive automated tests for mobile responsiveness,
 
 ```bash
 # Install dependencies
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm install playwright @axe-core/playwright lighthouse
 
 # Install Playwright browsers

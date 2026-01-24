@@ -16,7 +16,7 @@
 ## Running Security Tests
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Run billing security tests
 python3 tests/security_test_billing.py

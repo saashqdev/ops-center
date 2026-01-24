@@ -48,7 +48,7 @@ This document outlines the comprehensive testing strategy for Phase 1 of the Ops
 
 **Setup**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pip install pytest pytest-cov pytest-asyncio httpx freezegun
 ```
 
@@ -74,7 +74,7 @@ asyncio_mode = auto
 
 **Setup**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm install -D vitest @testing-library/react @testing-library/jest-dom \
   @testing-library/user-event jsdom @vitest/ui msw
 ```

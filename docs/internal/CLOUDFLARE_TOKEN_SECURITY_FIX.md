@@ -142,7 +142,7 @@ If GUI isn't available:
 
 ```bash
 # 1. Edit .env.auth file
-vim /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # 2. Find this line (around line 30-35):
 CLOUDFLARE_API_TOKEN=0LVXYAzHsGRtxn1Qe0_ItTlCFGxW9iogQCmsegC_
@@ -219,7 +219,7 @@ else:
 After verifying everything works:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Delete all backup files
 find . -name "*.backup" -type f -delete
@@ -336,7 +336,7 @@ Token Rotation Checklist
 
 **Usage**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ./scripts/cleanup-token-references.sh
 ```
 
@@ -402,7 +402,7 @@ cat .env.auth | grep CLOUDFLARE_API_TOKEN
 docker exec ops-center-direct printenv | grep CLOUDFLARE
 
 # Rebuild if needed
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.direct.yml build
 docker compose -f docker-compose.direct.yml up -d
 ```

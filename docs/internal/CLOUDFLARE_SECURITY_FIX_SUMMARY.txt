@@ -116,7 +116,7 @@ valid token from Cloudflare, which only YOU can generate.
 
 After verifying everything works:
 
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 find . -name "*.backup" -type f -delete
 
 ┌───────────────────────────────────────────────────────────────────────────┐

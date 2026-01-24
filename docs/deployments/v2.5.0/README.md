@@ -303,7 +303,7 @@ curl http://localhost:8084/api/v1/alert-triggers/
 **Deployment**: November 29, 2025
 **Status**: Production Ready
 
-**Documentation Location**: `/home/muut/Production/UC-Cloud/services/ops-center/docs/deployments/v2.5.0/`
+**Documentation Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/deployments/v2.5.0/`
 
 **For Questions**: Refer to individual team reports in subdirectories
 

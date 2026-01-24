@@ -4,7 +4,7 @@
 
 Deployment Agent: Database Deployment Agent for LiteLLM
 Timestamp: October 20, 2025 06:06:06 UTC
-Working Directory: /home/muut/Production/UC-Cloud/services/ops-center
+Working Directory: /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 Database: PostgreSQL (unicorn_db) on unicorn-postgresql
 Schema File: backend/sql/litellm_schema.sql (24KB)
 
@@ -294,11 +294,11 @@ System is ready for production use.
 ================================================================================
 
 Schema File:
-  /home/muut/Production/UC-Cloud/services/ops-center/backend/sql/litellm_schema.sql
+  /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/sql/litellm_schema.sql
 
 Documentation:
-  /home/muut/Production/UC-Cloud/services/ops-center/LITELLM_DATABASE_DEPLOYMENT_REPORT.md
-  /home/muut/Production/UC-Cloud/services/ops-center/docs/LITELLM_DATABASE_QUICK_REFERENCE.md
+  /home/ubuntu/Ops-Center-OSS/src/services/ops-center/LITELLM_DATABASE_DEPLOYMENT_REPORT.md
+  /home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/LITELLM_DATABASE_QUICK_REFERENCE.md
 
 Database:
   Container: unicorn-postgresql
@@ -308,7 +308,7 @@ Database:
 
 Contact:
   Deployment Agent: Database Deployment Agent for LiteLLM
-  Working Directory: /home/muut/Production/UC-Cloud/services/ops-center
+  Working Directory: /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 ================================================================================
                           END OF DEPLOYMENT REPORT

@@ -253,7 +253,7 @@ services/ops-center/
 
 ### 1. Apply Migration
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
   -f /app/migrations/add_email_notifications_column.sql
 ```

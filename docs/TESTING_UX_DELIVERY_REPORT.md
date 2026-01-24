@@ -72,7 +72,7 @@ async def test_initiate_upgrade_returns_checkout_url(
 
 **How to Run**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 pytest backend/tests/test_subscription_upgrade.py -v
 pytest backend/tests/test_subscription_upgrade.py --cov=backend --cov-report=html
 ```
@@ -142,7 +142,7 @@ test('clicking upgrade button triggers upgrade flow', async () => {
 
 **How to Run**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm test -- TierComparison.test.jsx
 npm test -- --coverage
 ```
@@ -215,7 +215,7 @@ async def test_complete_upgrade_trial_to_professional(self, test_user, http_clie
 
 **How to Run**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 pytest backend/tests/e2e/test_upgrade_flow.py -v
 pytest backend/tests/e2e/test_upgrade_flow.py -k "test_complete_upgrade" -v
 ```
@@ -452,7 +452,7 @@ pytest-mock==3.12.0
 
 **Installation**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 pip install -r backend/requirements.txt
 ```
 
@@ -795,7 +795,7 @@ Epic 2.4 testing is considered complete when:
 
 All test artifacts are located in:
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── backend/tests/test_subscription_upgrade.py     [Backend tests]
 ├── backend/tests/e2e/test_upgrade_flow.py         [E2E tests]
 ├── src/tests/components/TierComparison.test.jsx   [Frontend tests]
@@ -904,7 +904,7 @@ All Epic 2.4 testing artifacts have been successfully created and delivered. The
 
 ```bash
 # Backend tests
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 pytest backend/tests/test_subscription_upgrade.py -v
 pytest backend/tests/e2e/test_upgrade_flow.py -v
 

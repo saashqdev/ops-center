@@ -220,7 +220,7 @@ npx playwright test -g "should navigate to Geeses"
 ### Rollback Procedure
 ```bash
 # Quick rollback (see deployment runbook for full procedure)
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git log -1  # View current commit
 # Follow DEPLOYMENT_RUNBOOK.md Section 3 for safe rollback
 ```

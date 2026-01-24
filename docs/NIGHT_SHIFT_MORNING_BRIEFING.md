@@ -143,7 +143,7 @@ npx playwright test tests/e2e/critical-paths.spec.js
 
 **Run Report**:
 ```bash
-/home/muut/Production/UC-Cloud/services/ops-center/tests/api/validate-endpoints.sh
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/api/validate-endpoints.sh
 # Results saved to: /tmp/api_validation_20251028_140029.json
 ```
 
@@ -380,7 +380,7 @@ npx playwright test tests/e2e/critical-paths.spec.js
    - `/.swarm/NIGHT_SHIFT_MISSION.md` (mission log)
 
 ### All Files Location
-**Base Directory**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Base Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 ---
 
@@ -401,10 +401,10 @@ npx playwright test tests/e2e/critical-paths.spec.js
 3. **🧪 Run Tests**
    ```bash
    # API validation
-   /home/muut/Production/UC-Cloud/services/ops-center/tests/api/validate-endpoints.sh
+   /home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/api/validate-endpoints.sh
 
    # E2E tests (requires Playwright)
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    npm install --save-dev @playwright/test
    npx playwright test tests/e2e/critical-paths.spec.js
    ```
@@ -501,7 +501,7 @@ If you encounter any issues with the deployed changes:
 2. **Rollback if Needed**:
    ```bash
    # Previous deployment backed up in git
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    git log -1  # See this deployment commit
    # To rollback: Use deployment runbook Section 3
    ```

@@ -121,7 +121,7 @@ EOF
 
 ```bash
 # Copy migration to container
-docker cp /home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/create_llm_management_tables_v2.sql \
+docker cp /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/create_llm_management_tables_v2.sql \
   unicorn-postgresql:/tmp/migration_v2.sql
 
 # Backup database first
@@ -147,7 +147,7 @@ If you need to undo the V2 migration:
 
 ```bash
 # Copy rollback script to container
-docker cp /home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/rollback_llm_management_tables_v2.sql \
+docker cp /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/rollback_llm_management_tables_v2.sql \
   unicorn-postgresql:/tmp/rollback_v2.sql
 
 # Run rollback

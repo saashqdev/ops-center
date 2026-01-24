@@ -685,7 +685,7 @@ All frontend requirements met:
 
 **Implementation**: Frontend Development Team Lead
 **Date**: October 23, 2025
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 For backend integration questions, refer to:
 - Task description: Original implementation requirements

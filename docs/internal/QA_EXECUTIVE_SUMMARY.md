@@ -25,7 +25,7 @@
 **Action**:
 ```bash
 # Edit backend/server.py
-vim /home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 
 # Add line 78:
 from dynamic_pricing_api import router as dynamic_pricing_router

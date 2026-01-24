@@ -375,7 +375,7 @@ POST /api/v1/llm-config/active
 ### 1. Generate Encryption Key
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 python3 backend/scripts/generate_encryption_key.py
 ```
 

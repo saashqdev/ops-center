@@ -10,7 +10,7 @@ The rclone integration requires the `rclone` binary to be installed in the ops-c
 
 ### Step 1: Add to Dockerfile
 
-Edit `/home/muut/Production/UC-Cloud/services/ops-center/Dockerfile`:
+Edit `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/Dockerfile`:
 
 ```dockerfile
 # Add after other system packages

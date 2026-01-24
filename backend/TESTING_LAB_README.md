@@ -26,10 +26,10 @@ The Testing Lab API enables **interactive model testing with streaming responses
 
 ```bash
 # API is already created at:
-# /home/muut/Production/UC-Cloud/services/ops-center/backend/testing_lab_api.py
+# /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/testing_lab_api.py
 
 # Register in server.py
-vim /home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 
 # Add these lines:
 from testing_lab_api import router as testing_lab_router

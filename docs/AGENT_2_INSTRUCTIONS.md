@@ -3,7 +3,7 @@
 **Mission**: Enable subscription functionality in TierComparison.jsx
 
 **Files**:
-- Frontend: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/TierComparison.jsx`
+- Frontend: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/TierComparison.jsx`
 - Backend: Already exists! (`/api/v1/subscriptions/plans`, `/api/v1/billing/subscriptions/checkout`)
 
 **Duration**: 6-8 hours (Backend already done, focus on frontend integration)
@@ -321,7 +321,7 @@ import { CircularProgress } from '@mui/material';
 
 ```bash
 # 1. Build and deploy
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

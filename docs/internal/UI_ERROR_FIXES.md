@@ -246,7 +246,7 @@ const result = safeValue.toFixed(1);
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Rebuild frontend
 npm run build

@@ -62,7 +62,7 @@
 
 ## Environment Variables (Current Best Practice)
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
 
 ```bash
 # System Provider Keys (used when users don't have BYOK)

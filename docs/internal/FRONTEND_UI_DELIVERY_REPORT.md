@@ -24,7 +24,7 @@ All deliverables for Epic 2.4 Self-Service Upgrades have been successfully imple
 
 **Status**: ✅ COMPLETE
 **Lines**: ~350 lines
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/src/components/TierComparison.jsx`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/TierComparison.jsx`
 
 **Features Implemented**:
 - ✅ 4 tier cards (Trial, Starter, Professional, Enterprise) in responsive grid
@@ -64,7 +64,7 @@ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 2
 
 **Status**: ✅ COMPLETE
 **Lines**: ~500 lines
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/UpgradeFlow.jsx`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/UpgradeFlow.jsx`
 
 **Features Implemented**:
 - ✅ **Step 1: Tier Selection** - Embeds TierComparison component
@@ -119,7 +119,7 @@ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 2
 
 **Status**: ✅ COMPLETE
 **Lines**: ~300 lines
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/src/components/UpgradeCTA.jsx`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/UpgradeCTA.jsx`
 
 **Features Implemented**:
 - ✅ Reusable upgrade prompt component
@@ -175,7 +175,7 @@ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 2
 
 **Status**: ✅ COMPLETE
 **Lines Modified**: ~40 lines
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/src/components/Layout.jsx`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/Layout.jsx`
 
 **Changes Implemented**:
 - ✅ **Upgrade button in header** (right side, before Organization Selector)
@@ -225,7 +225,7 @@ className="
 
 **Status**: ✅ COMPLETE
 **Lines Modified**: ~20 lines
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/src/App.jsx`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/App.jsx`
 
 **Changes Implemented**:
 - ✅ Added lazy import for `UpgradeFlow`
@@ -682,7 +682,7 @@ Step 1: Select Plan  →  Step 2: Review Changes  →  Step 3: Confirm
 ### Frontend Build
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies (if needed)
 npm install
@@ -720,7 +720,7 @@ docker restart ops-center-direct
 If issues occur:
 ```bash
 # Restore previous build
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git stash  # Stash new files
 npm run build
 cp -r dist/* public/

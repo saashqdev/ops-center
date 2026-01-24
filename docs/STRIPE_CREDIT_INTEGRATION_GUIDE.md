@@ -42,7 +42,7 @@ docker exec ops-center-direct python3 /app/scripts/setup_stripe_credit_products.
 
 ### Current Configuration
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/.env.stripe`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/.env.stripe`
 
 ```env
 # Stripe API Keys (TEST MODE)
@@ -58,7 +58,7 @@ STRIPE_WEBHOOK_SECRET=whsec_placeholder
 
 **STRIPE_WEBHOOK_SECRET_CREDITS**: This variable needs to be added after webhook configuration.
 
-**Where to Add**: `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
+**Where to Add**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
 
 ```env
 # Add this line after webhook creation:
@@ -108,7 +108,7 @@ After creating the endpoint:
 
 1. Edit `.env.auth`:
    ```bash
-   nano /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+   nano /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
    ```
 
 2. Add the webhook secret:
@@ -693,9 +693,9 @@ ERROR: Failed to add credits: Database connection error
 
 ### Internal Documentation
 
-- **Credit System**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/credit_system.py`
-- **Purchase API**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/credit_purchase_api.py`
-- **Setup Script**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/setup_stripe_credit_products.py`
+- **Credit System**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/credit_system.py`
+- **Purchase API**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/credit_purchase_api.py`
+- **Setup Script**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/setup_stripe_credit_products.py`
 
 ### Contact Points
 

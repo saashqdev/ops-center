@@ -5,7 +5,7 @@ OPS-CENTER BACKEND API TEST REPORT - EXECUTIVE SUMMARY
 Test Date: 2025-10-28
 Duration: 30-45 minutes
 Tester: Backend Testing Specialist (QA Agent)
-Report Location: /home/muut/Production/UC-Cloud/services/ops-center/TEST_REPORT_BACKEND.md
+Report Location: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/TEST_REPORT_BACKEND.md
 
 ================================================================================
 OVERALL HEALTH SCORE: 71.5% (C+)

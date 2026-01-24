@@ -45,7 +45,7 @@ Includes:
 
 ### Phase 1: Create Components (Day 1-2)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Copy code templates from EPIC_3.1_FRONTEND_IMPLEMENTATION.md
 # Create:

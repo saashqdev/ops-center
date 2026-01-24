@@ -8,7 +8,7 @@ The logout endpoint has been updated to properly clear Keycloak SSO sessions in 
 
 ### 1. Backend: `/api/v1/auth/logout` Endpoint Update
 
-**File:** `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py` (line 2836)
+**File:** `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py` (line 2836)
 
 **Updated behavior:**
 1. Clears local session via `auth_manager.logout()`
@@ -191,11 +191,11 @@ export default {
 ### Test Script
 
 A test script is provided at:
-`/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_keycloak_logout.py`
+`/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_keycloak_logout.py`
 
 **Run tests:**
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 tests/test_keycloak_logout.py
 ```
 
@@ -317,8 +317,8 @@ docker restart unicorn-ops-center
 
 - **Keycloak Documentation**: https://www.keycloak.org/docs/latest/securing_apps/index.html#logout
 - **OIDC Logout Specification**: https://openid.net/specs/openid-connect-session-1_0.html#RPLogout
-- **Backend Server**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py`
-- **Keycloak Integration**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/keycloak_integration.py`
+- **Backend Server**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py`
+- **Keycloak Integration**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/keycloak_integration.py`
 
 ## Summary
 

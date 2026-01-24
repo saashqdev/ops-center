@@ -88,7 +88,7 @@ curl http://localhost:8084/api/v1/alerts/health
 ### Step 2: Apply Database Migration (1 min)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
   -f /app/migrations/alert_triggers_schema.sql
@@ -159,7 +159,7 @@ curl http://localhost:8084/api/v1/alert-triggers/statistics | jq
 
 ### Unit Tests
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pytest tests/test_alert_triggers.py -v
 ```
 

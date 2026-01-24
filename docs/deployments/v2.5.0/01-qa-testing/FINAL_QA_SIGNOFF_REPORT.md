@@ -600,13 +600,13 @@ async def get_user_billing(...):
 - `/tmp/FINAL_FIX_REPORT.md` - Subscription management bug fix (from previous team)
 
 **Test Scripts**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/tests/security_test_billing.py` - Security test suite
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/security_test_billing.py` - Security test suite
 - `/tmp/test_billing_apis.py` - API endpoint test suite
 - `/tmp/setup_billing_test_data.sql` - Test data setup script (from previous report)
 
 **Configuration Files**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth` - Environment variables
-- `/home/muut/Production/UC-Cloud/services/ops-center/docker-compose.direct.yml` - Docker configuration
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth` - Environment variables
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docker-compose.direct.yml` - Docker configuration
 
 ---
 

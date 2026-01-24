@@ -458,10 +458,10 @@ async def test_route_creation_logged(self, admin_client):
 
 ```bash
 # Make script executable
-chmod +x /home/muut/Production/UC-Cloud/services/ops-center/tests/run_traefik_tests.sh
+chmod +x /home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/run_traefik_tests.sh
 
 # Run all tests
-cd /home/muut/Production/UC-Cloud/services/ops-center/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests
 ./run_traefik_tests.sh
 
 # Or specify test type

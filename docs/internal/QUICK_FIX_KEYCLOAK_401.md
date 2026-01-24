@@ -31,7 +31,7 @@ f"{KEYCLOAK_URL}/realms/master/protocol/openid-connect/token",
 
 ```bash
 # 1. Edit file
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 nano backend/keycloak_integration.py
 # Change line 43 as shown above
 

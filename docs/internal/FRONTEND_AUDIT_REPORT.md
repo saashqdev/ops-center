@@ -2,7 +2,7 @@
 
 **Audit Date**: October 28, 2025
 **Audited By**: Claude Code Research Agent
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/`
 
 ---
 

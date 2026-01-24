@@ -701,7 +701,7 @@ gunzip < backups/db_backup_20251112_143022.sql.gz | \
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Make scripts executable (already done)
 chmod +x scripts/*.sh

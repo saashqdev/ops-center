@@ -11,7 +11,7 @@
 ### Step 1: Backup Database (1 minute)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Backup current database
 docker exec ops-center-postgres pg_dump -U unicorn_ops unicorn_ops_db > \
@@ -89,7 +89,7 @@ echo "✅ Ops-center restarted"
 
 ```bash
 # View all created documentation
-ls -lh /home/muut/Production/UC-Cloud/services/ops-center/backend/docs/
+ls -lh /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/
 
 echo "✅ Documentation ready"
 ```
@@ -159,7 +159,7 @@ docker restart ops-center-frontend  # if separate container
 
 ```bash
 # Find your backup file
-ls -lt /home/muut/Production/UC-Cloud/services/ops-center/backend/backups/
+ls -lt /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/backups/
 
 # Restore from backup (replace with actual filename)
 docker exec -i ops-center-postgres psql -U unicorn_ops -d unicorn_ops_db < \

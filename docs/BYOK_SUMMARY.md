@@ -205,7 +205,7 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 ## Database Migration
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 psql -U postgres -d ops_center -f migrations/007_user_execution_servers.sql
 ```
 
@@ -229,7 +229,7 @@ psql -U postgres -d ops_center -f migrations/007_user_execution_servers.sql
 
 1. **Run Database Migration**
    ```bash
-   psql -U postgres -d ops_center -f /home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/007_user_execution_servers.sql
+   psql -U postgres -d ops_center -f /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/007_user_execution_servers.sql
    ```
 
 2. **Set Environment Variables**
@@ -239,7 +239,7 @@ psql -U postgres -d ops_center -f migrations/007_user_execution_servers.sql
 
 3. **Install New Dependencies**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
    pip install -r requirements.txt
    ```
 
@@ -347,7 +347,7 @@ Key log messages:
 
 ## Files Reference
 
-All files are in `/home/muut/Production/UC-Cloud/services/ops-center/`:
+All files are in `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`:
 
 - `backend/execution_servers_api.py` - New execution servers API
 - `backend/byok_service.py` - New BYOK business logic

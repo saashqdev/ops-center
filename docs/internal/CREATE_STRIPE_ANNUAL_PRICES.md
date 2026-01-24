@@ -121,7 +121,7 @@ Login with Stripe account credentials.
 Edit the subscription manager file:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 vim backend/subscription_manager.py
 ```
 
@@ -143,7 +143,7 @@ stripe_annual_price_id="price_1SJabcDzk9HqAZnH12345678"  # Annual: $190/year
 Apply the configuration changes:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker restart ops-center-direct
 
 # Wait for startup

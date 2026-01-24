@@ -84,7 +84,7 @@ POST   /api/v1/credentials/{service}/test     # Test credential
 
 ```bash
 # Build frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 
 # Deploy to public

@@ -48,7 +48,7 @@ It automatically:
 ### Step 1: Generate Encryption Key (one-time)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 python3 backend/scripts/generate_encryption_key.py
 ```
 

@@ -39,7 +39,7 @@ ORDER BY tier;
 
 ### 2. ✅ Creation Script
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/create_test_users.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/create_test_users.py`
 
 **Features**:
 - Creates 4 test users with UUIDs in predictable format
@@ -58,7 +58,7 @@ docker exec ops-center-direct python3 /app/scripts/create_test_users.py
 
 ### 3. ✅ Test Credentials File
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_users.json`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_users.json`
 
 **Format**:
 ```json
@@ -82,7 +82,7 @@ docker exec ops-center-direct python3 /app/scripts/create_test_users.py
 
 ### 4. ✅ Test Script (Tier Access Testing)
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_tier_access.sh`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_tier_access.sh`
 
 **Features**:
 - Loads test users from JSON file
@@ -93,7 +93,7 @@ docker exec ops-center-direct python3 /app/scripts/create_test_users.py
 
 **Usage**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 ./test_tier_access.sh
 ```
 
@@ -103,7 +103,7 @@ cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
 
 ### 5. ✅ Comprehensive Documentation
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/TEST_USERS_GUIDE.md`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/TEST_USERS_GUIDE.md`
 
 **Contents** (800+ lines):
 - Overview of test users and their purpose
@@ -199,17 +199,17 @@ The next blocker requires implementing tier-based model filtering:
 All files created and saved:
 
 1. **Creation Script**:
-   - `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/create_test_users.py`
+   - `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/create_test_users.py`
 
 2. **Test Script**:
-   - `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_tier_access.sh`
+   - `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_tier_access.sh`
 
 3. **Credentials File**:
-   - `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_users.json`
+   - `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_users.json`
 
 4. **Documentation**:
-   - `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/TEST_USERS_GUIDE.md`
-   - `/home/muut/Production/UC-Cloud/services/ops-center/BLOCKER3_COMPLETION_REPORT.md` (this file)
+   - `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/TEST_USERS_GUIDE.md`
+   - `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/BLOCKER3_COMPLETION_REPORT.md` (this file)
 
 ---
 
@@ -231,13 +231,13 @@ docker exec ops-center-direct python3 /app/scripts/create_test_users.py
 ### View Test User Credentials
 
 ```bash
-cat /home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_users.json
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_users.json
 ```
 
 ### Run Tier Access Test (once API filtering implemented)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 ./test_tier_access.sh
 ```
 

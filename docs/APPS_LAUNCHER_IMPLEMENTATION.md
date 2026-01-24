@@ -11,7 +11,7 @@ Implemented a super simple apps launcher for the Ops-Center dashboard that displ
 
 ### 1. New Frontend Component
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/AppsLauncher.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/AppsLauncher.jsx`
 
 **Features**:
 - Fetches apps from existing API: `GET /api/v1/extensions/catalog`
@@ -56,7 +56,7 @@ UPDATE add_ons SET launch_url = 'https://brigade.your-domain.com' WHERE name = '
 
 ### 3. Routing Changes
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/App.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/App.jsx`
 
 **Changes**:
 1. Added lazy import for `AppsLauncher`
@@ -93,7 +93,7 @@ UPDATE add_ons SET launch_url = 'https://brigade.your-domain.com' WHERE name = '
 
 **Endpoint**: `GET /api/v1/extensions/catalog`
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/extensions_catalog_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/extensions_catalog_api.py`
 
 **Response** (example):
 ```json
@@ -255,12 +255,12 @@ curl http://localhost:8084/api/v1/extensions/catalog | jq
 ## Files Reference
 
 ### Frontend
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/AppsLauncher.jsx` - Main component
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/App.jsx` - Routing config
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/AppsLauncher.jsx` - Main component
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/App.jsx` - Routing config
 
 ### Backend
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/extensions_catalog_api.py` - API endpoint
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py` - Router registration
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/extensions_catalog_api.py` - API endpoint
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py` - Router registration
 
 ### Database
 - Table: `add_ons` (PostgreSQL `unicorn_db`)

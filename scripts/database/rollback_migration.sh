@@ -5,7 +5,7 @@
 set -e
 
 # Configuration
-PROJECT_DIR="/home/muut/Production/UC-Cloud/services/ops-center"
+PROJECT_DIR="/home/ubuntu/Ops-Center-OSS/src/services/ops-center"
 CONTAINER_NAME="ops-center-direct"
 BACKUP_SCRIPT="$PROJECT_DIR/scripts/database/backup_database.sh"
 

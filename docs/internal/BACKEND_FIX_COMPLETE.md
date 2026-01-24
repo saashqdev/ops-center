@@ -20,7 +20,7 @@ Successfully resolved all circular import errors in the billing system backend b
 
 ### 1. Created Centralized Dependencies Module
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/dependencies.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/dependencies.py`
 
 **Contents**:
 - `get_db_pool(request)` - Database connection pool dependency
@@ -164,8 +164,8 @@ The circular import issue has been **completely resolved**. The server restarts 
 ---
 
 **Files Affected**:
-- ✅ `/home/muut/Production/UC-Cloud/services/ops-center/backend/dependencies.py` (NEW)
-- ✅ `/home/muut/Production/UC-Cloud/services/ops-center/backend/dynamic_pricing_api.py` (FIXED)
+- ✅ `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/dependencies.py` (NEW)
+- ✅ `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/dynamic_pricing_api.py` (FIXED)
 
 **Deployment**:
 - Container: `ops-center-direct`

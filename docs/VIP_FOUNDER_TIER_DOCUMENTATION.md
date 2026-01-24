@@ -548,7 +548,7 @@ docker restart ops-center-direct
 
 **Solution**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Rebuild frontend
 npm run build

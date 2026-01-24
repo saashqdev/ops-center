@@ -689,7 +689,7 @@ export const ZONE_PRIORITIES = [
 ### Phase 1: Directory Setup (5 minutes)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Create directory structure
 mkdir -p src/components/CloudflareDNS/ZoneListView

@@ -72,7 +72,7 @@ docker ps | grep ops-center
 
 ```bash
 # Run all unit tests
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 pytest test_traefik_manager.py -v
 
 # Run specific test class
@@ -145,7 +145,7 @@ Tests Failed: 2
 
 ```bash
 # Run everything
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 
 # Unit tests
 pytest test_traefik_manager.py -v
@@ -338,10 +338,10 @@ jobs:
 **Solution**:
 ```bash
 # Set PYTHONPATH
-export PYTHONPATH=/home/muut/Production/UC-Cloud/services/ops-center/backend:$PYTHONPATH
+export PYTHONPATH=/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend:$PYTHONPATH
 
 # Or run from backend directory
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pytest tests/test_traefik_manager.py -v
 ```
 

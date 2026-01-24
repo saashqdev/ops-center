@@ -36,7 +36,7 @@ docker logs ops-center-direct --tail 50
 **Alternative - Update .env file**:
 ```bash
 # Edit environment file
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 nano .env.auth
 
 # Change this line:
@@ -125,7 +125,7 @@ Use this if database migrations need to be rolled back.
 ### Step 1: Stop Ops Center
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose stop ops-center-direct
 ```
 

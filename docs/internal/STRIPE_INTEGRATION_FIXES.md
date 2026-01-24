@@ -17,7 +17,7 @@
 - No way to differentiate monthly vs annual Stripe price IDs
 
 **Files Changed**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/subscription_manager.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/subscription_manager.py`
 
 **Changes Made**:
 
@@ -75,7 +75,7 @@ stripe_annual_price_id="price_1SI0FIDzk9HqAZnHZFRzBjgP"  # TODO: Create annual p
 - Webhooks couldn't be verified
 
 **Files Changed**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/stripe_integration.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/stripe_integration.py`
 
 **Changes Made**:
 
@@ -123,7 +123,7 @@ def __init__(self):
 - Users selecting "yearly" billing would be charged incorrectly
 
 **Files Changed**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/stripe_api.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/stripe_api.py`
 
 **Changes Made**:
 
@@ -249,7 +249,7 @@ else:
 2. **Verify Environment Variables** ✅ REQUIRED
    ```bash
    # Check .env.auth file
-   grep STRIPE_SECRET_KEY /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+   grep STRIPE_SECRET_KEY /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
    # Should see:
    # STRIPE_SECRET_KEY=sk_test_51QwxFKDzk9HqAZnH...
@@ -309,7 +309,7 @@ else:
 If these changes cause issues, rollback with:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Restore from git (if committed)
 git checkout HEAD~1 backend/subscription_manager.py

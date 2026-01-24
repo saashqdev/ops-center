@@ -202,16 +202,16 @@ User Profile may need manual configuration via Keycloak Admin Console.
 ## Files Reference
 
 **Configuration Scripts**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/configure_keycloak_user_profile.py`
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/verify_user_attributes.py`
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/quick_populate_users.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/configure_keycloak_user_profile.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/verify_user_attributes.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/quick_populate_users.py`
 
 **Documentation**:
-- Full Guide: `/home/muut/Production/UC-Cloud/services/ops-center/docs/KEYCLOAK_USER_PROFILE_SETUP.md`
-- Quick Ref: `/home/muut/Production/UC-Cloud/services/ops-center/docs/KEYCLOAK_USER_PROFILE_QUICK_REF.md`
+- Full Guide: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/KEYCLOAK_USER_PROFILE_SETUP.md`
+- Quick Ref: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/KEYCLOAK_USER_PROFILE_QUICK_REF.md`
 
 **Backend Integration**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/keycloak_integration.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/keycloak_integration.py`
 - Lines 352-417: Tier-specific helper functions
 
 ---

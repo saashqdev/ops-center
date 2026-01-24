@@ -133,7 +133,7 @@ The `docker-compose.direct.yml` file is for the Unicorn Commander deployment, wh
 
 ```bash
 # Navigate to ops-center directory
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Find the correct compose file for Center-Deep deployment
 ls -la docker-compose*.yml
@@ -199,9 +199,9 @@ docker logs ops-center-centerdeep -f
 ## Key Files & Locations
 
 ### Deployment Documentation
-- `/home/muut/Production/UC-Cloud/services/ops-center/OPS_CENTER_DEPLOYMENT_CHECKLIST.md` - Master checklist
-- `/home/muut/Production/UC-Cloud/services/ops-center/OPS_CENTER_DEPLOYMENT_SUMMARY.md` - Deployment summary
-- `/home/muut/Production/UC-Cloud/services/ops-center/DEPLOYMENT_STATUS_FINAL.md` - This file
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/OPS_CENTER_DEPLOYMENT_CHECKLIST.md` - Master checklist
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/OPS_CENTER_DEPLOYMENT_SUMMARY.md` - Deployment summary
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/DEPLOYMENT_STATUS_FINAL.md` - This file
 
 ### Database Reports
 - `/tmp/org_billing_deployment_report.md` - Complete database deployment (621 lines)
@@ -213,14 +213,14 @@ docker logs ops-center-centerdeep -f
 - `/tmp/BACKEND_TESTING_REPORT.md` - Complete testing report (700+ lines)
 
 ### Integration Documentation (For LoopNet Agent)
-- `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md` - Complete guide (2,380 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_INTEGRATION_SUMMARY.md` - Executive summary (531 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/LOOPNET_QUICK_START.md` - Quick reference (315 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_INTEGRATION_GUIDE.md` - Complete guide (2,380 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_INTEGRATION_SUMMARY.md` - Executive summary (531 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LOOPNET_QUICK_START.md` - Quick reference (315 lines)
 
 ### Source Code
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_billing_api.py` - 17 REST API endpoints (1,194 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/create_org_billing.sql` - Database schema (501 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/requirements.txt` - Python dependencies (includes slowapi==0.1.9)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_billing_api.py` - 17 REST API endpoints (1,194 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/create_org_billing.sql` - Database schema (501 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/requirements.txt` - Python dependencies (includes slowapi==0.1.9)
 
 ---
 
@@ -410,7 +410,7 @@ The LoopNet agent has **everything needed** to integrate with Ops-Center's organ
 - Attach relevant container logs
 
 **Documentation Location**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 ---
 

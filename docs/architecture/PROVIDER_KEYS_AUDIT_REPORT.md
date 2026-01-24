@@ -3,7 +3,7 @@
 **Audit Date**: November 14, 2025
 **Auditor**: Claude Code (UC-Cloud Team Lead)
 **Scope**: Complete analysis of all provider key management systems in Ops-Center
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 

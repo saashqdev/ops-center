@@ -505,7 +505,7 @@ docker restart unicorn-postgresql
 **Diagnosis**:
 ```bash
 # Check if new build was deployed
-ls -lh /home/muut/Production/UC-Cloud/services/ops-center/public/assets/ | head
+ls -lh /home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/assets/ | head
 ```
 
 **Solution**:
@@ -515,7 +515,7 @@ ls -lh /home/muut/Production/UC-Cloud/services/ops-center/public/assets/ | head
 # Hard reload: Ctrl + Shift + R
 
 # Or rebuild frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 rm -rf dist/ node_modules/.vite
 npm run build
 cp -r dist/* public/
@@ -619,9 +619,9 @@ docker restart ops-center-direct
 4. Review this document's troubleshooting section
 
 **For Development**:
-- Backend API: `/home/muut/Production/UC-Cloud/services/ops-center/backend/`
-- Frontend: `/home/muut/Production/UC-Cloud/services/ops-center/src/`
-- Database schema: `/home/muut/Production/UC-Cloud/services/ops-center/backend/sql/`
+- Backend API: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/`
+- Frontend: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/`
+- Database schema: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/sql/`
 
 **For Deployment**:
 - Build frontend: `npm run build && cp -r dist/* public/`

@@ -138,7 +138,7 @@ logger.info("Testing Lab API endpoints registered at /api/v1/llm/test (interacti
 
 **Run Command**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ./backend/tests/test_phase2_apis.sh
 ```
 

@@ -839,7 +839,7 @@ test('Mobile Lighthouse score > 90', async () => {
 
 ```bash
 # Run all mobile tests
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npx playwright test tests/mobile/
 
 # Results:
@@ -942,7 +942,7 @@ dist/assets/*.js             2,854.67 kB │ gzip: 882.45 kB
 
 ```bash
 # 1. Build frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 # Output: dist/ directory with optimized assets
 

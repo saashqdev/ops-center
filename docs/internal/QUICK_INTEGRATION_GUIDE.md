@@ -40,7 +40,7 @@ import DashboardProModern from './pages/DashboardProModern';
 ### 2. Build Frontend (5 minutes)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Build
 npm run build

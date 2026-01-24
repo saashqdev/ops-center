@@ -1092,10 +1092,10 @@ requests.exceptions.ConnectionError: ('Connection aborted.', RemoteDisconnected(
 ## Support & Documentation
 
 ### Internal Documentation
-- **Ops-Center Guide**: `/home/muut/Production/UC-Cloud/services/ops-center/CLAUDE.md`
-- **LiteLLM API Source**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/litellm_api.py`
-- **Organizational Billing**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_credit_integration.py`
-- **Usage Tracking**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/usage_tracking.py`
+- **Ops-Center Guide**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/CLAUDE.md`
+- **LiteLLM API Source**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/litellm_api.py`
+- **Organizational Billing**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_credit_integration.py`
+- **Usage Tracking**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/usage_tracking.py`
 
 ### Container Information
 - **Container Name**: `ops-center-centerdeep`
@@ -1131,7 +1131,7 @@ docker exec unicorn-redis redis-cli KEYS "credit:*"
 
 ### Add New Service Key to Ops-Center
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/litellm_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/litellm_api.py`
 
 **Location**: Line 566-570
 

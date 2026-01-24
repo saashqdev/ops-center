@@ -8,11 +8,11 @@
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Verify you're in the right directory
 pwd
-# Should output: /home/muut/Production/UC-Cloud/services/ops-center
+# Should output: /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Check git status
 git status

@@ -124,7 +124,7 @@ Organizations use **file-based storage** instead of PostgreSQL:
 
 ### Data Files
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/data/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data/`
 
 **organizations.json**:
 ```json
@@ -178,7 +178,7 @@ Created comprehensive test script that validates:
 
 **Run Tests**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ./test_org_crud.sh
 ```
 
@@ -249,7 +249,7 @@ docker logs ops-center-direct 2>&1 | grep "CSRF exemption check for path: /api/v
 ### 3. Check File Storage
 
 ```bash
-ls -lh /home/muut/Production/UC-Cloud/services/ops-center/backend/data/
+ls -lh /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data/
 ```
 
 **Expected**: `organizations.json` and `org_users.json` created after first organization
@@ -289,7 +289,7 @@ ls -lh /home/muut/Production/UC-Cloud/services/ops-center/backend/data/
 If this fix causes issues, rollback by reverting these files:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Revert org_api.py
 git checkout HEAD -- backend/org_api.py

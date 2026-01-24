@@ -42,7 +42,7 @@ REFERENCE FILES:
 VERIFICATION BEFORE STARTING:
 Run this to ensure everything still works:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 python3 verify_uchub_sso.py
 ```
 

@@ -387,7 +387,7 @@ All required packages are already installed (confirmed via package.json):
 ### Step 3: Build and Deploy
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Build frontend
 npm run build

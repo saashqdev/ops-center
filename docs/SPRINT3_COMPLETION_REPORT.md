@@ -217,7 +217,7 @@ curl "http://localhost:8084/api/v1/brigade/tasks/history?limit=10&status=complet
 
 **Usage**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 ./TEST_NEW_ENDPOINTS.sh
 ```
 
@@ -339,7 +339,7 @@ cd /home/muut/Production/UC-Cloud/services/ops-center/backend
 
 1. **Pull latest code**:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    git pull
    ```
 

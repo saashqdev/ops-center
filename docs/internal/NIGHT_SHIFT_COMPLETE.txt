@@ -103,7 +103,7 @@
 
 📍 FILE LOCATIONS:
 
-   Base Directory: /home/muut/Production/UC-Cloud/services/ops-center/
+   Base Directory: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 
    Start Reading:
    • NIGHT_SHIFT_SUMMARY.md (quick overview)

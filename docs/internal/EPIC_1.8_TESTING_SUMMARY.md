@@ -365,4 +365,4 @@ The credit system can be deployed to production with confidence.
 ---
 
 **Report Generated**: October 23, 2025
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`

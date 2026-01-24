@@ -21,7 +21,7 @@ After following this guide, you'll have:
 ## Step 1: Install Dependencies (2 minutes)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pip install -r requirements.txt
 ```
 
@@ -193,7 +193,7 @@ You now have:
 1. **Start Prometheus**:
 ```bash
 docker run -d -p 9090:9090 \
-  -v /home/muut/Production/UC-Cloud/services/ops-center/config/alerting_rules.yml:/etc/prometheus/rules.yml \
+  -v /home/ubuntu/Ops-Center-OSS/src/services/ops-center/config/alerting_rules.yml:/etc/prometheus/rules.yml \
   prom/prometheus \
   --config.file=/etc/prometheus/prometheus.yml
 ```

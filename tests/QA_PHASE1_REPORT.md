@@ -176,7 +176,7 @@ pip install pytest pytest-cov pytest-asyncio httpx freezegun
 
 1. **Install Backend Dependencies**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
    pip install pytest pytest-cov pytest-asyncio httpx freezegun
    ```
 

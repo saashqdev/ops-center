@@ -495,7 +495,7 @@ curl -X POST http://localhost:8084/api/v1/credits/coupons/create \
 ## File Structure
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/backend/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/
 
 ├── migrations/
 │   └── create_credit_system_tables.sql      (6 tables, indexes, triggers)
@@ -609,7 +609,7 @@ These are intentional and planned for Phase 2.
 
 **Questions?** Contact Backend Team Lead
 
-**Code Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/`
+**Code Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/`
 
 **Documentation**:
 - API Docs: `EPIC_1.8_API_DOCUMENTATION.md`

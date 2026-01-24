@@ -432,7 +432,7 @@ Different URLs for different purposes:
 
 ### 1. Apply Code Changes ✅
 
-Changes made to `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py`
+Changes made to `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py`
 
 ### 2. Restart Container ✅
 
@@ -502,7 +502,7 @@ If issues arise, rollback is simple:
 ### Option 1: Revert Code Changes
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git checkout backend/server.py
 docker restart ops-center-direct
 ```

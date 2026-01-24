@@ -2,7 +2,7 @@
 
 **Mission**: Remove ALL fake data fallbacks in LLMUsage.jsx
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/LLMUsage.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/LLMUsage.jsx`
 
 **Duration**: 4-6 hours
 
@@ -252,7 +252,7 @@ Same pattern for power level chart.
 
 ```bash
 # Build and deploy
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

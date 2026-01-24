@@ -18,7 +18,7 @@
 
 - [ ] **Verify disk space available**
   ```bash
-  df -h /home/muut/Production/UC-Cloud/services/ops-center
+  df -h /home/ubuntu/Ops-Center-OSS/src/services/ops-center
   # Minimum: 50GB free for backups
   ```
 
@@ -191,10 +191,10 @@
   crontab -e
 
   # Daily backup at 2 AM
-  0 2 * * * /home/muut/Production/UC-Cloud/services/ops-center/scripts/automated-backup.sh >> /var/log/uc-cloud-backup-cron.log 2>&1
+  0 2 * * * /home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/automated-backup.sh >> /var/log/uc-cloud-backup-cron.log 2>&1
 
   # Weekly cleanup (Sunday 3 AM)
-  0 3 * * 0 /home/muut/Production/UC-Cloud/services/ops-center/scripts/cleanup-old-backups.sh --force --days 7 --keep 3 >> /var/log/uc-cloud-cleanup-cron.log 2>&1
+  0 3 * * 0 /home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/cleanup-old-backups.sh --force --days 7 --keep 3 >> /var/log/uc-cloud-cleanup-cron.log 2>&1
   ```
 
 - [ ] **Verify cron jobs**
@@ -442,7 +442,7 @@ _______________________________________________
 
 ### Create Manual Backup
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ./scripts/automated-backup.sh
 ```
 

@@ -1873,7 +1873,7 @@ A: Passwords are bcrypt hashed. Never store plaintext passwords. Use `htpasswd` 
 **Documentation**:
 - Traefik Official Docs: https://doc.traefik.io/traefik/
 - Let's Encrypt Docs: https://letsencrypt.org/docs/
-- UC-Cloud Docs: `/home/muut/Production/UC-Cloud/services/ops-center/docs/`
+- UC-Cloud Docs: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
 
 **Community**:
 - Traefik Community Forum: https://community.traefik.io/

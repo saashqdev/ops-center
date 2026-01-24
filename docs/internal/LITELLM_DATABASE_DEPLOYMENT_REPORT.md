@@ -379,7 +379,7 @@ SELECT * FROM debit_user_credits(
 
 ## File Locations
 
-- **Schema File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/sql/litellm_schema.sql`
+- **Schema File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/sql/litellm_schema.sql`
 - **Container**: `unicorn-postgresql`
 - **Database**: `unicorn_db`
 - **Temp Location**: `/tmp/litellm_schema.sql` (inside container)

@@ -20,7 +20,7 @@ DB_CONTAINER="unicorn-postgresql"
 DB_USER="unicorn"
 DB_NAME="unicorn_test"
 DB_PASSWORD="unicorn"
-MIGRATIONS_DIR="/home/muut/Production/UC-Cloud/services/ops-center/backend/migrations"
+MIGRATIONS_DIR="/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations"
 
 echo -e "${BLUE}================================================${NC}"
 echo -e "${BLUE}LLM Hub Test Database Setup${NC}"

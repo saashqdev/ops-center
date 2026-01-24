@@ -634,7 +634,7 @@ Migration file: `alembic/versions/20251023_1230_create_service_credentials_table
 
 **Apply migration:**
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 alembic upgrade head
 ```
 

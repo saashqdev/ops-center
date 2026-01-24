@@ -410,7 +410,7 @@ curl http://localhost:8084/api/v1/forgejo/health
 **Solution**:
 ```bash
 # Rebuild frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 
@@ -455,7 +455,7 @@ docker restart ops-center-direct
 
 - **Complete Integration Guide**: `/tmp/FORGEJO_INTEGRATION_COMPLETE.md`
 - **UC-Cloud Main README**: `/home/muut/Production/UC-Cloud/README.md`
-- **Ops-Center README**: `/home/muut/Production/UC-Cloud/services/ops-center/README.md`
+- **Ops-Center README**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/README.md`
 - **Forgejo Official Docs**: https://forgejo.org/docs/latest/
 
 ---

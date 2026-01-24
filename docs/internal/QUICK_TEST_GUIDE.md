@@ -19,7 +19,7 @@
 6. **Copy webhook secret** (starts with `whsec_...`)
 7. **Add to environment**:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
    # Edit .env.auth
    vim .env.auth

@@ -100,7 +100,7 @@ Register → 5.0 credits auto-provisioned → API call succeeds → User happy
 
 ## Documentation
 
-**Complete Guide**: `/home/muut/Production/UC-Cloud/services/ops-center/FIX_CREDIT_AUTOPROVISION.md`
+**Complete Guide**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/FIX_CREDIT_AUTOPROVISION.md`
 
 Includes:
 - Problem statement and solution

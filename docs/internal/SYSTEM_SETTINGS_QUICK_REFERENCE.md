@@ -11,7 +11,7 @@
 python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
 # 2. Add to environment
-echo "SYSTEM_SETTINGS_ENCRYPTION_KEY=<key>" >> /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+echo "SYSTEM_SETTINGS_ENCRYPTION_KEY=<key>" >> /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # 3. Apply database schema
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
@@ -212,7 +212,7 @@ docker restart unicorn-redis
 ## File Locations
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── backend/
 │   ├── system_settings_manager.py   # Core logic
 │   ├── system_settings_api.py       # REST API

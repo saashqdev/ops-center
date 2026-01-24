@@ -31,7 +31,7 @@ You created `dynamic_pricing_api.py` but never imported it in `server.py`
 
 ### Fix:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Edit server.py
 vim backend/server.py
@@ -83,7 +83,7 @@ You created `UserBillingDashboard.jsx` but never added route in `App.jsx`
 
 ### Fix:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Edit App.jsx
 vim src/App.jsx
@@ -136,7 +136,7 @@ Lines 45-73 of `OrganizationBilling.jsx` use hardcoded mock object
 
 ### Fix (Full Code):
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Edit OrganizationBilling.jsx
 vim src/pages/organization/OrganizationBilling.jsx

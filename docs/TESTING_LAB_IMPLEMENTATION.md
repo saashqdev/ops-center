@@ -343,7 +343,7 @@ const handleTestModel = async () => {
 
 **Commands Used**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

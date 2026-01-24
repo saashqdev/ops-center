@@ -639,7 +639,7 @@ ls -la /home/muut/Infrastructure/traefik/dynamic/
 # Open Developer Tools → Console
 
 # Rebuild if needed
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

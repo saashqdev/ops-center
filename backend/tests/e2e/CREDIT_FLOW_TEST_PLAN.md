@@ -413,21 +413,21 @@ export TEST_OPENROUTER_KEY="sk-or-test-your-key-here"
 #### Option 1: Automated Script
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests/e2e
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/e2e
 ./run_credit_flow_tests.sh
 ```
 
 #### Option 2: Pytest
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 pytest backend/tests/e2e/test_complete_credit_flow.py -v
 ```
 
 #### Option 3: Standalone Python
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 python3 backend/tests/e2e/test_complete_credit_flow.py
 ```
 

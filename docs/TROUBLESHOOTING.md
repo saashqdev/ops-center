@@ -633,7 +633,7 @@ echo "Diagnostic report created: $REPORT_DIR.tar.gz"
 ### Support Channels
 
 - **GitHub Issues**: https://github.com/Unicorn-Commander/Ops-Center/issues
-- **Documentation**: `/home/muut/Production/UC-Cloud/services/ops-center/docs/`
+- **Documentation**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
 - **Logs**: Check container logs first
 
 ## References

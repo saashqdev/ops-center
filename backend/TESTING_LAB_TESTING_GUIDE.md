@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_usage_source ON llm_usage_logs((metadata->>'sourc
 
 ### 3. Register API in `server.py`
 
-Edit `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py`:
+Edit `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py`:
 
 ```python
 # Add import

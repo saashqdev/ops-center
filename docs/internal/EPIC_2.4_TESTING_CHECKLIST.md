@@ -290,7 +290,7 @@ ZIP: Any 5 digits (e.g., 12345)
 
 ### Backend Tests (pytest)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pytest tests/test_subscription_upgrade.py -v --cov=subscription_api
 ```
 
@@ -301,7 +301,7 @@ pytest tests/test_subscription_upgrade.py -v --cov=subscription_api
 
 ### Frontend Tests (Jest/Vitest)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm test -- TierComparison.test.jsx
 ```
 
@@ -312,7 +312,7 @@ npm test -- TierComparison.test.jsx
 
 ### E2E Tests (pytest)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pytest tests/e2e/test_upgrade_flow.py -v
 ```
 

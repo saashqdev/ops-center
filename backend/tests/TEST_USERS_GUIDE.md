@@ -109,7 +109,7 @@ ORDER BY tier;
 Run the automated tier access test:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 ./test_tier_access.sh
 ```
 
@@ -192,7 +192,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
 
 ## Test User Credentials File
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_users.json`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_users.json`
 
 **Format**:
 ```json

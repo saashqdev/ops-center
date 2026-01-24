@@ -50,14 +50,14 @@ labels:
 ### 1. Install Dependencies
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pip install httpx websockets pydantic
 ```
 
 ### 2. Restart Ops-Center
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker-compose -f docker-compose.direct.yml restart
 ```
 
@@ -88,7 +88,7 @@ curl http://localhost:8084/v1/health
 ### 2. Run Test Suite
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 python3 tests/test_anthropic_proxy.py
 ```
 
@@ -143,7 +143,7 @@ claude-code "Write a hello world function in Python"
 
 ```bash
 # On client machine
-cd /home/muut/Production/UC-Cloud/services/ops-center/scripts
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts
 
 # Make executable
 chmod +x mcp_connector.py

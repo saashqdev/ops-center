@@ -135,7 +135,7 @@ API keys are **optional** for viewing existing dashboards but **required** for:
 ### 4. Restart Ops-Center
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker restart ops-center-direct
 
 # Verify backend loaded Grafana config
@@ -465,7 +465,7 @@ Grafana connection and data source management.
 ### Running Tests
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Run Grafana API tests
 python -m pytest tests/test_grafana_api.py -v
@@ -569,7 +569,7 @@ The test suite covers:
 
 2. **Verify API key in .env.auth**:
    ```bash
-   grep GRAFANA_API_KEY /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+   grep GRAFANA_API_KEY /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
    ```
 
 3. **Restart Ops-Center** to load new key:

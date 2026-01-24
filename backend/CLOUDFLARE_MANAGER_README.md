@@ -2,7 +2,7 @@
 
 **Status**: ✅ Production Ready (Phase 1 Complete)
 **Module**: `cloudflare_manager.py`
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/cloudflare_manager.py`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/cloudflare_manager.py`
 **Epic**: 1.6 Phase 1 - Zone Management
 **Created**: October 22, 2025
 
@@ -806,8 +806,8 @@ AuditLogger.log_cloudflare_action(
 ## Documentation
 
 **Architecture Spec**: `/home/muut/Production/UC-Cloud/docs/epic1.6_cloudflare_architecture_spec.md`
-**Module Code**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/cloudflare_manager.py`
-**This README**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/CLOUDFLARE_MANAGER_README.md`
+**Module Code**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/cloudflare_manager.py`
+**This README**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/CLOUDFLARE_MANAGER_README.md`
 
 ---
 

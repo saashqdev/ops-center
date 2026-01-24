@@ -67,7 +67,7 @@ Edit `.env.litellm` and add your provider API keys. You only need to configure t
 Check that all required files are present:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Verify files exist
 ls -lh litellm_config.yaml          # LiteLLM model routing config (17KB)
@@ -80,7 +80,7 @@ ls -lh docker-compose.litellm.yml   # Docker compose file (4.5KB)
 Start the LiteLLM proxy and Wilmer router:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Start LiteLLM services
 docker compose -f docker-compose.litellm.yml up -d

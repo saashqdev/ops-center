@@ -106,7 +106,7 @@ Successfully generated comprehensive OpenAPI 3.0 specifications for all Ops-Cent
 
 **Usage**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 scripts/simple_endpoint_extractor.py
 ```
 
@@ -405,7 +405,7 @@ async def create_user(user: UserCreate):
 
 #### 2. Regenerate Docs
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python3 scripts/simple_endpoint_extractor.py
 ```
 
@@ -622,7 +622,7 @@ app.openapi = lambda: get_custom_openapi_schema(app)
 
 ```bash
 # 1. Navigate to ops-center backend
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # 2. Regenerate documentation (if needed)
 python3 scripts/simple_endpoint_extractor.py

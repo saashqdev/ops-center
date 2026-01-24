@@ -12,7 +12,7 @@ FILES CREATED
 =============================================================================
 
 1. MAIN IMPLEMENTATION
-   File: /home/muut/Production/UC-Cloud/services/ops-center/backend/org_api.py
+   File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_api.py
    Size: 579 lines
    Description: FastAPI router with 9 organization management endpoints
    Features:
@@ -24,7 +24,7 @@ FILES CREATED
    - Integration with existing org_manager.py
 
 2. INTEGRATION GUIDE
-   File: /home/muut/Production/UC-Cloud/services/ops-center/ORG_API_INTEGRATION.md
+   File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_API_INTEGRATION.md
    Size: 450+ lines
    Description: Complete step-by-step integration guide
    Sections:
@@ -37,7 +37,7 @@ FILES CREATED
    - Security considerations
 
 3. IMPLEMENTATION SUMMARY
-   File: /home/muut/Production/UC-Cloud/services/ops-center/ORG_API_IMPLEMENTATION_SUMMARY.md
+   File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_API_IMPLEMENTATION_SUMMARY.md
    Size: 600+ lines
    Description: Comprehensive implementation documentation
    Includes:
@@ -49,7 +49,7 @@ FILES CREATED
    - Known limitations and future enhancements
 
 4. QUICK START GUIDE
-   File: /home/muut/Production/UC-Cloud/services/ops-center/ORG_API_QUICK_START.md
+   File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_API_QUICK_START.md
    Size: 100+ lines
    Description: Quick reference for integration
    Content:
@@ -59,7 +59,7 @@ FILES CREATED
    - Troubleshooting tips
 
 5. TEST SCRIPT
-   File: /home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_org_api_quick.py
+   File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_org_api_quick.py
    Size: 180 lines
    Description: Automated verification script
    Tests:
@@ -151,12 +151,12 @@ INTEGRATION INSTRUCTIONS
 =============================================================================
 
 Step 1: Add Import
-   File: /home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+   File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
    Line: ~70-80 (with other router imports)
    Code: from org_api import router as org_router
 
 Step 2: Register Router
-   File: /home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+   File: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
    Line: ~290-330 (with other router registrations)
    Code: app.include_router(org_router)
 

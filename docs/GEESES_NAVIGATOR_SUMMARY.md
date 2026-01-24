@@ -83,7 +83,7 @@
 ## 📁 File Structure
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/geeses/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/geeses/
 ├── tools/                          # 6 TypeScript tools
 │   ├── ops_center_api_query.ts    (290 lines)
 │   ├── get_system_status.ts       (385 lines)

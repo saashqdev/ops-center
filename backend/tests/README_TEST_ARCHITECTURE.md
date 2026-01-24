@@ -227,7 +227,7 @@ services/ops-center/
 
 ```bash
 # Change to tests directory
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 
 # Run all automated tests
 pytest test_local_user*.py -v
@@ -293,10 +293,10 @@ sudo apt-get install jq
 **Solution**:
 ```bash
 # Ensure backend implementation exists
-ls -l /home/muut/Production/UC-Cloud/services/ops-center/backend/local_user_manager.py
+ls -l /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/local_user_manager.py
 
 # Add backend to Python path
-export PYTHONPATH=/home/muut/Production/UC-Cloud/services/ops-center/backend:$PYTHONPATH
+export PYTHONPATH=/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend:$PYTHONPATH
 ```
 
 ### Integration Tests Fail

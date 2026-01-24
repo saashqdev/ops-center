@@ -94,7 +94,7 @@ echo ""
 
 # Test 6: Check org_manager file storage
 echo -e "${YELLOW}Test 6: Check File-Based Storage${NC}"
-DATA_DIR="/home/muut/Production/UC-Cloud/services/ops-center/backend/data"
+DATA_DIR="/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data"
 
 if [ -d "$DATA_DIR" ]; then
     print_result 0 "Data directory exists: $DATA_DIR"

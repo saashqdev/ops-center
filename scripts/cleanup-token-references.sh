@@ -39,7 +39,7 @@ FILES=(
   "tests/unit/test_cloudflare_manager.py"
 )
 
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 UPDATED_COUNT=0
 SKIPPED_COUNT=0

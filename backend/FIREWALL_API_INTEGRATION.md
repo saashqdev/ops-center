@@ -36,7 +36,7 @@ If firewall_manager.py doesn't exist yet, wait for Backend Developer Agent to cr
 
 ### Step 2: Register Router in Main App
 
-Edit `/home/muut/Production/UC-Cloud/services/ops-center/backend/server_auth_integrated.py`:
+Edit `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server_auth_integrated.py`:
 
 ```python
 # Add at top of file with other imports
@@ -315,7 +315,7 @@ def test_list_rules_requires_auth():
 
 Run tests:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pytest test_firewall_api.py -v
 ```
 

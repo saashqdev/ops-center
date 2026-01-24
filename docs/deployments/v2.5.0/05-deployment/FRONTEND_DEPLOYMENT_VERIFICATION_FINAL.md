@@ -417,7 +417,7 @@ $ curl http://localhost:8084/health
 ### Asset Deployment Verification
 
 ```bash
-$ ls -lh /home/muut/Production/UC-Cloud/services/ops-center/public/
+$ ls -lh /home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/
 total 8.7M
 drwxrwxr-x 2 muut muut 112K Nov 26 05:09 assets/      # ✅ 1,045 files
 -rw-rw-r-- 1 muut muut 4.1K Nov 26 05:09 index.html   # ✅

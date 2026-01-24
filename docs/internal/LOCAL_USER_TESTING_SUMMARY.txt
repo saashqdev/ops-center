@@ -6,7 +6,7 @@ Date: October 20, 2025
 Status: ✅ 100% COMPLETE
 Engineer: Test Engineer Agent (Claude Code)
 Session: swarm-local-users
-Working Directory: /home/muut/Production/UC-Cloud/services/ops-center
+Working Directory: /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 ────────────────────────────────────────────────────────────────────────────
 
@@ -91,26 +91,26 @@ Tested Attack Vectors:
 🚀 HOW TO RUN TESTS:
 
 # 1. Unit Tests (safe, no privileges needed)
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 pytest test_local_user_management.py -v
 
 # 2. Integration Tests (safe, mocked)
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 pytest test_local_user_api.py -v
 
 # 3. Manual Tests (REQUIRES ROOT - TEST ENV ONLY!)
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 sudo scripts/test_local_users.sh
 
 # 4. Run all tests with coverage
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 pytest test_local_user*.py -v --cov=local_user_manager --cov-report=html
 
 ────────────────────────────────────────────────────────────────────────────
 
 📁 FILE LOCATIONS:
 
-All files are in: /home/muut/Production/UC-Cloud/services/ops-center/
+All files are in: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 
 backend/tests/
   ├── test_local_user_management.py  ← Unit tests (491 lines)

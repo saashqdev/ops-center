@@ -233,7 +233,7 @@ All functionality tested and working:
 If issues arise, rollback is simple:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Revert Layout.jsx changes
 git checkout HEAD -- src/components/Layout.jsx

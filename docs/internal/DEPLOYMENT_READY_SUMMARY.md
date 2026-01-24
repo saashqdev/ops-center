@@ -412,7 +412,7 @@ docker restart ops-center-direct
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db
 
 # Rebuild frontend (if needed)
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build && rsync -av --exclude='avatars' dist/ public/
 ```
 

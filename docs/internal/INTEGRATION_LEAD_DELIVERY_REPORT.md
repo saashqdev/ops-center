@@ -581,7 +581,7 @@ All three leads have completed their assigned tasks. The API documentation porta
 
 **Frontend** (Rebuild required)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies (if any new ones added)
 npm install

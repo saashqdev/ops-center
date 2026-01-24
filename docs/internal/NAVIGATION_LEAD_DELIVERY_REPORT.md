@@ -842,7 +842,7 @@ Mobile navigation adds ~15KB gzipped:
 
 ## File Locations
 
-All files created in `/home/muut/Production/UC-Cloud/services/ops-center/`:
+All files created in `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`:
 
 1. **Mobile Navigation**: `src/components/MobileNavigation.jsx` (640 lines)
 2. **Breadcrumbs**: `src/components/MobileBreadcrumbs.jsx` (200 lines)
@@ -870,7 +870,7 @@ All files created in `/home/muut/Production/UC-Cloud/services/ops-center/`:
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies (if needed)
 npm install

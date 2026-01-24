@@ -711,7 +711,7 @@ describe('Traefik Management', () => {
 
 ### Build Process
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies (if needed)
 npm install react-chartjs-2 chart.js react-syntax-highlighter

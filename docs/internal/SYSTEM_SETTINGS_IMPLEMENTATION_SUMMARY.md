@@ -201,7 +201,7 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 ### 2. Add to Environment
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Add to .env.auth
 echo "SYSTEM_SETTINGS_ENCRYPTION_KEY=<your-generated-key>" >> .env.auth

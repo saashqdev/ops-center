@@ -219,7 +219,7 @@ async def system_status():
 
 ### Run All Tests
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Automated test suite
 python3 tests/test_all_endpoints.py
@@ -307,13 +307,13 @@ Before deploying to production:
 
 ## 📞 Support
 
-**Main Report**: `/home/muut/Production/UC-Cloud/services/ops-center/TEST_REPORT_BACKEND.md`
+**Main Report**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/TEST_REPORT_BACKEND.md`
 
 **Test Scripts**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/tests/test_all_endpoints.py`
-- `/home/muut/Production/UC-Cloud/services/ops-center/tests/test_detailed_authenticated.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/test_all_endpoints.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests/test_detailed_authenticated.py`
 
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 

@@ -625,7 +625,7 @@ docker exec uchub-keycloak /opt/keycloak/bin/kcadm.sh get users \
 **Solution**: Check browser console for errors
 ```bash
 # Rebuild frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

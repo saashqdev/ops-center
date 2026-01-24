@@ -263,7 +263,7 @@ tests/
 
 ```bash
 # Run all tests with coverage
-cd /home/muut/Production/UC-Cloud/services/ops-center/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests
 ./run_migration_tests.sh
 ```
 
@@ -522,7 +522,7 @@ jobs:
 
 **Fix**:
 ```bash
-export PYTHONPATH="${PYTHONPATH}:/home/muut/Production/UC-Cloud/services/ops-center"
+export PYTHONPATH="${PYTHONPATH}:/home/ubuntu/Ops-Center-OSS/src/services/ops-center"
 ```
 
 #### 2. Async Test Warnings

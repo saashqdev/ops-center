@@ -211,7 +211,7 @@ All documentation located in `/tmp/`:
 ### Git Commit Message
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 git add backend/org_credit_integration.py
 git add backend/platform_keys_api.py

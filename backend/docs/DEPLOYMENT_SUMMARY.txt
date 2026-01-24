@@ -9,7 +9,7 @@ FILES CREATED
 ================================================================================
 
 1. SQL SCHEMA & DATA
-   Location: /home/muut/Production/UC-Cloud/services/ops-center/backend/sql/uc_cloud_services_catalog.sql
+   Location: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/sql/uc_cloud_services_catalog.sql
    Size: ~40 KB
    Purpose: Production-ready database with 8 real UC-Cloud services
    
@@ -21,7 +21,7 @@ FILES CREATED
    ✅ Analytics tables (service_views, service_subscriptions)
 
 2. DOCUMENTATION
-   Location: /home/muut/Production/UC-Cloud/services/ops-center/backend/docs/
+   Location: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/
    
    a) SERVICE_URLS.md (12 KB)
       - Production URLs for all services
@@ -96,7 +96,7 @@ DEPLOYMENT INSTRUCTIONS
 
 Step 1: Backup Database
 -----------------------
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 docker exec ops-center-postgres pg_dump -U unicorn_ops unicorn_ops_db > \
   backups/backup_before_catalog_$(date +%Y%m%d_%H%M%S).sql
 
@@ -193,7 +193,7 @@ Service Icons Needed (512x512px PNG):
 7. orator-icon.png      - Speaker/sound waves
 8. magicdeck-icon.png   - Playing cards/deck
 
-Save to: /home/muut/Production/UC-Cloud/services/ops-center/frontend/public/assets/services/
+Save to: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/frontend/public/assets/services/
 
 ================================================================================
 VERIFICATION CHECKLIST

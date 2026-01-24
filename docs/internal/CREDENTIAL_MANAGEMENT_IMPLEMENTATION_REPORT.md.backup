@@ -92,7 +92,7 @@ service_credentials (
 **Migration Commands**:
 ```bash
 # Apply migration
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 alembic upgrade head
 
 # Rollback migration
@@ -669,7 +669,7 @@ async def my_endpoint(request: Request):
 
 ```bash
 # Navigate to backend
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Apply migration
 alembic upgrade head
@@ -915,7 +915,7 @@ docker logs ops-center-direct | grep "Retrieved credential from DB"
 
 ```bash
 # Navigate to ops-center backend
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Check migration status
 alembic current
@@ -965,7 +965,7 @@ docker exec ops-center-direct printenv | grep ENCRYPTION_KEY
 python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
 # Add to .env.auth
-echo "ENCRYPTION_KEY=YOUR_GENERATED_KEY" >> /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+echo "ENCRYPTION_KEY=YOUR_GENERATED_KEY" >> /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Restart ops-center
 docker restart ops-center-direct

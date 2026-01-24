@@ -6,7 +6,7 @@
 ## Installation
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Initialize schema
 python scripts/initialize_litellm_db.py
@@ -247,7 +247,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "
 
 ```bash
 # Run all tests
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pytest tests/test_litellm_schema.py -v
 
 # Run specific test

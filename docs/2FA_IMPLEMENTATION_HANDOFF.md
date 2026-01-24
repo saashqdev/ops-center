@@ -501,7 +501,7 @@ done
 
 ```bash
 # 1. Register router and restart backend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 # Edit backend/server.py to include router
 docker restart ops-center-direct
 

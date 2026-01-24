@@ -2,7 +2,7 @@
 
 **Created**: October 23, 2025
 **Status**: ✅ DEPLOYED
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/LiteLLMManagement.jsx`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/LiteLLMManagement.jsx`
 **Route**: `/admin/litellm-providers`
 **URL**: https://your-domain.com/admin/litellm-providers
 
@@ -409,7 +409,7 @@ const LiteLLMManagement = lazy(() => import('./pages/LiteLLMManagement'));
 ### Deployment Commands
 ```bash
 # Build frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 
 # Deploy to public/

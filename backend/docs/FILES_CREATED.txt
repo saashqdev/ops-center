@@ -103,16 +103,16 @@ ABSOLUTE FILE PATHS
 
 SQL:
 ----
-/home/muut/Production/UC-Cloud/services/ops-center/backend/sql/uc_cloud_services_catalog.sql
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/sql/uc_cloud_services_catalog.sql
 
 Documentation:
 --------------
-/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/SERVICE_URLS.md
-/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/SERVICES_CATALOG_SUMMARY.md
-/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/PRICING_STRATEGY.md
-/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/QUICK_START_DEPLOYMENT.md
-/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/DEPLOYMENT_SUMMARY.txt
-/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/FILES_CREATED.txt (this file)
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/SERVICE_URLS.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/SERVICES_CATALOG_SUMMARY.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/PRICING_STRATEGY.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/QUICK_START_DEPLOYMENT.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/DEPLOYMENT_SUMMARY.txt
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/FILES_CREATED.txt (this file)
 
 ================================================================================
 WHAT TO READ FIRST
@@ -152,7 +152,7 @@ QUICK COMMANDS
 
 Deploy Services:
 ----------------
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 docker exec ops-center-postgres pg_dump -U unicorn_ops unicorn_ops_db > backup.sql
 docker exec -i ops-center-postgres psql -U unicorn_ops -d unicorn_ops_db < sql/uc_cloud_services_catalog.sql
 
@@ -211,11 +211,11 @@ SUPPORT
 
 Documentation Location:
 -----------------------
-/home/muut/Production/UC-Cloud/services/ops-center/backend/docs/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/
 
 Quick Reference:
 ----------------
-cat /home/muut/Production/UC-Cloud/services/ops-center/backend/docs/FILES_CREATED.txt
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/FILES_CREATED.txt
 
 For Help:
 ---------

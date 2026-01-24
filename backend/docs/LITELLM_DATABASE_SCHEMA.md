@@ -552,7 +552,7 @@ SELECT refresh_usage_summary();
 ### 1. Run Schema Script
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Execute schema
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -f sql/litellm_schema.sql

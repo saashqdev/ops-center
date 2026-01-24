@@ -861,7 +861,7 @@ redis>=5.0.0
 **Install:**
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pip install -r requirements.txt
 ```
 
@@ -881,7 +881,7 @@ pip install -r requirements.txt
 **Install:**
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm install
 ```
 
@@ -1462,19 +1462,19 @@ curl -X POST http://localhost:8084/api/v1/analytics/users/churn/train
 
 1. **Install Python Dependencies**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
    pip install scikit-learn numpy pandas redis
    ```
 
 2. **Install JavaScript Dependencies**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    npm install chart.js react-chartjs-2
    ```
 
 3. **Create Data Directory**
    ```bash
-   mkdir -p /home/muut/Production/UC-Cloud/services/ops-center/backend/data
+   mkdir -p /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data
    ```
 
 4. **Add Router to FastAPI**
@@ -1801,7 +1801,7 @@ redis-cli -h unicorn-redis ping
 curl -X POST http://localhost:8084/api/v1/analytics/users/churn/train
 
 # Check model files exist
-ls -lh /home/muut/Production/UC-Cloud/services/ops-center/backend/data/
+ls -lh /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data/
 
 # Expected files:
 # - churn_model.pkl

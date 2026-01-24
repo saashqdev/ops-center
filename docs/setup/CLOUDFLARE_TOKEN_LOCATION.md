@@ -40,7 +40,7 @@ If Platform Settings page isn't accessible:
 
 ```bash
 # Edit environment file
-vim /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # Find line (around line 30-35):
 CLOUDFLARE_API_TOKEN=0LVXYAzHsGRtxn1Qe0_ItTlCFGxW9iogQCmsegC_
@@ -63,7 +63,7 @@ docker restart ops-center-direct
 
 **If missing**: Frontend may need rebuild
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build && cp -r dist/* public/
 docker restart ops-center-direct
 ```

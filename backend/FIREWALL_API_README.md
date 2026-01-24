@@ -453,7 +453,7 @@ INFO: FIREWALL ACTION: ADD_RULE by admin@example.com - allow tcp/80 from 192.168
 
 ### Step 1: Import Router
 
-Edit `/home/muut/Production/UC-Cloud/services/ops-center/backend/server_auth_integrated.py`:
+Edit `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server_auth_integrated.py`:
 
 ```python
 # Add import at top

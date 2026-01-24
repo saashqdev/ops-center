@@ -8,7 +8,7 @@
 ## Priority 1: CRITICAL FIXES (Must Do First)
 
 ### Fix #1: BillingDashboard.jsx - Line 125
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/BillingDashboard.jsx`  
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/BillingDashboard.jsx`  
 **Status**: 67% working (8 of 12 endpoints exist)
 
 **Current Code (Line ~125)**:
@@ -29,7 +29,7 @@ fetch('/api/v1/billing/summary', { credentials: 'include' })
 ---
 
 ### Fix #2: BillingDashboard.jsx - Lines 126-131 (Analytics)
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/BillingDashboard.jsx`  
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/BillingDashboard.jsx`  
 **Status**: Missing all 5 analytics endpoints
 
 **Current Code**:
@@ -52,7 +52,7 @@ fetch('/api/v1/billing/analytics/user-growth?period=...')
 ---
 
 ### Fix #3: Security.jsx - Lines ~80-90
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/Security.jsx`  
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/Security.jsx`  
 **Status**: 25% working (1 of 4 endpoints exist)
 
 **Current Code**:
@@ -130,7 +130,7 @@ Action:
 ## Priority 2: MEDIUM FIXES (Do Next)
 
 ### Fix #5: SubscriptionUsage.jsx
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/subscription/SubscriptionUsage.jsx`  
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/subscription/SubscriptionUsage.jsx`  
 **Status**: 40% working (2 of 5 endpoints)
 
 **Missing Endpoints**:
@@ -148,7 +148,7 @@ Action:
 ---
 
 ### Fix #6: SubscriptionPayment.jsx
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/subscription/SubscriptionPayment.jsx`  
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/subscription/SubscriptionPayment.jsx`  
 **Status**: 75% working (3 of 4 endpoints)
 
 **Missing Endpoints**:
@@ -161,7 +161,7 @@ Action:
 ---
 
 ### Fix #7: NotificationSettings.jsx
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/NotificationSettings.jsx`  
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/NotificationSettings.jsx`  
 **Status**: 67% working (2 of 3 endpoints)
 
 **Missing/Broken**:
@@ -176,7 +176,7 @@ Action:
 ---
 
 ### Fix #8: SubscriptionPlan.jsx
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/subscription/SubscriptionPlan.jsx`  
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/subscription/SubscriptionPlan.jsx`  
 **Status**: 83% working (5 of 6 endpoints)
 
 **Unclear Endpoint**:
@@ -249,7 +249,7 @@ curl http://localhost:8084/api/v1/audit/events
 # Open DevTools > Console tab and look for fetch errors
 
 # 4. Run frontend build
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 ```
 
@@ -258,11 +258,11 @@ npm run build
 ## File Locations
 
 **Main fixes needed in**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/BillingDashboard.jsx`
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/Security.jsx`
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/subscription/SubscriptionUsage.jsx`
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/PermissionsManagement.jsx` (decision needed)
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/LLMUsage.jsx` (decision needed)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/BillingDashboard.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/Security.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/subscription/SubscriptionUsage.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/PermissionsManagement.jsx` (decision needed)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/LLMUsage.jsx` (decision needed)
 
 **Backend routers (for reference)**:
 - `backend/billing_api.py` - Billing endpoints

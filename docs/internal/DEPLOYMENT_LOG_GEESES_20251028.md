@@ -33,7 +33,7 @@
    <Route path="geeses" element={<Geeses />} />
    ```
 
-**File Modified**: `/home/muut/Production/UC-Cloud/services/ops-center/src/App.jsx`
+**File Modified**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/App.jsx`
 
 **Note**: Route placed in MONITORING & ANALYTICS section for logical grouping. The system also auto-added a duplicate route at `monitoring/geeses` (line 352) for consistency with section structure.
 
@@ -99,7 +99,7 @@ src/pages/admin/SubscriptionManagement.jsx:111
 ### Deployment Statistics
 - **Total Files Deployed**: 2,960 files
 - **Deployment Size**: 230 MB
-- **Target Directory**: `/home/muut/Production/UC-Cloud/services/ops-center/public/`
+- **Target Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/`
 
 ### Key Files Deployed
 ```
@@ -276,7 +276,7 @@ If issues are discovered, rollback with:
 
 ```bash
 # Restore previous frontend build
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git checkout HEAD -- public/
 
 # Revert App.jsx changes

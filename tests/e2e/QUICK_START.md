@@ -7,7 +7,7 @@ Get started with Ops-Center E2E testing in 5 minutes on Mac Studio.
 ### 1. Install Playwright (One-Time Setup)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install Playwright browsers
 npm run playwright:install

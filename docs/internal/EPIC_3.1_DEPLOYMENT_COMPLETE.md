@@ -367,7 +367,7 @@ GET    /api/v1/llm/usage/export           # Export to CSV/JSON
 
 #### 1. Database Setup (5 minutes)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Run migration
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db < backend/migrations/create_llm_tables.sql
@@ -415,7 +415,7 @@ curl -H "Authorization: Bearer TOKEN" \
 
 ### Automated Tests (153 tests)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Run all tests
 pytest tests/unit/ tests/integration/ tests/performance/ tests/security/
@@ -669,7 +669,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "SELECT * FROM l
 **Frontend Issues**:
 ```bash
 # Rebuild frontend
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

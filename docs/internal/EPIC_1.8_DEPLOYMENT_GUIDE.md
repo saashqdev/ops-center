@@ -95,7 +95,7 @@ docker exec unicorn-redis redis-cli PING
 
 ```bash
 # Navigate to ops-center directory
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Create timestamp
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)

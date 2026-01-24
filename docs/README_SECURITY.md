@@ -64,7 +64,7 @@ This directory contains comprehensive security documentation for the Ops-Center 
 ### Contact
 
 **Security Team**: security@your-domain.com  
-**Documentation Location**: `/home/muut/Production/UC-Cloud/services/ops-center/docs/`
+**Documentation Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
 
 ---
 

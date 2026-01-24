@@ -53,7 +53,7 @@ Integrate the LLM provider management system with the existing LLM router in Ops
 BYOK_ENCRYPTION_KEY=3oSN-ca3dd_g-nYIY1MDHipF0jSaszApHU83w0ItRsM=
 ```
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
 
 ### 3. Test Suite
 
@@ -416,7 +416,7 @@ GET /api/v1/llm-config/servers/1/models
 
 ✅ Already deployed to:
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── backend/
 │   ├── llm_provider_integration.py (NEW)
 │   └── scripts/

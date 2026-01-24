@@ -881,7 +881,7 @@ async def test_keycloak_2fa_enforcement_flow():
 
 3. **Frontend Deployment**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    npm run build
    cp -r dist/* public/
    ```
@@ -943,7 +943,7 @@ If deployment fails:
 
 **Security Team Lead**: AI Assistant
 **Project**: Ops-Center 2FA Management
-**Repository**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Repository**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 

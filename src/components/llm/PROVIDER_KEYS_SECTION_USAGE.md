@@ -409,11 +409,11 @@ export default LLMManagement;
 
 ## File Locations
 
-**Component**: `/home/muut/Production/UC-Cloud/services/ops-center/src/components/ProviderKeysSection.jsx`
+**Component**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/ProviderKeysSection.jsx`
 
 **Backend APIs**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/llm_provider_keys_api.py` (assumed)
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py` (main FastAPI app)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/llm_provider_keys_api.py` (assumed)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py` (main FastAPI app)
 
 **Database**: `unicorn_db` (PostgreSQL)
 - Table: `llm_provider_keys` (assumed)

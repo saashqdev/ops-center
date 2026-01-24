@@ -10,7 +10,7 @@
 ### 1. Install Dependencies
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm install
 npx playwright install --with-deps chromium
 ```

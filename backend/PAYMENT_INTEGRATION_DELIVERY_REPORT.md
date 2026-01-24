@@ -355,7 +355,7 @@ pydantic==2.6.1       # ✅ Installed
 ```bash
 # Option 1: Direct SQL execution
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
-  -f /home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/add_subscription_changes_table.sql
+  -f /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/add_subscription_changes_table.sql
 
 # Option 2: Via psql prompt
 docker exec -it unicorn-postgresql psql -U unicorn -d unicorn_db
@@ -394,7 +394,7 @@ app.include_router(webhooks_router)
 ### Step 4: Restart Backend
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker restart ops-center-direct
 
 # Verify logs
@@ -777,7 +777,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c \
 
 **Development Team**: Payment Integration Lead
 **Documentation**: `/backend/PAYMENT_INTEGRATION_DELIVERY_REPORT.md`
-**Code Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/`
+**Code Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/`
 
 ---
 

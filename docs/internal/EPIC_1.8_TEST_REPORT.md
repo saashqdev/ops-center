@@ -28,7 +28,7 @@ This report summarizes the comprehensive testing infrastructure created for Epic
 
 ### 1. Unit Tests (`test_credit_system.py`)
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_credit_system.py`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_credit_system.py`
 **Lines of Code**: 800+
 **Test Count**: 60+ unit tests
 
@@ -98,7 +98,7 @@ This report summarizes the comprehensive testing infrastructure created for Epic
 
 ### 2. Integration Tests (`test_credit_api.py`)
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/integration/test_credit_api.py`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/integration/test_credit_api.py`
 **Lines of Code**: 700+
 **Test Count**: 30+ integration tests
 
@@ -160,7 +160,7 @@ This report summarizes the comprehensive testing infrastructure created for Epic
 
 ### 3. Performance Tests (`test_credit_performance.py`)
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/performance/test_credit_performance.py`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/performance/test_credit_performance.py`
 **Lines of Code**: 300+
 **Test Count**: 10+ performance tests
 
@@ -199,7 +199,7 @@ This report summarizes the comprehensive testing infrastructure created for Epic
 
 ### 4. Security Tests (`test_credit_security.py`)
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/security/test_credit_security.py`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/security/test_credit_security.py`
 **Lines of Code**: 400+
 **Test Count**: 15+ security tests
 
@@ -260,7 +260,7 @@ This report summarizes the comprehensive testing infrastructure created for Epic
 
 ### Migration Script
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/scripts/migrate_credit_system.sh`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/migrate_credit_system.sh`
 **Lines**: 200+
 **Features**:
 
@@ -287,7 +287,7 @@ This report summarizes the comprehensive testing infrastructure created for Epic
 
 ### SQL Schema
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/create_credit_system_tables.sql`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/create_credit_system_tables.sql`
 **Lines**: 2,500+
 
 ✅ **Tables Created** (5 total)
@@ -326,7 +326,7 @@ This report summarizes the comprehensive testing infrastructure created for Epic
 ### Running Unit Tests
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Run all unit tests
 docker exec ops-center-direct pytest backend/tests/test_credit_system.py -v
@@ -371,7 +371,7 @@ docker exec ops-center-direct pytest backend/tests/security/test_credit_security
 ### Running Database Migration
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Run migration (production mode)
 ./scripts/migrate_credit_system.sh

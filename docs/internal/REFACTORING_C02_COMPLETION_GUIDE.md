@@ -313,7 +313,7 @@ export default CloudflareDNS;
 ### Step 1: Create ZoneListView Components (7 files)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ```
 
 Create each file in `src/components/CloudflareDNS/ZoneListView/`:
@@ -368,7 +368,7 @@ import CloudflareDNS from './components/CloudflareDNS';
 ### Step 5: Test Build
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 ```
 

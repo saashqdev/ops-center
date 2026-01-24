@@ -77,7 +77,7 @@ All architecture specifications have been completed and are ready for implementa
 **1. Create Database Tables**
 ```bash
 # Run migration script
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker exec ops-center-direct psql -U unicorn -d unicorn_db -f migrations/001_litellm_tables.sql
 ```
 
@@ -106,7 +106,7 @@ ANTHROPIC_API_KEY=<optional-for-enterprise>
 
 **3. Deploy LiteLLM Proxy**
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.litellm.yml up -d litellm-proxy
 
 # Verify
@@ -142,7 +142,7 @@ curl -X POST http://localhost:4000/chat/completions \
 
 **1. Create WilmerAI Directory Structure**
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 mkdir -p wilmer
 cd wilmer
 
@@ -324,7 +324,7 @@ curl -X POST https://your-domain.com/api/v1/llm/chat/completions \
 
 **1. Create LLM Management Page**
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/src/pages
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages
 touch LLMManagement.jsx
 ```
 
@@ -417,7 +417,7 @@ export default function LLMChat() {
 
 **4. Build and Deploy**
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

@@ -2,7 +2,7 @@
 
 **Mission**: Fix network stats always showing 0 in Monitoring page
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/System.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/System.jsx`
 
 **Duration**: 2-3 hours
 
@@ -304,7 +304,7 @@ async def get_network_stats():
 
 ```bash
 # 1. Build and deploy
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

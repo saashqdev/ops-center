@@ -217,7 +217,7 @@ FILE LOCATIONS
 ================================================================================
 
 Testing Infrastructure:
-/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/
 ├── test_credit_system.py                    (800+ lines)
 ├── integration/
 │   └── test_credit_api.py                   (700+ lines)
@@ -227,14 +227,14 @@ Testing Infrastructure:
     └── test_credit_security.py              (400+ lines)
 
 Database Infrastructure:
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── scripts/
 │   └── migrate_credit_system.sh             (200 lines)
 └── backend/migrations/
     └── create_credit_system_tables.sql      (2,500+ lines)
 
 Documentation:
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── EPIC_1.8_TEST_REPORT.md                  (400+ lines)
 ├── EPIC_1.8_DEPLOYMENT_GUIDE.md             (600+ lines)
 ├── EPIC_1.8_TESTING_SUMMARY.md              (300+ lines)
@@ -263,7 +263,7 @@ docker exec ops-center-direct pytest backend/tests/ -v
 QUICK START - RUN MIGRATION
 ================================================================================
 
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # 1. Backup (automatic in script, but can do manually)
 docker exec unicorn-postgresql pg_dump -U unicorn unicorn_db > /tmp/backup.sql

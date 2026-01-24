@@ -277,7 +277,7 @@ The frontend UI should:
 To apply the database migration:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 psql -U postgres -d ops_center -f migrations/007_user_execution_servers.sql
 ```
 

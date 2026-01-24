@@ -134,7 +134,7 @@ AppMatrix uses Material-UI icons for visual organization:
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Build frontend
 npm run build
@@ -201,7 +201,7 @@ If issues occur, revert to FeatureMatrix:
 
 ```bash
 # Edit SubscriptionManagement.js
-cd /home/muut/Production/UC-Cloud/services/ops-center/frontend/src/components/billing
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/frontend/src/components/billing
 
 # Line 14: Change import back
 - import AppMatrix from './AppMatrix';
@@ -212,7 +212,7 @@ cd /home/muut/Production/UC-Cloud/services/ops-center/frontend/src/components/bi
 + <FeatureMatrix
 
 # Rebuild and deploy
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

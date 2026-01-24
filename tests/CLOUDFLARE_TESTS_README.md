@@ -53,7 +53,7 @@ This test suite provides comprehensive coverage for the Cloudflare DNS managemen
 ### 1. Install Test Dependencies
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests
 
 # Install all testing dependencies
 pip install -r requirements-test.txt
@@ -212,7 +212,7 @@ REDIS_PORT=6379
 
 ```bash
 # Navigate to ops-center tests directory
-cd /home/muut/Production/UC-Cloud/services/ops-center/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests
 
 # Run all Cloudflare tests
 ./run_cloudflare_tests.sh
@@ -340,7 +340,7 @@ pytest -v --timeout=30 --asyncio-mode=auto
 ```
 ============================= test session starts ==============================
 platform linux -- Python 3.10.12, pytest-7.4.3, pluggy-1.3.0
-rootdir: /home/muut/Production/UC-Cloud/services/ops-center/tests
+rootdir: /home/ubuntu/Ops-Center-OSS/src/services/ops-center/tests
 plugins: asyncio-0.21.1, cov-4.1.0, timeout-2.1.0, xdist-3.3.1
 collected 154 items
 

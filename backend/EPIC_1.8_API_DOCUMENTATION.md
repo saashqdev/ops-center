@@ -965,7 +965,7 @@ Manages promotional coupons with validation.
 Run the migration SQL to create tables:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Connect to PostgreSQL
 docker exec -it unicorn-postgresql psql -U unicorn -d unicorn_db

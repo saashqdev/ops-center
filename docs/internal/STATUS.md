@@ -23,7 +23,7 @@
 
 **Current Build:**
 - Bundle: `index-DJgwK7Dk.js` (latest)
-- Location: `/home/muut/Production/UC-Cloud/services/ops-center/backend/dist/`
+- Location: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/dist/`
 - Container: `ops-center-direct` (running on port 8084)
 
 ---
@@ -142,7 +142,7 @@ backend/dist/ ✅ Deployed
 
 ### Rebuild & Deploy
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 rm -rf backend/dist && cp -r dist backend/dist
 docker restart ops-center-direct

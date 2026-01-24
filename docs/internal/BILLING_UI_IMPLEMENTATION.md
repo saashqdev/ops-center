@@ -21,7 +21,7 @@ All three billing dashboard interfaces have been successfully implemented and de
 
 ## Screen 1: User Billing Dashboard
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/billing/UserBillingDashboard.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/billing/UserBillingDashboard.jsx`
 **Lines**: 436
 **Route**: `/admin/billing/dashboard`
 
@@ -93,7 +93,7 @@ GET /api/v1/org-billing/credits/{org_id}/usage
 
 ## Screen 2: Organization Admin Billing Screen
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/organization/OrganizationBillingPro.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/organization/OrganizationBillingPro.jsx`
 **Lines**: 635
 **Route**: `/admin/organization/:orgId/billing`
 
@@ -177,7 +177,7 @@ POST /api/v1/org-billing/credits/{org_id}/allocate
 
 ## Screen 3: System Admin Billing Overview
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/admin/SystemBillingOverview.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/admin/SystemBillingOverview.jsx`
 **Lines**: 574
 **Route**: `/admin/billing/overview`
 
@@ -412,7 +412,7 @@ cp -r dist/* public/
 ```
 
 All built assets now available at:
-- `/home/muut/Production/UC-Cloud/services/ops-center/public/`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/`
 
 ### Container Restart Required
 
@@ -519,7 +519,7 @@ All criteria have been met:
 ### Source Files
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/
 
 pages/
   billing/
@@ -537,8 +537,8 @@ App.jsx                              (Updated with routes)
 ### Built Files
 
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/dist/
-/home/muut/Production/UC-Cloud/services/ops-center/public/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/dist/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/
 ```
 
 ---
@@ -547,7 +547,7 @@ App.jsx                              (Updated with routes)
 
 ### API Reference
 
-See: `/home/muut/Production/UC-Cloud/services/ops-center/ORG_BILLING_IMPLEMENTATION_SUMMARY.md`
+See: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_BILLING_IMPLEMENTATION_SUMMARY.md`
 
 ### Backend Implementation
 
@@ -578,7 +578,7 @@ All backend endpoints are fully implemented and documented in:
 **Status**: ✅ PRODUCTION READY
 
 For backend API documentation, see:
-`/home/muut/Production/UC-Cloud/services/ops-center/ORG_BILLING_IMPLEMENTATION_SUMMARY.md`
+`/home/ubuntu/Ops-Center-OSS/src/services/ops-center/ORG_BILLING_IMPLEMENTATION_SUMMARY.md`
 
 ---
 

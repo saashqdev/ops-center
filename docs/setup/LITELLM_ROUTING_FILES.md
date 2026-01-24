@@ -8,21 +8,21 @@
 
 ### Backend API
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/backend/litellm_routing_api.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/litellm_routing_api.py
 Lines: 1,250
 Purpose: Complete API with 13 endpoints, database schema, encryption
 ```
 
 ### Frontend UI
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/pages/LLMProviderManagement.jsx
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/LLMProviderManagement.jsx
 Lines: 975
 Purpose: Material-UI interface with 5 tabs for provider management
 ```
 
 ### Database Seeder
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/seed_llm_providers.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/seed_llm_providers.py
 Lines: 239
 Purpose: Seeds 5 providers and 25+ models with realistic pricing
 Usage: python3 seed_llm_providers.py [--reset]
@@ -30,7 +30,7 @@ Usage: python3 seed_llm_providers.py [--reset]
 
 ### Integration
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 Modified: Line 78 (import) and Line 367 (router registration)
 Purpose: Registers API endpoints at /api/v1/llm/*
 ```
@@ -41,7 +41,7 @@ Purpose: Registers API endpoints at /api/v1/llm/*
 
 ### Complete API Guide
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/docs/LITELLM_ROUTING_API_GUIDE.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/LITELLM_ROUTING_API_GUIDE.md
 Lines: 805
 Contents:
   - API endpoint reference with examples
@@ -55,7 +55,7 @@ Contents:
 
 ### Implementation Summary
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/LITELLM_ROUTING_IMPLEMENTATION_SUMMARY.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LITELLM_ROUTING_IMPLEMENTATION_SUMMARY.md
 Lines: 450
 Contents:
   - Feature overview
@@ -68,7 +68,7 @@ Contents:
 
 ### Delivery Summary
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/LITELLM_ROUTING_DELIVERY.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LITELLM_ROUTING_DELIVERY.md
 Lines: 650
 Contents:
   - Deliverables checklist
@@ -81,7 +81,7 @@ Contents:
 
 ### File Reference (This Document)
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/LITELLM_ROUTING_FILES.md
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/LITELLM_ROUTING_FILES.md
 Purpose: Quick reference for all created files
 ```
 
@@ -91,7 +91,7 @@ Purpose: Quick reference for all created files
 
 ### Backend Directory
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/backend/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/
 ├── litellm_routing_api.py       (Main API - 1,250 lines)
 ├── server.py                    (Updated for integration)
 └── scripts/
@@ -100,20 +100,20 @@ Purpose: Quick reference for all created files
 
 ### Frontend Directory
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/
 └── pages/
     └── LLMProviderManagement.jsx  (UI - 975 lines)
 ```
 
 ### Documentation Directory
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/docs/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/
 └── LITELLM_ROUTING_API_GUIDE.md  (Complete guide - 805 lines)
 ```
 
 ### Root Directory
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── LITELLM_ROUTING_IMPLEMENTATION_SUMMARY.md
 ├── LITELLM_ROUTING_DELIVERY.md
 └── LITELLM_ROUTING_FILES.md (this file)
@@ -134,22 +134,22 @@ Purpose: Quick reference for all created files
 
 ### View Main API
 ```bash
-cat /home/muut/Production/UC-Cloud/services/ops-center/backend/litellm_routing_api.py
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/litellm_routing_api.py
 ```
 
 ### View Frontend UI
 ```bash
-cat /home/muut/Production/UC-Cloud/services/ops-center/src/pages/LLMProviderManagement.jsx
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/LLMProviderManagement.jsx
 ```
 
 ### View Complete Guide
 ```bash
-less /home/muut/Production/UC-Cloud/services/ops-center/docs/LITELLM_ROUTING_API_GUIDE.md
+less /home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/LITELLM_ROUTING_API_GUIDE.md
 ```
 
 ### Run Database Seeder
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker exec ops-center-direct python3 /app/scripts/seed_llm_providers.py
 ```
 
@@ -157,7 +157,7 @@ docker exec ops-center-direct python3 /app/scripts/seed_llm_providers.py
 
 ## Environment Variables Required
 
-Add to `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`:
+Add to `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`:
 
 ```bash
 # Encryption key for API keys

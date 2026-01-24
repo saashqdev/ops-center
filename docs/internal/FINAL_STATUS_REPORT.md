@@ -199,7 +199,7 @@ This report summarizes **all work completed today** to address your requirements
 
 **Need to run**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Build frontend (includes all new pages)
 npm run build
@@ -424,7 +424,7 @@ WHERE tier_code = 'vip_founder';
 
 ## 📚 Documentation Reference
 
-All documentation is in `/home/muut/Production/UC-Cloud/services/ops-center/`:
+All documentation is in `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`:
 
 1. **Dynamic Pricing** - `docs/DYNAMIC_PRICING_SYSTEM_ARCHITECTURE.md` (86 pages)
 2. **Pricing UI** - `docs/PRICING_UI_WIREFRAMES.md`

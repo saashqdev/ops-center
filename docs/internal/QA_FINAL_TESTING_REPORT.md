@@ -1,7 +1,7 @@
 # QA Final Testing Report - Organization Billing System
 **Date**: November 12, 2025
 **Tester**: QA & Testing Team Lead
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 **Test Environment**: Production (your-domain.com)
 
 ---
@@ -583,7 +583,7 @@ Status: ⏳ REQUIRES AUTHENTICATION - Endpoint exists but needs admin token
 1. **Register Dynamic Pricing API** (5 minutes):
    ```bash
    # Edit backend/server.py
-   vim /home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+   vim /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 
    # Add after line 77:
    from dynamic_pricing_api import router as dynamic_pricing_router

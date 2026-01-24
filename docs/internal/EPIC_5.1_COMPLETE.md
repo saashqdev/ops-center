@@ -172,7 +172,7 @@ All pages successfully integrated with:
 ✅ **Production Deployment Complete**
 
 - **Date**: October 28, 2025 at 05:34 UTC
-- **Location**: `/home/muut/Production/UC-Cloud/services/ops-center/public/`
+- **Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/`
 - **Backend**: ops-center-direct (restarted)
 - **URL**: https://your-domain.com/admin/monitoring/*
 
@@ -188,27 +188,27 @@ All pages successfully integrated with:
 
 ### Frontend (3 files)
 
-1. `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/GrafanaConfig.jsx`
+1. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/GrafanaConfig.jsx`
    - Before: 217 lines (placeholder UI)
    - After: 495 lines (full integration)
    - Change: +278 lines (+128%)
 
-2. `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/PrometheusConfig.jsx`
+2. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/PrometheusConfig.jsx`
    - Before: 222 lines (placeholder UI)
    - After: 409 lines (full integration)
    - Change: +187 lines (+84%)
 
-3. `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/UmamiConfig.jsx`
+3. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/UmamiConfig.jsx`
    - Before: 257 lines (placeholder UI)
    - After: 497 lines (full integration)
    - Change: +240 lines (+93%)
 
 ### Documentation (2 files)
 
-1. `/home/muut/Production/UC-Cloud/services/ops-center/docs/MONITORING_CONFIG_TEST_REPORT.md`
+1. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/MONITORING_CONFIG_TEST_REPORT.md`
    - New file: Comprehensive test report with results
 
-2. `/home/muut/Production/UC-Cloud/services/ops-center/EPIC_5.1_COMPLETE.md`
+2. `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/EPIC_5.1_COMPLETE.md`
    - This file: Mission completion summary
 
 ---

@@ -28,7 +28,7 @@
 
 ### Load Test Data
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db < sql/test_data_simple.sql
 ```
 

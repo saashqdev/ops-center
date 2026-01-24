@@ -399,8 +399,8 @@ Once configured, these features will work correctly:
 ## Additional Resources
 
 - **Keycloak User Profile Documentation**: https://www.keycloak.org/docs/latest/server_admin/#user-profile
-- **Ops-Center User Management**: `/home/muut/Production/UC-Cloud/services/ops-center/docs/`
-- **Configuration Scripts**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/scripts/`
+- **Ops-Center User Management**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
+- **Configuration Scripts**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/scripts/`
 
 ---
 

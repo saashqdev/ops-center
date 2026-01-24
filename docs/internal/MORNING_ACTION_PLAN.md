@@ -242,18 +242,18 @@ CREATE INDEX IF NOT EXISTS idx_organizations_owner_id ON organizations(owner_id)
 - `/tmp/night_shift_tests/QUICK_REFERENCE.md` - Quick fixes checklist
 
 ### Documentation
-- `/home/muut/Production/UC-Cloud/services/ops-center/GOOD_MORNING_REPORT.md` - Morning briefing
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/GOOD_MORNING_REPORT.md` - Morning briefing
 - `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_README.md` - Edge Device overview
 - `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_ARCHITECTURE.md` (77 pages)
 - `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_SCHEMA.sql` (450+ lines)
 - `/home/muut/Production/UC-Cloud/docs/INFRASTRUCTURE_OPTIMIZATION_REPORT.md` (585 lines)
 
 ### Code Deployed
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/Geeses.jsx` (648 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/admin/SubscriptionManagement.jsx` (38K)
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/GrafanaConfig.jsx` (19K)
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/PrometheusConfig.jsx` (16K)
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/UmamiConfig.jsx` (19K)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/Geeses.jsx` (648 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/admin/SubscriptionManagement.jsx` (38K)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/GrafanaConfig.jsx` (19K)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/PrometheusConfig.jsx` (16K)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/UmamiConfig.jsx` (19K)
 
 ---
 

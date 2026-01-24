@@ -420,7 +420,7 @@ Successfully deployed **5 specialized team leads** in parallel to resolve **8 cr
 
 ```bash
 # 1. Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # 2. Verify build (already done by team)
 npm run verify
@@ -516,7 +516,7 @@ curl https://your-domain.com/admin/system/local-users
 
 **PM (Acting)**: Claude
 **Project**: Ops-Center Multi-Issue Resolution
-**Repository**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Repository**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 **Escalation Path**:
 1. Check documentation in `/docs/`

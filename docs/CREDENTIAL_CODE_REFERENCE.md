@@ -6,26 +6,26 @@
 
 ### Backend Core Files
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/backend/key_encryption.py
-/home/muut/Production/UC-Cloud/services/ops-center/backend/secret_manager.py
-/home/muut/Production/UC-Cloud/services/ops-center/backend/byok_service.py
-/home/muut/Production/UC-Cloud/services/ops-center/backend/byok_manager.py
-/home/muut/Production/UC-Cloud/services/ops-center/backend/byok_api.py
-/home/muut/Production/UC-Cloud/services/ops-center/backend/cloudflare_api.py
-/home/muut/Production/UC-Cloud/services/ops-center/backend/server.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/key_encryption.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/secret_manager.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/byok_service.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/byok_manager.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/byok_api.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/cloudflare_api.py
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/server.py
 ```
 
 ### Frontend Components
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/pages/account/AccountAPIKeys.jsx
-/home/muut/Production/UC-Cloud/services/ops-center/src/components/llm/APIKeyCard.jsx
-/home/muut/Production/UC-Cloud/services/ops-center/src/components/llm/AddAPIKeyModal.jsx
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/account/AccountAPIKeys.jsx
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/llm/APIKeyCard.jsx
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/llm/AddAPIKeyModal.jsx
 ```
 
 ### Configuration
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/.env.auth
-/home/muut/Production/UC-Cloud/services/ops-center/docker-compose.direct.yml
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docker-compose.direct.yml
 ```
 
 ---

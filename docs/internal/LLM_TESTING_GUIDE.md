@@ -109,7 +109,7 @@ curl -X POST "https://your-domain.com/api/v1/llm/chat/completions" \
 ENCRYPTION_KEY=$(python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")
 
 # 2. Add to environment
-echo "BYOK_ENCRYPTION_KEY=$ENCRYPTION_KEY" >> /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+echo "BYOK_ENCRYPTION_KEY=$ENCRYPTION_KEY" >> /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 # 3. Restart backend
 docker restart ops-center-direct
@@ -173,7 +173,7 @@ async def get_active_llm_provider(self, purpose="chat"):
 docker exec ops-center-direct printenv | grep POSTGRES
 
 # Or check .env.auth
-grep POSTGRES /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+grep POSTGRES /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 ```
 
 ### 4. Usage Tracking Integration
@@ -265,7 +265,7 @@ fi
 # Test 3: Check frontend files
 echo ""
 echo "3. Checking frontend deployment..."
-if [ -f "/home/muut/Production/UC-Cloud/services/ops-center/public/assets/LLMProviderSettings-BMmaRIT2.js" ]; then
+if [ -f "/home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/assets/LLMProviderSettings-BMmaRIT2.js" ]; then
     echo "   ✅ Frontend bundle deployed"
 else
     echo "   ❌ Frontend bundle missing"

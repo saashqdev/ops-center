@@ -672,7 +672,7 @@ function createStars() {
 
 ### Step 1: Add Custom CSS File
 
-Create `/home/muut/Production/UC-Cloud/services/ops-center/src/styles/landing.css`:
+Create `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/styles/landing.css`:
 
 ```css
 /* Import fonts */
@@ -760,7 +760,7 @@ Create `/home/muut/Production/UC-Cloud/services/ops-center/src/styles/landing.cs
 
 ### Step 2: Update Tailwind Config
 
-Add to `/home/muut/Production/UC-Cloud/services/ops-center/tailwind.config.js`:
+Add to `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tailwind.config.js`:
 
 ```javascript
 module.exports = {
@@ -818,7 +818,7 @@ module.exports = {
 
 ### Step 3: Create Background Components
 
-Create `/home/muut/Production/UC-Cloud/services/ops-center/src/components/BackgroundEffects.jsx`:
+Create `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/BackgroundEffects.jsx`:
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
@@ -1040,7 +1040,7 @@ return (
 ### Step 5: Build and Deploy
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install any new dependencies
 npm install
@@ -1177,18 +1177,18 @@ Ensure React component maintains responsive behavior.
 ## 🔗 Related Files
 
 **Old Design**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/public.backup-20251021-212032/index.html`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/public.backup-20251021-212032/index.html`
 
 **Current React Component**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/PublicLanding.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/PublicLanding.jsx`
 
 **New Files to Create**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/styles/landing.css`
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/components/BackgroundEffects.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/styles/landing.css`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/BackgroundEffects.jsx`
 
 **Files to Update**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/tailwind.config.js`
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/PublicLanding.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/tailwind.config.js`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/PublicLanding.jsx`
 
 ---
 

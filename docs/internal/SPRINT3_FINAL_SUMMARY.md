@@ -209,7 +209,7 @@ docs/
 Run the comprehensive test script:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 ./TEST_NEW_ENDPOINTS.sh
 ```
 
@@ -284,7 +284,7 @@ curl http://localhost:8084/api/v1/brigade/usage \
 
 1. **Pull latest code**:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    git pull
    ```
 
@@ -315,7 +315,7 @@ INFO:     Brigade Proxy API endpoints registered at /api/v1/brigade (H23)
 If issues occur, rollback is simple:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 git revert HEAD
 docker restart ops-center-direct
 ```

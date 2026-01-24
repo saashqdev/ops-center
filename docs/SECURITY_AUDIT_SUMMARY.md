@@ -134,7 +134,7 @@ Security team reviews implementation before deployment.
 
 ## File Locations
 
-All documentation in: `/home/muut/Production/UC-Cloud/services/ops-center/docs/`
+All documentation in: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
 
 ```
 docs/

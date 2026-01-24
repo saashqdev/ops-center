@@ -335,7 +335,7 @@ PWA Cache: 2623 entries (187MB)
 
 ### File Locations
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── src/
 │   ├── pages/Dashboard.jsx (modernized - 847 lines)
 │   └── styles/glassmorphism.js (new - 227 lines)
@@ -439,7 +439,7 @@ The reusable `glassmorphism.js` design system enables rapid application of the s
 ## Contact
 
 **Project**: UC-Cloud / Ops-Center
-**Repository**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Repository**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 **Documentation**: This file + `CLAUDE.md`
 **Team Lead**: Claude (UI/UX Architecture Team)
 **Date Completed**: October 28, 2025

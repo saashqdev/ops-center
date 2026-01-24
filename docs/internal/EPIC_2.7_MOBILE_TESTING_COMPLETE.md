@@ -277,7 +277,7 @@ test('Page loads in < 3 seconds on Fast 3G', async () => {
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies
 npm install
@@ -419,7 +419,7 @@ The Mobile Testing Guide includes **8 common mobile issues** with complete fixes
 
 ### Test Files
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── tests/mobile/
 │   ├── README.md (473 lines)
 │   ├── mobile-responsiveness.test.js (1,237 lines, 80 tests)
@@ -429,7 +429,7 @@ The Mobile Testing Guide includes **8 common mobile issues** with complete fixes
 
 ### Documentation Files
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── docs/
 │   └── MOBILE_TESTING_GUIDE.md (1,449 lines)
 ├── MOBILE_TESTING_DELIVERY_REPORT.md (846 lines)
@@ -438,7 +438,7 @@ The Mobile Testing Guide includes **8 common mobile issues** with complete fixes
 
 ### Configuration Files
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 └── package.json (updated with mobile test dependencies and scripts)
 ```
 

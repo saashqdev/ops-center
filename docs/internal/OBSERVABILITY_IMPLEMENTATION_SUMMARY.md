@@ -531,7 +531,7 @@ async def chat_completion(model: str, messages: list, user_id: str, org_id: str)
 ### Phase 1: Immediate (This Week)
 1. **Install Dependencies**:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
    pip install -r requirements.txt
    ```
 

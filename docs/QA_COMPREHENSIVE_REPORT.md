@@ -391,7 +391,7 @@ docker exec ops-center-direct python3 /app/backend/scripts/quick_populate_users.
 
 1. **Run Frontend Component Search**
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    find src/pages -name "*Subscription*.jsx" -o -name "*App*.jsx" -o -name "*InviteCode*.jsx"
    grep -r "subscription-management\|app-management\|invite-codes" src/
    ```

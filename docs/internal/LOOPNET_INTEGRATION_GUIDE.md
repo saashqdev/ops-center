@@ -2179,10 +2179,10 @@ credits_needed = math.ceil(api_cost_dollars * 1000)  # 3 credits
 
 ### Documentation
 
-- **Ops-Center CLAUDE.md**: `/home/muut/Production/UC-Cloud/services/ops-center/CLAUDE.md`
-- **Database Schema**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/migrations/create_org_billing.sql`
-- **API Implementation**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_billing_api.py`
-- **Deployment Checklist**: `/home/muut/Production/UC-Cloud/services/ops-center/OPS_CENTER_DEPLOYMENT_CHECKLIST.md`
+- **Ops-Center CLAUDE.md**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/CLAUDE.md`
+- **Database Schema**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations/create_org_billing.sql`
+- **API Implementation**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_billing_api.py`
+- **Deployment Checklist**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/OPS_CENTER_DEPLOYMENT_CHECKLIST.md`
 
 ### API Reference
 

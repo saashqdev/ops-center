@@ -834,7 +834,7 @@ if usage_log:
 
 **Option 1: Alembic Migration** (Recommended)
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Generate migration
 alembic revision --autogenerate -m "Add LLM infrastructure tables"

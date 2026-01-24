@@ -901,7 +901,7 @@ async def main():
         report = suite.generate_report()
 
         # Save to file
-        report_path = "/home/muut/Production/UC-Cloud/services/ops-center/TEST_REPORT_INTEGRATION.md"
+        report_path = "/home/ubuntu/Ops-Center-OSS/src/services/ops-center/TEST_REPORT_INTEGRATION.md"
         with open(report_path, "w") as f:
             f.write(report)
 

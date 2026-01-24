@@ -463,7 +463,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
 
 **A**: Verify `.env.auth` has keys:
 ```bash
-grep -E "OPENROUTER_API_KEY|OPENAI_API_KEY" /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+grep -E "OPENROUTER_API_KEY|OPENAI_API_KEY" /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 ```
 
 ---

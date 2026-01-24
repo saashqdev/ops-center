@@ -248,7 +248,7 @@ All targets are achievable with the delivered optimizations:
 
 ```bash
 # 1. Install tools
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ./scripts/install_performance_tools.sh
 
 # 2. Verify installation

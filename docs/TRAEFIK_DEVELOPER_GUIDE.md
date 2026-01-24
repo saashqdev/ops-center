@@ -913,7 +913,7 @@ try {
 
 **Clone Repository**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ```
 
 **Backend Setup**:
@@ -946,7 +946,7 @@ npm run dev
 
 **Start Ops-Center Container**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.direct.yml up -d
 ```
 
@@ -1440,7 +1440,7 @@ def test_backup_and_restore(manager):
 
 **Run Tests**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 pytest tests/test_traefik_manager.py -v
 ```
 
@@ -1567,7 +1567,7 @@ describe('TraefikConfig Component', () => {
 
 **Run Tests**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm test
 ```
 
@@ -1648,7 +1648,7 @@ def test_complete_route_creation_workflow():
 
 **Frontend Build**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies (if needed)
 npm install
@@ -1723,7 +1723,7 @@ services:
 
 **Deploy**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Build frontend
 npm run build

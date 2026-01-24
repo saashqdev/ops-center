@@ -98,7 +98,7 @@ drwxr-xr-x 2 root root 4096 Oct 28 00:11 public/avatars
 
 **Fix Required** (user must run):
 ```bash
-sudo chown -R muut:muut /home/muut/Production/UC-Cloud/services/ops-center/public/avatars
+sudo chown -R muut:muut /home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/avatars
 ```
 
 **Alternative Fix**: Modify backend to handle avatar uploads differently (store in database or user-writable directory)
@@ -266,7 +266,7 @@ DROP FUNCTION IF EXISTS sync_llm_usage_tokens();
 
 1. **Fix Avatar Permissions**:
    ```bash
-   sudo chown -R muut:muut /home/muut/Production/UC-Cloud/services/ops-center/public/avatars
+   sudo chown -R muut:muut /home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/avatars
    ```
 
 2. **Test Frontend**:

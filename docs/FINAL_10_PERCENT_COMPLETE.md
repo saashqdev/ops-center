@@ -180,7 +180,7 @@ Queen (Product Owner)
 
 ### Atlas AI
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/atlas/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/atlas/
 ├── tools/ (6 TypeScript files)
 ├── architecture/ (agent definition + spec)
 ├── docs/ (integration guide, tests, reference)
@@ -189,7 +189,7 @@ Queen (Product Owner)
 
 ### Monitoring Pages
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/src/pages/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/
 ├── GrafanaConfig.jsx
 ├── PrometheusConfig.jsx
 └── UmamiConfig.jsx
@@ -197,7 +197,7 @@ Queen (Product Owner)
 
 ### Subscription Management
 ```
-/home/muut/Production/UC-Cloud/services/ops-center/
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 ├── backend/
 │   ├── subscription_tiers_api.py
 │   └── migrations/add_subscription_tiers.sql

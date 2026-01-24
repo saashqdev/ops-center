@@ -14,7 +14,7 @@ This guide documents the defensive coding utilities and patterns used in Ops-Cen
 ## Available Utilities
 
 ### Location
-`/home/muut/Production/UC-Cloud/services/ops-center/src/utils/safeUtils.js`
+`/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/utils/safeUtils.js`
 
 ### Import
 ```javascript
@@ -187,7 +187,7 @@ if (!saved) {
 Catch React component errors and display fallback UI instead of white screen
 
 ### Location
-`/home/muut/Production/UC-Cloud/services/ops-center/src/components/ErrorBoundary.jsx`
+`/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/ErrorBoundary.jsx`
 
 ### Usage
 

@@ -97,7 +97,7 @@ LiteLLM is a **multi-provider LLM routing system** for UC-Cloud Ops-Center that 
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Step 1: Fix dependency (5 min)
 echo "litellm>=1.40.0" >> backend/requirements.txt

@@ -40,7 +40,7 @@ After creation:
 
 Edit the file:
 ```bash
-nano /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+nano /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 ```
 
 Add this line at the end:

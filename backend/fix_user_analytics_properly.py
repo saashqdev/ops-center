@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-filepath = Path("/home/muut/Production/UC-Cloud/services/ops-center/backend/user_analytics.py")
+filepath = Path("/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/user_analytics.py")
 
 # Read the file
 with open(filepath, 'r') as f:

@@ -377,7 +377,7 @@ LIMIT 10;
 
 ```bash
 # Copy schema file to container
-docker cp /home/muut/Production/UC-Cloud/services/ops-center/backend/sql/llm_config_schema.sql \
+docker cp /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/sql/llm_config_schema.sql \
   ops-center-direct:/tmp/llm_config_schema.sql
 
 # Run schema creation
@@ -994,7 +994,7 @@ curl http://localhost:8084/api/v1/llm-config/api-keys \
   -H "Cookie: session_token=$SESSION_TOKEN"
 
 # 3. See full documentation for all endpoints
-cat /home/muut/Production/UC-Cloud/services/ops-center/backend/docs/LLM_CONFIG_API.md
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/docs/LLM_CONFIG_API.md
 ```
 
 **Next Steps**:

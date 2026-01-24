@@ -356,7 +356,7 @@ docker exec ops-center-direct printenv BYOK_ENCRYPTION_KEY
 
 # If missing, add to .env.auth and restart
 echo "BYOK_ENCRYPTION_KEY=zKtWCJZjvU9ve8LiJw2WVL2UE4vzAr2EenZsQzU_a48=" >> \
-  /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+  /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
 
 docker restart ops-center-direct
 ```

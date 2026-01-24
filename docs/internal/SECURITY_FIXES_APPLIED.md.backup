@@ -485,7 +485,7 @@ CREATE INDEX idx_encrypted_credentials_service ON encrypted_credentials(service)
 ### Run Security Tests
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies
 pip3 install pytest dnspython cryptography

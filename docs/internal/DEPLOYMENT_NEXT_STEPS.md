@@ -45,7 +45,7 @@
 
 ### Step 1: Update Dockerfile
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/Dockerfile`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/Dockerfile`
 
 **Change Required**: Line 39-40
 
@@ -185,7 +185,7 @@ LIMIT 10;
 
 ```bash
 # Check if frontend pages were created
-ls -lh /home/muut/Production/UC-Cloud/services/ops-center/src/pages/CredentialsPage.jsx
+ls -lh /home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/CredentialsPage.jsx
 
 # If file exists, proceed with build
 # If file doesn't exist, frontend team needs to create it first
@@ -194,7 +194,7 @@ ls -lh /home/muut/Production/UC-Cloud/services/ops-center/src/pages/CredentialsP
 ### Step 10: Build Frontend (If Files Exist)
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Install dependencies (if needed)
 npm install
@@ -443,7 +443,7 @@ DROP TABLE IF EXISTS audit_logs CASCADE;
 
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Update Dockerfile (manual edit required - see Step 1)
 
@@ -460,7 +460,7 @@ docker logs ops-center-direct --tail 30 | grep -E "(Uvicorn running|credential)"
 docker exec ops-center-direct python3 /app/test_e2e_credentials.py
 
 # Build and deploy frontend (if files exist)
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 npm run build
 cp -r dist/* public/
 docker restart ops-center-direct

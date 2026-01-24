@@ -542,7 +542,7 @@ CREATE INDEX IF NOT EXISTS idx_llm_providers_type ON llm_providers(provider_type
 ### 3. Backend Deployment
 ```bash
 # Navigate to ops-center
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Restart backend to load new code
 docker restart ops-center-direct
@@ -664,7 +664,7 @@ curl -X PUT http://localhost:8084/api/v1/llm/admin/system-keys/<provider-id> \
 **Implementation Status**: ✅ COMPLETE
 
 **Files Modified**:
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/litellm_api.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/litellm_api.py`
 
 **Lines Added**: ~270 lines
 

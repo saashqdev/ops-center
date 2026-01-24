@@ -49,7 +49,7 @@ npm --version   # Should show 10.x.x
 Navigate to the ops-center directory:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ```
 
 Install Playwright:

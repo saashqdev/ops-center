@@ -322,16 +322,16 @@ OrganizationsList.jsx (625 lines)
 ## File Locations
 
 ### Created
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/organization/OrganizationsList.jsx` (625 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/organization/OrganizationsList.jsx` (625 lines)
 
 ### Modified
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_api.py` (+115 lines)
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/App.jsx` (+10 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_api.py` (+115 lines)
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/App.jsx` (+10 lines)
 
 ### Related Files (existing, not modified)
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/components/CreateOrganizationModal.jsx`
-- `/home/muut/Production/UC-Cloud/services/ops-center/src/contexts/OrganizationContext.jsx`
-- `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_manager.py`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/components/CreateOrganizationModal.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/contexts/OrganizationContext.jsx`
+- `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_manager.py`
 
 ---
 

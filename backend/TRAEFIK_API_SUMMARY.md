@@ -858,7 +858,7 @@ curl http://localhost:8084/api/v1/traefik/health
 
 **Status**: Ready for Backend Developer to implement `traefik_manager.py`
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/traefik_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/traefik_api.py`
 
 ---
 

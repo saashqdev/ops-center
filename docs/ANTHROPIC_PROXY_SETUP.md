@@ -145,7 +145,7 @@ List registered MCP servers.
 
 ### Environment Variables
 
-Add to `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`:
+Add to `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`:
 
 ```bash
 # Anthropic Proxy Configuration

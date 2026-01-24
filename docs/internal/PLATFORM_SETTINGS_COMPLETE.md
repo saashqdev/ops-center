@@ -245,7 +245,7 @@ docker logs ops-center-direct | grep "Platform Settings API"
 ssh user@server
 
 # Navigate to directory
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Edit docker-compose file
 vim docker-compose.direct.yml
@@ -334,7 +334,7 @@ docker restart ops-center-direct
 
 **Docker Compose File**:
 ```bash
-/home/muut/Production/UC-Cloud/services/ops-center/docker-compose.direct.yml
+/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docker-compose.direct.yml
 ```
 
 **Line 27**:

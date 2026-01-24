@@ -225,7 +225,7 @@ docker exec uchub-postgres psql -U unicorn -d unicorn_db \
 Run the setup script to create Stripe products:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 
 # Set Stripe API key
 export STRIPE_SECRET_KEY="sk_test_..."
@@ -271,7 +271,7 @@ Stripe Dashboard: https://dashboard.stripe.com/test/products
    ```bash
    # Add to .env.auth or .env.centerdeep
    echo 'STRIPE_WEBHOOK_SECRET_CREDITS=whsec_xxxxxxxxxxxxx' >> \
-     /home/muut/Production/UC-Cloud/services/ops-center/.env.auth
+     /home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth
    ```
 
 5. **Restart Container**:
@@ -284,7 +284,7 @@ Stripe Dashboard: https://dashboard.stripe.com/test/products
 **Current Status**: Frontend source files created, build pending.
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Clear cache and rebuild
 rm -rf node_modules/.vite dist
@@ -500,7 +500,7 @@ await credit_manager.allocate_credits(
 
 1. **Build Frontend**:
    ```bash
-   cd /home/muut/Production/UC-Cloud/services/ops-center
+   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    npm run build && cp -r dist/* public/
    ```
 

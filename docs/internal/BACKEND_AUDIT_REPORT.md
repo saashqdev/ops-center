@@ -3,7 +3,7 @@
 **Generated**: October 28, 2025
 **Auditor**: Claude (Research Agent)
 **Scope**: Full backend API inventory and feature analysis
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/`
 
 ---
 

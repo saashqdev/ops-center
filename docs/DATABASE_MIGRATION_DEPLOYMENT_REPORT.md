@@ -18,7 +18,7 @@ Successfully implemented a comprehensive database schema migration system using 
 
 ### 1. Alembic Framework Setup ✅
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 **Files Created**:
 - `alembic.ini` - Configuration file (192 lines)
@@ -565,7 +565,7 @@ All success criteria met:
 
 ## Contact & Support
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 **Documentation**:
 - Main Guide: `docs/DATABASE_MIGRATIONS.md`

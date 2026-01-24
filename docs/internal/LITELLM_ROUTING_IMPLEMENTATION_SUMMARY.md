@@ -249,7 +249,7 @@ GOOGLE_API_KEY=...
 The database tables are auto-created on first import. To manually initialize:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Initialize database
 docker exec ops-center-direct python3 -c "from litellm_routing_api import init_database; init_database()"

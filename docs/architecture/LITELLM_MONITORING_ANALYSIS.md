@@ -1,7 +1,7 @@
 # LiteLLM Container & Monitoring Analysis
 
 **Date**: November 14, 2025
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 **Status**: OPERATIONAL - Production Ready
 
 ---
@@ -535,7 +535,7 @@ byok_settings:
 
 ### Ops-Center Configuration
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
 
 ```bash
 # LiteLLM Connection
@@ -743,7 +743,7 @@ docker exec unicorn-lago-postgres psql -U lago -d lago -c \
 | File | Purpose |
 |------|---------|
 | `/app/config.yaml` (LiteLLM) | Proxy configuration with Lago callback |
-| `/home/muut/Production/UC-Cloud/services/ops-center/.env.auth` | Credentials |
+| `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth` | Credentials |
 | `backend/litellm_integration.py` | Ops-Center ↔ LiteLLM bridge |
 | `backend/litellm_api.py` | LLM endpoint implementation |
 | `backend/litellm_routing_api.py` | Advanced routing with usage tracking |

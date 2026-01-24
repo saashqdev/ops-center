@@ -1,7 +1,7 @@
 # Database Migrations - Quick Reference Card
 
 **Status**: ✅ Production Ready
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 ---
 
@@ -205,7 +205,7 @@ docker ps | grep -E 'ops-center|postgresql'
 
 ## 📞 Support
 
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center/`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/`
 
 **Check logs**:
 ```bash

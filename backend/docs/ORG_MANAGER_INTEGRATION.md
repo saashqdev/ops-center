@@ -4,14 +4,14 @@ Complete guide for integrating the Organization Manager into UC-Cloud Ops Center
 
 ## Quick Reference
 
-**Module Location**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/org_manager.py`
+**Module Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/org_manager.py`
 
 **Import**:
 ```python
 from org_manager import org_manager, Organization, OrgUser
 ```
 
-**Storage**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/data/`
+**Storage**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data/`
 - `organizations.json`
 - `org_users.json`
 
@@ -45,8 +45,8 @@ backend/
 
 Ensure the application has write access to the data directory:
 ```bash
-mkdir -p /home/muut/Production/UC-Cloud/services/ops-center/backend/data
-chmod 755 /home/muut/Production/UC-Cloud/services/ops-center/backend/data
+mkdir -p /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data
+chmod 755 /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data
 ```
 
 ---
@@ -479,14 +479,14 @@ def export_to_database():
 Run the test suite:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python -m pytest tests/test_org_manager.py -v
 ```
 
 Run examples:
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend
 python docs/org_manager_examples.py
 ```
 
@@ -522,7 +522,7 @@ logging.basicConfig(
 # Backup organizations data
 #!/bin/bash
 BACKUP_DIR="/backups/org_manager"
-DATA_DIR="/home/muut/Production/UC-Cloud/services/ops-center/backend/data"
+DATA_DIR="/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 mkdir -p "$BACKUP_DIR"
@@ -579,8 +579,8 @@ echo "Backup completed: $TIMESTAMP"
 
 **Solution**:
 ```bash
-sudo chown -R $USER:$USER /home/muut/Production/UC-Cloud/services/ops-center/backend/data
-chmod 755 /home/muut/Production/UC-Cloud/services/ops-center/backend/data
+sudo chown -R $USER:$USER /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data
+chmod 755 /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/data
 ```
 
 ### Issue: "Organization with name already exists"

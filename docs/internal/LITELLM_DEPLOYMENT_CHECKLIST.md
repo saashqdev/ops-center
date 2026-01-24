@@ -137,7 +137,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "\dt litellm*"
 
 ```bash
 # Step 1: User creates .env.litellm file
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 cp .env.litellm.example .env.litellm
 
 # Step 2: User adds API keys
@@ -162,7 +162,7 @@ chmod 600 .env.litellm
 
 ```bash
 # Step 1: Start LiteLLM services
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker compose -f docker-compose.litellm.yml up -d
 
 # Step 2: Check containers started

@@ -225,7 +225,7 @@ async def debit_credits(self, user_id: str, amount: float, metadata: Dict):
 
 **Usage**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 ./scripts/deploy_service_auth_fix.sh
 ```
 

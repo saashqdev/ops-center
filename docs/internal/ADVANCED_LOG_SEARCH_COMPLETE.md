@@ -17,7 +17,7 @@ Successfully implemented a production-ready advanced log search API for Ops-Cent
 
 ### ✅ 1. Backend API Implementation (`backend/logs_search_api.py`)
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/logs_search_api.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/logs_search_api.py`
 **Lines**: 487 lines
 **Features Implemented**:
 - ✅ Multi-filter support (query, severity, services, date range, regex)
@@ -46,7 +46,7 @@ DELETE /api/v1/logs/cache            - Clear search cache
 
 ### ✅ 2. Comprehensive Test Suite (`backend/tests/test_logs_search.py`)
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/backend/tests/test_logs_search.py`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests/test_logs_search.py`
 **Lines**: 533 lines
 **Test Coverage**:
 
@@ -77,7 +77,7 @@ DELETE /api/v1/logs/cache            - Clear search cache
 
 **Run Tests**:
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center/backend/tests
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/tests
 pytest test_logs_search.py -v
 ```
 
@@ -85,7 +85,7 @@ pytest test_logs_search.py -v
 
 ### ✅ 3. Frontend Enhancement (`src/pages/Logs.jsx`)
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/src/pages/Logs.jsx`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/Logs.jsx`
 **Lines Added**: ~350 lines (total file: 896 lines)
 **UI Components Added**:
 
@@ -139,7 +139,7 @@ docker logs ops-center-direct | grep "Advanced Log Search"
 
 ### ✅ 5. Comprehensive Documentation (`docs/LOGS_SEARCH_API.md`)
 
-**File**: `/home/muut/Production/UC-Cloud/services/ops-center/docs/LOGS_SEARCH_API.md`
+**File**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/LOGS_SEARCH_API.md`
 **Pages**: 20+ pages (822 lines)
 **Sections**:
 
@@ -157,7 +157,7 @@ docker logs ops-center-direct | grep "Advanced Log Search"
 **Quick Reference**:
 ```bash
 # View documentation
-cat /home/muut/Production/UC-Cloud/services/ops-center/docs/LOGS_SEARCH_API.md
+cat /home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/LOGS_SEARCH_API.md
 ```
 
 ---

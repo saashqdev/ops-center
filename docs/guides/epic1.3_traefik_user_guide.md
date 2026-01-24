@@ -833,7 +833,7 @@ Every configuration change triggers an automatic backup.
 
 1. Click **"Create Backup"** button
 2. Backup saved with timestamp: `traefik_backup_20251023_143052.yml`
-3. Stored in `/home/muut/Production/UC-Cloud/services/ops-center/backups/traefik/`
+3. Stored in `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backups/traefik/`
 4. Confirmation message appears
 
 #### Restoring from Backup

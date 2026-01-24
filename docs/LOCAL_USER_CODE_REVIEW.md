@@ -3,7 +3,7 @@
 **Reviewer**: Code Review Agent
 **Date**: October 20, 2025
 **Session ID**: swarm-local-users
-**Working Directory**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Working Directory**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 

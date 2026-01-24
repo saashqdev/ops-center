@@ -313,7 +313,7 @@ Other:                  180 endpoints (39.8%)
 
 ---
 
-**Full Report**: `/home/muut/Production/UC-Cloud/services/ops-center/BACKEND_AUDIT_REPORT.md`
+**Full Report**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/BACKEND_AUDIT_REPORT.md`
 
 **Audit Completed**: October 28, 2025
 **Confidence Level**: 98%

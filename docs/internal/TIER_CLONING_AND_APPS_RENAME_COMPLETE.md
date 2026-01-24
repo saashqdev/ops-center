@@ -2,7 +2,7 @@
 
 **Date**: November 12, 2025
 **Status**: ✅ FULLY DEPLOYED
-**Location**: `/home/muut/Production/UC-Cloud/services/ops-center`
+**Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center`
 
 ---
 

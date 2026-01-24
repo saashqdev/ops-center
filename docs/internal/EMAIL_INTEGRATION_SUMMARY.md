@@ -47,7 +47,7 @@
 ### 1. Restart Container
 
 ```bash
-cd /home/muut/Production/UC-Cloud/services/ops-center
+cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 docker restart ops-center-direct
 
 # Wait 10-15 seconds
