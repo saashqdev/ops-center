@@ -89,8 +89,8 @@ export default function SubscriptionBilling() {
     setError(null);
     try {
       const [invoicesRes, cycleRes] = await Promise.all([
-        fetch('/api/v1/billing/invoices?limit=50'),
-        fetch('/api/v1/billing/cycle')
+        fetch('/api/v1/billing/invoices?limit=50', { credentials: 'include' }),
+        fetch('/api/v1/billing/cycle', { credentials: 'include' })
       ]);
 
       // Handle invoices response

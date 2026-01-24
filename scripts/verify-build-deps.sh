@@ -51,17 +51,17 @@ print_header() {
 
 check_pass() {
     echo -e "  ${GREEN}✓${NC} $1"
-    ((PASSED++))
+    ((PASSED++)) || true
 }
 
 check_fail() {
     echo -e "  ${RED}✗${NC} $1"
-    ((FAILED++))
+    ((FAILED++)) || true
 }
 
 check_warn() {
     echo -e "  ${YELLOW}⚠${NC} $1"
-    ((WARNINGS++))
+    ((WARNINGS++)) || true
 }
 
 version_compare() {
@@ -253,8 +253,8 @@ else
     fi
 fi
 
-# Check App.jsx imports it correctly
-if grep -q "SubscriptionManagement.*from.*pages/admin/SubscriptionManagement" "src/App.jsx"; then
+# Check App.jsx imports it correctly (supports both static and lazy import)
+if grep -qE "SubscriptionManagement.*(from|import\()\s*['\"]\./pages/admin/SubscriptionManagement" "src/App.jsx"; then
     check_pass "App.jsx correctly imports SubscriptionManagement"
 else
     check_fail "App.jsx has incorrect import path for SubscriptionManagement"

@@ -1142,31 +1142,63 @@ async def root_redirect(request: Request):
     session_token = request.cookies.get("session_token")
     print(f"Session token from cookie: {session_token[:20] if session_token else 'None'}...")
     print(f"Session token exists in Redis: {session_token in sessions if session_token else False}")
+
     if session_token and session_token in sessions:
-        print("User authenticated, serving React app")
-        # Serve the React app for authenticated users
-        if os.path.exists("public/index.html"):
-            response = FileResponse("public/index.html")
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-        elif os.path.exists("dist/index.html"):
-            response = FileResponse("dist/index.html")
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-        elif os.path.exists("../public/index.html"):
-            response = FileResponse("../public/index.html")
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-        else:
-            # Fallback: redirect to signup if frontend not found
-            print("ERROR: React app not found at public/index.html or dist/index.html")
-            return RedirectResponse(url="/auth/login", status_code=302)
+                print("User authenticated, serving React app")
+                # Serve built frontend if present
+                for path in ["dist/index.html", "public/index.html", "../public/index.html"]:
+                        if os.path.exists(path):
+                                response = FileResponse(path)
+                                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                                response.headers["Pragma"] = "no-cache"
+                                response.headers["Expires"] = "0"
+                                return response
+
+                # Fallback: show a minimal signed-in page so the user sees success
+                session = sessions.get(session_token) if hasattr(sessions, "get") else None
+                user_info = (session or {}).get("user", {})
+                username = user_info.get("preferred_username") or user_info.get("username") or user_info.get("email") or "unknown"
+                email = user_info.get("email", "unknown")
+                role = user_info.get("role", "viewer")
+                org_name = (session or {}).get("org_name") or "None"
+                html = f"""
+                <!doctype html>
+                <html lang=\"en\">
+                <head>
+                    <meta charset=\"utf-8\" />
+                    <title>Ops Center</title>
+                    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+                    <style>
+                        body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background: #0b1621; color: #e9eff5; display: flex; min-height: 100vh; align-items: center; justify-content: center; }}
+                        .card {{ background: #142433; padding: 32px; border-radius: 12px; width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.35); }}
+                        h1 {{ margin: 0 0 12px 0; font-size: 24px; }}
+                        p {{ margin: 0 0 10px 0; line-height: 1.5; }}
+                        .meta {{ font-size: 14px; color: #9fb3c8; margin-top: 12px; }}
+                        a {{ color: #7be0b5; font-weight: 600; text-decoration: none; }}
+                        .actions {{ margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }}
+                        .btn {{ padding: 10px 14px; border-radius: 8px; background: #7be0b5; color: #0b1621; text-decoration: none; font-weight: 700; }}
+                    </style>
+                </head>
+                <body>
+                    <div class=\"card\">
+                        <h1>Signed in</h1>
+                        <p>You are signed in as <strong>{username}</strong>.</p>
+                        <p class=\"meta\">Email: {email}<br/>Role: {role}<br/>Org: {org_name}</p>
+                        <div class=\"actions\">
+                            <a class=\"btn\" href=\"/auth/logout\">Logout</a>
+                            <a class=\"btn\" href=\"/auth/login\">Re-auth</a>
+                            <a class=\"btn\" href=\"/signup-flow.html\">Signup flow</a>
+                        </div>
+                        <p class=\"meta\">If you expected the full UI, ensure the frontend build is available at dist/index.html.</p>
+                    </div>
+                </body>
+                </html>
+                """
+                return HTMLResponse(content=html, headers={
+                        "Cache-Control": "no-cache, no-store, must-revalidate",
+                        "Pragma": "no-cache",
+                        "Expires": "0"
+                })
     else:
         print("User not authenticated, serving React app (will show landing page based on mode)")
         # Serve the React app for unauthenticated users
@@ -5354,9 +5386,9 @@ async def oauth_callback(request: Request, code: str, state: str = None):
                             print(f"Subscription check failed, allowing access: {e}")
                             redirect_url = "/"
                     else:
-                        # No org_id - new user, redirect to signup flow
-                        print(f"User has no organization, redirecting to signup flow")
-                        redirect_url = "/signup-flow.html"
+                        # No org_id - allow access but mark as unassigned
+                        print(f"User has no organization, allowing access to landing page")
+                        redirect_url = "/"
 
                     # Redirect with session token
                     response = RedirectResponse(url=redirect_url)
