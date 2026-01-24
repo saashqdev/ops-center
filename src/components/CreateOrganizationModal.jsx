@@ -60,12 +60,13 @@ export default function CreateOrganizationModal({ open, onClose, onCreated }) {
         throw new Error(errorMessage);
       }
 
-      const newOrg = await response.json();
-      console.log('Organization created successfully:', newOrg);
+      const responseData = await response.json();
+      const createdOrg = responseData.organization || responseData;
+      console.log('Organization created successfully:', createdOrg);
 
-      // Call onCreated callback with new organization
+      // Call onCreated callback with the normalized organization shape
       if (onCreated) {
-        onCreated(newOrg);
+        onCreated(createdOrg);
       }
 
       // Reset form and close modal

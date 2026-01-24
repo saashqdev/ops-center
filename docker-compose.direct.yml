@@ -39,12 +39,15 @@ services:
       - "8080:8080"
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-change-me}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-vz9cA8-kuX-oso3DC-w7}
       - KEYCLOAK_FRONTEND_URL=https://auth.kubeworkz.io
       # Allow framing from our domain; tighten as needed
       - KC_HTTP_RESPONSE_HEADER__CONTENT_SECURITY_POLICY=frame-ancestors 'self' https://auth.kubeworkz.io
     command: >-
       start-dev --proxy edge --hostname auth.kubeworkz.io --hostname-strict=true --hostname-strict-https=true
+    volumes:
+      # Mount custom UC-1 Pro theme
+      - ./keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro      
     networks:
       - web
       - uchub-network
@@ -80,7 +83,9 @@ services:
       - OAUTH_CLIENT_ID=ops-center
       - OPS_CENTER_OAUTH_CLIENT_SECRET=vz9cA8-kuX-oso3DC-w7
       - KEYCLOAK_URL=https://auth.kubeworkz.io
+      - KEYCLOAK_PUBLIC_URL=https://auth.kubeworkz.io
       - KEYCLOAK_REALM=uchub
+      - KEYCLOAK_LOGOUT_REDIRECT=https://${APP_DOMAIN:-kubeworkz.io}/auth/logged-out
       - KEYCLOAK_ADMIN_USER=admin
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-change-me}
       - SESSION_SECRET_KEY=${SESSION_SECRET_KEY:-generate-with-openssl-rand-hex-32}

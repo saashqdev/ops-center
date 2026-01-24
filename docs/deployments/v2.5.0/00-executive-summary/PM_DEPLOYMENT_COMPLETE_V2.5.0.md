@@ -492,7 +492,7 @@ Successfully coordinated and deployed Ops-Center v2.5.0 with **3 major systems**
 
 - **Landing Page**: https://your-domain.com
 - **Admin Dashboard**: https://your-domain.com/admin
-- **API Base**: https://api.your-domain.com
+- **API Base**: https://api.kubeworkz.io
 
 ### New Features (v2.5.0)
 

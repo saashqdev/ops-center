@@ -191,7 +191,7 @@ Add to `.env.auth`:
 BRIGADE_URL=http://unicorn-brigade:8112
 LITELLM_URL=http://localhost:4000
 ANTHROPIC_PROXY_ENABLED=true
-EXTERNAL_API_URL=https://api.your-domain.com
+EXTERNAL_API_URL=https://api.kubeworkz.io
 ```
 
 ### 2. Traefik Configuration
@@ -230,7 +230,7 @@ curl http://localhost:8084/v1/health
 ### Method 1: Environment Variables
 
 ```bash
-export ANTHROPIC_BASE_URL="https://api.your-domain.com/v1"
+export ANTHROPIC_BASE_URL="https://api.kubeworkz.io/v1"
 export ANTHROPIC_API_KEY="<your-ops-center-api-key>"
 ```
 
@@ -240,7 +240,7 @@ Create `~/.config/claude-code/config.json`:
 ```json
 {
   "api": {
-    "base_url": "https://api.your-domain.com/v1",
+    "base_url": "https://api.kubeworkz.io/v1",
     "api_key": "<your-api-key>"
   }
 }
@@ -250,7 +250,7 @@ Create `~/.config/claude-code/config.json`:
 
 ```bash
 claude-code \
-  --api-base-url https://api.your-domain.com/v1 \
+  --api-base-url https://api.kubeworkz.io/v1 \
   --api-key <your-key>
 ```
 
@@ -283,7 +283,7 @@ python3 scripts/mcp_connector_polling.py
 Generate an API key via Ops-Center:
 
 ```bash
-curl -X POST https://api.your-domain.com/api/v1/api-keys \
+curl -X POST https://api.kubeworkz.io/api/v1/api-keys \
   -H "Authorization: Bearer <jwt-token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -369,7 +369,7 @@ docker logs traefik | grep api.unicorncommander
 ```bash
 # Verify API key is valid
 curl -H "Authorization: Bearer <your-key>" \
-     https://api.your-domain.com/v1/health
+     https://api.kubeworkz.io/v1/health
 
 # Check Keycloak connectivity
 curl https://auth.your-domain.com/realms/uchub/.well-known/openid-configuration
@@ -385,10 +385,10 @@ curl https://auth.your-domain.com/realms/uchub/.well-known/openid-configuration
 ps aux | grep mcp_connector
 
 # Verify WebSocket connection
-curl https://api.your-domain.com/api/mcp/status
+curl https://api.kubeworkz.io/api/mcp/status
 
 # Check registered servers
-curl https://api.your-domain.com/api/mcp/servers/<user-id>
+curl https://api.kubeworkz.io/api/mcp/servers/<user-id>
 ```
 
 ### High Latency

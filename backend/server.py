@@ -382,7 +382,7 @@ async def get_user_org_context(user_id: str, email: str = None) -> dict:
 # Restrict origins to known domains for security
 allowed_origins = [
     "https://your-domain.com",
-    "https://api.your-domain.com",
+    "https://api.kubeworkz.io",
     "https://auth.your-domain.com",
     "http://localhost:8084",
     "http://localhost:3000",
@@ -1200,25 +1200,8 @@ async def root_redirect(request: Request):
                         "Expires": "0"
                 })
     else:
-        print("User not authenticated, serving React app (will show landing page based on mode)")
-        # Serve the React app for unauthenticated users
-        # React RootRedirect component will handle landing page mode logic
-        if os.path.exists("public/index.html"):
-            response = FileResponse("public/index.html")
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-        elif os.path.exists("dist/index.html"):
-            response = FileResponse("dist/index.html")
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-        else:
-            # Fallback: redirect to login if frontend not found
-            print("ERROR: React app not found at public/index.html or dist/index.html")
-            return RedirectResponse(url="/auth/login", status_code=302)
+        print("User not authenticated, redirecting to Keycloak login")
+        return RedirectResponse(url="/auth/login", status_code=302)
 
 # Initialize Docker client
 try:
@@ -3875,16 +3858,33 @@ async def logout(request: Request, current_user: dict = Depends(get_current_user
         external_host = os.getenv("EXTERNAL_HOST", "your-domain.com")
         external_protocol = os.getenv("EXTERNAL_PROTOCOL", "https")
 
-        # Our logout confirmation page URL (where Keycloak will redirect after clearing session)
-        logout_confirmation_url = f"{external_protocol}://{external_host}/auth/logged-out"
-
-        # Keycloak logout URL - using simple redirect_uri (not post_logout_redirect_uri)
-        # This avoids the strict validation that comes with id_token_hint
-        keycloak_logout_url = (
-            f"{keycloak_external_url}/realms/{keycloak_realm}/protocol/openid-connect/logout"
-            f"?client_id={os.getenv('KEYCLOAK_CLIENT_ID', 'ops-center')}"
-            f"&redirect_uri={logout_confirmation_url}"
+        # Our logout confirmation URL must match an allowed redirect URI in the Keycloak client
+        # Use callback (known-allowed) by default; override via KEYCLOAK_LOGOUT_REDIRECT if needed
+        logout_confirmation_url = os.getenv(
+            "KEYCLOAK_LOGOUT_REDIRECT",
+            f"{external_protocol}://{external_host}/auth/callback"
         )
+
+        # Encode redirect URI
+        try:
+            import urllib.parse
+            encoded_redirect = urllib.parse.quote_plus(logout_confirmation_url)
+        except Exception:
+            encoded_redirect = logout_confirmation_url
+
+        # Prefer id_token_hint to bypass the Keycloak confirmation page and keep styles on our site
+        if id_token:
+            keycloak_logout_url = (
+                f"{keycloak_external_url}/realms/{keycloak_realm}/protocol/openid-connect/logout"
+                f"?id_token_hint={id_token}"
+                f"&post_logout_redirect_uri={encoded_redirect}"
+            )
+        else:
+            keycloak_logout_url = (
+                f"{keycloak_external_url}/realms/{keycloak_realm}/protocol/openid-connect/logout"
+                f"?client_id={os.getenv('KEYCLOAK_CLIENT_ID', 'ops-center')}"
+                f"&post_logout_redirect_uri={encoded_redirect}"
+            )
 
         print(f"Logout URL: {keycloak_logout_url}")
 
@@ -5280,7 +5280,8 @@ async def oauth_callback(request: Request, code: str, state: str = None):
             "code": code,
             "redirect_uri": redirect_uri,
             "client_id": OAUTH_CLIENT_ID,
-            "client_secret": OAUTH_CLIENT_SECRET
+            "client_secret": OAUTH_CLIENT_SECRET,
+            "scope": "openid profile email"
         }
         
         try:
@@ -5293,7 +5294,9 @@ async def oauth_callback(request: Request, code: str, state: str = None):
                 try:
                     tokens = response.json()
                     access_token = tokens.get("access_token")
+                    id_token = tokens.get("id_token")
                     print(f"Got access token: {access_token[:20] if access_token else 'None'}...")
+                    print(f"Got id_token: {'present' if id_token else 'missing'}")
                     
                     if not access_token:
                         print(f"No access token in response: {tokens}")

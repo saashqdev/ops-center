@@ -305,7 +305,7 @@ session_token = request.cookies.get('session_token')
 
 ```python
 response = requests.get(
-    'https://api.your-domain.com/api/v1/org-billing/billing/user',
+    'https://api.kubeworkz.io/api/v1/org-billing/billing/user',
     cookies={'session_token': session_token}
 )
 orgs = response.json()['organizations']

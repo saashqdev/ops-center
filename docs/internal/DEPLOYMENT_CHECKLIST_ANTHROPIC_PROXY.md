@@ -26,7 +26,7 @@
 BRIGADE_URL=http://unicorn-brigade:8112
 LITELLM_URL=http://localhost:4000
 ANTHROPIC_PROXY_ENABLED=true
-EXTERNAL_API_URL=https://api.your-domain.com
+EXTERNAL_API_URL=https://api.kubeworkz.io
 ```
 
 ### 2. Traefik Configuration
@@ -96,7 +96,7 @@ python3 tests/test_anthropic_proxy.py
 
 ```bash
 # Test from external machine
-curl https://api.your-domain.com/v1/health
+curl https://api.kubeworkz.io/v1/health
 
 # Expected: {"status": "healthy", ...}
 ```
@@ -124,7 +124,7 @@ curl http://localhost:8084/api/mcp/status
 
 ```bash
 # Set environment variables
-export ANTHROPIC_BASE_URL="https://api.your-domain.com/v1"
+export ANTHROPIC_BASE_URL="https://api.kubeworkz.io/v1"
 export ANTHROPIC_API_KEY="sk-ant-uc-<your-key>"
 ```
 
@@ -175,7 +175,7 @@ python3 mcp_connector.py
 ### 4. Verify MCP Registration
 
 ```bash
-curl https://api.your-domain.com/api/mcp/servers/<your-user-id>
+curl https://api.kubeworkz.io/api/mcp/servers/<your-user-id>
 
 # Expected: List of registered MCP servers
 ```
@@ -202,10 +202,10 @@ docker logs -f unicorn-brigade
 ```bash
 # Check API usage
 curl -H "Authorization: Bearer <jwt>" \
-     https://api.your-domain.com/api/v1/usage/current
+     https://api.kubeworkz.io/api/v1/usage/current
 
 # Check MCP status
-curl https://api.your-domain.com/api/mcp/status
+curl https://api.kubeworkz.io/api/mcp/status
 ```
 
 ### 3. Performance Metrics
@@ -271,7 +271,7 @@ docker restart unicorn-brigade
 python3 mcp_connector.py
 
 # Check MCP status
-curl https://api.your-domain.com/api/mcp/status
+curl https://api.kubeworkz.io/api/mcp/status
 ```
 
 ## Post-Deployment

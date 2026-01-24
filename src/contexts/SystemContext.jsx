@@ -32,9 +32,16 @@ export function SystemProvider({ children }) {
   // Setup WebSocket connection
   useEffect(() => {
     let ws;
-    let reconnectInterval;
+    let reconnectTimer;
+    let attempts = 0;
+    const maxAttempts = 3;
 
     const connect = () => {
+      if (attempts >= maxAttempts) {
+        console.warn('WebSocket disabled after max reconnect attempts');
+        return;
+      }
+
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
@@ -42,26 +49,30 @@ export function SystemProvider({ children }) {
         ws.onopen = () => {
           console.log('WebSocket connected');
           setWsConnected(true);
+          attempts = 0;
         };
 
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleWebSocketMessage(data);
-      };
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          handleWebSocketMessage(data);
+        };
 
-      ws.onclose = () => {
-        console.log('WebSocket disconnected');
-        setWsConnected(false);
-        // Reconnect after 5 seconds
-        reconnectInterval = setTimeout(connect, 5000);
-      };
+        ws.onclose = () => {
+          console.log('WebSocket disconnected');
+          setWsConnected(false);
+          attempts += 1;
+          if (attempts < maxAttempts) {
+            reconnectTimer = setTimeout(connect, 5000);
+          }
+        };
 
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+        };
       } catch (error) {
         console.error('WebSocket connection failed:', error);
         setWsConnected(false);
+        attempts += 1;
       }
     };
 
@@ -69,7 +80,7 @@ export function SystemProvider({ children }) {
 
     return () => {
       if (ws) ws.close();
-      if (reconnectInterval) clearTimeout(reconnectInterval);
+      if (reconnectTimer) clearTimeout(reconnectTimer);
     };
   }, []);
 

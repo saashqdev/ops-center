@@ -111,7 +111,7 @@ async def create_subscription(
 
 **Files Modified**:
 - ✅ Modified `/backend/server.py` CORS configuration
-  - Whitelisted: `https://your-domain.com`, `https://api.your-domain.com`, localhost
+  - Whitelisted: `https://your-domain.com`, `https://api.kubeworkz.io`, localhost
   - Methods limited to: GET, POST, PUT, DELETE, PATCH, OPTIONS
   - Added `X-Request-ID` to exposed headers
 
@@ -128,7 +128,7 @@ app.add_middleware(
 ```python
 allowed_origins = [
     "https://your-domain.com",
-    "https://api.your-domain.com",
+    "https://api.kubeworkz.io",
     "http://localhost:8084",
 ]
 

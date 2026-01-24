@@ -2047,7 +2047,7 @@ volumes:
 9. Admin sees success toast: "Route created successfully"
 10. Admin clicks "Test" button
 11. System sends test request:
-    - `GET https://api.your-domain.com/health`
+    - `GET https://api.kubeworkz.io/health`
     - Returns: 200 OK (12ms)
 12. SSL certificate auto-issued by Let's Encrypt within 60 seconds
 

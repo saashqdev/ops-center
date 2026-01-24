@@ -94,7 +94,7 @@ curl https://your-domain.com/api/v1/account/uc-api-keys \
 ]
 
 # 3. Use the UC API key to call Unicorn Commander API
-curl -X POST https://api.your-domain.com/v1/chat/completions \
+curl -X POST https://api.kubeworkz.io/v1/chat/completions \
   -H "Authorization: Bearer uc_1234567890abcdef..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -502,7 +502,7 @@ Steps:
 1. Generate UC API key: "Postman Testing"
 2. Set short expiration: 7 days
 3. Use in Postman:
-   - URL: https://api.your-domain.com/v1/chat/completions
+   - URL: https://api.kubeworkz.io/v1/chat/completions
    - Auth: Bearer uc_test_key
 4. Revoke when testing complete
 ```
@@ -880,7 +880,7 @@ docker compose -f docker-compose.billing.yml restart uchub-litellm
 # Enter name: "Test Key"
 # Copy the key shown
 # Test with:
-curl -X POST https://api.your-domain.com/v1/chat/completions \
+curl -X POST https://api.kubeworkz.io/v1/chat/completions \
   -H "Authorization: Bearer uc_YOUR_KEY" \
   -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Test"}]}'
 ```

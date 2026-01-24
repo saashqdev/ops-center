@@ -95,14 +95,15 @@ export default function OrganizationSelector() {
 
   // Handle organization created
   const handleOrgCreated = (newOrg) => {
-    console.log('New organization created:', newOrg);
+    const createdOrg = newOrg?.organization || newOrg;
+    console.log('New organization created:', createdOrg);
     // Refresh the organization list
     if (refreshOrganizations) {
       refreshOrganizations();
     }
-    // Switch to the newly created organization
-    if (newOrg && newOrg.id) {
-      switchOrganization(newOrg.id);
+    // Switch to the newly created organization if available
+    if (createdOrg && createdOrg.id) {
+      switchOrganization(createdOrg.id);
     }
   };
 

@@ -128,7 +128,7 @@ docker logs ops-center-direct | grep "\[a1b2c3d4-"
 ```python
 allowed_origins = [
     "https://your-domain.com",
-    "https://api.your-domain.com",
+    "https://api.kubeworkz.io",
     "https://auth.your-domain.com",
     "http://localhost:8084",
     "http://localhost:3000",

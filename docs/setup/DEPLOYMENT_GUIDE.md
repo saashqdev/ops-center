@@ -384,7 +384,7 @@ docker logs ops-center-direct -f
 ### Useful URLs
 
 - **Production:** https://your-domain.com
-- **API:** https://api.your-domain.com
+- **API:** https://api.kubeworkz.io
 - **Grafana:** https://your-domain.com:9090
 - **GitHub Actions:** https://github.com/Unicorn-Commander/UC-Cloud/actions
 - **Forgejo Actions:** https://git.your-domain.com/UnicornCommander/UC-Cloud/actions

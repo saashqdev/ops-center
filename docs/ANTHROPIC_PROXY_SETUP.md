@@ -154,7 +154,7 @@ LITELLM_URL=http://localhost:4000
 ANTHROPIC_PROXY_ENABLED=true
 
 # External API URL (for Claude Code to connect)
-EXTERNAL_API_URL=https://api.your-domain.com
+EXTERNAL_API_URL=https://api.kubeworkz.io
 ```
 
 ### Traefik Configuration
@@ -177,7 +177,7 @@ labels:
 Set the Anthropic API base URL to point to Ops-Center:
 
 ```bash
-export ANTHROPIC_BASE_URL="https://api.your-domain.com/v1"
+export ANTHROPIC_BASE_URL="https://api.kubeworkz.io/v1"
 export ANTHROPIC_API_KEY="sk-ant-<your-ops-center-api-key>"
 ```
 
@@ -188,7 +188,7 @@ Create `~/.config/claude-code/config.json`:
 ```json
 {
   "api": {
-    "base_url": "https://api.your-domain.com/v1",
+    "base_url": "https://api.kubeworkz.io/v1",
     "api_key": "sk-ant-<your-ops-center-api-key>"
   }
 }
@@ -197,7 +197,7 @@ Create `~/.config/claude-code/config.json`:
 ### Option 3: Command Line
 
 ```bash
-claude-code --api-base-url https://api.your-domain.com/v1 \
+claude-code --api-base-url https://api.kubeworkz.io/v1 \
             --api-key sk-ant-<your-key>
 ```
 
@@ -271,7 +271,7 @@ import json
 
 def poll_and_execute():
     user_id = "your-user-id"
-    api_url = "https://api.your-domain.com/api/mcp"
+    api_url = "https://api.kubeworkz.io/api/mcp"
 
     while True:
         # Poll for pending tool calls
@@ -309,7 +309,7 @@ export ANTHROPIC_API_KEY="Bearer <your-jwt-token>"
 Generate an API key in Ops-Center:
 
 ```bash
-curl -X POST https://api.your-domain.com/api/v1/api-keys \
+curl -X POST https://api.kubeworkz.io/api/v1/api-keys \
   -H "Authorization: Bearer <jwt-token>" \
   -H "Content-Type: application/json" \
   -d '{"name": "Claude Code API Key", "scopes": ["anthropic-proxy"]}'
@@ -364,7 +364,7 @@ Verify your API key:
 
 ```bash
 curl -H "Authorization: Bearer <your-key>" \
-     https://api.your-domain.com/v1/health
+     https://api.kubeworkz.io/v1/health
 ```
 
 ### Tool Calls Not Working
@@ -372,13 +372,13 @@ curl -H "Authorization: Bearer <your-key>" \
 Check MCP server connection:
 
 ```bash
-curl https://api.your-domain.com/api/mcp/status
+curl https://api.kubeworkz.io/api/mcp/status
 ```
 
 Verify your user ID has registered servers:
 
 ```bash
-curl https://api.your-domain.com/api/mcp/servers/<your-user-id>
+curl https://api.kubeworkz.io/api/mcp/servers/<your-user-id>
 ```
 
 ### High Latency
@@ -438,7 +438,7 @@ Control which Brigade agents handle tasks:
 Register custom tools for your workflow:
 
 ```bash
-curl -X POST https://api.your-domain.com/api/mcp/register \
+curl -X POST https://api.kubeworkz.io/api/mcp/register \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your-user-id",

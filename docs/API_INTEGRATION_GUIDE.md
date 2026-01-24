@@ -2,7 +2,7 @@
 
 **Version**: 2.0
 **Last Updated**: November 3, 2025
-**Base URL**: `https://api.your-domain.com`
+**Base URL**: `https://api.kubeworkz.io`
 
 ---
 
@@ -43,7 +43,7 @@ The Unicorn Commander API provides OpenAI-compatible LLM inference with access t
 ### 2. Make Your First Request
 
 ```bash
-curl -X POST https://api.your-domain.com/v1/llm/chat/completions \
+curl -X POST https://api.kubeworkz.io/v1/llm/chat/completions \
   -H "Authorization: Bearer uc_sk_YOUR_API_KEY_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -61,7 +61,7 @@ curl -X POST https://api.your-domain.com/v1/llm/chat/completions \
 ### Base URL
 
 ```
-https://api.your-domain.com
+https://api.kubeworkz.io
 ```
 
 All endpoints use HTTPS. HTTP requests are automatically redirected.
@@ -200,7 +200,7 @@ openrouter/meta-llama/llama-3.1-405b
 
 **List all models**:
 ```bash
-curl https://api.your-domain.com/v1/llm/models \
+curl https://api.kubeworkz.io/v1/llm/models \
   -H "Authorization: Bearer uc_sk_YOUR_API_KEY"
 ```
 
@@ -216,7 +216,7 @@ from openai import OpenAI
 # Configure client
 client = OpenAI(
     api_key="uc_sk_YOUR_API_KEY_HERE",
-    base_url="https://api.your-domain.com/v1/llm"
+    base_url="https://api.kubeworkz.io/v1/llm"
 )
 
 # Chat completion
@@ -240,7 +240,7 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: 'uc_sk_YOUR_API_KEY_HERE',
-  baseURL: 'https://api.your-domain.com/v1/llm'
+  baseURL: 'https://api.kubeworkz.io/v1/llm'
 });
 
 async function chat() {
@@ -263,7 +263,7 @@ chat();
 ### cURL
 
 ```bash
-curl -X POST https://api.your-domain.com/v1/llm/chat/completions \
+curl -X POST https://api.kubeworkz.io/v1/llm/chat/completions \
   -H "Authorization: Bearer uc_sk_YOUR_API_KEY_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -287,7 +287,7 @@ use OpenAI\Client;
 
 $client = Client::factory()
     ->withApiKey('uc_sk_YOUR_API_KEY_HERE')
-    ->withBaseUrl('https://api.your-domain.com/v1/llm')
+    ->withBaseUrl('https://api.kubeworkz.io/v1/llm')
     ->make();
 
 $response = $client->chat()->create([
@@ -315,7 +315,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="uc_sk_YOUR_API_KEY_HERE",
-    base_url="https://api.your-domain.com/v1/llm"
+    base_url="https://api.kubeworkz.io/v1/llm"
 )
 
 stream = client.chat.completions.create(
@@ -410,7 +410,7 @@ from openai import OpenAI, APIError, RateLimitError, AuthenticationError
 
 client = OpenAI(
     api_key="uc_sk_YOUR_API_KEY_HERE",
-    base_url="https://api.your-domain.com/v1/llm"
+    base_url="https://api.kubeworkz.io/v1/llm"
 )
 
 try:
@@ -545,7 +545,7 @@ Save costs by using your own API keys from providers:
    ```python
    client = OpenAI(
        api_key="uc_sk_YOUR_KEY",
-       base_url="https://api.your-domain.com/v1/llm",
+       base_url="https://api.kubeworkz.io/v1/llm",
        timeout=30.0  # 30 second timeout
    )
    ```
@@ -569,7 +569,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="uc_sk_...",
-    base_url="https://api.your-domain.com/v1/llm"
+    base_url="https://api.kubeworkz.io/v1/llm"
 )
 ```
 
@@ -622,6 +622,6 @@ A: API calls count requests. Credits measure actual cost (based on tokens used).
 
 **Generated**: November 3, 2025
 **Version**: 2.0
-**Base URL**: https://api.your-domain.com
+**Base URL**: https://api.kubeworkz.io
 
 For the latest documentation, visit: https://your-domain.com/docs

@@ -33,11 +33,16 @@ const OpenRouterSettings = () => {
   const fetchProvider = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/llm/providers');
+      const response = await fetch('/api/v1/llm/providers', {
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to fetch providers');
 
       const data = await response.json();
-      const openrouter = data.find(p => p.type === 'openrouter');
+      const providers = data.providers || data; // API may return { providers: [...] } or bare list
+      const openrouter = providers.find(p =>
+        p.type === 'openrouter' || p.provider_type === 'openrouter'
+      );
 
       if (openrouter) {
         setProvider(openrouter);
@@ -58,14 +63,22 @@ const OpenRouterSettings = () => {
       return;
     }
 
+    if (!provider) {
+      showToast('Provider not loaded yet. Please retry.', 'error');
+      return;
+    }
+
     setSaving(true);
     try {
-      const response = await fetch(`/api/v1/llm/providers/${provider.id}`, {
-        method: 'PUT',
+      const response = await fetch('/api/v1/llm/providers/keys', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          api_key_encrypted: apiKey,
-          enabled: true
+          provider_type: provider.provider_type || provider.type || 'openrouter',
+          api_key: apiKey,
+          name: provider.name || 'OpenRouter',
+          config: provider.config || null
         })
       });
 
@@ -98,6 +111,7 @@ const OpenRouterSettings = () => {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer test-user@example.com'
         },
+        credentials: 'include',
         body: JSON.stringify({
           model: 'openai/gpt-4o-mini',
           messages: [{ role: 'user', content: 'Say "Test successful" in 2 words' }],

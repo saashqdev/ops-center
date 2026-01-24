@@ -17,7 +17,7 @@ Usage:
 Environment Variables:
     MCP_USER_ID: Your Ops-Center user ID
     MCP_API_KEY: Your Ops-Center API key
-    MCP_API_URL: Ops-Center API URL (default: https://api.your-domain.com)
+    MCP_API_URL: Ops-Center API URL (default: https://api.kubeworkz.io)
     MCP_ALLOWED_PATHS: Comma-separated list of allowed paths (default: current directory)
 """
 

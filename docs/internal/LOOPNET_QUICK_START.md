@@ -15,7 +15,7 @@ import requests
 def get_user_org_context(session_token: str) -> dict:
     """Get user's org_id and remaining credits"""
     response = requests.get(
-        'https://api.your-domain.com/api/v1/org-billing/billing/user',
+        'https://api.kubeworkz.io/api/v1/org-billing/billing/user',
         cookies={'session_token': session_token}
     )
     data = response.json()
@@ -139,7 +139,7 @@ Use these for `service_type` parameter:
 
 ## API Endpoints
 
-**Base**: `https://api.your-domain.com/api/v1/org-billing`
+**Base**: `https://api.kubeworkz.io/api/v1/org-billing`
 
 ### User Endpoints
 
@@ -300,7 +300,7 @@ postgresql://unicorn:password@unicorn-postgresql:5432/unicorn_db
 - Slack: #ops-center-integration
 
 **API**:
-- Base URL: `https://api.your-domain.com`
+- Base URL: `https://api.kubeworkz.io`
 - Database: `unicorn-postgresql:5432/unicorn_db`
 
 ---

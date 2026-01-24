@@ -119,7 +119,7 @@ Organization Pool (10,000 credits)
 
 ### Prerequisites
 
-1. **Access to Ops-Center API**: `https://api.your-domain.com`
+1. **Access to Ops-Center API**: `https://api.kubeworkz.io`
 2. **Keycloak Session Token**: Obtained via user login
 3. **Organization ID**: User's current organization context
 4. **Test Credentials**: Provided by Ops-Center team
@@ -127,7 +127,7 @@ Organization Pool (10,000 credits)
 ### Base URL
 
 ```
-Production: https://api.your-domain.com
+Production: https://api.kubeworkz.io
 Development: http://localhost:8084
 ```
 
@@ -143,7 +143,7 @@ X-Request-ID: <unique_request_id>  # Optional but recommended
 
 ```bash
 # Test API connectivity
-curl -X GET "https://api.your-domain.com/api/v1/org-billing/billing/user" \
+curl -X GET "https://api.kubeworkz.io/api/v1/org-billing/billing/user" \
   -H "Cookie: session_token=YOUR_SESSION_TOKEN"
 ```
 
@@ -180,7 +180,7 @@ curl -X GET "https://api.your-domain.com/api/v1/org-billing/billing/user" \
 **Frontend (Browser)**:
 ```javascript
 // Session cookie is automatically included in fetch requests
-const response = await fetch('https://api.your-domain.com/api/v1/org-billing/billing/user', {
+const response = await fetch('https://api.kubeworkz.io/api/v1/org-billing/billing/user', {
   method: 'GET',
   credentials: 'include'  // Include cookies
 });
@@ -196,7 +196,7 @@ session_token = request.cookies.get('session_token')
 
 # Make API call to Ops-Center
 response = requests.get(
-    'https://api.your-domain.com/api/v1/org-billing/billing/user',
+    'https://api.kubeworkz.io/api/v1/org-billing/billing/user',
     cookies={'session_token': session_token}
 )
 user_data = response.json()
@@ -209,7 +209,7 @@ user_data = response.json()
 def get_user_org_context(session_token: str) -> dict:
     """Get user's current organization context"""
     response = requests.get(
-        'https://api.your-domain.com/api/v1/org-billing/billing/user',
+        'https://api.kubeworkz.io/api/v1/org-billing/billing/user',
         cookies={'session_token': session_token}
     )
 
@@ -360,7 +360,7 @@ All organizational billing endpoints are under:
 
 **cURL Example**:
 ```bash
-curl -X POST "https://api.your-domain.com/api/v1/org-billing/subscriptions" \
+curl -X POST "https://api.kubeworkz.io/api/v1/org-billing/subscriptions" \
   -H "Cookie: session_token=YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -394,7 +394,7 @@ curl -X POST "https://api.your-domain.com/api/v1/org-billing/subscriptions" \
 
 **cURL Example**:
 ```bash
-curl -X GET "https://api.your-domain.com/api/v1/org-billing/subscriptions/550e8400-e29b-41d4-a716-446655440000" \
+curl -X GET "https://api.kubeworkz.io/api/v1/org-billing/subscriptions/550e8400-e29b-41d4-a716-446655440000" \
   -H "Cookie: session_token=YOUR_TOKEN"
 ```
 
@@ -423,7 +423,7 @@ curl -X GET "https://api.your-domain.com/api/v1/org-billing/subscriptions/550e84
 
 **cURL Example**:
 ```bash
-curl -X PUT "https://api.your-domain.com/api/v1/org-billing/subscriptions/550e8400-e29b-41d4-a716-446655440000/upgrade?new_plan=hybrid" \
+curl -X PUT "https://api.kubeworkz.io/api/v1/org-billing/subscriptions/550e8400-e29b-41d4-a716-446655440000/upgrade?new_plan=hybrid" \
   -H "Cookie: session_token=YOUR_TOKEN"
 ```
 
@@ -488,7 +488,7 @@ curl -X PUT "https://api.your-domain.com/api/v1/org-billing/subscriptions/550e84
 
 **cURL Example**:
 ```bash
-curl -X POST "https://api.your-domain.com/api/v1/org-billing/credits/550e8400-e29b-41d4-a716-446655440000/add?credits=5000&purchase_amount=50.00" \
+curl -X POST "https://api.kubeworkz.io/api/v1/org-billing/credits/550e8400-e29b-41d4-a716-446655440000/add?credits=5000&purchase_amount=50.00" \
   -H "Cookie: session_token=YOUR_TOKEN"
 ```
 
@@ -531,7 +531,7 @@ curl -X POST "https://api.your-domain.com/api/v1/org-billing/credits/550e8400-e2
 
 **cURL Example**:
 ```bash
-curl -X POST "https://api.your-domain.com/api/v1/org-billing/credits/550e8400-e29b-41d4-a716-446655440000/allocate" \
+curl -X POST "https://api.kubeworkz.io/api/v1/org-billing/credits/550e8400-e29b-41d4-a716-446655440000/allocate" \
   -H "Cookie: session_token=YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1138,7 +1138,7 @@ class OrganizationContext:
     async def load_organizations(self):
         """Load all organizations user belongs to"""
         response = requests.get(
-            'https://api.your-domain.com/api/v1/org-billing/billing/user',
+            'https://api.kubeworkz.io/api/v1/org-billing/billing/user',
             cookies={'session_token': self.session_token}
         )
 
@@ -1562,7 +1562,7 @@ if not user_orgs:
 
 ```python
 response = requests.post(
-    'https://api.your-domain.com/api/v1/org-billing/credits/add',
+    'https://api.kubeworkz.io/api/v1/org-billing/credits/add',
     ...
 )
 
@@ -1819,17 +1819,17 @@ Use these cURL commands to test API endpoints directly:
 
 ```bash
 # 1. Get user's organizations and credit status
-curl -X GET "https://api.your-domain.com/api/v1/org-billing/billing/user" \
+curl -X GET "https://api.kubeworkz.io/api/v1/org-billing/billing/user" \
   -H "Cookie: session_token=YOUR_TOKEN" \
   | jq '.'
 
 # 2. Get organization credit pool
-curl -X GET "https://api.your-domain.com/api/v1/org-billing/credits/ORG_UUID" \
+curl -X GET "https://api.kubeworkz.io/api/v1/org-billing/credits/ORG_UUID" \
   -H "Cookie: session_token=YOUR_TOKEN" \
   | jq '.'
 
 # 3. Get credit usage stats
-curl -X GET "https://api.your-domain.com/api/v1/org-billing/credits/ORG_UUID/usage?days=7" \
+curl -X GET "https://api.kubeworkz.io/api/v1/org-billing/credits/ORG_UUID/usage?days=7" \
   -H "Cookie: session_token=YOUR_TOKEN" \
   | jq '.service_breakdown'
 
@@ -1938,7 +1938,7 @@ import uuid
 request_id = f"loopnet_{uuid.uuid4()}"
 
 response = requests.post(
-    'https://api.your-domain.com/api/v1/org-billing/...',
+    'https://api.kubeworkz.io/api/v1/org-billing/...',
     headers={'X-Request-ID': request_id},
     ...
 )
@@ -2087,11 +2087,11 @@ result = await perform_operation()  # Then operation (fails = credits lost)
 **Admin API** (requires admin role):
 ```bash
 # Add credits back to pool
-curl -X POST "https://api.your-domain.com/api/v1/org-billing/credits/ORG_ID/add?credits=50&purchase_amount=0" \
+curl -X POST "https://api.kubeworkz.io/api/v1/org-billing/credits/ORG_ID/add?credits=50&purchase_amount=0" \
   -H "Cookie: session_token=ADMIN_TOKEN"
 
 # Reallocate to user
-curl -X POST "https://api.your-domain.com/api/v1/org-billing/credits/ORG_ID/allocate" \
+curl -X POST "https://api.kubeworkz.io/api/v1/org-billing/credits/ORG_ID/allocate" \
   -H "Cookie: session_token=ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"user_id": "USER_ID", "allocated_credits": 50, "notes": "Refund for failed operation"}'
@@ -2186,7 +2186,7 @@ credits_needed = math.ceil(api_cost_dollars * 1000)  # 3 credits
 
 ### API Reference
 
-**Base URL**: `https://api.your-domain.com`
+**Base URL**: `https://api.kubeworkz.io`
 
 **Endpoints**:
 - Subscription: `/api/v1/org-billing/subscriptions`
