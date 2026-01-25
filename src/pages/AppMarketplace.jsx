@@ -108,7 +108,7 @@ const AppMarketplace = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
           App Marketplace
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: '#c084fc' }}>
           Discover premium apps and upgrade your subscription for more features
         </Typography>
       </Box>

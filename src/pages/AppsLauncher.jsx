@@ -95,7 +95,7 @@ const AppsLauncher = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
           My Apps
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: '#c084fc' }}>
           Apps included in your subscription tier
         </Typography>
       </Box>

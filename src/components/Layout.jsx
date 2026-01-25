@@ -70,6 +70,7 @@ import OrganizationSelector from './OrganizationSelectorSimple';
 import MobileNavigation from './MobileNavigation';
 import MobileBreadcrumbs from './MobileBreadcrumbs';
 import BottomNavBar from './BottomNavBar';
+import { useOrganization } from '../contexts/OrganizationContext';
 
 // Icon mapping for dynamic icon resolution from route configuration
 const iconMap = {
@@ -110,6 +111,7 @@ export default function Layout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, currentTheme, switchTheme, availableThemes, isDarkMode, toggleDarkMode } = useTheme();
+  const { refreshOrganizations, switchOrganization } = useOrganization?.() || {};
 
   // Theme configurations for display names
   const themes = {
@@ -1025,7 +1027,16 @@ export default function Layout({ children }) {
                 )}
 
                 {/* Organization Selector */}
-                <OrganizationSelector />
+                <OrganizationSelector
+                  onOrgCreated={async (createdOrg) => {
+                    if (refreshOrganizations) {
+                      await refreshOrganizations();
+                    }
+                    if (switchOrganization && createdOrg?.id) {
+                      switchOrganization(createdOrg.id);
+                    }
+                  }}
+                />
 
                 {/* Notification Bell (Admin only) */}
                 {userInfo.role === 'admin' && (
@@ -1080,6 +1091,8 @@ export default function Layout({ children }) {
               </div>
             </div>
           </header>
+
+          {/* Create Organization Modal */}
 
           <main className="flex-1 relative overflow-y-auto focus:outline-none">
             <div className="py-6 pb-20 md:pb-6">

@@ -45,7 +45,7 @@ function RoleBadge({ role }) {
   );
 }
 
-export default function OrganizationSelector() {
+export default function OrganizationSelector({ onOrgCreated }) {
   const {
     currentOrgId,
     organizations,
@@ -137,7 +137,7 @@ export default function OrganizationSelector() {
   }
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className="relative inline-block z-[2000]">
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -183,7 +183,7 @@ export default function OrganizationSelector() {
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className={`absolute top-full mt-2 w-[320px] rounded-lg shadow-2xl z-50 ${
+          className={`absolute top-full mt-2 w-[320px] rounded-lg shadow-2xl z-[9999] ${
             currentTheme === 'unicorn'
               ? 'bg-gradient-to-br from-purple-900 to-pink-900 border border-purple-500/30'
               : currentTheme === 'light'
