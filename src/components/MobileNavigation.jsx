@@ -219,6 +219,7 @@ export default function MobileNavigation({ user, currentPath }) {
         { label: 'Monitoring', path: '/admin/system', icon: <BarChartIcon /> },
         { label: 'LLM Management', path: '/admin/llm-management', icon: <CloudIcon /> },
         { label: 'LLM Providers', path: '/admin/litellm-providers', icon: <AutoAwesomeIcon /> },
+        { label: 'LLM Routing (v2)', path: '/admin/litellm-routing', icon: <AutoAwesomeIcon />, badge: 'NEW' },
         { label: 'Model Catalog', path: '/admin/llm-models', icon: <ViewListIcon /> },
         { label: 'Cloudflare DNS', path: '/admin/infrastructure/cloudflare', icon: <LanguageIcon /> }
       ]
