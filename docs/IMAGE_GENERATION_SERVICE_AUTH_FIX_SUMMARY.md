@@ -478,7 +478,7 @@ If deployment fails or causes issues:
 ### Step 1: Restore Database
 ```bash
 # Find backup file (created during deployment)
-BACKUP_FILE=$(ls -t /home/muut/backups/ops-center-pre-service-auth-fix-*.sql | head -1)
+BACKUP_FILE=$(ls -t /home/ubuntu/backups/ops-center-pre-service-auth-fix-*.sql | head -1)
 
 # Restore backup
 docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db < "$BACKUP_FILE"
@@ -486,7 +486,7 @@ docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db < "$BACKUP_FILE"
 
 ### Step 2: Revert Code Changes
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 git revert HEAD  # If changes were committed
 # Or restore from backup
 ```

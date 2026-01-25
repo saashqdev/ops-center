@@ -8,7 +8,7 @@ Backend defines `/api/v1/billing/checkout/create`
 
 ### Solution: Update Backend Route (Recommended)
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/stripe_api.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/stripe_api.py`
 
 **Change Line 99** from:
 ```python
@@ -98,7 +98,7 @@ enterprise: price_1JKL...
 
 ### If you prefer to fix frontend instead of backend:
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/public/signup-flow.html`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/signup-flow.html`
 
 **Change Line 721** from:
 ```javascript

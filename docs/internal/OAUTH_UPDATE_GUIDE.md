@@ -181,7 +181,7 @@ If you get stuck:
 Once redirect URIs are updated, you're ready to run:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./setup-custom-auth.sh
 ```
 

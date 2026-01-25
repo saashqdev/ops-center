@@ -4,7 +4,7 @@
 
 Ensure all files are in place:
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme
 tree uc1-pro
 ```
 
@@ -40,7 +40,7 @@ services:
     image: quay.io/keycloak/keycloak:25.0
     container_name: keycloak
     volumes:
-      - /home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro
+      - /home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro
     environment:
       KC_HOSTNAME: auth.your-domain.com
       KC_HOSTNAME_STRICT: false
@@ -93,7 +93,7 @@ RUN /opt/keycloak/bin/kc.sh build
 
 Build and deploy:
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 docker build -f Dockerfile.keycloak -t keycloak-uc1pro:latest .
 ```
 

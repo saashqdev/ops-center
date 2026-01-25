@@ -372,5 +372,5 @@ general_settings:
 ## Support
 
 - **LiteLLM Docs**: https://docs.litellm.ai/
-- **UC-Cloud Docs**: /home/muut/Production/UC-Cloud/CLAUDE.md
+- **UC-Cloud Docs**: /home/ubuntu/Production/UC-Cloud/CLAUDE.md
 - **GitHub Issues**: https://github.com/Unicorn-Commander/UC-Cloud/issues

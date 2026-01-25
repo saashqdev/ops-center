@@ -3,7 +3,7 @@
 ## Run All Tests
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 bash tests/test_plans_page.sh
 ```
 

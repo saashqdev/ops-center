@@ -133,7 +133,7 @@ After applying all fixes:
 
 ### 1. Rebuild Container
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 
 # Rebuild with --no-cache to ensure changes are picked up
 docker build -t uc-1-pro-ops-center --no-cache services/ops-center/

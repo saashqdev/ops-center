@@ -21,7 +21,7 @@ export TIER_ENFORCEMENT_ENABLED=true
 ### Test 1: Python Integration Test
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 
 # Run test suite
 python3 tests/test_tier_enforcement.py your@email.com
@@ -72,7 +72,7 @@ X-API-Calls-Remaining: 99
 ```bash
 # Run comprehensive bash tests
 SESSION_FILE=/tmp/session.txt \
-  /home/muut/Production/UC-1-Pro/services/ops-center/backend/tests/test_tier_enforcement.sh
+  /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/tests/test_tier_enforcement.sh
 ```
 
 **Expected Output**:

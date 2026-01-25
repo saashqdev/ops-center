@@ -7,7 +7,7 @@ Custom Keycloak theme for UC-1 Pro Operations Center with purple and gold brandi
 Deploy the theme to Keycloak:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-keycloak-theme.sh
 ```
 
@@ -42,7 +42,7 @@ uc-1-pro/
 Use the provided deployment script:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-keycloak-theme.sh
 ```
 
@@ -139,7 +139,7 @@ cp uc1-pro.jar /opt/keycloak/providers/
 
 2. Copy to theme directory:
 ```bash
-cp colonel-logo.png /home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc1-pro/login/resources/img/
+cp colonel-logo.png /home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc1-pro/login/resources/img/
 ```
 
 3. If using Docker volume mount, the change will be reflected immediately

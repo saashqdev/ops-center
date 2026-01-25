@@ -23,7 +23,7 @@ This audit examined the four system management pages in UC-1 Pro Ops Center. Ove
 
 ## 1. System.jsx (Resources/System Monitoring)
 
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/System.jsx`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/System.jsx`
 **Lines of Code**: 917
 
 ### Features Analysis
@@ -108,7 +108,7 @@ This audit examined the four system management pages in UC-1 Pro Ops Center. Ove
 
 ## 2. Network.jsx (Network Configuration)
 
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Network.jsx`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Network.jsx`
 **Lines of Code**: 791
 
 ### Features Analysis
@@ -191,7 +191,7 @@ This audit examined the four system management pages in UC-1 Pro Ops Center. Ove
 
 ## 3. StorageBackup.jsx (Storage & Backup Management)
 
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/StorageBackup.jsx`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/StorageBackup.jsx`
 **Lines of Code**: 919
 
 ### Features Analysis
@@ -236,7 +236,7 @@ This audit examined the four system management pages in UC-1 Pro Ops Center. Ove
 
 #### 1. Storage Path Mismatch (Priority: HIGH)
 - **Backend**: `/home/ucadmin/UC-1-Pro/volumes/`
-- **Actual Path**: `/home/muut/Production/UC-1-Pro/`
+- **Actual Path**: `/home/ubuntu/Production/UC-1-Pro/`
 - **Impact**: Storage manager won't find volumes on production system
 - **Recommendation**: Update paths in `storage_manager.py` or make configurable
 
@@ -282,7 +282,7 @@ This audit examined the four system management pages in UC-1 Pro Ops Center. Ove
 
 ## 4. Logs.jsx (Log Viewing & Analysis)
 
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Logs.jsx`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Logs.jsx`
 **Lines of Code**: 560
 
 ### Features Analysis
@@ -634,18 +634,18 @@ The system management pages are **well-designed and mostly functional**, with so
 ## Appendix: File Locations
 
 ### Frontend Pages
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/System.jsx`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Network.jsx`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/StorageBackup.jsx`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Logs.jsx`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/System.jsx`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Network.jsx`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/StorageBackup.jsx`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Logs.jsx`
 
 ### Backend Modules
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py` (Main API)
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/storage_manager.py` (Storage & Backup)
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/log_manager.py` (Log Management)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py` (Main API)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/storage_manager.py` (Storage & Backup)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/log_manager.py` (Log Management)
 
 ### Configuration
-- Paths need update from `/home/ucadmin/` to `/home/muut/Production/`
+- Paths need update from `/home/ucadmin/` to `/home/ubuntu/Production/`
 
 ---
 

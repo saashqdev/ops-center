@@ -54,7 +54,7 @@ Create a comprehensive web-based GUI for managing Traefik reverse proxy configur
 
 Traefik uses a **hybrid configuration model**:
 
-#### Static Configuration (`/home/muut/Infrastructure/traefik/traefik.yml`)
+#### Static Configuration (`/home/ubuntu/Infrastructure/traefik/traefik.yml`)
 
 **Purpose**: Core Traefik settings that require restart to change
 
@@ -96,7 +96,7 @@ certificatesResolvers:
 
 #### Dynamic Configuration (File Provider)
 
-**Location**: `/home/muut/Infrastructure/traefik/dynamic/*.yml`
+**Location**: `/home/ubuntu/Infrastructure/traefik/dynamic/*.yml`
 
 **Files**:
 1. `domains.yml` - Main service routing (314 lines)
@@ -202,7 +202,7 @@ labels:
 ### 5. SSL/TLS Configuration
 
 **Certificate Resolver**: Let's Encrypt (HTTP-01 Challenge)
-**Storage**: `/home/muut/Infrastructure/traefik/acme/acme.json` (203KB)
+**Storage**: `/home/ubuntu/Infrastructure/traefik/acme/acme.json` (203KB)
 **Key Type**: EC256 (Elliptic Curve)
 **Email**: admin@your-domain.com
 
@@ -1149,7 +1149,7 @@ import yaml
 from pathlib import Path
 
 TRAEFIK_API_URL = "http://traefik:8080/api"
-DYNAMIC_CONFIG_DIR = "/home/muut/Infrastructure/traefik/dynamic"
+DYNAMIC_CONFIG_DIR = "/home/ubuntu/Infrastructure/traefik/dynamic"
 
 async def get_routes():
     """Read routes from Traefik API"""
@@ -1361,7 +1361,7 @@ def sanitize_yaml(content: str) -> str:
 ### 3. File System Security
 
 **Requirements**:
-- Restrict file operations to `/home/muut/Infrastructure/traefik/dynamic/` directory
+- Restrict file operations to `/home/ubuntu/Infrastructure/traefik/dynamic/` directory
 - Prevent path traversal attacks
 - Validate file names
 - Set proper file permissions (644 for config files)
@@ -1370,7 +1370,7 @@ def sanitize_yaml(content: str) -> str:
 ```python
 from pathlib import Path
 
-DYNAMIC_CONFIG_DIR = Path("/home/muut/Infrastructure/traefik/dynamic")
+DYNAMIC_CONFIG_DIR = Path("/home/ubuntu/Infrastructure/traefik/dynamic")
 
 def safe_file_path(filename: str) -> Path:
     """Return safe file path or raise exception"""
@@ -1878,7 +1878,7 @@ def get_web_containers():
 ### 3. File System Integration
 
 **Requirements**:
-- Mount `/home/muut/Infrastructure/traefik` directory
+- Mount `/home/ubuntu/Infrastructure/traefik` directory
 - Read/write YAML files in `/dynamic` subdirectory
 - Monitor file changes
 - Create backups before modifications
@@ -1886,7 +1886,7 @@ def get_web_containers():
 **Docker Volume**:
 ```yaml
 volumes:
-  - /home/muut/Infrastructure/traefik:/traefik:rw
+  - /home/ubuntu/Infrastructure/traefik:/traefik:rw
 ```
 
 ### 4. Notification Integration
@@ -2801,10 +2801,10 @@ TRAEFIK_API_URL=http://traefik:8080/api
 TRAEFIK_API_AUTH_ENABLED=false
 
 # Dynamic Config Directory
-TRAEFIK_DYNAMIC_CONFIG_DIR=/home/muut/Infrastructure/traefik/dynamic
+TRAEFIK_DYNAMIC_CONFIG_DIR=/home/ubuntu/Infrastructure/traefik/dynamic
 
 # ACME Storage
-TRAEFIK_ACME_STORAGE=/home/muut/Infrastructure/traefik/acme/acme.json
+TRAEFIK_ACME_STORAGE=/home/ubuntu/Infrastructure/traefik/acme/acme.json
 
 # Docker Socket
 DOCKER_HOST=unix:///var/run/docker.sock

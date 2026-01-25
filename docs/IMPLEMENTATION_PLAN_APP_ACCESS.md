@@ -547,11 +547,11 @@ export default function PublicLanding() {
 
 1. **Create backup**
    ```bash
-   mkdir -p /home/muut/backups/$(date +%Y%m%d)
-   cp -r /home/muut/Production/UC-1-Pro/services/ops-center/src \
-      /home/muut/backups/$(date +%Y%m%d)/
-   cp -r /home/muut/Production/UC-1-Pro/services/ops-center/backend \
-      /home/muut/backups/$(date +%Y%m%d)/
+   mkdir -p /home/ubuntu/backups/$(date +%Y%m%d)
+   cp -r /home/ubuntu/Production/UC-1-Pro/services/ops-center/src \
+      /home/ubuntu/backups/$(date +%Y%m%d)/
+   cp -r /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend \
+      /home/ubuntu/backups/$(date +%Y%m%d)/
    ```
 
 2. **Git commit**
@@ -565,7 +565,7 @@ export default function PublicLanding() {
 
 1. **Deploy to staging**
    ```bash
-   cd /home/muut/Production/UC-1-Pro/services/ops-center
+   cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
    git checkout staging
    git merge main
    npm run build
@@ -617,7 +617,7 @@ export default function PublicLanding() {
 
 1. **Quick rollback**
    ```bash
-   cd /home/muut/Production/UC-1-Pro/services/ops-center
+   cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
    git checkout HEAD~1
    npm run build
    docker restart unicorn-ops-center

@@ -26,7 +26,7 @@
 **Status**: ✅ DEPLOYED & PARTIALLY FUNCTIONAL
 
 #### Files Created:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/system_detector.py` (588 lines, 20KB)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/system_detector.py` (588 lines, 20KB)
   - ✅ Source file exists
   - ✅ Deployed to container at `/app/system_detector.py`
   - ✅ Module loads successfully in Python
@@ -73,7 +73,7 @@
 - ✅ Code duplication removed
 
 #### Files Modified:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Security.jsx` (518 lines)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Security.jsx` (518 lines)
   - ✅ Source file updated
   - ⚠️ Bundle verification needed (requires browser testing)
 
@@ -90,19 +90,19 @@
 **Status**: ✅ DEPLOYED & FUNCTIONAL
 
 #### Files Created:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/components/Toast.jsx` (148 lines)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/components/Toast.jsx` (148 lines)
   - ✅ Source file exists (4.1KB)
   - ✅ Deployed in bundle
   - ✅ Found "Toast" references in bundle: `/app/dist/assets/index-CkXn3ELl.js`
 
 #### Files Modified:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Services.jsx` (924 lines)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Services.jsx` (924 lines)
   - ✅ Removed `window.location.reload()` (line 150)
   - ✅ Added `useToast()` hook
   - ✅ Added proper state management
   - ✅ Added loading overlays
 
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/App.jsx`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/App.jsx`
   - ✅ Wrapped with `ToastProvider`
 
 #### Features Implemented:
@@ -137,7 +137,7 @@
 **Status**: ✅ DEPLOYED & FULLY FUNCTIONAL
 
 #### Files Created:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/service_discovery.py` (317 lines, 12KB)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/service_discovery.py` (317 lines, 12KB)
   - ✅ Source file exists
   - ✅ Deployed to container at `/app/service_discovery.py`
   - ✅ Module loads successfully

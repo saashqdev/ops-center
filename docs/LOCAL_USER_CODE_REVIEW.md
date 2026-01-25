@@ -763,7 +763,7 @@ This feature adds significant security risk and maintenance burden. Evaluate car
 - **System Features Inventory**: `/services/ops-center/SYSTEM_FEATURES_INVENTORY.md`
 - **Master Section Checklist**: `/services/ops-center/MASTER_SECTION_CHECKLIST.md`
 - **Ops-Center Configuration**: `/services/ops-center/CLAUDE.md`
-- **UC-Cloud Overview**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- **UC-Cloud Overview**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 
 ---
 

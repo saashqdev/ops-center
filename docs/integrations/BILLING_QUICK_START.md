@@ -173,9 +173,9 @@ docker logs unicorn-lago-worker -f
 ```
 
 **Configuration Files**:
-- Environment: `/home/muut/Production/UC-1-Pro/services/ops-center/.env.auth`
-- Docker Compose: `/home/muut/Production/UC-1-Pro/services/ops-center/docker-compose.direct.yml`
-- Full Status: `/home/muut/Production/UC-1-Pro/services/ops-center/OPS_CENTER_BILLING_INTEGRATION_STATUS.md`
+- Environment: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/.env.auth`
+- Docker Compose: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docker-compose.direct.yml`
+- Full Status: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/OPS_CENTER_BILLING_INTEGRATION_STATUS.md`
 
 ---
 

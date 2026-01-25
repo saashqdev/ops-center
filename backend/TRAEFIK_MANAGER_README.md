@@ -356,7 +356,7 @@ TraefikError (Base)
 
 ```python
 # Default paths
-traefik_dir = "/home/muut/Production/UC-Cloud/traefik"
+traefik_dir = "/home/ubuntu/Production/UC-Cloud/traefik"
 config_file = traefik_dir + "/traefik.yml"
 dynamic_dir = traefik_dir + "/dynamic"
 backup_dir = traefik_dir + "/backups"
@@ -564,7 +564,7 @@ async def create_backup():
 async def restore_backup(backup_name: str):
     """Restore from backup"""
     try:
-        backup_path = f"/home/muut/Production/UC-Cloud/traefik/backups/{backup_name}"
+        backup_path = f"/home/ubuntu/Production/UC-Cloud/traefik/backups/{backup_name}"
         return manager.restore_config(backup_path, username="api-user")
     except TraefikError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -667,8 +667,8 @@ print(response.json())
 
 1. **File Permissions**: Ensure traefik directory has correct permissions
    ```bash
-   chown -R traefik:traefik /home/muut/Production/UC-Cloud/traefik
-   chmod 600 /home/muut/Production/UC-Cloud/traefik/acme/acme.json
+   chown -R traefik:traefik /home/ubuntu/Production/UC-Cloud/traefik
+   chmod 600 /home/ubuntu/Production/UC-Cloud/traefik/acme/acme.json
    ```
 
 2. **Audit Logs**: Protect audit log from unauthorized access
@@ -678,7 +678,7 @@ print(response.json())
 
 3. **Backup Directory**: Secure backups (contain SSL private keys)
    ```bash
-   chmod 700 /home/muut/Production/UC-Cloud/traefik/backups
+   chmod 700 /home/ubuntu/Production/UC-Cloud/traefik/backups
    ```
 
 4. **Rate Limiting**: Prevents DoS via config changes
@@ -698,8 +698,8 @@ docker exec ops-center-direct pip install pydantic
 
 ```bash
 # Solution: Check file permissions
-ls -la /home/muut/Production/UC-Cloud/traefik/
-sudo chown -R $(whoami):$(whoami) /home/muut/Production/UC-Cloud/traefik/
+ls -la /home/ubuntu/Production/UC-Cloud/traefik/
+sudo chown -R $(whoami):$(whoami) /home/ubuntu/Production/UC-Cloud/traefik/
 ```
 
 ### Issue: Traefik not reloading
@@ -741,7 +741,7 @@ dig newdomain.com
 - **Traefik Docs**: https://doc.traefik.io/traefik/
 - **Let's Encrypt**: https://letsencrypt.org/docs/
 - **Pydantic**: https://docs.pydantic.dev/
-- **UC-Cloud Architecture**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- **UC-Cloud Architecture**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 
 ---
 

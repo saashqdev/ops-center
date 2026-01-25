@@ -278,7 +278,7 @@ Even though the feature doesn't exist, here's how to verify:
 **Required steps:**
 ```bash
 # Find the actual React source location
-find /home/muut/Production/UC-1-Pro/services/ops-center -name "*.tsx" -type f
+find /home/ubuntu/Production/UC-1-Pro/services/ops-center -name "*.tsx" -type f
 
 # Once found, implement toast system:
 # 1. Add react-toastify to package.json
@@ -463,7 +463,7 @@ This is NOT a cache issue. The bundle is correctly built and served, but it cont
 
 **Host Paths:**
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/
 ├── package.json                        ← Dependencies
 ├── dist/                               ← Built assets
 ├── frontend/src/                       ← React source (minimal)
@@ -473,7 +473,7 @@ This is NOT a cache issue. The bundle is correctly built and served, but it cont
 
 **Traefik Config:**
 ```
-/home/muut/Infrastructure/traefik/dynamic/domains.yml
+/home/ubuntu/Infrastructure/traefik/dynamic/domains.yml
 ```
 
 ---

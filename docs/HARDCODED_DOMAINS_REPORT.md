@@ -2,7 +2,7 @@
 
 **Date**: 2025-12-25
 **Purpose**: Identify all hardcoded domain references that must be externalized for OSS release
-**Scope**: `/home/muut/OSS/ops-center`
+**Scope**: `/home/ubuntu/OSS/ops-center`
 
 ## Executive Summary
 

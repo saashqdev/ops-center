@@ -102,7 +102,7 @@ Delete an API key
 
 ### Required Environment Variables
 
-Add to `/home/muut/Production/UC-1-Pro/.env`:
+Add to `/home/ubuntu/Production/UC-1-Pro/.env`:
 
 ```bash
 # Encryption key for API keys (generate with command below)
@@ -246,7 +246,7 @@ curl -X DELETE https://your-domain.com/api/v1/user/api-keys/openai \
 ### Rebuild Frontend
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 npm run build
 ```
 
@@ -299,7 +299,7 @@ docker logs unicorn-ops-center
 **Solution**:
 ```bash
 # Check server.py imports
-grep "api_keys_router" /home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py
+grep "api_keys_router" /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py
 
 # Should see:
 # from api_keys_router import router as api_keys_router

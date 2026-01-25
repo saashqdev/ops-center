@@ -7,7 +7,7 @@ Successfully removed the page reload hack from Services.jsx and implemented prop
 ## Changes Made
 
 ### 1. Created Toast Notification System
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/components/Toast.jsx`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/components/Toast.jsx`
 
 - Created a complete toast notification system using Framer Motion
 - Supports 4 notification types: success, error, warning, info
@@ -27,7 +27,7 @@ toast.info('Service is restarting');
 ```
 
 ### 2. Updated Services.jsx
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Services.jsx`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Services.jsx`
 
 #### Removed:
 - `window.location.reload()` on line 150 (REMOVED COMPLETELY)
@@ -97,7 +97,7 @@ const handleServiceAction = async (containerName, action) => {
    - All buttons disabled during action
 
 ### 3. Updated App.jsx
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/App.jsx`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/App.jsx`
 
 - Wrapped `SystemProvider` children with `ToastProvider`
 - Toast notifications now available throughout the admin panel
@@ -198,9 +198,9 @@ The existing WebSocket connection in SystemContext will continue to push real-ti
 
 ## Files Modified
 
-1. `/home/muut/Production/UC-1-Pro/services/ops-center/src/components/Toast.jsx` (NEW)
-2. `/home/muut/Production/UC-1-Pro/services/ops-center/src/pages/Services.jsx` (MODIFIED)
-3. `/home/muut/Production/UC-1-Pro/services/ops-center/src/App.jsx` (MODIFIED)
+1. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/components/Toast.jsx` (NEW)
+2. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/pages/Services.jsx` (MODIFIED)
+3. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/App.jsx` (MODIFIED)
 
 ## Code Quality
 

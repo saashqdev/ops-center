@@ -202,7 +202,7 @@ DELETE /api/v1/admin/users/{user_id}/api-keys/{key_id}  # Returns "not yet imple
 
 **Current**: Test mode (`sk_test_...`)
 **Needed**: Live mode (`sk_live_...`)
-**Location**: `/home/muut/Production/UC-Cloud/billing/.env.billing`
+**Location**: `/home/ubuntu/Production/UC-Cloud/billing/.env.billing`
 
 **Action Required**:
 1. Get Stripe live API keys from Stripe dashboard

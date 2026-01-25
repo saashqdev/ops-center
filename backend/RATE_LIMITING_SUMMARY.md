@@ -9,7 +9,7 @@ Successfully implemented a comprehensive Redis-based rate limiting system for th
 ### Core Components
 
 #### 1. Rate Limiter Module (`rate_limiter.py`)
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/rate_limiter.py`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/rate_limiter.py`
 
 **Features**:
 - Redis-based distributed rate limiting
@@ -29,7 +29,7 @@ Successfully implemented a comprehensive Redis-based rate limiting system for th
 - `check_rate_limit_manual()`: Manual rate limit checking
 
 #### 2. Configuration File (`.env.ratelimit`)
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/.env.ratelimit`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/.env.ratelimit`
 
 **Default Limits**:
 ```
@@ -47,7 +47,7 @@ RATE_LIMIT_WRITE=50/minute       # State-changing operations
 - `RATE_LIMIT_FAIL_OPEN=true` - Graceful degradation
 
 #### 3. Updated Dependencies (`requirements.txt`)
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/requirements.txt`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/requirements.txt`
 
 **Added**:
 - `redis==5.0.1` - Redis async client
@@ -56,7 +56,7 @@ RATE_LIMIT_WRITE=50/minute       # State-changing operations
 ### Integration Tools
 
 #### 4. Integration Script (`scripts/integrate_rate_limiting.py`)
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/scripts/integrate_rate_limiting.py`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/scripts/integrate_rate_limiting.py`
 
 **Capabilities**:
 - Automatic backup of server.py
@@ -74,7 +74,7 @@ python scripts/integrate_rate_limiting.py            # Apply
 ### Documentation
 
 #### 5. Integration Guide (`docs/RATE_LIMITING_INTEGRATION.md`)
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_INTEGRATION.md`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_INTEGRATION.md`
 
 **Contents**:
 - Step-by-step integration instructions
@@ -85,7 +85,7 @@ python scripts/integrate_rate_limiting.py            # Apply
 - Troubleshooting tips
 
 #### 6. README (`docs/RATE_LIMITING_README.md`)
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_README.md`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_README.md`
 
 **Contents**:
 - Quick start guide
@@ -100,7 +100,7 @@ python scripts/integrate_rate_limiting.py            # Apply
 ### Testing
 
 #### 7. Test Suite (`tests/test_rate_limiting.py`)
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/tests/test_rate_limiting.py`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/tests/test_rate_limiting.py`
 
 **Test Coverage**:
 - Configuration parsing
@@ -272,7 +272,7 @@ Retry-After: 42
 
 ### Step 1: Install Dependencies
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 pip install -r requirements.txt
 ```
 
@@ -465,20 +465,20 @@ docker logs unicorn-ops-center | tail -100 | grep -i rate
 ## Files Created
 
 ### Core Implementation
-1. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/rate_limiter.py` (600+ lines)
-2. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/.env.ratelimit` (configuration)
-3. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/requirements.txt` (updated)
+1. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/rate_limiter.py` (600+ lines)
+2. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/.env.ratelimit` (configuration)
+3. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/requirements.txt` (updated)
 
 ### Integration Tools
-4. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/scripts/integrate_rate_limiting.py` (integration script)
+4. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/scripts/integrate_rate_limiting.py` (integration script)
 
 ### Documentation
-5. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_INTEGRATION.md` (integration guide)
-6. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_README.md` (user documentation)
-7. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/RATE_LIMITING_SUMMARY.md` (this file)
+5. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_INTEGRATION.md` (integration guide)
+6. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/RATE_LIMITING_README.md` (user documentation)
+7. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/RATE_LIMITING_SUMMARY.md` (this file)
 
 ### Testing
-8. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/tests/test_rate_limiting.py` (comprehensive test suite)
+8. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/tests/test_rate_limiting.py` (comprehensive test suite)
 
 ## Next Steps
 

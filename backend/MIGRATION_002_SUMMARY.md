@@ -522,7 +522,7 @@ python3 run_migration.py --force
 - **Main Schema Docs**: `backend/SCHEMA.md`
 - **Fernet Encryption**: https://cryptography.io/en/latest/fernet/
 - **PostgreSQL ALTER TABLE**: https://www.postgresql.org/docs/current/sql-altertable.html
-- **UC-Cloud Docs**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- **UC-Cloud Docs**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 
 ---
 

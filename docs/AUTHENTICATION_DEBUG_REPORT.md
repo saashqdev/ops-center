@@ -1,7 +1,7 @@
 # UC-1 Pro Authentication System - Debug Report
 **Date**: October 3, 2025
 **System**: ops-center-direct container
-**Location**: /home/muut/Production/UC-1-Pro/services/ops-center
+**Location**: /home/ubuntu/Production/UC-1-Pro/services/ops-center
 
 ## Executive Summary
 
@@ -23,7 +23,7 @@ OAuth callback error: NOT NULL constraint failed: users.oauth_id
 The `oauth_manager.handle_callback()` returns user info with key `provider_user_id`, but the code was trying to access `user_info.get("id")` which doesn't exist.
 
 **Fix Applied**:
-- **File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
+- **File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
 - **Line**: 344-348
 - **Change**:
   ```python
@@ -44,7 +44,7 @@ sqlite3.OperationalError: table users has no column named password_hash
 The database schema created by `init_database()` was missing `password_hash` and `password_salt` columns needed for password authentication. Additionally, `oauth_id` was marked as NOT NULL which prevented password-only users.
 
 **Fix Applied**:
-- **File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
+- **File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
 - **Lines**: 169-191
 - **Changes**:
   ```sql
@@ -68,7 +68,7 @@ Temporary failure in name resolution.
 The container was configured to connect to `unicorn-redis:6379` but no container with that name exists. The actual Redis instance is `unicorn-lago-redis`.
 
 **Fix Applied**:
-- **File**: `/home/muut/Production/UC-1-Pro/services/ops-center/.env.auth`
+- **File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/.env.auth`
 - **Line**: 31
 - **Change**:
   ```env
@@ -84,7 +84,7 @@ The container was configured to connect to `unicorn-redis:6379` but no container
 The docker-compose configuration didn't include a volume mapping, so the database was lost on every container restart.
 
 **Fix Applied**:
-- **File**: `/home/muut/Production/UC-1-Pro/services/ops-center/docker-compose.direct.yml`
+- **File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docker-compose.direct.yml`
 - **Added**:
   ```yaml
   volumes:
@@ -95,14 +95,14 @@ The docker-compose configuration didn't include a volume mapping, so the databas
 
 ## Files Modified
 
-1. **/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py**
+1. **/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py**
    - Fixed OAuth callback key mapping (line 346)
    - Updated database schema to include password fields (lines 175-191)
 
-2. **/home/muut/Production/UC-1-Pro/services/ops-center/.env.auth**
+2. **/home/ubuntu/Production/UC-1-Pro/services/ops-center/.env.auth**
    - Updated Redis URL to unicorn-lago-redis (line 31)
 
-3. **/home/muut/Production/UC-1-Pro/services/ops-center/docker-compose.direct.yml**
+3. **/home/ubuntu/Production/UC-1-Pro/services/ops-center/docker-compose.direct.yml**
    - Added env_file directive (line 10)
    - Added volume mapping (line 17)
    - Added port mapping (lines 18-19)
@@ -113,7 +113,7 @@ The docker-compose configuration didn't include a volume mapping, so the databas
 The Docker image `uc-1-pro-ops-center` needs to be rebuilt with the updated server.py:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 docker build -t uc-1-pro-ops-center .
 ```
 

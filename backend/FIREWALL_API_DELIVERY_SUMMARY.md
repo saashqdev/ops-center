@@ -340,7 +340,7 @@ RATE_LIMIT_ENABLED=true
 
 ### Architecture
 
-- **Epic Spec**: `/home/muut/Production/UC-Cloud/docs/epic1.2_architecture_spec.md`
+- **Epic Spec**: `/home/ubuntu/Production/UC-Cloud/docs/epic1.2_architecture_spec.md`
 - **Network Manager**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/network_manager.py`
 
 ### Dependencies

@@ -338,7 +338,7 @@ const data = await response.json();
 ### Run Test Suite
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/tests
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/tests
 ./run_admin_tests.sh
 ```
 
@@ -371,7 +371,7 @@ cd /home/muut/Production/UC-1-Pro/services/ops-center/tests
 
 ```python
 import sys
-sys.path.insert(0, '/home/muut/Production/UC-1-Pro/services/ops-center/backend')
+sys.path.insert(0, '/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend')
 
 from keycloak_integration import get_all_users, get_user_tier_info
 
@@ -419,15 +419,15 @@ print(f"Tier: {tier_info['subscription_tier']}")
 ## Files
 
 **Backend:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` - Keycloak client
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py` - API endpoints
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` - Keycloak client
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py` - API endpoints
 
 **Frontend:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html` - Admin UI
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html` - Admin UI
 
 **Tests:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py` - Test suite
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/run_admin_tests.sh` - Test runner
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py` - Test suite
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/run_admin_tests.sh` - Test runner
 
 ## Support
 

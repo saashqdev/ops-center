@@ -109,7 +109,7 @@ A complete custom authentication system that replaces Authentik with:
 
 1. Copy template:
    ```bash
-   cd /home/muut/Production/UC-1-Pro/services/ops-center
+   cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
    cp .env.auth.template .env.auth
    ```
 
@@ -131,7 +131,7 @@ A complete custom authentication system that replaces Authentik with:
 ### Step 5: Install Dependencies
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 
 # Install Python dependencies
 pip3 install stripe httpx redis cryptography
@@ -173,7 +173,7 @@ docker restart unicorn-ops-center
 4. **Verify redirect to dashboard**: Should redirect to `/dashboard`
 5. **Check user in database**:
    ```bash
-   sqlite3 /home/muut/Production/UC-1-Pro/volumes/ops_center.db
+   sqlite3 /home/ubuntu/Production/UC-1-Pro/volumes/ops_center.db
    SELECT * FROM users;
    .exit
    ```
@@ -186,7 +186,7 @@ docker restart unicorn-ops-center
 3. **Complete Stripe checkout** (use test card: 4242 4242 4242 4242)
 4. **Verify tier update**:
    ```bash
-   sqlite3 /home/muut/Production/UC-1-Pro/volumes/ops_center.db
+   sqlite3 /home/ubuntu/Production/UC-1-Pro/volumes/ops_center.db
    SELECT id, email, subscription_tier, stripe_customer_id FROM users;
    .exit
    ```

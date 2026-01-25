@@ -2,7 +2,7 @@
 
 **Date**: October 11, 2025
 **Status**: ✅ READY FOR BILLING
-**Location**: `/home/muut/Production/UC-1-Pro/services/ops-center`
+**Location**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center`
 
 ## Overview
 
@@ -178,7 +178,7 @@ $ docker exec ops-center-direct redis-cli -h unicorn-lago-redis ping
 Run the setup script to create products and prices in Stripe:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 docker exec ops-center-direct python setup_stripe_products.py
 ```
 
@@ -276,9 +276,9 @@ docker exec ops-center-direct python -c "from subscription_manager import subscr
 
 ## 📚 Related Documentation
 
-- **Billing API Reference**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/BILLING_API_QUICK_REFERENCE.md`
-- **Stripe Integration Guide**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/STRIPE_INTEGRATION.md`
-- **Lago Setup**: See main billing documentation in `/home/muut/Production/UC-1-Pro/billing/`
+- **Billing API Reference**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/BILLING_API_QUICK_REFERENCE.md`
+- **Stripe Integration Guide**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/STRIPE_INTEGRATION.md`
+- **Lago Setup**: See main billing documentation in `/home/ubuntu/Production/UC-1-Pro/billing/`
 
 ---
 

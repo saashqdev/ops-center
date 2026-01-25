@@ -243,10 +243,10 @@ CREATE INDEX IF NOT EXISTS idx_organizations_owner_id ON organizations(owner_id)
 
 ### Documentation
 - `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/GOOD_MORNING_REPORT.md` - Morning briefing
-- `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_README.md` - Edge Device overview
-- `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_ARCHITECTURE.md` (77 pages)
-- `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_SCHEMA.sql` (450+ lines)
-- `/home/muut/Production/UC-Cloud/docs/INFRASTRUCTURE_OPTIMIZATION_REPORT.md` (585 lines)
+- `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_README.md` - Edge Device overview
+- `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_ARCHITECTURE.md` (77 pages)
+- `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_SCHEMA.sql` (450+ lines)
+- `/home/ubuntu/Production/UC-Cloud/docs/INFRASTRUCTURE_OPTIMIZATION_REPORT.md` (585 lines)
 
 ### Code Deployed
 - `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/src/pages/Geeses.jsx` (648 lines)

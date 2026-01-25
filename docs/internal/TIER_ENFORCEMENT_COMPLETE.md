@@ -137,7 +137,7 @@ X-API-Calls-Remaining: 291
 ### Run Python Tests
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 python3 tests/test_tier_enforcement.py your@email.com
 ```
 

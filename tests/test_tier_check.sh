@@ -161,10 +161,10 @@ fi
 echo ""
 
 echo -e "${YELLOW}Checking middlewares.yml configuration...${NC}"
-if [ -f "/home/muut/Infrastructure/traefik/dynamic/middlewares.yml" ]; then
+if [ -f "/home/ubuntu/Infrastructure/traefik/dynamic/middlewares.yml" ]; then
     echo -e "${GREEN}✓ middlewares.yml exists${NC}"
 
-    if grep -q "lago-tier-check" "/home/muut/Infrastructure/traefik/dynamic/middlewares.yml"; then
+    if grep -q "lago-tier-check" "/home/ubuntu/Infrastructure/traefik/dynamic/middlewares.yml"; then
         echo -e "${GREEN}✓ lago-tier-check middleware defined${NC}"
     else
         echo -e "${RED}✗ lago-tier-check middleware not found in file${NC}"

@@ -561,7 +561,7 @@ Use the provided test script to verify functionality:
 export KEYCLOAK_ADMIN_PASSWORD="your-admin-password"
 
 # Run tests
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 python3 test_admin_api.py
 ```
 

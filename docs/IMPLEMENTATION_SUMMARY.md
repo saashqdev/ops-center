@@ -277,7 +277,7 @@ DELETE /api/v1/user/api-keys/openai
 ### Step 1: Restart Services
 
 ```bash
-cd /home/muut/Production/UC-1-Pro
+cd /home/ubuntu/Production/UC-1-Pro
 
 # Restart ops-center to load new code
 docker-compose restart unicorn-ops-center
@@ -295,7 +295,7 @@ docker logs unicorn-ops-center --tail 50
 
 ```bash
 # Check dist folder was created
-ls -lh /home/muut/Production/UC-1-Pro/services/ops-center/dist/
+ls -lh /home/ubuntu/Production/UC-1-Pro/services/ops-center/dist/
 
 # Should see:
 # index.html

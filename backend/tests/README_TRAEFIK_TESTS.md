@@ -355,7 +355,7 @@ pytest tests/test_traefik_manager.py -v
 docker ps | grep ops-center
 
 # Start service
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 docker restart ops-center-direct
 
 # Wait for startup

@@ -4,7 +4,7 @@
 
 ```bash
 # 1. Restart ops-center to load new code
-cd /home/muut/Production/UC-1-Pro
+cd /home/ubuntu/Production/UC-1-Pro
 docker restart unicorn-ops-center
 
 # 2. Check logs
@@ -92,18 +92,18 @@ curl -X PATCH "https://your-domain.com/api/v1/admin/subscriptions/user@example.c
 ## 📁 Key Files
 
 **Backend:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py`
 
 **Frontend:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html`
 
 **Tests:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py`
 
 **Docs:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/KEYCLOAK_ADMIN_IMPLEMENTATION.md`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/KEYCLOAK_ADMIN_IMPLEMENTATION.md`
 
 ## 🔧 Environment Variables
 
@@ -142,4 +142,4 @@ KEYCLOAK_ADMIN_PASSWORD=your-test-password
 
 - Check container logs: `docker logs unicorn-ops-center`
 - Keycloak admin: https://auth.your-domain.com/admin/uchub/console
-- Full docs: `/home/muut/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md`
+- Full docs: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md`

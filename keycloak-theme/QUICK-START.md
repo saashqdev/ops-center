@@ -5,13 +5,13 @@
 ### Prerequisites
 - Docker is running
 - Keycloak container is running (name: `uchub-keycloak`)
-- Theme files are in: `/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/`
+- Theme files are in: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/`
 
 ### Deploy in 3 Steps
 
 #### Step 1: Run Deployment Script
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-keycloak-theme.sh
 ```
 

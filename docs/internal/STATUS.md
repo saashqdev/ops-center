@@ -3,7 +3,7 @@
 **Last Updated**: October 22, 2025 01:40 UTC
 **Session**: Post-deployment fix session
 **Status**: 🟡 PARTIALLY WORKING - Landing page fixed, User Management broken
-**Backup**: `/home/muut/backups/ops-center-backup-20251022-014051.tar.gz` (133MB)
+**Backup**: `/home/ubuntu/backups/ops-center-backup-20251022-014051.tar.gz` (133MB)
 
 ---
 

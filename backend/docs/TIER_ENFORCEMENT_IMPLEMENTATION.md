@@ -7,7 +7,7 @@ Successfully implemented tier enforcement system that reads subscription tiers f
 ## What Was Implemented
 
 ### 1. Keycloak Integration Module
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
 
 **Functions**:
 - `get_admin_token()` - Authenticate with Keycloak Admin API
@@ -25,7 +25,7 @@ Successfully implemented tier enforcement system that reads subscription tiers f
 - Error handling with graceful fallbacks
 
 ### 2. Tier Enforcement Middleware
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/tier_enforcement_middleware.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/tier_enforcement_middleware.py`
 
 **Updated to use Keycloak instead of Authentik**:
 - Removed Authentik API calls
@@ -47,7 +47,7 @@ Successfully implemented tier enforcement system that reads subscription tiers f
 - `/health`, `/docs`, `/redoc`
 
 ### 3. Usage API
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/usage_api.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/usage_api.py`
 
 **Updated to use Keycloak**:
 - Replaced all Authentik API calls with Keycloak integration
@@ -62,8 +62,8 @@ Successfully implemented tier enforcement system that reads subscription tiers f
 
 ### 4. Test Suite
 **Files**:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/tests/test_tier_enforcement.py`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/tests/test_tier_enforcement.sh`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/tests/test_tier_enforcement.py`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/tests/test_tier_enforcement.sh`
 
 **Python Test Suite** (8 tests):
 1. Keycloak connection and authentication
@@ -86,8 +86,8 @@ Successfully implemented tier enforcement system that reads subscription tiers f
 
 ### 5. Documentation
 **Files**:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/TIER_ENFORCEMENT_SETUP.md`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/TIER_ENFORCEMENT_IMPLEMENTATION.md` (this file)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/TIER_ENFORCEMENT_SETUP.md`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/TIER_ENFORCEMENT_IMPLEMENTATION.md` (this file)
 
 **Coverage**:
 - Architecture overview
@@ -189,7 +189,7 @@ curl -b /tmp/session.txt https://your-domain.com/api/v1/services -v 2>&1 | grep 
 
 ```bash
 # Python unit tests
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 python3 tests/test_tier_enforcement.py your@email.com
 
 # Bash integration tests

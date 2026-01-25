@@ -95,7 +95,7 @@ Output: `Cx6IW6h4ydmRQaSwi7MdZ1soAaM0FgbQuSBzuxH41Ao=`
 
 ### 2. Configure Environment Variables
 
-Add to `/home/muut/Production/UC-1-Pro/services/ops-center/backend/.env`:
+Add to `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/.env`:
 
 ```bash
 # BYOK Configuration
@@ -305,7 +305,7 @@ async with httpx.AsyncClient() as client:
 ### 1. Rebuild Ops-Center Container
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 docker-compose -f docker-compose.ops-center-sso.yml build
 ```
 
@@ -355,7 +355,7 @@ Use the curl examples above or:
 export SESSION_COOKIE="your_session_cookie_here"
 
 # Run test script
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 export TEST_SESSION_COOKIE=$SESSION_COOKIE
 python3 tests/test_byok.py
 ```
@@ -464,8 +464,8 @@ docker-compose -f docker-compose.ops-center-sso.yml build --no-cache
 ## References
 
 - **Keycloak Admin API**: https://auth.your-domain.com/admin/master/console/
-- **BYOK Spec**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/byok_api.py`
-- **Test Suite**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/tests/test_byok.py`
+- **BYOK Spec**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/byok_api.py`
+- **Test Suite**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/tests/test_byok.py`
 - **Encryption**: https://cryptography.io/en/latest/fernet/
 
 ---

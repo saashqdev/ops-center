@@ -161,7 +161,7 @@ AUDIT_FAIL_OPEN=true                      # Continue on audit failure
 
 **Database Location:**
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/data/ops_center.db
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/data/ops_center.db
 ```
 
 **Log Files:**
@@ -405,7 +405,7 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" \
   "http://localhost:8084/api/v1/audit/stats"
 
 # Check database
-sqlite3 /home/muut/Production/UC-1-Pro/services/ops-center/data/ops_center.db \
+sqlite3 /home/ubuntu/Production/UC-1-Pro/services/ops-center/data/ops_center.db \
   "SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 10;"
 
 # Check log file

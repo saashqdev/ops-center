@@ -3,7 +3,7 @@ CONTEXT: I'm working on the UC-Cloud Ops Center multi-tenant SaaS platform. In t
 CURRENT STATE:
 - SSO working: Keycloak uchub realm with 3 identity providers (Google/GitHub/Microsoft)
 - Payment working: Stripe checkout integration via Lago billing
-- Backups created: /home/muut/backups/ops-center-backup-20251013-215242.tar.gz
+- Backups created: /home/ubuntu/backups/ops-center-backup-20251013-215242.tar.gz
 - Documentation updated: CLAUDE.md, SSO-SETUP-COMPLETE.md, NEXT-SESSION-HANDOFF.md
 - All systems operational and tested
 
@@ -37,7 +37,7 @@ IMPORTANT CONTEXT:
 REFERENCE FILES:
 - Full handoff doc: /services/ops-center/NEXT-SESSION-HANDOFF.md
 - SSO config: /services/ops-center/SSO-SETUP-COMPLETE.md
-- Project config: /home/muut/CLAUDE.md
+- Project config: /home/ubuntu/CLAUDE.md
 
 VERIFICATION BEFORE STARTING:
 Run this to ensure everything still works:

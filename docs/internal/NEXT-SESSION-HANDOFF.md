@@ -64,8 +64,8 @@
 - Integration: Working with Keycloak user management
 
 ### Backups Created 💾
-- ops-center: `/home/muut/backups/ops-center-backup-20251013-215242.tar.gz` (27MB)
-- Full UC-Cloud: `/home/muut/backups/uc-cloud-full-backup-20251013-215258.tar.gz` (64MB)
+- ops-center: `/home/ubuntu/backups/ops-center-backup-20251013-215242.tar.gz` (27MB)
+- Full UC-Cloud: `/home/ubuntu/backups/uc-cloud-full-backup-20251013-215258.tar.gz` (64MB)
 
 ---
 
@@ -387,7 +387,7 @@ cat package.json | grep scripts -A 10
 - `/services/ops-center/SSO-SETUP-COMPLETE.md` - Complete SSO configuration guide
 - `/services/ops-center/UCHUB-REALM-SETUP.md` - UCHUB realm manual setup instructions
 - `/services/ops-center/backend/tests/verify_uchub_sso.py` - Automated verification
-- `/home/muut/CLAUDE.md` - Updated with current SSO config
+- `/home/ubuntu/CLAUDE.md` - Updated with current SSO config
 
 ### Existing Documentation
 - `/services/ops-center/MULTI-TENANCY-STATUS.md` - Multi-tenancy implementation
@@ -428,7 +428,7 @@ cat package.json | grep scripts -A 10
 ## ⚠️ IMPORTANT NOTES
 
 1. **Backups**: Always create backups before major changes
-   - Location: `/home/muut/backups/`
+   - Location: `/home/ubuntu/backups/`
    - Latest: `ops-center-backup-20251013-215242.tar.gz`
 
 2. **Testing**: Test in this order:
@@ -438,7 +438,7 @@ cat package.json | grep scripts -A 10
 
 3. **Rollback**: If something breaks:
    ```bash
-   cd /home/muut/backups
+   cd /home/ubuntu/backups
    tar -xzf ops-center-backup-20251013-215242.tar.gz -C /tmp/ops-center-restore
    # Review and selectively restore files
    ```

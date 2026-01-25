@@ -452,7 +452,7 @@ curl -X GET https://your-domain.com/api/v1/traefik/acme/status \
         "ca_server": "https://acme-v02.api.letsencrypt.org/directory"
       }
     ],
-    "acme_file": "/home/muut/Production/UC-Cloud/traefik/acme/acme.json",
+    "acme_file": "/home/ubuntu/Production/UC-Cloud/traefik/acme/acme.json",
     "file_size": 45678,
     "last_modified": "2025-10-24T10:15:30.123456Z"
   }

@@ -281,7 +281,7 @@ class LocalUser(BaseModel):
                 "username": "muut",
                 "uid": 1000,
                 "gid": 1000,
-                "home": "/home/muut",
+                "home": "/home/ubuntu",
                 "shell": "/bin/bash",
                 "groups": ["muut", "sudo", "docker"],
                 "has_sudo": True,

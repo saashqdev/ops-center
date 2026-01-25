@@ -27,7 +27,7 @@ If you have a custom deployment, you can configure service URLs.
 ### 1. Copy Environment Template
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 cp .env.template .env
 ```
 
@@ -148,7 +148,7 @@ curl http://localhost:8084/api/v1/services/discovery
 
 Run the test suite:
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./test_service_discovery.sh
 ```
 

@@ -142,7 +142,7 @@ usage_tracker = UsageTracker(
 
 # ===== DATABASE SETUP =====
 
-DB_PATH = "/home/muut/Production/UC-1-Pro/volumes/ops_center.db"
+DB_PATH = "/home/ubuntu/Production/UC-1-Pro/volumes/ops_center.db"
 
 @contextmanager
 def get_db():

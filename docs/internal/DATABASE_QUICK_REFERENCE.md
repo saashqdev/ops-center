@@ -40,7 +40,7 @@
 | **Migrations** | `alembic/versions/` |
 | **Config** | `alembic.ini` |
 | **Scripts** | `scripts/database/` |
-| **Backups** | `/home/muut/backups/database/` |
+| **Backups** | `/home/ubuntu/backups/database/` |
 | **Docs** | `docs/DATABASE_*.md` |
 
 ---
@@ -51,7 +51,7 @@
 **Current Version**: `f6570c470a28` (baseline)
 **Tables**: 12
 **Backup Retention**: 7 days
-**Last Backup**: Check `/home/muut/backups/database/`
+**Last Backup**: Check `/home/ubuntu/backups/database/`
 
 ---
 
@@ -134,7 +134,7 @@ docker restart ops-center-direct
 curl http://localhost:8084/api/v1/system/status
 
 # 4. If still broken, restore from backup
-./scripts/database/restore_database.sh /home/muut/backups/database/unicorn_db_LATEST.sql
+./scripts/database/restore_database.sh /home/ubuntu/backups/database/unicorn_db_LATEST.sql
 ```
 
 ---

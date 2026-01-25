@@ -202,7 +202,7 @@
 ### Setup Unicorn Brigade
 - [ ] 4.1 Clone/update Unicorn Brigade repository
   ```bash
-  cd /home/muut/Production/UC-Cloud
+  cd /home/ubuntu/Production/UC-Cloud
   git clone https://github.com/Unicorn-Commander/Unicorn-Brigade.git
   ```
 - [ ] 4.2 Review Unicorn Brigade architecture
@@ -410,7 +410,7 @@
 - [ ] 7.1 Create production backup:
   ```bash
   cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
-  tar -czf /home/muut/backups/ops-center-backup-$(date +%Y%m%d-%H%M%S).tar.gz .
+  tar -czf /home/ubuntu/backups/ops-center-backup-$(date +%Y%m%d-%H%M%S).tar.gz .
   ```
 - [ ] 7.2 Review all environment variables
 - [ ] 7.3 Switch Stripe to live mode (when ready)

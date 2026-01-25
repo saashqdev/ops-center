@@ -81,7 +81,7 @@ This security audit analyzes the proposed Traefik Configuration Management syste
 **Attack Scenario**:
 ```
 1. Attacker gains code execution in Ops-Center container
-2. Reads /home/muut/Infrastructure/traefik/acme/acme.json
+2. Reads /home/ubuntu/Infrastructure/traefik/acme/acme.json
 3. Extracts private keys for *.your-domain.com
 4. Performs SSL interception attacks
 ```
@@ -180,7 +180,7 @@ volumes:
 
 **Current Backup Location**:
 ```python
-TRAEFIK_BACKUP_DIR = Path("/home/muut/Infrastructure/traefik/backups")
+TRAEFIK_BACKUP_DIR = Path("/home/ubuntu/Infrastructure/traefik/backups")
 ```
 
 **Vulnerabilities**:
@@ -611,7 +611,7 @@ async def require_admin(authorization: str = Header(None)):
 sudo cryptsetup luksFormat /dev/sdX
 sudo cryptsetup luksOpen /dev/sdX traefik_encrypted
 sudo mkfs.ext4 /dev/mapper/traefik_encrypted
-sudo mount /dev/mapper/traefik_encrypted /home/muut/Infrastructure/traefik
+sudo mount /dev/mapper/traefik_encrypted /home/ubuntu/Infrastructure/traefik
 ```
 
 **Option 2: Application-Level Encryption**
@@ -1089,7 +1089,7 @@ Implement these for enhanced security posture:
 
 ### 7.1 Directory Structure
 ```bash
-/home/muut/Infrastructure/traefik/
+/home/ubuntu/Infrastructure/traefik/
 ├── acme/               (0750, muut:traefik-admin)
 │   └── acme.json       (0400, muut:traefik-admin) ⚠️ ENCRYPTED
 ├── dynamic/            (0750, muut:traefik-admin)
@@ -1110,19 +1110,19 @@ sudo groupadd traefik-admin
 sudo usermod -a -G traefik-admin muut
 
 # Set directory permissions
-sudo chmod 0750 /home/muut/Infrastructure/traefik/acme
-sudo chmod 0750 /home/muut/Infrastructure/traefik/dynamic
-sudo chmod 0700 /home/muut/Infrastructure/traefik/backups
+sudo chmod 0750 /home/ubuntu/Infrastructure/traefik/acme
+sudo chmod 0750 /home/ubuntu/Infrastructure/traefik/dynamic
+sudo chmod 0700 /home/ubuntu/Infrastructure/traefik/backups
 
 # Set file permissions
-sudo chmod 0400 /home/muut/Infrastructure/traefik/acme/acme.json
-sudo find /home/muut/Infrastructure/traefik/dynamic -name "*.yml" -exec chmod 0640 {} \;
+sudo chmod 0400 /home/ubuntu/Infrastructure/traefik/acme/acme.json
+sudo find /home/ubuntu/Infrastructure/traefik/dynamic -name "*.yml" -exec chmod 0640 {} \;
 
 # Set ownership
-sudo chown -R muut:traefik-admin /home/muut/Infrastructure/traefik/
+sudo chown -R muut:traefik-admin /home/ubuntu/Infrastructure/traefik/
 
 # Verify
-sudo find /home/muut/Infrastructure/traefik -ls
+sudo find /home/ubuntu/Infrastructure/traefik -ls
 ```
 
 ### 7.3 Permission Explanation
@@ -1183,7 +1183,7 @@ echo "traefik_secure /home/traefik-encrypted.img /secure/traefik-keyfile" | sudo
 echo "/dev/mapper/traefik_secure /secure/traefik ext4 defaults 0 2" | sudo tee -a /etc/fstab
 
 # Update Traefik paths
-sudo ln -sf /secure/traefik/acme.json /home/muut/Infrastructure/traefik/acme/acme.json
+sudo ln -sf /secure/traefik/acme.json /home/ubuntu/Infrastructure/traefik/acme/acme.json
 ```
 
 ---

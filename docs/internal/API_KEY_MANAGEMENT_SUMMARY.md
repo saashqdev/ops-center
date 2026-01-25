@@ -242,7 +242,7 @@ API_KEY=$(curl -s -X GET https://your-domain.com/api/v1/admin/platform-keys/open
   -H "Cookie: session_token=$ADMIN_SESSION_TOKEN" | jq -r '.api_key')
 
 # 2. Update .env.billing file
-cd /home/muut/Production/UC-Cloud/billing
+cd /home/ubuntu/Production/UC-Cloud/billing
 echo "OPENROUTER_API_KEY=$API_KEY" >> .env.billing
 
 # 3. Restart LiteLLM
@@ -866,7 +866,7 @@ INFO:     Application startup complete.
 # Save
 
 # Follow LITELLM_CONFIG_UPDATE.md to update LiteLLM
-cd /home/muut/Production/UC-Cloud/billing
+cd /home/ubuntu/Production/UC-Cloud/billing
 echo "OPENROUTER_API_KEY=sk-or-v1-YOUR_KEY" >> .env.billing
 docker compose -f docker-compose.billing.yml restart uchub-litellm
 ```

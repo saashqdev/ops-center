@@ -300,7 +300,7 @@ python3 tests/simulate_webhooks.py --run-all
 
 1. **Environment Setup:**
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/tests
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/tests
 
 # Install dependencies
 pip install -r requirements-test.txt

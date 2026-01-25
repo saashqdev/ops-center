@@ -88,7 +88,7 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Migrations applied successfully${NC}"
 else
     echo -e "${RED}ERROR: Migration failed${NC}"
-    echo -e "${YELLOW}Database backup is available in /home/muut/backups/database/${NC}"
+    echo -e "${YELLOW}Database backup is available in /home/ubuntu/backups/database/${NC}"
     echo -e "${YELLOW}To rollback: ./scripts/rollback_migration.sh${NC}"
     exit 1
 fi

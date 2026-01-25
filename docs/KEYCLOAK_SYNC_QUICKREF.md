@@ -38,7 +38,7 @@ curl https://your-domain.com/api/v1/webhooks/lago/health
 
 ### 5. Run Tests
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./scripts/test_keycloak_webhook.sh
 ```
 
@@ -82,9 +82,9 @@ curl -sk "https://auth.your-domain.com/admin/realms/uchub/users?email=admin@exam
 
 ## Files Modified
 
-1. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` - NEW
-2. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py` - UPDATED
-3. `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py` - FIXED (line 3763)
+1. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` - NEW
+2. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py` - UPDATED
+3. `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py` - FIXED (line 3763)
 
 ---
 

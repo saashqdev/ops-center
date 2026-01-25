@@ -10,28 +10,28 @@ October 9, 2025
 ## Files Created/Modified
 
 ### New Files
-1. **`/home/muut/Production/UC-1-Pro/services/ops-center/backend/system_manager.py`** (551 lines)
+1. **`/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/system_manager.py`** (551 lines)
    - Core system management module
    - Network configuration (netplan)
    - User password management
    - Package update checking
    - Pydantic models for validation
 
-2. **`/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/SYSTEM_MANAGEMENT_API.md`**
+2. **`/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/SYSTEM_MANAGEMENT_API.md`**
    - Complete API documentation
    - Request/response schemas
    - Security guidelines
    - Integration examples
    - Best practices
 
-3. **`/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/SYSTEM_API_QUICK_REFERENCE.md`**
+3. **`/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/SYSTEM_API_QUICK_REFERENCE.md`**
    - Quick reference guide
    - curl examples
    - Python/JavaScript client code
    - Security checklist
 
 ### Modified Files
-1. **`/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`**
+1. **`/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`**
    - Added 4 new API endpoints (lines 2679-2878)
    - Added logging configuration (lines 95-97)
    - Added system_manager imports (lines 41-47)
@@ -173,7 +173,7 @@ pytest tests/test_system_api.py::test_package_management_flow
 ### Manual Testing
 ```bash
 # Start server
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 uvicorn server:app --host 0.0.0.0 --port 8084
 
 # Test endpoints (see SYSTEM_API_QUICK_REFERENCE.md)

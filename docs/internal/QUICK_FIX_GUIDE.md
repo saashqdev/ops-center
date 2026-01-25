@@ -265,7 +265,7 @@ docker logs ops-center-direct | grep -i "error\|exception\|500"
 docker restart ops-center-direct
 
 # Full rebuild
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 docker compose -f services/ops-center/docker-compose.direct.yml build
 docker compose -f services/ops-center/docker-compose.direct.yml up -d
 ```

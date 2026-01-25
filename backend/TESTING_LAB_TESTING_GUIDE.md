@@ -62,7 +62,7 @@ app.include_router(testing_lab_router)
 ### 4. Restart Backend
 
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 docker restart ops-center-direct
 
 # Wait for startup

@@ -470,7 +470,7 @@ CLOUDFLARE_ACCOUNT_ID=your_account_id  # Auto-detected if not set
 ### Documentation
 - **This Deployment Report**: `EPIC_1.6_DEPLOYMENT_COMPLETE.md`
 - **Test Report**: `EPIC_1.6_TEST_REPORT.md`
-- **Master Checklist**: `/home/muut/Production/UC-Cloud/MASTER_CHECKLIST.md` (Section 1.6)
+- **Master Checklist**: `/home/ubuntu/Production/UC-Cloud/MASTER_CHECKLIST.md` (Section 1.6)
 
 ### Troubleshooting
 ```bash

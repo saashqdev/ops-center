@@ -55,7 +55,7 @@ curl -H "Authorization: Bearer $TOKEN" \
   http://localhost:8084/api/v1/audit/stats
 
 # Check database
-sqlite3 /home/muut/Production/UC-1-Pro/services/ops-center/data/ops_center.db \
+sqlite3 /home/ubuntu/Production/UC-1-Pro/services/ops-center/data/ops_center.db \
   "SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 5;"
 ```
 

@@ -13,7 +13,7 @@ Successfully migrated subscription sync system from Authentik to **Keycloak** at
 ## Files Created/Modified
 
 ### 1. Keycloak Integration Module
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
 
 **Key Functions:**
 - `get_admin_token()` - Token management with caching
@@ -31,7 +31,7 @@ Successfully migrated subscription sync system from Authentik to **Keycloak** at
 - ✅ SSL support (self-signed certs)
 
 ### 2. Updated Webhook Handler
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py`
 
 **Changes:**
 - Replaced Authentik imports with Keycloak integration
@@ -48,7 +48,7 @@ Successfully migrated subscription sync system from Authentik to **Keycloak** at
 - ✅ `invoice.payment_status_updated`
 
 ### 3. Fixed Route Handling
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py` (line 3763)
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py` (line 3763)
 
 **Problem:** Catch-all SPA route was intercepting API endpoints
 
@@ -202,7 +202,7 @@ curl -sk "https://auth.your-domain.com/admin/realms/uchub/users?email=admin@exam
 ### Comprehensive Test Suite
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./scripts/test_keycloak_webhook.sh
 ```
 
@@ -302,17 +302,17 @@ docker start ops-center-direct
 ## File Locations
 
 ### Source Code
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` (468 lines)
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py` (307 lines)
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py` (routing fix at line 3763)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` (468 lines)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py` (307 lines)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py` (routing fix at line 3763)
 
 ### Documentation
-- `/home/muut/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_SUBSCRIPTION_SYNC.md` (515 lines)
-- `/home/muut/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_WEBHOOK_DEPLOYMENT.md` (396 lines)
-- `/home/muut/Production/UC-1-Pro/services/ops-center/docs/IMPLEMENTATION_SUMMARY_KEYCLOAK_SYNC.md` (this file)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_SUBSCRIPTION_SYNC.md` (515 lines)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_WEBHOOK_DEPLOYMENT.md` (396 lines)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/IMPLEMENTATION_SUMMARY_KEYCLOAK_SYNC.md` (this file)
 
 ### Testing
-- `/home/muut/Production/UC-1-Pro/services/ops-center/scripts/test_keycloak_webhook.sh` (executable)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/scripts/test_keycloak_webhook.sh` (executable)
 
 ---
 

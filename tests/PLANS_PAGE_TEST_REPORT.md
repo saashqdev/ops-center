@@ -451,7 +451,7 @@ def get_plans():
 ### Automated Testing:
 ```bash
 # Run the comprehensive test script
-bash /home/muut/Production/UC-1-Pro/services/ops-center/tests/test_plans_page.sh
+bash /home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_plans_page.sh
 
 # Expected output:
 # - 18+ tests passing
@@ -507,13 +507,13 @@ The UC-1 Pro plans page and subscription API are **fully functional and producti
 
 ### Test Script Location:
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/tests/test_plans_page.sh
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_plans_page.sh
 ```
 
 ### Test Execution:
 ```bash
 # To re-run tests:
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 bash tests/test_plans_page.sh
 ```
 

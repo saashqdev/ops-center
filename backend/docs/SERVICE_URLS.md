@@ -341,7 +341,7 @@ docker logs unicorn-open-webui --tail 100
 docker restart unicorn-open-webui
 
 # Restart all services
-cd /home/muut/Production/UC-Cloud/services
+cd /home/ubuntu/Production/UC-Cloud/services
 docker-compose restart
 ```
 

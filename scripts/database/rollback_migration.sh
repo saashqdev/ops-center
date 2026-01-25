@@ -75,7 +75,7 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Rollback successful${NC}"
 else
     echo -e "${RED}ERROR: Rollback failed${NC}"
-    echo -e "${YELLOW}Database backup is available in /home/muut/backups/database/${NC}"
+    echo -e "${YELLOW}Database backup is available in /home/ubuntu/backups/database/${NC}"
     exit 1
 fi
 

@@ -3,7 +3,7 @@
 ## One-Command Deployment
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center && ./deploy-keycloak-theme.sh
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center && ./deploy-keycloak-theme.sh
 ```
 
 ## Essential Commands
@@ -128,7 +128,7 @@ docker restart uchub-keycloak
 
 ### Source Files
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/
 ├── theme.properties
 └── login/
     ├── theme.properties
@@ -145,7 +145,7 @@ docker restart uchub-keycloak
 
 ### Scripts
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/
 ├── deploy-keycloak-theme.sh       # Deploy theme
 ├── verify-keycloak-theme.sh       # Verify installation
 ├── KEYCLOAK_THEME_GUIDE.md        # Full documentation
@@ -227,4 +227,4 @@ curl -s http://localhost:9100/realms/uchub/account | grep -i "uc-1-pro"
 
 ---
 
-**Quick Deploy**: `cd /home/muut/Production/UC-1-Pro/services/ops-center && ./deploy-keycloak-theme.sh`
+**Quick Deploy**: `cd /home/ubuntu/Production/UC-1-Pro/services/ops-center && ./deploy-keycloak-theme.sh`

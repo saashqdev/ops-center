@@ -94,7 +94,7 @@ Ops Center has been migrated from direct OAuth to Keycloak SSO integration. This
 After creating the client, set the environment variable:
 
 ```bash
-# In /home/muut/Production/UC-1-Pro/services/ops-center/.env or docker-compose
+# In /home/ubuntu/Production/UC-1-Pro/services/ops-center/.env or docker-compose
 export KEYCLOAK_CLIENT_SECRET="<your-client-secret-from-step-3>"
 ```
 

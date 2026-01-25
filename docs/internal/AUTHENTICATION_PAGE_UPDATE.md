@@ -396,7 +396,7 @@ docker exec ops-center-direct curl -s http://localhost:8084/api/v1/system/keyclo
 ## References
 
 - **Keycloak Admin API**: https://www.keycloak.org/docs-api/latest/rest-api/index.html
-- **UC-Cloud Configuration**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- **UC-Cloud Configuration**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 - **Ops-Center Docs**: `/services/ops-center/CLAUDE.md`
 - **Keycloak SSO Setup**: `/services/ops-center/SSO-SETUP-COMPLETE.md`
 

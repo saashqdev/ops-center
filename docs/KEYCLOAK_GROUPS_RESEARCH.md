@@ -73,7 +73,7 @@ KC_METRICS_ENABLED=true
 
 ### Current Role Mapper Implementation
 
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/role_mapper.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/role_mapper.py`
 
 **Current Logic:**
 1. Check hardcoded username list (lines 124-131)
@@ -328,7 +328,7 @@ curl -X POST https://auth.your-domain.com/realms/master/protocol/openid-connect/
 ### Available Admin Scripts
 
 **1. Client Setup Script (VERIFIED):**
-File: `/home/muut/Production/UC-1-Pro/services/ops-center/setup-keycloak-client.py`
+File: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/setup-keycloak-client.py`
 
 **Features:**
 - Uses `httpx` for REST API calls
@@ -338,7 +338,7 @@ File: `/home/muut/Production/UC-1-Pro/services/ops-center/setup-keycloak-client.
 - Already has KeycloakAdmin class
 
 **2. Admin API Test Script (VERIFIED):**
-File: `/home/muut/Production/UC-1-Pro/services/ops-center/test_admin_api.py`
+File: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/test_admin_api.py`
 
 **Features:**
 - Tests admin authentication
@@ -458,7 +458,7 @@ If not → Check group mapper configuration
 
 **Step 2.1: Update role_mapper.py**
 
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/role_mapper.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/role_mapper.py`
 
 **Changes:**
 
@@ -579,7 +579,7 @@ Update `ROLE_MAPPING.md` to reflect new group-based approach.
 
 **Script 1: Create Groups via API**
 
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/scripts/create-keycloak-groups.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/scripts/create-keycloak-groups.py`
 
 ```python
 #!/usr/bin/env python3
@@ -683,7 +683,7 @@ python3 scripts/create-keycloak-groups.py
 
 **Script 2: Add User to Group via API**
 
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/scripts/add-user-to-group.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/scripts/add-user-to-group.py`
 
 ```python
 #!/usr/bin/env python3
@@ -1025,7 +1025,7 @@ curl -s https://auth.your-domain.com/realms/uchub/protocol/openid-connect/userin
 
 **Step 1: Revert Code Changes**
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 git checkout HEAD -- role_mapper.py
 # Or restore from backup
 cp role_mapper.py.backup role_mapper.py
@@ -1035,7 +1035,7 @@ cp role_mapper.py.backup role_mapper.py
 ```bash
 docker restart ops-center-direct
 # Or
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 docker-compose -f docker-compose.direct.yml restart
 ```
 
@@ -1427,4 +1427,4 @@ docker logs uchub-keycloak --tail 100 | grep -E "ERROR|WARN"
 **Document Version:** 1.0
 **Last Updated:** October 9, 2025
 **Author:** Claude (Research Agent)
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_GROUPS_RESEARCH.md`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_GROUPS_RESEARCH.md`

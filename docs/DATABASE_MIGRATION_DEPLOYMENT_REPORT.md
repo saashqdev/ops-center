@@ -99,7 +99,7 @@ Successfully implemented a comprehensive database schema migration system using 
 - Automatic cleanup of old backups
 - Verification after backup creation
 
-**Backup Location**: `/home/muut/backups/database/`
+**Backup Location**: `/home/ubuntu/backups/database/`
 
 **Backup Format**:
 ```
@@ -497,7 +497,7 @@ psycopg2-binary==2.9.9   # PostgreSQL driver
 | Documentation Lines | 2,216 lines |
 | Total Code/Docs | 3,364 lines |
 | Backup Size | 1.2 KB (empty DB) |
-| Backup Location | /home/muut/backups/database/ |
+| Backup Location | /home/ubuntu/backups/database/ |
 | Retention Period | 7 days |
 | Development Time | ~4 hours |
 
@@ -577,7 +577,7 @@ All success criteria met:
 
 **Migration Files**: `alembic/versions/`
 
-**Backup Location**: `/home/muut/backups/database/`
+**Backup Location**: `/home/ubuntu/backups/database/`
 
 ---
 

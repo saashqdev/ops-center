@@ -437,7 +437,7 @@ CREATE VIEW (x3)
 ### 2. Restart Backend
 
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 
 # Restart ops-center
 docker restart ops-center-direct

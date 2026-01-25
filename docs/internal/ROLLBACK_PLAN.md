@@ -141,7 +141,7 @@ docker exec unicorn-postgresql pg_dump \
 
 # Copy backup to host
 docker cp unicorn-postgresql:/tmp/pre_rollback_backup.dump \
-  /home/muut/backups/pre_rollback_$(date +%Y%m%d_%H%M%S).dump
+  /home/ubuntu/backups/pre_rollback_$(date +%Y%m%d_%H%M%S).dump
 ```
 
 ### Step 3: Run Database Rollback

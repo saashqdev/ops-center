@@ -23,7 +23,7 @@ RUN rclone version
 ### Step 2: Rebuild Container
 
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 
 # Rebuild ops-center
 docker compose -f services/ops-center/docker-compose.direct.yml build

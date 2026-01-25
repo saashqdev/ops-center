@@ -18,7 +18,7 @@ Production-ready email notification system for UC-1 Pro Operations Center with O
 ### 1. Install Dependencies
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 pip install -r requirements.txt
 ```
 

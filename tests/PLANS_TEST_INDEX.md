@@ -22,7 +22,7 @@ All tests completed successfully on October 11, 2025.
 
 ### Run Full Test Suite
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 bash tests/test_plans_page.sh
 ```
 
@@ -319,8 +319,8 @@ User Journey:
 
 ## Related Documentation
 
-- Backend API: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/`
-- Frontend: `/home/muut/Production/UC-1-Pro/services/ops-center/public/plans.html`
+- Backend API: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/`
+- Frontend: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/plans.html`
 - Stripe Integration: `STRIPE_IMPLEMENTATION_REPORT.md`
 - User Signup: `USER_SIGNUP_GUIDE.md`
 
@@ -341,7 +341,7 @@ User Journey:
 curl -I https://your-domain.com/plans.html
 
 # Full test suite
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 bash tests/test_plans_page.sh
 
 # Trial tier specific
@@ -353,7 +353,7 @@ curl -s https://your-domain.com/api/v1/subscriptions/plans | \
 
 ## Contact & Support
 
-- **Test Reports:** `/home/muut/Production/UC-1-Pro/services/ops-center/tests/`
+- **Test Reports:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/`
 - **Test Script:** `tests/test_plans_page.sh`
 - **Issues:** GitHub Issues or internal tracking
 
@@ -373,5 +373,5 @@ curl -s https://your-domain.com/api/v1/subscriptions/plans | \
 
 **Last Updated:** October 11, 2025
 **Test Environment:** Production (https://your-domain.com)
-**Working Directory:** `/home/muut/Production/UC-1-Pro/services/ops-center`
+**Working Directory:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center`
 **Test Status:** ✅ ALL TESTS PASSED

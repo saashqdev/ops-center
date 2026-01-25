@@ -227,7 +227,7 @@ docker exec unicorn-postgresql psql -U unicorn -d unicorn_db \
 ### 4. Restart Ops-Center
 
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 
 # Rebuild if needed (to include new files)
 docker compose -f services/ops-center/docker-compose.direct.yml build

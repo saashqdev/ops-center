@@ -236,6 +236,6 @@ console.log(`Current IP: ${network.ip}`);
 
 ## Files
 
-- **Backend Module:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/system_manager.py`
-- **API Endpoints:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
-- **Full Documentation:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/docs/SYSTEM_MANAGEMENT_API.md`
+- **Backend Module:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/system_manager.py`
+- **API Endpoints:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
+- **Full Documentation:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/docs/SYSTEM_MANAGEMENT_API.md`

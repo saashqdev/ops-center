@@ -41,9 +41,9 @@ async def get_router_conflicts(rule: str, exclude_router: Optional[str] = None) 
 ```
 
 **Configuration Approach**:
-- File-based (not database) - writes directly to `/home/muut/Infrastructure/traefik/dynamic/`
+- File-based (not database) - writes directly to `/home/ubuntu/Infrastructure/traefik/dynamic/`
 - Traefik auto-reloads via file watcher
-- Backups stored in `/home/muut/Infrastructure/traefik/backups/`
+- Backups stored in `/home/ubuntu/Infrastructure/traefik/backups/`
 
 ### 2. Routes Management API
 **File**: `/backend/traefik_routes_api.py` (436 lines)
@@ -282,16 +282,16 @@ app.include_router(traefik_middlewares_router)
 - Simpler architecture (no sync needed between database and files)
 
 **File Locations**:
-- **Dynamic Config**: `/home/muut/Infrastructure/traefik/dynamic/`
+- **Dynamic Config**: `/home/ubuntu/Infrastructure/traefik/dynamic/`
   - `domains.yml` - Main routes and services file
   - `middlewares.yml` - Middleware definitions
   - `api-domains.yml` - API routes
   - `billing-routes.yml` - Billing routes
   - `cloudflare.yml` - Cloudflare integration
   - etc.
-- **Backups**: `/home/muut/Infrastructure/traefik/backups/`
+- **Backups**: `/home/ubuntu/Infrastructure/traefik/backups/`
   - `backup_YYYYMMDD_HHMMSS/` - Timestamped backups
-- **SSL Certificates**: `/home/muut/Infrastructure/traefik/letsencrypt/acme.json`
+- **SSL Certificates**: `/home/ubuntu/Infrastructure/traefik/letsencrypt/acme.json`
 
 ### Traefik Integration Method
 
@@ -299,7 +299,7 @@ app.include_router(traefik_middlewares_router)
 ```yaml
 providers:
   file:
-    directory: /home/muut/Infrastructure/traefik/dynamic
+    directory: /home/ubuntu/Infrastructure/traefik/dynamic
     watch: true  # Auto-reload on file changes
 ```
 
@@ -614,8 +614,8 @@ cryptography>=41.0.0
 
 - Traefik must have Prometheus metrics enabled
 - Traefik file provider must be configured
-- Write access to `/home/muut/Infrastructure/traefik/dynamic/`
-- Read access to `/home/muut/Infrastructure/traefik/letsencrypt/acme.json`
+- Write access to `/home/ubuntu/Infrastructure/traefik/dynamic/`
+- Read access to `/home/ubuntu/Infrastructure/traefik/letsencrypt/acme.json`
 
 ---
 
@@ -684,8 +684,8 @@ cryptography>=41.0.0
 
 3. **Set Up Backups Directory**:
    ```bash
-   mkdir -p /home/muut/Infrastructure/traefik/backups
-   chmod 755 /home/muut/Infrastructure/traefik/backups
+   mkdir -p /home/ubuntu/Infrastructure/traefik/backups
+   chmod 755 /home/ubuntu/Infrastructure/traefik/backups
    ```
 
 4. **Update Server Startup**:

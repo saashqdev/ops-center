@@ -105,7 +105,7 @@ Comprehensive audit of 4 system management pages in UC-1 Pro Ops Center:
 - Comprehensive backend implementation
 
 **Issues**:
-- Path mismatch (CRITICAL) - `/home/ucadmin` vs `/home/muut`
+- Path mismatch (CRITICAL) - `/home/ucadmin` vs `/home/ubuntu`
 - Backup schedule not enforced (HIGH)
 - Volume actions not wired (MEDIUM)
 - No progress indicators (LOW)

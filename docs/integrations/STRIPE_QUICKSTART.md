@@ -10,7 +10,7 @@
 ### Step 1: Install Dependencies (30 seconds)
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 pip install stripe==10.0.0
 ```
 
@@ -27,7 +27,7 @@ export STRIPE_API_KEY="sk_test_..."
 ### Step 3: Create Products in Stripe (2 minutes)
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 python backend/setup_stripe_products.py
 ```
 

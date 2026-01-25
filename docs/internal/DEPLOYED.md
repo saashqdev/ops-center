@@ -116,7 +116,7 @@ The flow should be:
 ### 3. Verify User Was Created
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 docker exec ops-center-direct sqlite3 /app/data/ops_center.db "SELECT id, email, name, subscription_tier, oauth_provider FROM users;"
 ```
 
@@ -221,10 +221,10 @@ Should see: `✓ Auth system initialized`
 ## 📁 Important File Locations
 
 ### On Host
-- Server: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
-- Auth Module: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/auth/`
-- Login Page: `/home/muut/Production/UC-1-Pro/services/ops-center/public/login.html`
-- Environment: `/home/muut/Production/UC-1-Pro/services/ops-center/.env.auth`
+- Server: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
+- Auth Module: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/auth/`
+- Login Page: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/login.html`
+- Environment: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/.env.auth`
 
 ### In Container
 - Server: `/app/server.py`

@@ -1460,7 +1460,7 @@ docker exec uchub-keycloak /opt/keycloak/bin/kc.sh export \
 
 # Backup PostgreSQL
 docker exec unicorn-postgresql pg_dump -U unicorn unicorn_db > \
-  /home/muut/backups/unicorn_db_$(date +%Y%m%d).sql
+  /home/ubuntu/backups/unicorn_db_$(date +%Y%m%d).sql
 ```
 
 2. **Create Founder's Friend Price in Stripe**:
@@ -1546,7 +1546,7 @@ docker restart ops-center-direct
 
 # 2. Restore database
 docker exec -i unicorn-postgresql psql -U unicorn unicorn_db < \
-  /home/muut/backups/unicorn_db_YYYYMMDD.sql
+  /home/ubuntu/backups/unicorn_db_YYYYMMDD.sql
 
 # 3. Restore Keycloak
 docker exec uchub-keycloak /opt/keycloak/bin/kc.sh import \

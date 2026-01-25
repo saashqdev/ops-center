@@ -4,11 +4,11 @@
 **Review Date:** October 9, 2025
 **Reviewer:** Claude Code Security Review Agent
 **Files Reviewed:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/components/Layout.jsx`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/src/App.jsx`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/auth_manager.py`
-- `/home/muut/Production/UC-1-Pro/services/ops-center/frontend/src/contexts/AuthContext.js`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/components/Layout.jsx`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/App.jsx`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/auth_manager.py`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/frontend/src/contexts/AuthContext.js`
 
 ---
 

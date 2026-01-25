@@ -362,7 +362,7 @@ If not → Redirect to upgrade page
 
 ### Traefik Middleware
 
-**File**: /home/muut/Infrastructure/traefik/dynamic/middleware.yml
+**File**: /home/ubuntu/Infrastructure/traefik/dynamic/middleware.yml
 
 ```yaml
 http:
@@ -602,10 +602,10 @@ Modify Lago frontend to handle OAuth flow
 - `/billing/docker-compose.billing.yml` - Billing services config
 
 ### Key Files
-- `/home/muut/Infrastructure/traefik/dynamic/domains.yml` - Service routing
-- `/home/muut/Production/UC-1-Pro/docker-compose.yml` - Main services
-- `/home/muut/Production/UC-1-Pro/services/authentik/docker-compose.yml` - Authentik config
-- `/home/muut/Production/UC-1-Pro/billing/docker-compose.billing.yml` - Billing config
+- `/home/ubuntu/Infrastructure/traefik/dynamic/domains.yml` - Service routing
+- `/home/ubuntu/Production/UC-1-Pro/docker-compose.yml` - Main services
+- `/home/ubuntu/Production/UC-1-Pro/services/authentik/docker-compose.yml` - Authentik config
+- `/home/ubuntu/Production/UC-1-Pro/billing/docker-compose.billing.yml` - Billing config
 
 ---
 

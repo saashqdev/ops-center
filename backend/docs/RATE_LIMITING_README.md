@@ -20,7 +20,7 @@ The rate limiting system provides Redis-based request throttling with support fo
 ### 1. Install Dependencies
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 pip install -r requirements.txt
 ```
 
@@ -205,7 +205,7 @@ curl -v http://localhost:8084/api/v1/services 2>&1 | grep -i "x-ratelimit"
 
 ```bash
 # Run test suite
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 pytest tests/test_rate_limiting.py -v
 
 # Run with coverage

@@ -507,7 +507,7 @@ The system is **production-ready** with the following caveats:
 
 ### Test Execution Details
 
-**Test Script:** `/home/muut/Production/UC-1-Pro/services/ops-center/tests/test_billing_endpoints.sh`
+**Test Script:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_billing_endpoints.sh`
 **Results File:** `/tmp/billing_test_results_1760160374.json`
 **Report File:** `/tmp/billing_test_report_1760160374.md`
 **Docker Container:** `ops-center-direct`

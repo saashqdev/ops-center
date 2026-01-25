@@ -330,7 +330,7 @@ httpx==0.27.0
 ### Quick Deploy
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-byok.sh
 ```
 
@@ -338,7 +338,7 @@ cd /home/muut/Production/UC-1-Pro/services/ops-center
 
 ```bash
 # 1. Configure environment
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 cp .env.byok .env
 # Edit .env with actual credentials
 
@@ -406,7 +406,7 @@ The BYOK system has been successfully implemented with Keycloak integration. All
 ## Contact & Support
 
 **Implementation**: Claude Code
-**Documentation**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/`
+**Documentation**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/`
 **Support**: Check logs with `docker logs ops-center-direct`
 
 ---

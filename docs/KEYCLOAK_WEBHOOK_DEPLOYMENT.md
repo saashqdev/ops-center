@@ -7,7 +7,7 @@ All code has been implemented and is ready to deploy. The integration is complet
 ## What Was Implemented
 
 ### 1. Keycloak Integration Module
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
 
 - Admin token management with caching
 - User lookup by email
@@ -16,7 +16,7 @@ All code has been implemented and is ready to deploy. The integration is complet
 - Health check endpoint
 
 ### 2. Updated Lago Webhook Handler
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py`
 
 **Changes Made:**
 - ✅ Replaced Authentik integration with Keycloak
@@ -29,7 +29,7 @@ All code has been implemented and is ready to deploy. The integration is complet
 - ✅ Updated health check to report Keycloak status
 
 ### 3. Fixed FastAPI Route Handling
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py` (line 3763)
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py` (line 3763)
 
 **Problem:** Catch-all route was intercepting API endpoints
 **Solution:** Added API path exclusion to catch-all handler
@@ -42,8 +42,8 @@ if full_path.startswith("api/"):
 
 ### 4. Documentation
 **Files Created:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_SUBSCRIPTION_SYNC.md` - Complete integration guide
-- `/home/muut/Production/UC-1-Pro/services/ops-center/scripts/test_keycloak_webhook.sh` - Comprehensive test suite
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_SUBSCRIPTION_SYNC.md` - Complete integration guide
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/scripts/test_keycloak_webhook.sh` - Comprehensive test suite
 
 ## Architecture Flow
 
@@ -82,7 +82,7 @@ Edit your docker-compose file for ops-center and add the environment variables a
 Since backend code is baked into the image, rebuild is required:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 
 # Stop current container
 docker stop ops-center-direct
@@ -134,7 +134,7 @@ In Lago admin panel:
 ### Step 5: Run Test Suite
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./scripts/test_keycloak_webhook.sh
 ```
 

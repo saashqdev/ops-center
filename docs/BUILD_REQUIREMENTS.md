@@ -579,7 +579,7 @@ npx vite-bundle-visualizer
 
 ## Related Documentation
 
-- **UC-Cloud Main**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- **UC-Cloud Main**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 - **Ops-Center CLAUDE.md**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/CLAUDE.md`
 - **Docker Compose**: `docker-compose.direct.yml`
 - **Vite Config**: `vite.config.js`

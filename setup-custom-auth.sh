@@ -26,7 +26,7 @@ echo "================================"
 # Check if running from correct directory
 if [ ! -f "backend/server_auth_integrated.py" ]; then
     echo -e "${RED}Error: backend/server_auth_integrated.py not found!${NC}"
-    echo "Please run this script from /home/muut/Production/UC-1-Pro/services/ops-center"
+    echo "Please run this script from /home/ubuntu/Production/UC-1-Pro/services/ops-center"
     exit 1
 fi
 
@@ -221,7 +221,7 @@ echo "4. Check logs if issues:"
 echo "   docker logs $CONTAINER_NAME -f"
 echo ""
 echo "5. Check database:"
-echo "   sqlite3 /home/muut/Production/UC-1-Pro/volumes/ops_center.db"
+echo "   sqlite3 /home/ubuntu/Production/UC-1-Pro/volumes/ops_center.db"
 echo "   SELECT * FROM users;"
 echo ""
 echo -e "${YELLOW}📚 Documentation:${NC}"

@@ -151,7 +151,7 @@ echo "📊 Step 4: Updating Prometheus Configuration..."
 echo ""
 
 # Check if Prometheus config file exists
-PROMETHEUS_CONFIG="/home/muut/Production/UC-Cloud/monitoring/prometheus-config.yml"
+PROMETHEUS_CONFIG="/home/ubuntu/Production/UC-Cloud/monitoring/prometheus-config.yml"
 if [ ! -f "$PROMETHEUS_CONFIG" ]; then
     PROMETHEUS_CONFIG="/home/ubuntu/Ops-Center-OSS/src/services/ops-center/monitoring/prometheus-config.yml"
 fi

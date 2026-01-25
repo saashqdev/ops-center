@@ -63,8 +63,8 @@ sudo mkdir /secure/traefik
 sudo mount /dev/mapper/traefik_secure /secure/traefik
 
 # Move acme.json to encrypted partition
-sudo mv /home/muut/Infrastructure/traefik/acme/acme.json /secure/traefik/
-sudo ln -s /secure/traefik/acme.json /home/muut/Infrastructure/traefik/acme/acme.json
+sudo mv /home/ubuntu/Infrastructure/traefik/acme/acme.json /secure/traefik/
+sudo ln -s /secure/traefik/acme.json /home/ubuntu/Infrastructure/traefik/acme/acme.json
 
 # Update Traefik docker-compose.yml
 volumes:
@@ -84,8 +84,8 @@ class EncryptedACMEStorage:
 
 - [ ] **Set correct file permissions**
   ```bash
-  sudo chmod 0400 /home/muut/Infrastructure/traefik/acme/acme.json
-  sudo chown muut:traefik-admin /home/muut/Infrastructure/traefik/acme/acme.json
+  sudo chmod 0400 /home/ubuntu/Infrastructure/traefik/acme/acme.json
+  sudo chown muut:traefik-admin /home/ubuntu/Infrastructure/traefik/acme/acme.json
   ```
 
 **Acceptance Criteria**:
@@ -134,7 +134,7 @@ async def backup_config(self, filename: Optional[str] = None) -> str:
 
 - [ ] **Set correct backup directory permissions**
   ```bash
-  sudo chmod 0700 /home/muut/Infrastructure/traefik/backups
+  sudo chmod 0700 /home/ubuntu/Infrastructure/traefik/backups
   ```
 
 - [ ] **Implement backup retention policy**
@@ -440,22 +440,22 @@ sudo groupadd traefik-admin
 sudo usermod -a -G traefik-admin muut
 
 # Set directory permissions
-sudo chmod 0750 /home/muut/Infrastructure/traefik/acme
-sudo chmod 0750 /home/muut/Infrastructure/traefik/dynamic
-sudo chmod 0700 /home/muut/Infrastructure/traefik/backups
+sudo chmod 0750 /home/ubuntu/Infrastructure/traefik/acme
+sudo chmod 0750 /home/ubuntu/Infrastructure/traefik/dynamic
+sudo chmod 0700 /home/ubuntu/Infrastructure/traefik/backups
 
 # Set file permissions
-sudo chmod 0400 /home/muut/Infrastructure/traefik/acme/acme.json
-sudo find /home/muut/Infrastructure/traefik/dynamic -name "*.yml" -exec chmod 0640 {} \;
+sudo chmod 0400 /home/ubuntu/Infrastructure/traefik/acme/acme.json
+sudo find /home/ubuntu/Infrastructure/traefik/dynamic -name "*.yml" -exec chmod 0640 {} \;
 
 # Set ownership
-sudo chown -R muut:traefik-admin /home/muut/Infrastructure/traefik/
+sudo chown -R muut:traefik-admin /home/ubuntu/Infrastructure/traefik/
 
 # Verify
 echo "Verifying permissions..."
-ls -la /home/muut/Infrastructure/traefik/acme/
-ls -la /home/muut/Infrastructure/traefik/dynamic/
-ls -la /home/muut/Infrastructure/traefik/backups/
+ls -la /home/ubuntu/Infrastructure/traefik/acme/
+ls -la /home/ubuntu/Infrastructure/traefik/dynamic/
+ls -la /home/ubuntu/Infrastructure/traefik/backups/
 
 echo "✅ Permissions set successfully"
 ```

@@ -9,7 +9,7 @@
 ### Step 1: Create Groups via Script
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 
 # Install httpx if not already installed
 pip3 install httpx
@@ -72,7 +72,7 @@ python3 scripts/add-user-to-group.py aaron uc1-admins
 
 ### Step 4: Update Code
 
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/role_mapper.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/role_mapper.py`
 
 **Add these lines to ROLE_MAPPINGS (around line 22):**
 
@@ -167,7 +167,7 @@ python3 scripts/add-user-to-group.py alice uc1-admins
 
 ```bash
 # Revert code changes
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 git checkout HEAD -- role_mapper.py
 
 # Restart
@@ -230,7 +230,7 @@ docker logs uchub-keycloak --tail 100
 ## Full Documentation
 
 See complete research and implementation guide:
-- `/home/muut/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_GROUPS_RESEARCH.md`
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/KEYCLOAK_GROUPS_RESEARCH.md`
 
 ---
 

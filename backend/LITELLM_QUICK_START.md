@@ -49,7 +49,7 @@ Update if your services run on different ports/hosts.
 
 ```bash
 # From UC-Cloud root
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 
 # Restart ops-center
 docker restart ops-center-direct

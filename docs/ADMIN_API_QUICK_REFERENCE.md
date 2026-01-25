@@ -116,7 +116,7 @@ export KEYCLOAK_ADMIN_USERNAME="admin"
 
 ```bash
 # Run test script
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 export KEYCLOAK_ADMIN_PASSWORD="your-password"
 python3 test_admin_api.py
 ```

@@ -194,7 +194,7 @@ Full Report:  tests/PLANS_PAGE_TEST_REPORT.md
 Summary:      tests/TEST_SUMMARY.txt
 
 To re-run tests:
-  cd /home/muut/Production/UC-1-Pro/services/ops-center
+  cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
   bash tests/test_plans_page.sh
 
 To test Trial tier specifically:

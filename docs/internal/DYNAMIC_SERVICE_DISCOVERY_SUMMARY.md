@@ -32,7 +32,7 @@ Successfully implemented a comprehensive service discovery system for UC-1 Pro O
 
 ### 1. Backend Service Discovery Module
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/service_discovery.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/service_discovery.py`
 
 **Features**:
 - Dynamic service endpoint resolution with fallback chain
@@ -77,7 +77,7 @@ service_discovery.get_service_info()               # Get comprehensive info
 
 ### 3. Frontend Service Integration
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/src/services/modelApi.js`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/src/services/modelApi.js`
 
 **Changes**:
 - Added service discovery constructor and caching
@@ -94,7 +94,7 @@ service_discovery.get_service_info()               # Get comprehensive info
 
 ### 4. Configuration Template
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/.env.template`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/.env.template`
 
 **Contents**:
 - Comprehensive service URL documentation
@@ -105,7 +105,7 @@ service_discovery.get_service_info()               # Get comprehensive info
 
 ### 5. Docker Compose Integration
 
-**File**: `/home/muut/Production/UC-1-Pro/docker-compose.yml`
+**File**: `/home/ubuntu/Production/UC-1-Pro/docker-compose.yml`
 
 **Changes**: Added environment variables to `ops-center` service:
 ```yaml
@@ -198,7 +198,7 @@ The following services are now dynamically discoverable:
 
 Run comprehensive tests:
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./test_service_discovery.sh
 ```
 

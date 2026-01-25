@@ -651,7 +651,7 @@ Documentation feedback and improvement suggestions:
 
 ### Related Documentation
 
-- **UC-Cloud Main**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- **UC-Cloud Main**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 - **Ops-Center Main**: `/services/ops-center/CLAUDE.md`
 - **Lago Integration**: `backend/docs/LAGO_ORG_BILLING_INTEGRATION.md`
 - **LiteLLM Credit API**: `backend/docs/LITELLM_CREDIT_API.md`

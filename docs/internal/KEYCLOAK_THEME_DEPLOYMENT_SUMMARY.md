@@ -9,7 +9,7 @@ A complete Keycloak theme deployment system has been created for UC-1 Pro with a
 ### 🚀 Deployment Scripts
 
 #### 1. Main Deployment Script
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/deploy-keycloak-theme.sh`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/deploy-keycloak-theme.sh`
 - **Size**: 12K
 - **Permissions**: Executable (755)
 - **Purpose**: Automated theme deployment to uchub-keycloak container
@@ -24,7 +24,7 @@ A complete Keycloak theme deployment system has been created for UC-1 Pro with a
 - Step-by-step success confirmation
 
 #### 2. Verification Script
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/verify-keycloak-theme.sh`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/verify-keycloak-theme.sh`
 - **Size**: 4.1K
 - **Permissions**: Executable (755)
 - **Purpose**: Verify theme installation and configuration
@@ -40,7 +40,7 @@ A complete Keycloak theme deployment system has been created for UC-1 Pro with a
 ### 📚 Documentation
 
 #### 1. Complete Theme Guide
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/KEYCLOAK_THEME_GUIDE.md`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/KEYCLOAK_THEME_GUIDE.md`
 - **Size**: 13K
 - **Content**: Comprehensive documentation covering:
   - Theme structure and organization
@@ -52,7 +52,7 @@ A complete Keycloak theme deployment system has been created for UC-1 Pro with a
   - Production considerations
 
 #### 2. Quick Reference Card
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/KEYCLOAK_THEME_QUICKREF.md`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/KEYCLOAK_THEME_QUICKREF.md`
 - **Size**: 4.7K
 - **Content**: Essential commands and quick workflows:
   - One-command deployment
@@ -62,7 +62,7 @@ A complete Keycloak theme deployment system has been created for UC-1 Pro with a
   - Quick activation steps
 
 #### 3. Theme README
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/README.md`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/README.md`
 - **Size**: Updated with deployment script info
 - **Content**: Theme-specific documentation
 
@@ -70,7 +70,7 @@ A complete Keycloak theme deployment system has been created for UC-1 Pro with a
 
 #### Theme Structure
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/
 ├── theme.properties                    (484 bytes)  - Main theme config
 └── login/
     ├── theme.properties                (360 bytes)  - Login config
@@ -121,7 +121,7 @@ A complete Keycloak theme deployment system has been created for UC-1 Pro with a
 ### Quick Start (One Command)
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-keycloak-theme.sh
 ```
 
@@ -129,7 +129,7 @@ cd /home/muut/Production/UC-1-Pro/services/ops-center
 
 1. **Deploy Theme**:
    ```bash
-   cd /home/muut/Production/UC-1-Pro/services/ops-center
+   cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
    ./deploy-keycloak-theme.sh
    ```
 
@@ -292,7 +292,7 @@ docker restart uchub-keycloak
 
 ### Scripts
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/
 ├── deploy-keycloak-theme.sh              # Main deployment script
 ├── verify-keycloak-theme.sh              # Verification script
 ├── KEYCLOAK_THEME_GUIDE.md              # Complete guide
@@ -302,7 +302,7 @@ docker restart uchub-keycloak
 
 ### Theme Files
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/
 ├── README.md                             # Theme documentation
 ├── backups/                              # Automatic backups
 └── uc-1-pro/                            # Theme source
@@ -421,7 +421,7 @@ docker exec uchub-keycloak ls /opt/keycloak/themes/
 
 ```bash
 # Deploy theme
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-keycloak-theme.sh
 
 # Verify installation

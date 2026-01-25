@@ -47,7 +47,7 @@ Update the LiteLLM container environment variable to use the database key.
 
 2. **Update Docker Compose environment**:
    ```bash
-   cd /home/muut/Production/UC-Cloud
+   cd /home/ubuntu/Production/UC-Cloud
 
    # Edit the LiteLLM service environment
    vim docker-compose.yml  # Or wherever uchub-litellm is defined
@@ -86,7 +86,7 @@ Update the LiteLLM config YAML to use the environment variable.
 
    # Common locations:
    # - /app/litellm_config.yaml (inside container)
-   # - /home/muut/Production/UC-Cloud/billing/litellm/config.yaml (host)
+   # - /home/ubuntu/Production/UC-Cloud/billing/litellm/config.yaml (host)
    ```
 
 2. **Edit config file**:
@@ -163,7 +163,7 @@ Based on the UC-Cloud setup:
 
 1. **Container**: `uchub-litellm`
 2. **Port**: 4000 (internal)
-3. **Config**: Likely at `/home/muut/Production/UC-Cloud/billing/litellm/config.yaml`
+3. **Config**: Likely at `/home/ubuntu/Production/UC-Cloud/billing/litellm/config.yaml`
 4. **Environment**: Defined in `docker-compose.billing.yml`
 
 ### To Update:
@@ -174,7 +174,7 @@ API_KEY=$(curl -s -X GET https://your-domain.com/api/v1/admin/platform-keys/open
   -H "Cookie: session_token=$SESSION_TOKEN" | jq -r '.api_key')
 
 # 2. Update Docker environment
-cd /home/muut/Production/UC-Cloud/billing
+cd /home/ubuntu/Production/UC-Cloud/billing
 vim docker-compose.billing.yml
 
 # Add under uchub-litellm service:

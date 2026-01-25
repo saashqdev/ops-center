@@ -512,8 +512,8 @@ docker restart ops-center-direct
 Backups created on October 13, 2025:
 
 ```bash
-/home/muut/backups/ops-center-backup-20251013-215242.tar.gz
-/home/muut/backups/uc-cloud-full-backup-20251013-215258.tar.gz
+/home/ubuntu/backups/ops-center-backup-20251013-215242.tar.gz
+/home/ubuntu/backups/uc-cloud-full-backup-20251013-215258.tar.gz
 ```
 
 ---

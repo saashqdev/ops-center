@@ -457,7 +457,7 @@ export ADMIN_API_TOKEN="your-admin-token"
 
 ### Traefik Endpoints (C10, C11, C12, C13)
 - All use `TraefikManager` class from `traefik_manager.py`
-- Configuration files in `/home/muut/Production/UC-Cloud/traefik/`
+- Configuration files in `/home/ubuntu/Production/UC-Cloud/traefik/`
 - Rate limiting enforced (5 changes per 60 seconds per user)
 - Automatic backups created before destructive operations
 - Audit logging to `/var/log/traefik_audit.log`

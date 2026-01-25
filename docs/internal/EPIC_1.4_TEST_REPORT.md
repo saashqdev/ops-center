@@ -127,7 +127,7 @@ $ ./scripts/verify-backup.sh --latest
 $ ./scripts/disaster-recovery.sh --latest --dry-run
 [INFO] === UC-Cloud Disaster Recovery Started ===
 [INFO] Backup file: /backups/uc-cloud-backup-20251023-120000.tar.gz
-[INFO] Restore directory: /home/muut/Production/UC-Cloud
+[INFO] Restore directory: /home/ubuntu/Production/UC-Cloud
 [SUCCESS] Backup verification passed
 [DRY RUN] Would create rollback point
 [DRY RUN] Would stop all services

@@ -100,7 +100,7 @@ While you slept, **16 AI subagents** worked through the night and delivered **10
 
 **Revenue Potential**: $1.2M ARR (projected at 1,000 devices)
 
-**Report Location**: `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_README.md`
+**Report Location**: `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_README.md`
 
 ---
 
@@ -158,13 +158,13 @@ While you slept, **16 AI subagents** worked through the night and delivered **10
 
 4. `/tmp/night_shift_test_report.md` - Complete test results (606 lines)
 5. `/tmp/night_shift_code_quality_report.md` - Code analysis
-6. `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_README.md` - Start here for Edge Devices
+6. `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_README.md` - Start here for Edge Devices
 
 ### 📖 Read This Week (2 hours):
 
-7. `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_IMPLEMENTATION_SUMMARY.md` - Executive summary
-8. `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_ARCHITECTURE.md` - Full 77-page spec
-9. `/home/muut/Production/UC-Cloud/docs/INFRASTRUCTURE_OPTIMIZATION_REPORT.md` - Performance roadmap
+7. `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_IMPLEMENTATION_SUMMARY.md` - Executive summary
+8. `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_EDGE_DEVICE_ARCHITECTURE.md` - Full 77-page spec
+9. `/home/ubuntu/Production/UC-Cloud/docs/INFRASTRUCTURE_OPTIMIZATION_REPORT.md` - Performance roadmap
 
 ---
 
@@ -242,7 +242,7 @@ While you slept, **16 AI subagents** worked through the night and delivered **10
 3. Is 20-week timeline acceptable?
 4. Budget $300K-$400K approved?
 
-**Next Step**: Review `/home/muut/Production/UC-Cloud/docs/EPIC_7.1_README.md`
+**Next Step**: Review `/home/ubuntu/Production/UC-Cloud/docs/EPIC_7.1_README.md`
 
 ---
 

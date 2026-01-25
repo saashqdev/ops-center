@@ -270,7 +270,7 @@ List all backups with status
   "schedule": "0 2 * * *",
   "last_backup": "2025-10-23T02:00:00",
   "next_backup": "2025-10-24T02:00:00",
-  "backup_location": "/home/muut/Production/UC-Cloud/backups",
+  "backup_location": "/home/ubuntu/Production/UC-Cloud/backups",
   "retention_days": 7,
   "backups": [
     {
@@ -429,9 +429,9 @@ Get backup configuration
   "backup_enabled": true,
   "schedule": "0 2 * * *",
   "retention_days": 7,
-  "backup_location": "/home/muut/Production/UC-Cloud/backups",
+  "backup_location": "/home/ubuntu/Production/UC-Cloud/backups",
   "include_paths": [
-    "/home/muut/Production/UC-Cloud/volumes"
+    "/home/ubuntu/Production/UC-Cloud/volumes"
   ],
   "exclude_patterns": [
     "*.tmp",
@@ -473,7 +473,7 @@ Update backup configuration
   "retention_days": 14,
   "backup_location": "/mnt/backups",
   "include_paths": [
-    "/home/muut/Production/UC-Cloud/volumes"
+    "/home/ubuntu/Production/UC-Cloud/volumes"
   ],
   "exclude_patterns": [
     "*.tmp",
@@ -563,7 +563,7 @@ Duration: 0:15:30
 Status: Success
 
 The scheduled system backup has completed successfully.
-Backup Location: /home/muut/Production/UC-Cloud/backups
+Backup Location: /home/ubuntu/Production/UC-Cloud/backups
 
 ---
 UC-Cloud Ops-Center
@@ -985,14 +985,14 @@ docker restart ops-center-direct
 
 #### 4. Permission Denied on Backup Directory
 
-**Error**: "Permission denied: '/home/muut/Production/UC-Cloud/backups'"
+**Error**: "Permission denied: '/home/ubuntu/Production/UC-Cloud/backups'"
 
 **Solution**:
 ```bash
 # Create backup directory with correct permissions
-sudo mkdir -p /home/muut/Production/UC-Cloud/backups
-sudo chown -R 1000:1000 /home/muut/Production/UC-Cloud/backups
-sudo chmod 755 /home/muut/Production/UC-Cloud/backups
+sudo mkdir -p /home/ubuntu/Production/UC-Cloud/backups
+sudo chown -R 1000:1000 /home/ubuntu/Production/UC-Cloud/backups
+sudo chmod 755 /home/ubuntu/Production/UC-Cloud/backups
 
 # Restart container
 docker restart ops-center-direct

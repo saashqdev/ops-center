@@ -122,7 +122,7 @@ Successfully implemented comprehensive REST API endpoints for user management vi
 
 ### Created Files
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/
 ├── backend/
 │   └── auth/
 │       └── keycloak_admin.py           # New Keycloak Admin module (1,018 lines)
@@ -134,7 +134,7 @@ Successfully implemented comprehensive REST API endpoints for user management vi
 
 ### Modified Files
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/
 └── backend/
     └── server.py                       # Added 13 endpoints + models (520 lines)
 ```
@@ -166,7 +166,7 @@ Run the provided test script:
 export KEYCLOAK_ADMIN_PASSWORD="your-admin-password"
 
 # Run tests
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 python3 test_admin_api.py
 ```
 

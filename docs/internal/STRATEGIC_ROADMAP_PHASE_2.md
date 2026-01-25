@@ -587,7 +587,7 @@ PM (Claude)
    - Good: Quick smoke tests before deployment
 
 5. **Don't Create Files at Root**
-   - Bad: Save files to /home/muut/Production/UC-Cloud/test.md
+   - Bad: Save files to /home/ubuntu/Production/UC-Cloud/test.md
    - Good: Save to appropriate subdirectory (docs/, scripts/, backend/)
 
 ---

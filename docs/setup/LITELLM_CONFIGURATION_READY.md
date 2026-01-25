@@ -369,7 +369,7 @@ docker logs unicorn-litellm-wilmer --tail 100
   - Groq: https://console.groq.com/docs
   - OpenRouter: https://openrouter.ai/docs
   - Together AI: https://docs.together.ai/
-- **UC-Cloud Docs**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- **UC-Cloud Docs**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 - **Ops-Center Docs**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/CLAUDE.md`
 
 ---

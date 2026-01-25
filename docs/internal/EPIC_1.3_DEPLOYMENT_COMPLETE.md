@@ -630,7 +630,7 @@ docker logs ops-center-direct --tail 100 | grep traefik
 docker ps | grep traefik
 
 # Check Traefik config directory
-ls -la /home/muut/Infrastructure/traefik/dynamic/
+ls -la /home/ubuntu/Infrastructure/traefik/dynamic/
 ```
 
 **Frontend Issues**:

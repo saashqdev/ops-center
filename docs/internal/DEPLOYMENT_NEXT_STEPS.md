@@ -70,7 +70,7 @@ COPY backend/alembic.ini ./
 ### Step 2: Rebuild Docker Image
 
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 
 # Rebuild image with --no-cache
 docker compose -f services/ops-center/docker-compose.direct.yml build --no-cache
@@ -448,7 +448,7 @@ cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 # Update Dockerfile (manual edit required - see Step 1)
 
 # Rebuild and deploy
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 docker compose -f services/ops-center/docker-compose.direct.yml build --no-cache
 docker compose -f services/ops-center/docker-compose.direct.yml up -d
 

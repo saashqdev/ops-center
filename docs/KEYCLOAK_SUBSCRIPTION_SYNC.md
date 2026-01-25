@@ -346,7 +346,7 @@ Error: `Invalid Lago webhook signature`
 
 ### Keycloak Integration Module
 
-Location: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
+Location: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
 
 #### Key Functions
 
@@ -392,7 +392,7 @@ await update_user_attributes(
 
 ### Webhook Handler
 
-Location: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py`
+Location: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/lago_webhooks.py`
 
 #### Endpoints
 
@@ -441,6 +441,6 @@ For issues or questions:
 
 ## Related Documentation
 
-- [Keycloak Setup Guide](/home/muut/Production/UC-1-Pro/services/ops-center/KEYCLOAK_SETUP.md)
-- [Billing Integration](/home/muut/Production/UC-1-Pro/services/ops-center/BILLING_API_IMPLEMENTATION.md)
-- [Subscription Management](/home/muut/Production/UC-1-Pro/services/ops-center/SUBSCRIPTION_FEATURE_SUMMARY.md)
+- [Keycloak Setup Guide](/home/ubuntu/Production/UC-1-Pro/services/ops-center/KEYCLOAK_SETUP.md)
+- [Billing Integration](/home/ubuntu/Production/UC-1-Pro/services/ops-center/BILLING_API_IMPLEMENTATION.md)
+- [Subscription Management](/home/ubuntu/Production/UC-1-Pro/services/ops-center/SUBSCRIPTION_FEATURE_SUMMARY.md)

@@ -47,7 +47,7 @@ backend/auth/
 ### Created Files (Ready to Deploy)
 
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/
 ├── backend/
 │   ├── auth/                          # ✅ Auth module (7 files)
 │   │   ├── __init__.py
@@ -78,7 +78,7 @@ backend/auth/
 ### Step 1: Deploy New Server (5 minutes)
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 
 # Backup original server
 cp backend/server.py backend/server_original_backup.py
@@ -157,7 +157,7 @@ Then update `.env.auth` with your credentials and restart.
 ### Database After First User:
 
 ```sql
-sqlite3 /home/muut/Production/UC-1-Pro/volumes/ops_center.db
+sqlite3 /home/ubuntu/Production/UC-1-Pro/volumes/ops_center.db
 
 SELECT * FROM users;
 -- id | email | name | oauth_provider | subscription_tier | stripe_customer_id
@@ -373,7 +373,7 @@ Both approaches work. Option A lets you see the UI immediately. Option B gives y
 **Ready to deploy?** Run:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 cp backend/server_auth_integrated.py backend/server.py
 cp public/login-new.html public/login.html
 docker-compose restart ops-center

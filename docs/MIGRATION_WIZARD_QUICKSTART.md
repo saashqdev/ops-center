@@ -794,7 +794,7 @@ If you have a custom SSL certificate:
 - Swagger docs: `https://your-domain.com/docs`
 
 **Community**:
-- UC-Cloud documentation: `/home/muut/Production/UC-Cloud/CLAUDE.md`
+- UC-Cloud documentation: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
 - GitHub issues: [Repository URL]
 
 ---

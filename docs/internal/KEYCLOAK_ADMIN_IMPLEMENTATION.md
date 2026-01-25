@@ -7,7 +7,7 @@ Successfully implemented admin subscription management system using Keycloak for
 ## What Was Implemented
 
 ### 1. Keycloak Integration Module
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py`
 
 **Features:**
 - Admin token management with automatic caching and refresh
@@ -30,7 +30,7 @@ set_subscription_tier()     # Set user subscription tier
 ```
 
 ### 2. Admin Subscriptions API
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py`
 
 **Endpoints:**
 - `GET /api/v1/admin/subscriptions/list` - List all subscriptions
@@ -47,7 +47,7 @@ set_subscription_tier()     # Set user subscription tier
 - 403 Forbidden for non-admin users
 
 ### 3. Frontend Dashboard
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html`
 
 **Features:**
 - DataTables with search, filter, and pagination
@@ -62,9 +62,9 @@ set_subscription_tier()     # Set user subscription tier
 
 ### 4. Test Suite
 **Files:**
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py` - Comprehensive test suite
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/run_admin_tests.sh` - Test runner script
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/quick_test.py` - Quick connection test
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py` - Comprehensive test suite
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/run_admin_tests.sh` - Test runner script
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/quick_test.py` - Quick connection test
 
 **Tests Cover:**
 1. Admin token retrieval
@@ -77,7 +77,7 @@ set_subscription_tier()     # Set user subscription tier
 8. API endpoint documentation
 
 ### 5. Documentation
-**File:** `/home/muut/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md`
+**File:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md`
 
 **Includes:**
 - Complete API endpoint reference
@@ -135,7 +135,7 @@ Subscription data stored as Keycloak attributes (all values are arrays):
 ### 1. Start Ops Center (if not running)
 
 ```bash
-cd /home/muut/Production/UC-1-Pro
+cd /home/ubuntu/Production/UC-1-Pro
 docker compose -f docker-compose.ops-center-sso.yml up -d
 ```
 
@@ -192,22 +192,22 @@ curl -X GET https://your-domain.com/api/v1/admin/subscriptions/analytics/overvie
 ## File Locations
 
 ### Backend
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` - Keycloak client
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py` - API routes
-- `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py` - Main server (already imports API)
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/keycloak_integration.py` - Keycloak client
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/admin_subscriptions_api.py` - API routes
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py` - Main server (already imports API)
 
 ### Frontend
-- `/home/muut/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html` - Admin dashboard
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/admin/subscriptions.html` - Admin dashboard
 
 ### Tests
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py` - Test suite
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/run_admin_tests.sh` - Test runner
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/quick_test.py` - Quick test
-- `/home/muut/Production/UC-1-Pro/services/ops-center/tests/.env.test` - Test environment
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_keycloak_admin.py` - Test suite
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/run_admin_tests.sh` - Test runner
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/quick_test.py` - Quick test
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/.env.test` - Test environment
 
 ### Documentation
-- `/home/muut/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md` - API docs
-- `/home/muut/Production/UC-1-Pro/services/ops-center/KEYCLOAK_ADMIN_IMPLEMENTATION.md` - This file
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/docs/ADMIN_SUBSCRIPTION_API.md` - API docs
+- `/home/ubuntu/Production/UC-1-Pro/services/ops-center/KEYCLOAK_ADMIN_IMPLEMENTATION.md` - This file
 
 ## Integration with Existing System
 

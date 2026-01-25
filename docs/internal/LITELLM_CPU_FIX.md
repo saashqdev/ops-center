@@ -33,7 +33,7 @@ docker rm -f uchub-postgres
 docker volume rm uc-1-hub_uchub_postgres_data
 
 # Recreated with proper initialization
-cd /home/muut/UC-1-Hub
+cd /home/ubuntu/UC-1-Hub
 docker compose up -d uchub-postgres
 
 # Database initialized correctly this time:
@@ -186,7 +186,7 @@ When creating new PostgreSQL containers:
 
 ## Related Documentation
 
-- PostgreSQL init scripts: `/home/muut/UC-1-Hub/scripts/create-multiple-postgres-databases.sh`
+- PostgreSQL init scripts: `/home/ubuntu/UC-1-Hub/scripts/create-multiple-postgres-databases.sh`
 - LiteLLM config: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docker-compose.litellm.yml`
 - Ops-Center main config: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/.env.auth`
 

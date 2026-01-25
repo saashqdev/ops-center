@@ -126,7 +126,7 @@ docker cp /home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/migrations
 
 # Backup database first
 docker exec unicorn-postgresql pg_dump -U unicorn unicorn_db > \
-  /home/muut/backups/unicorn_db_before_migration_v2_$(date +%Y%m%d_%H%M%S).sql
+  /home/ubuntu/backups/unicorn_db_before_migration_v2_$(date +%Y%m%d_%H%M%S).sql
 
 # Run migration
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -f /tmp/migration_v2.sql

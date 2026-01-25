@@ -175,7 +175,7 @@ asyncio.run(setup_test_user())
 ### 1. Python Unit Tests
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 python3 tests/test_tier_enforcement.py test@example.com
 ```
 

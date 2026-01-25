@@ -861,7 +861,7 @@ Traefik uses two types of configuration:
 
 **Backup Location**:
 ```
-/home/muut/Production/UC-Cloud/traefik/backups/
+/home/ubuntu/Production/UC-Cloud/traefik/backups/
   traefik_backup_20251024_150530/
     traefik.yml
     dynamic/
@@ -1730,7 +1730,7 @@ A: Use Forward Auth middleware pointing to your auth service (Keycloak, Authelia
 
 **Q: Where are backups stored?**
 
-A: `/home/muut/Production/UC-Cloud/traefik/backups/`
+A: `/home/ubuntu/Production/UC-Cloud/traefik/backups/`
 
 **Q: How long are backups kept?**
 

@@ -170,7 +170,7 @@ DEPLOYMENT METHODS
 ==================
 
 1. Automated Script (Recommended):
-   cd /home/muut/Production/UC-1-Pro/services/ops-center
+   cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
    ./deploy-keycloak-theme.sh
 
 2. Docker Volume Mount (Development):

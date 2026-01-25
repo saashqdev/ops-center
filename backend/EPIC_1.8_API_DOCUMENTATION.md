@@ -1152,7 +1152,7 @@ REDIS_PORT=6379
 ### 2. Container Restart
 
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 
 # Restart ops-center to load new APIs
 docker restart ops-center-direct

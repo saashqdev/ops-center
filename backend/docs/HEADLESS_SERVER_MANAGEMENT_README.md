@@ -48,7 +48,7 @@ Successfully implemented comprehensive headless server management API for UC-1 P
 ### Implementation Files
 
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/backend/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/
 ├── system_manager.py                  # Core module (506 lines)
 ├── server.py                          # API endpoints (modified)
 └── docs/
@@ -60,11 +60,11 @@ Successfully implemented comprehensive headless server management API for UC-1 P
 
 ### Key Code Sections
 
-**Backend Module:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/system_manager.py`
+**Backend Module:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/system_manager.py`
 - Lines 1-506: Complete implementation
 - Includes: SystemManager class, Pydantic models, validation
 
-**API Endpoints:** `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
+**API Endpoints:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
 - Lines 2685-2878: New system management endpoints
 - Lines 41-47: Imports from system_manager
 - Lines 95-97: Logging configuration
@@ -75,7 +75,7 @@ Successfully implemented comprehensive headless server management API for UC-1 P
 ### 1. Verify Installation
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 python3 -c "from system_manager import system_manager; print('✅ Module loaded successfully')"
 ```
 
@@ -309,7 +309,7 @@ for pkg in updates['packages']:
 
 1. **Start the server:**
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 uvicorn server:app --host 0.0.0.0 --port 8084 --reload
 ```
 

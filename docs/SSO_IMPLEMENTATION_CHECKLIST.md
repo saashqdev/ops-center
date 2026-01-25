@@ -27,7 +27,7 @@
 - [ ] Click "Create" → Save provider
 - [ ] Create application linking provider
 - [ ] Test OAuth discovery URL: https://auth.your-domain.com/application/o/litellm-proxy/.well-known/openid-configuration
-- [ ] Update `/home/muut/Production/UC-1-Pro/billing/.env` with credentials
+- [ ] Update `/home/ubuntu/Production/UC-1-Pro/billing/.env` with credentials
 
 **Environment Variables to Add**:
 ```env
@@ -53,7 +53,7 @@ LITELLM_OAUTH_ENABLED=true
   ```
 - [ ] If missing, create new OAuth provider (same steps as 1.1)
 - [ ] Test OAuth discovery URL
-- [ ] Verify configuration in `/home/muut/Production/UC-1-Pro/billing/docker-compose.billing.yml`
+- [ ] Verify configuration in `/home/ubuntu/Production/UC-1-Pro/billing/docker-compose.billing.yml`
 
 **Current Config** (verify these match):
 ```yaml
@@ -121,7 +121,7 @@ curl https://auth.your-domain.com/application/o/center-deep/.well-known/openid-c
 ### Task 2.2: Create Traefik Middleware Configuration
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Infrastructure/traefik/dynamic/middleware.yml`
+**File**: `/home/ubuntu/Infrastructure/traefik/dynamic/middleware.yml`
 
 **Steps**:
 - [ ] Create middleware.yml if doesn't exist
@@ -153,7 +153,7 @@ http:
 ### Task 2.3: Apply Middleware to LiteLLM
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/billing/docker-compose.billing.yml`
+**File**: `/home/ubuntu/Production/UC-1-Pro/billing/docker-compose.billing.yml`
 
 **Steps**:
 - [ ] Update LiteLLM service labels (around line 179):
@@ -177,7 +177,7 @@ labels:
 ### Task 2.4: Apply Middleware to Lago
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/billing/docker-compose.billing.yml`
+**File**: `/home/ubuntu/Production/UC-1-Pro/billing/docker-compose.billing.yml`
 
 **Steps**:
 - [ ] Update Lago frontend labels (around line 78):
@@ -201,7 +201,7 @@ labels:
 ### Task 2.5: Apply Middleware to Usage Dashboard
 **Priority**: Medium | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/billing/docker-compose.billing.yml`
+**File**: `/home/ubuntu/Production/UC-1-Pro/billing/docker-compose.billing.yml`
 
 **Steps**:
 - [ ] Update Metabase labels (around line 214):
@@ -226,7 +226,7 @@ labels:
 **Priority**: High | **Status**: ⏳ Pending
 
 **Steps**:
-- [ ] Create `/home/muut/Production/UC-1-Pro/services/ops-center/backend/session_manager.py`
+- [ ] Create `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/session_manager.py`
 - [ ] Define session schema:
 ```python
 from dataclasses import dataclass
@@ -271,7 +271,7 @@ class UserSession:
 ### Task 3.2: Create Session Manager Class
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/session_manager.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/session_manager.py`
 
 **Implementation**:
 ```python
@@ -334,7 +334,7 @@ class SessionManager:
 ### Task 3.3: Implement Session Middleware
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/middleware/session_middleware.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/middleware/session_middleware.py`
 
 **Implementation**:
 ```python
@@ -375,7 +375,7 @@ class SessionMiddleware(BaseHTTPMiddleware):
 ### Task 3.4: Update OAuth Callback to Create Session
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
 
 **Steps**:
 - [ ] Locate OAuth callback endpoint (around line 300)
@@ -422,7 +422,7 @@ async def oauth_callback(code: str, state: str, response: Response):
 ### Task 3.5: Add Session Validation to Protected Routes
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/server.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/server.py`
 
 **Steps**:
 - [ ] Create dependency for session validation:
@@ -461,7 +461,7 @@ async def pro_route(session: UserSession = Depends(require_tier('professional'))
 ### Task 4.1: Create Tier Validation Middleware
 **Priority**: High | **Status**: ⏳ Pending
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/service_access.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/service_access.py`
 
 **Steps**:
 - [ ] Review existing code (already exists)
@@ -542,7 +542,7 @@ async def stripe_webhook(request: Request):
 - [ ] API key encryption
 - [ ] OAuth flow
 
-**File**: `/home/muut/Production/UC-1-Pro/services/ops-center/tests/test_session.py`
+**File**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/test_session.py`
 
 ---
 

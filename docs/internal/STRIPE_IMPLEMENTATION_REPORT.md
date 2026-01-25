@@ -224,7 +224,7 @@ KEYCLOAK_ADMIN_PASSWORD=...
 
 ### Step 1: Install Dependencies
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/backend
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/backend
 pip install -r requirements.txt
 ```
 
@@ -430,11 +430,11 @@ Planned improvements:
 
 ## Support & Documentation
 
-- **Stripe Integration Docs**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/STRIPE_INTEGRATION.md`
-- **Environment Template**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/.env.stripe.example`
-- **Setup Script**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/setup_stripe_products.py`
-- **API Code**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/stripe_api.py`
-- **Integration Code**: `/home/muut/Production/UC-1-Pro/services/ops-center/backend/stripe_integration.py`
+- **Stripe Integration Docs**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/STRIPE_INTEGRATION.md`
+- **Environment Template**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/.env.stripe.example`
+- **Setup Script**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/setup_stripe_products.py`
+- **API Code**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/stripe_api.py`
+- **Integration Code**: `/home/ubuntu/Production/UC-1-Pro/services/ops-center/backend/stripe_integration.py`
 
 ## Conclusion
 

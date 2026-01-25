@@ -454,7 +454,7 @@ docker restart ops-center-direct
 ## Related Documentation
 
 - **Complete Integration Guide**: `/tmp/FORGEJO_INTEGRATION_COMPLETE.md`
-- **UC-Cloud Main README**: `/home/muut/Production/UC-Cloud/README.md`
+- **UC-Cloud Main README**: `/home/ubuntu/Production/UC-Cloud/README.md`
 - **Ops-Center README**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/README.md`
 - **Forgejo Official Docs**: https://forgejo.org/docs/latest/
 

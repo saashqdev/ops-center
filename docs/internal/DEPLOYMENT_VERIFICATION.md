@@ -401,7 +401,7 @@ netstat -tuln | grep 8084
 docker restart ops-center-direct
 
 # If still failing, rebuild
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 docker compose -f services/ops-center/docker-compose.direct.yml restart
 ```
 

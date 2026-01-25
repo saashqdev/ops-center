@@ -218,8 +218,8 @@ User → Subscription Page
 ### Deploy Steps
 ```bash
 # Files are already in place:
-/home/muut/Production/UC-1-Pro/services/ops-center/public/subscription.html
-/home/muut/Production/UC-1-Pro/services/ops-center/public/index.html (updated)
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/subscription.html
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/public/index.html (updated)
 
 # If using Docker:
 docker restart unicorn-ops-center

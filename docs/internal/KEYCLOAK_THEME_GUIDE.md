@@ -15,7 +15,7 @@ This guide provides complete instructions for creating, deploying, and activatin
 
 ```bash
 # Deploy the theme
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-keycloak-theme.sh
 ```
 
@@ -23,7 +23,7 @@ cd /home/muut/Production/UC-1-Pro/services/ops-center
 
 The custom theme should be located at:
 ```
-/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/
 ```
 
 ### Standard Theme Directory Structure
@@ -474,12 +474,12 @@ EOF
 
 1. Edit theme files in source directory:
    ```bash
-   cd /home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro
+   cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro
    ```
 
 2. Redeploy using script:
    ```bash
-   cd /home/muut/Production/UC-1-Pro/services/ops-center
+   cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
    ./deploy-keycloak-theme.sh
    ```
 
@@ -490,7 +490,7 @@ EOF
 Track theme changes in git:
 
 ```bash
-cd /home/muut/Production/UC-1-Pro
+cd /home/ubuntu/Production/UC-1-Pro
 git add services/ops-center/keycloak-theme/
 git commit -m "Update Keycloak theme: [description of changes]"
 ```
@@ -503,7 +503,7 @@ The deployment script automatically creates backups:
 
 ```bash
 # Backups are stored in:
-/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/backups/
+/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/backups/
 ```
 
 ### Manual Backup

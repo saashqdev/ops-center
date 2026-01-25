@@ -131,7 +131,7 @@ VOLUMES_PATH = "/home/ucadmin/UC-1-Pro/volumes"
 import os
 
 # Get base path from environment or default
-BASE_PATH = os.getenv('UC1_BASE_PATH', '/home/muut/Production/UC-1-Pro')
+BASE_PATH = os.getenv('UC1_BASE_PATH', '/home/ubuntu/Production/UC-1-Pro')
 
 STORAGE_CONFIG_PATH = os.path.join(BASE_PATH, "volumes/storage_config.json")
 BACKUP_CONFIG_PATH = os.path.join(BASE_PATH, "volumes/backup_config.json")
@@ -141,7 +141,7 @@ VOLUMES_PATH = os.path.join(BASE_PATH, "volumes")
 
 **Environment Variable**: Add to docker-compose or .env:
 ```bash
-UC1_BASE_PATH=/home/muut/Production/UC-1-Pro
+UC1_BASE_PATH=/home/ubuntu/Production/UC-1-Pro
 ```
 
 ---
@@ -420,7 +420,7 @@ Before deploying fixes:
 1. **Backup Current System**
    ```bash
    # Full backup before changes
-   cd /home/muut/Production/UC-1-Pro
+   cd /home/ubuntu/Production/UC-1-Pro
    tar -czf ../uc1-backup-$(date +%Y%m%d).tar.gz .
    ```
 
@@ -432,7 +432,7 @@ Before deploying fixes:
 3. **Update Environment**
    ```bash
    # Add to .env or docker-compose.yml
-   echo "UC1_BASE_PATH=/home/muut/Production/UC-1-Pro" >> .env
+   echo "UC1_BASE_PATH=/home/ubuntu/Production/UC-1-Pro" >> .env
    ```
 
 4. **Restart Services**

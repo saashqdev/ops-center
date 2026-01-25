@@ -805,7 +805,7 @@ AuditLogger.log_cloudflare_action(
 
 ## Documentation
 
-**Architecture Spec**: `/home/muut/Production/UC-Cloud/docs/epic1.6_cloudflare_architecture_spec.md`
+**Architecture Spec**: `/home/ubuntu/Production/UC-Cloud/docs/epic1.6_cloudflare_architecture_spec.md`
 **Module Code**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/cloudflare_manager.py`
 **This README**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/backend/CLOUDFLARE_MANAGER_README.md`
 

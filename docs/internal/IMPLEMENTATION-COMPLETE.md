@@ -568,7 +568,7 @@ curl -X GET http://localhost:8084/api/v1/byok/keys \
    ```bash
    cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
    tar -czf ops-center-backup-$(date +%Y%m%d-%H%M%S).tar.gz .
-   mv ops-center-backup-*.tar.gz /home/muut/backups/
+   mv ops-center-backup-*.tar.gz /home/ubuntu/backups/
    ```
 
 2. **Build Frontend**:
@@ -596,7 +596,7 @@ curl -X GET http://localhost:8084/api/v1/byok/keys \
 ### Rollback Procedure (If Needed)
 
 ```bash
-cd /home/muut/backups
+cd /home/ubuntu/backups
 tar -xzf ops-center-backup-[timestamp].tar.gz -C /tmp/ops-center-rollback
 rsync -av /tmp/ops-center-rollback/ /home/ubuntu/Ops-Center-OSS/src/services/ops-center/
 docker-compose restart ops-center-direct

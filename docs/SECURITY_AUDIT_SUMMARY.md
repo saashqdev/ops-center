@@ -27,7 +27,7 @@
 - **Effort**: 8-12 hours
 
 ### 2. Unencrypted SSL Keys
-- **File**: `/home/muut/Infrastructure/traefik/acme/acme.json`
+- **File**: `/home/ubuntu/Infrastructure/traefik/acme/acme.json`
 - **Issue**: Private keys stored in plaintext
 - **Fix**: LUKS filesystem encryption or application-level encryption
 - **Effort**: 6-8 hours

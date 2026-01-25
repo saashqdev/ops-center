@@ -13,7 +13,7 @@
 ### Core Files Created
 
 #### 1. Theme Configuration
-- **Location:** `/home/muut/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/theme.properties`
+- **Location:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/keycloak-theme/uc-1-pro/theme.properties`
 - **Purpose:** Main theme configuration, specifies parent theme and CSS imports
 
 #### 2. Login Page Template
@@ -130,7 +130,7 @@ Gold Light:       #FBBF24
 ### Method 1: Automated Script (Recommended)
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center
 ./deploy-keycloak-theme.sh
 ```
 

@@ -227,7 +227,7 @@ curl -X POST https://your-domain.com/api/v1/billing/webhooks/stripe \
 ### Run Full Test Suite
 
 ```bash
-cd /home/muut/Production/UC-1-Pro/services/ops-center/tests
+cd /home/ubuntu/Production/UC-1-Pro/services/ops-center/tests
 chmod +x test_billing_endpoints.sh
 ./test_billing_endpoints.sh
 ```
@@ -256,7 +256,7 @@ cat /tmp/billing_test_report_*.md
 
 ## 📚 Related Documentation
 
-- **Full Test Report:** `/home/muut/Production/UC-1-Pro/services/ops-center/tests/BILLING_ENDPOINTS_TEST_REPORT.md`
+- **Full Test Report:** `/home/ubuntu/Production/UC-1-Pro/services/ops-center/tests/BILLING_ENDPOINTS_TEST_REPORT.md`
 - **Source Code:**
   - Stripe API: `backend/stripe_api.py`
   - Subscription API: `backend/subscription_api.py`

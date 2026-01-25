@@ -488,7 +488,7 @@ fetch('/api/v1/system/capabilities')
 ### Configuration Notes
 
 1. **Home Directory**: Currently detecting `/root` (container user)
-   - Host system uses `/home/muut`
+   - Host system uses `/home/ubuntu`
    - Detection is working correctly for container context
 
 2. **External Protocol**: Currently set to `http`

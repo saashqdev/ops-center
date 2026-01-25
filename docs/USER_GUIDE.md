@@ -660,9 +660,9 @@ _Current plan details, usage limits, and billing history_
 
 ## Additional Resources
 
-- **UC-Cloud Main Docs**: `/home/muut/Production/UC-Cloud/CLAUDE.md`
-- **Brigade Integration**: `/home/muut/Production/UC-Cloud/Unicorn-Brigade/UC-CLOUD-INTEGRATION.md`
-- **Lago Billing Docs**: `/home/muut/Production/UC-1-Pro/docs/BILLING_ARCHITECTURE_FINAL.md`
+- **UC-Cloud Main Docs**: `/home/ubuntu/Production/UC-Cloud/CLAUDE.md`
+- **Brigade Integration**: `/home/ubuntu/Production/UC-Cloud/Unicorn-Brigade/UC-CLOUD-INTEGRATION.md`
+- **Lago Billing Docs**: `/home/ubuntu/Production/UC-1-Pro/docs/BILLING_ARCHITECTURE_FINAL.md`
 - **API Reference**: `/admin/platform/api-docs`
 - **Keycloak Docs**: https://www.keycloak.org/documentation
 

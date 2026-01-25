@@ -119,7 +119,7 @@ set -e
 cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Create database backup BEFORE migration
-BACKUP_FILE="/home/muut/backups/ops-center-db-$(date +%Y%m%d_%H%M%S).sql"
+BACKUP_FILE="/home/ubuntu/backups/ops-center-db-$(date +%Y%m%d_%H%M%S).sql"
 docker exec unicorn-postgresql pg_dump -U unicorn unicorn_db > "$BACKUP_FILE"
 echo "Database backup created: $BACKUP_FILE"
 
@@ -264,7 +264,7 @@ fi
 cd /home/ubuntu/Ops-Center-OSS/src/services/ops-center
 
 # Create hotfix backup
-BACKUP_DIR="/home/muut/backups/hotfix-$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR="/home/ubuntu/backups/hotfix-$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 
 # Backup database

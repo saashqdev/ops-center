@@ -15,7 +15,7 @@ Ops-Center provides automated database backup system with:
 - ✅ **Point-in-time recovery** capability
 - ✅ **Verification** after backup
 
-**Backup Location**: `/home/muut/backups/database/`
+**Backup Location**: `/home/ubuntu/backups/database/`
 
 ---
 
@@ -26,13 +26,13 @@ Ops-Center provides automated database backup system with:
 ./scripts/database/backup_database.sh
 
 # List backups
-ls -lht /home/muut/backups/database/
+ls -lht /home/ubuntu/backups/database/
 
 # Restore from backup
 ./scripts/database/restore_database.sh /path/to/backup.sql
 
 # Check backup metadata
-cat /home/muut/backups/database/unicorn_db_TIMESTAMP.metadata.json
+cat /home/ubuntu/backups/database/unicorn_db_TIMESTAMP.metadata.json
 ```
 
 ---
@@ -91,7 +91,7 @@ cat /home/muut/backups/database/unicorn_db_TIMESTAMP.metadata.json
 
 Standard PostgreSQL dump file:
 ```
-/home/muut/backups/database/unicorn_db_20251022_143025.sql
+/home/ubuntu/backups/database/unicorn_db_20251022_143025.sql
 ```
 
 **Contents**:
@@ -111,7 +111,7 @@ Standard PostgreSQL dump file:
   "timestamp": "20251022_143025",
   "date": "2025-10-22T14:30:25Z",
   "db_size": "2.3 MB",
-  "backup_file": "/home/muut/backups/database/unicorn_db_20251022_143025.sql",
+  "backup_file": "/home/ubuntu/backups/database/unicorn_db_20251022_143025.sql",
   "backup_size": "1.8 MB",
   "retention_days": 7,
   "expires_on": "2025-10-29",
@@ -143,15 +143,15 @@ RETENTION_DAYS=14  # Keep for 14 days instead
 
 ```bash
 # Delete backups older than 7 days
-find /home/muut/backups/database/ -name "unicorn_db_*.sql" -type f -mtime +7 -delete
-find /home/muut/backups/database/ -name "unicorn_db_*.metadata.json" -type f -mtime +7 -delete
+find /home/ubuntu/backups/database/ -name "unicorn_db_*.sql" -type f -mtime +7 -delete
+find /home/ubuntu/backups/database/ -name "unicorn_db_*.metadata.json" -type f -mtime +7 -delete
 ```
 
 **Keep important backups**:
 
 ```bash
 # Move to permanent location
-cp /home/muut/backups/database/unicorn_db_20251022_143025.sql /home/muut/backups/permanent/
+cp /home/ubuntu/backups/database/unicorn_db_20251022_143025.sql /home/ubuntu/backups/permanent/
 ```
 
 ---
@@ -169,15 +169,15 @@ cp /home/muut/backups/database/unicorn_db_20251022_143025.sql /home/muut/backups
 Shows:
 ```
 Available backups:
-  /home/muut/backups/database/unicorn_db_20251022_143025.sql (1.8M, Oct 22 14:30)
-  /home/muut/backups/database/unicorn_db_20251022_120000.sql (1.7M, Oct 22 12:00)
+  /home/ubuntu/backups/database/unicorn_db_20251022_143025.sql (1.8M, Oct 22 14:30)
+  /home/ubuntu/backups/database/unicorn_db_20251022_120000.sql (1.7M, Oct 22 12:00)
   ...
 ```
 
 **Step 2: Restore from backup**
 
 ```bash
-./scripts/database/restore_database.sh /home/muut/backups/database/unicorn_db_20251022_143025.sql
+./scripts/database/restore_database.sh /home/ubuntu/backups/database/unicorn_db_20251022_143025.sql
 ```
 
 **Step 3: Confirmation**
@@ -229,10 +229,10 @@ curl http://localhost:8084/api/v1/system/status
 **Solution**:
 ```bash
 # 1. Find backup from before migration
-ls -lht /home/muut/backups/database/ | head -10
+ls -lht /home/ubuntu/backups/database/ | head -10
 
 # 2. Restore
-./scripts/database/restore_database.sh /home/muut/backups/database/unicorn_db_BEFORE_MIGRATION.sql
+./scripts/database/restore_database.sh /home/ubuntu/backups/database/unicorn_db_BEFORE_MIGRATION.sql
 
 # 3. Fix alembic version
 docker exec ops-center-direct bash -c "cd /app && alembic stamp <previous_version>"
@@ -257,10 +257,10 @@ docker stop ops-center-direct
 ./scripts/database/backup_database.sh
 
 # 3. Find last known good backup
-ls -lht /home/muut/backups/database/ | head -20
+ls -lht /home/ubuntu/backups/database/ | head -20
 
 # 4. Restore
-./scripts/database/restore_database.sh /home/muut/backups/database/unicorn_db_GOOD_BACKUP.sql
+./scripts/database/restore_database.sh /home/ubuntu/backups/database/unicorn_db_GOOD_BACKUP.sql
 
 # 5. Verify data integrity
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db -c "SELECT COUNT(*) FROM <affected_table>;"
@@ -279,12 +279,12 @@ docker logs ops-center-direct -f
 **Solution**:
 ```bash
 # Option 1: Restore entire database from backup
-./scripts/database/restore_database.sh /home/muut/backups/database/unicorn_db_LATEST.sql
+./scripts/database/restore_database.sh /home/ubuntu/backups/database/unicorn_db_LATEST.sql
 
 # Option 2: Extract specific data from backup
 # 1. Restore to temporary database
 docker exec unicorn-postgresql psql -U unicorn -c "CREATE DATABASE unicorn_db_temp;"
-cat /home/muut/backups/database/unicorn_db_LATEST.sql | docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db_temp
+cat /home/ubuntu/backups/database/unicorn_db_LATEST.sql | docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db_temp
 
 # 2. Copy specific data
 docker exec unicorn-postgresql psql -U unicorn -c "INSERT INTO unicorn_db.organizations SELECT * FROM unicorn_db_temp.organizations WHERE id IN (...);"
@@ -300,7 +300,7 @@ docker exec unicorn-postgresql psql -U unicorn -c "DROP DATABASE unicorn_db_temp
 **Solution**:
 ```bash
 # 1. Copy backup from production
-scp production:/home/muut/backups/database/unicorn_db_PROD.sql ./
+scp production:/home/ubuntu/backups/database/unicorn_db_PROD.sql ./
 
 # 2. Restore to dev database
 ./scripts/database/restore_database.sh ./unicorn_db_PROD.sql
@@ -332,10 +332,10 @@ For large databases:
 
 ```bash
 # Create compressed backup
-docker exec unicorn-postgresql pg_dump -U unicorn -d unicorn_db | gzip > /home/muut/backups/database/unicorn_db_$(date +%Y%m%d_%H%M%S).sql.gz
+docker exec unicorn-postgresql pg_dump -U unicorn -d unicorn_db | gzip > /home/ubuntu/backups/database/unicorn_db_$(date +%Y%m%d_%H%M%S).sql.gz
 
 # Restore compressed backup
-gunzip -c /home/muut/backups/database/unicorn_db_20251022_143025.sql.gz | docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db
+gunzip -c /home/ubuntu/backups/database/unicorn_db_20251022_143025.sql.gz | docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db
 ```
 
 ### Custom Format Backups
@@ -344,10 +344,10 @@ For faster restore on large databases:
 
 ```bash
 # Create custom format backup
-docker exec unicorn-postgresql pg_dump -U unicorn -d unicorn_db -Fc > /home/muut/backups/database/unicorn_db_$(date +%Y%m%d_%H%M%S).dump
+docker exec unicorn-postgresql pg_dump -U unicorn -d unicorn_db -Fc > /home/ubuntu/backups/database/unicorn_db_$(date +%Y%m%d_%H%M%S).dump
 
 # Restore custom format
-docker exec -i unicorn-postgresql pg_restore -U unicorn -d unicorn_db -c < /home/muut/backups/database/unicorn_db_20251022_143025.dump
+docker exec -i unicorn-postgresql pg_restore -U unicorn -d unicorn_db -c < /home/ubuntu/backups/database/unicorn_db_20251022_143025.dump
 ```
 
 ---
@@ -358,14 +358,14 @@ docker exec -i unicorn-postgresql pg_restore -U unicorn -d unicorn_db -c < /home
 
 ```bash
 # 1. Check file exists and not empty
-ls -lh /home/muut/backups/database/unicorn_db_20251022_143025.sql
+ls -lh /home/ubuntu/backups/database/unicorn_db_20251022_143025.sql
 
 # 2. Check SQL syntax
-head -100 /home/muut/backups/database/unicorn_db_20251022_143025.sql
+head -100 /home/ubuntu/backups/database/unicorn_db_20251022_143025.sql
 
 # 3. Test restore to temp database
 docker exec unicorn-postgresql psql -U unicorn -c "CREATE DATABASE unicorn_db_verify;"
-cat /home/muut/backups/database/unicorn_db_20251022_143025.sql | docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db_verify
+cat /home/ubuntu/backups/database/unicorn_db_20251022_143025.sql | docker exec -i unicorn-postgresql psql -U unicorn -d unicorn_db_verify
 
 # 4. Verify table count
 docker exec unicorn-postgresql psql -U unicorn -d unicorn_db_verify -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';"
@@ -384,7 +384,7 @@ Regularly test that backups can be restored:
 docker exec unicorn-postgresql psql -U unicorn -c "CREATE DATABASE test_restore;"
 
 # 2. Restore latest backup
-cat /home/muut/backups/database/unicorn_db_LATEST.sql | docker exec -i unicorn-postgresql psql -U unicorn -d test_restore
+cat /home/ubuntu/backups/database/unicorn_db_LATEST.sql | docker exec -i unicorn-postgresql psql -U unicorn -d test_restore
 
 # 3. Verify
 docker exec unicorn-postgresql psql -U unicorn -d test_restore -c "\dt"
@@ -464,14 +464,14 @@ sudo apt install awscli
 aws configure
 
 # Sync backups to S3
-aws s3 sync /home/muut/backups/database/ s3://my-bucket/ops-center-backups/
+aws s3 sync /home/ubuntu/backups/database/ s3://my-bucket/ops-center-backups/
 ```
 
 ### Option 2: Remote Server
 
 ```bash
 # Add to backup script
-rsync -avz /home/muut/backups/database/ backup-server:/backups/ops-center/
+rsync -avz /home/ubuntu/backups/database/ backup-server:/backups/ops-center/
 ```
 
 ### Option 3: NAS/Network Drive
@@ -481,7 +481,7 @@ rsync -avz /home/muut/backups/database/ backup-server:/backups/ops-center/
 sudo mount -t nfs backup-nas:/backups /mnt/backups
 
 # Copy backups
-cp /home/muut/backups/database/*.sql /mnt/backups/ops-center/
+cp /home/ubuntu/backups/database/*.sql /mnt/backups/ops-center/
 ```
 
 ---
@@ -508,10 +508,10 @@ docker exec -i unicorn-postgresql pg_restore -U unicorn -d unicorn_db -c -j 4 < 
 **Solution**: Clean old backups
 ```bash
 # Remove backups older than 3 days
-find /home/muut/backups/database/ -name "unicorn_db_*.sql" -mtime +3 -delete
+find /home/ubuntu/backups/database/ -name "unicorn_db_*.sql" -mtime +3 -delete
 
 # Or move to archive storage
-mv /home/muut/backups/database/*.sql /mnt/archive/
+mv /home/ubuntu/backups/database/*.sql /mnt/archive/
 ```
 
 ### Issue: Backup Script Fails
@@ -519,13 +519,13 @@ mv /home/muut/backups/database/*.sql /mnt/archive/
 **Solution**: Check permissions and container status
 ```bash
 # Check if directory writable
-touch /home/muut/backups/database/test.txt && rm /home/muut/backups/database/test.txt
+touch /home/ubuntu/backups/database/test.txt && rm /home/ubuntu/backups/database/test.txt
 
 # Check container running
 docker ps | grep unicorn-postgresql
 
 # Check disk space
-df -h /home/muut/backups/
+df -h /home/ubuntu/backups/
 ```
 
 ---
@@ -578,7 +578,7 @@ df -h /home/muut/backups/
 
 ## Emergency Contacts
 
-**Backup Location**: `/home/muut/backups/database/`
+**Backup Location**: `/home/ubuntu/backups/database/`
 **Scripts Location**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/database/`
 **Documentation**: `/home/ubuntu/Ops-Center-OSS/src/services/ops-center/docs/`
 

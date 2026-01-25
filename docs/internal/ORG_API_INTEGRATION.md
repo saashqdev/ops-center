@@ -157,7 +157,7 @@ owner           (Full control)
 ### Step 1: Restart the Backend
 
 ```bash
-cd /home/muut/Production/UC-Cloud
+cd /home/ubuntu/Production/UC-Cloud
 docker restart ops-center-direct
 ```
 

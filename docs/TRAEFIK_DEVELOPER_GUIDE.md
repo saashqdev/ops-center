@@ -1043,10 +1043,10 @@ console.log('API response:', data);
 docker logs traefik --tail 100 -f
 
 # Check configuration files
-cat /home/muut/Production/UC-Cloud/traefik/dynamic/routes.yml
+cat /home/ubuntu/Production/UC-Cloud/traefik/dynamic/routes.yml
 
 # Check ACME data
-cat /home/muut/Production/UC-Cloud/traefik/acme/acme.json | jq
+cat /home/ubuntu/Production/UC-Cloud/traefik/acme/acme.json | jq
 ```
 
 ---
@@ -1103,7 +1103,7 @@ Lines 1220-1540: Dialog components (modals)
 
 **Traefik Directory Structure**:
 ```
-/home/muut/Production/UC-Cloud/traefik/
+/home/ubuntu/Production/UC-Cloud/traefik/
 ├── traefik.yml               # Static configuration
 ├── dynamic/
 │   ├── routes.yml           # HTTP routers
@@ -1710,7 +1710,7 @@ services:
     ports:
       - "8084:8084"
     volumes:
-      - /home/muut/Production/UC-Cloud/traefik:/traefik
+      - /home/ubuntu/Production/UC-Cloud/traefik:/traefik
     networks:
       - unicorn-network
       - web
@@ -1758,7 +1758,7 @@ TRAEFIK_DOCKER_CONTAINER=traefik
 **Traefik Volume Mount**:
 ```yaml
 volumes:
-  - /home/muut/Production/UC-Cloud/traefik:/traefik
+  - /home/ubuntu/Production/UC-Cloud/traefik:/traefik
 ```
 
 This allows the Ops-Center container to read/write Traefik configuration files.
@@ -1792,7 +1792,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 **Automatic Backups**:
 - Backups created automatically before every configuration change
 - Last 10 backups retained (older ones deleted)
-- Location: `/home/muut/Production/UC-Cloud/traefik/backups/`
+- Location: `/home/ubuntu/Production/UC-Cloud/traefik/backups/`
 
 **Manual Backups**:
 ```bash
@@ -1804,7 +1804,7 @@ curl -X POST http://localhost:8084/api/v1/traefik/config/backup \
 timestamp=$(date +%Y%m%d_%H%M%S)
 backup_dir="/backup/traefik_manual_$timestamp"
 mkdir -p "$backup_dir"
-cp -r /home/muut/Production/UC-Cloud/traefik/* "$backup_dir/"
+cp -r /home/ubuntu/Production/UC-Cloud/traefik/* "$backup_dir/"
 ```
 
 **Archive Important Backups**:
@@ -1846,7 +1846,7 @@ curl http://localhost:8084/api/v1/traefik/health
 ## Appendix A: File Locations
 
 ```
-/home/muut/Production/UC-Cloud/
+/home/ubuntu/Production/UC-Cloud/
 ├── services/ops-center/
 │   ├── backend/
 │   │   ├── traefik_manager.py        # Core business logic
