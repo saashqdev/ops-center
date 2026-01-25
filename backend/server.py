@@ -89,6 +89,7 @@ from migration_api import router as migration_router
 from credential_api import router as credential_router
 from keycloak_status_api import router as keycloak_status_router
 from litellm_routing_api import router as litellm_routing_router
+from llm_routing_api_v2 import router as litellm_routing_router_v2  # Epic 3.1 Multi-Provider Routing
 from litellm_api import router as litellm_api_router  # Chat completions, credits, BYOK
 from model_catalog_api import router as model_catalog_router  # Model catalog API
 from model_access_api import router as model_access_router  # Model access control (Epic 3.3)
@@ -551,6 +552,11 @@ async def startup_event():
         app.state.byok_manager = byok_manager
         logger.info("BYOK manager initialized successfully")
 
+        # Initialize LiteLLM Routing API v2 (Epic 3.1)
+        from llm_routing_api_v2 import init_db_pool as init_llm_routing_v2_pool
+        await init_llm_routing_v2_pool()
+        logger.info("LiteLLM Routing API v2 database pool initialized")
+
         # Initialize Model Access API dependencies (Epic 3.3)
         from model_access_api import init_dependencies as init_model_access_deps
         init_model_access_deps(db_pool, credit_system, byok_manager)
@@ -635,6 +641,14 @@ async def shutdown_event():
             logger.info("Rate limiter closed")
         except Exception as e:
             logger.error(f"Error closing rate limiter: {e}")
+
+    # Close LiteLLM Routing API v2 pool
+    try:
+        from llm_routing_api_v2 import close_db_pool as close_llm_routing_v2_pool
+        await close_llm_routing_v2_pool()
+        logger.info("LiteLLM Routing API v2 database pool closed")
+    except Exception as e:
+        logger.error(f"Error closing LiteLLM Routing v2 pool: {e}")
 
     # Close credit system connections
     if hasattr(app.state, 'db_pool') and app.state.db_pool:
@@ -809,6 +823,8 @@ app.include_router(admin_local_users_router)
 logger.info("Admin Local User Management API endpoints registered at /api/v1/admin/system/local-users")
 app.include_router(litellm_routing_router)
 logger.info("LiteLLM routing API endpoints registered at /api/v1/llm")
+app.include_router(litellm_routing_router_v2)
+logger.info("LiteLLM routing API v2 (Epic 3.1) endpoints registered at /api/v2/llm")
 
 # Forgejo integration
 app.include_router(forgejo_router)
