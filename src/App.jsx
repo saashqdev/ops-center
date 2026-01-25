@@ -130,6 +130,10 @@ const ForgejoManagement = lazy(() => import('./pages/admin/ForgejoManagement'));
 const InviteCodesManagement = lazy(() => import('./pages/admin/InviteCodesManagement'));
 const SystemBillingOverview = lazy(() => import('./pages/admin/SystemBillingOverview'));
 
+// Epic 4.4: Subscription Tier Management
+const SubscriptionTierManagement = lazy(() => import('./pages/admin/SubscriptionTierManagement'));
+const TierFeatureManagement = lazy(() => import('./pages/admin/TierFeatureManagement'));
+
 // Infrastructure pages (lazy loaded)
 const CloudflareDNS = lazy(() => import('./components/CloudflareDNS'));
 const MigrationWizard = lazy(() => import('./pages/migration/MigrationWizard'));
@@ -392,6 +396,8 @@ function AppRoutes() {
                   <Route path="system/usage-analytics" element={<UsageAnalytics />} />
                   <Route path="system/billing" element={<BillingDashboard />} />
                   <Route path="system/subscription-management" element={<SubscriptionManagement />} />
+                  <Route path="system/subscription-tiers" element={<SubscriptionTierManagement />} /> {/* Epic 4.4 */}
+                  <Route path="system/tier-features" element={<TierFeatureManagement />} /> {/* Epic 4.4 */}
                   <Route path="system/app-management" element={<AppManagement />} />
                   <Route path="system/pricing-management" element={<DynamicPricingManagement />} />
                   <Route path="platform/white-label" element={<WhiteLabelBuilder />} />

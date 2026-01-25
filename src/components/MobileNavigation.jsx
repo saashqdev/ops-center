@@ -244,6 +244,8 @@ export default function MobileNavigation({ user, currentPath }) {
       visible: userRole === 'admin',
       children: [
         { label: 'Subscription Management', path: '/admin/system/subscription-management', icon: <CreditCardIcon /> },
+        { label: 'Subscription Tiers 💳', path: '/admin/system/subscription-tiers', icon: <CreditCardIcon />, badge: 'Epic 4.4' },
+        { label: 'Feature Flags 🎛️', path: '/admin/system/tier-features', icon: <BuildIcon />, badge: 'Epic 4.4' },
         { label: 'Feature Management', path: '/admin/system/feature-management', icon: <SettingsIcon /> },
         { label: 'Billing Dashboard', path: '/admin/system/billing', icon: <AttachMoneyIcon /> },
         { label: 'Analytics', path: '/admin/system/analytics', icon: <AnalyticsIcon /> },
