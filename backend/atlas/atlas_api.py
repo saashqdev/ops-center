@@ -45,7 +45,7 @@ class AtlasRequest(BaseModel):
     )
 
 
-class Tool ExecutionRequest(BaseModel):
+class ToolExecutionRequest(BaseModel):
     """Direct tool execution request"""
     tool_name: str = Field(..., description="Name of the tool to execute")
     parameters: Dict[str, Any] = Field(

@@ -206,10 +206,10 @@ async def list_tiers(
                 st.sort_order, st.api_calls_limit, st.team_seats,
                 st.byok_enabled, st.priority_support,
                 st.lago_plan_code, st.stripe_price_monthly, st.stripe_price_yearly,
-                st.created_at, st.updated_at, st.created_by, st.updated_by,
-                COALESCE(COUNT(DISTINCT ta.id), 0) AS app_count
+                st.created_at, st.updated_at,
+                COALESCE(COUNT(DISTINCT tf.id), 0) AS feature_count
             FROM subscription_tiers st
-            LEFT JOIN tier_apps ta ON st.id = ta.tier_id AND ta.enabled = TRUE
+            LEFT JOIN tier_features tf ON st.id = tf.tier_id
         """
 
         if active_only:
