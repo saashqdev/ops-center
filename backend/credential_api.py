@@ -27,6 +27,11 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 import logging
+import re
+
+# Rate limiting
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 # Import credential manager
 import sys
@@ -51,8 +56,51 @@ from database.connection import get_db_pool
 
 logger = logging.getLogger(__name__)
 
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
 # Initialize router
 router = APIRouter(prefix="/api/v1/credentials", tags=["credentials", "security"])
+
+
+# ==================== Security Utilities ====================
+
+def sanitize_metadata(metadata: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Sanitize metadata to prevent XSS and injection attacks
+    
+    - Removes HTML/script tags
+    - Limits string length
+    - Validates keys and values
+    """
+    if not metadata:
+        return {}
+    
+    sanitized = {}
+    
+    # Pattern to detect potentially dangerous content
+    dangerous_pattern = re.compile(r'<script|javascript:|onerror=|onclick=|<iframe', re.IGNORECASE)
+    
+    for key, value in metadata.items():
+        # Sanitize key (only allow alphanumeric, underscore, hyphen)
+        clean_key = re.sub(r'[^a-zA-Z0-9_-]', '', str(key))[:100]
+        
+        if isinstance(value, str):
+            # Remove dangerous patterns
+            clean_value = dangerous_pattern.sub('', value)
+            # Limit length
+            clean_value = clean_value[:1000]
+            sanitized[clean_key] = clean_value
+        elif isinstance(value, (int, float, bool)):
+            sanitized[clean_key] = value
+        elif isinstance(value, (list, dict)):
+            # Convert to JSON string and sanitize
+            import json
+            str_value = json.dumps(value)[:1000]
+            clean_value = dangerous_pattern.sub('', str_value)
+            sanitized[clean_key] = clean_value
+    
+    return sanitized
 
 
 # ==================== Pydantic Request Models ====================
@@ -87,12 +135,22 @@ class CreateCredentialRequest(BaseModel):
                     f"Valid types: {', '.join(valid_types)}"
                 )
         return v
+    
+    @validator('metadata')
+    def sanitize_metadata_field(cls, v):
+        """Sanitize metadata to prevent XSS/injection"""
+        return sanitize_metadata(v)
 
 
 class UpdateCredentialRequest(BaseModel):
     """Request model for updating credential"""
     value: str = Field(..., min_length=10, description="New credential value (plaintext)")
     metadata: Optional[Dict[str, Any]] = Field(None, description="Optional updated metadata")
+    
+    @validator('metadata')
+    def sanitize_metadata_field(cls, v):
+        """Sanitize metadata to prevent XSS/injection"""
+        return sanitize_metadata(v)
 
 
 class TestCredentialRequest(BaseModel):
@@ -195,7 +253,8 @@ async def create_credential(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to create credential: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to create credential: {str(e)}")
+        # Generic error message to avoid leaking internal details
+        raise HTTPException(status_code=500, detail="Failed to create credential. Please check your input and try again.")
 
 
 @router.get("", response_model=List[CredentialResponse])
@@ -272,7 +331,8 @@ async def get_credential(
         raise
     except Exception as e:
         logger.error(f"Failed to get credential: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get credential")
+        # Generic error message to avoid leaking API details or internal errors
+        raise HTTPException(status_code=500, detail="Failed to test credential. Please verify your credentials and try again.")
 
 
 @router.put("/{service}/{credential_type}", response_model=CredentialResponse)
@@ -324,7 +384,8 @@ async def update_credential(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to update credential: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to update credential: {str(e)}")
+        # Generic error message to avoid leaking internal details
+        raise HTTPException(status_code=500, detail="Failed to update credential. Please check your input and try again.")
 
 
 @router.delete("/{service}/{credential_type}", status_code=204)
@@ -378,6 +439,7 @@ async def delete_credential(
 
 
 @router.post("/{service}/test", response_model=TestResultResponse)
+@limiter.limit("5/minute")
 async def test_credential(
     service: str,
     request_body: TestCredentialRequest,
@@ -438,7 +500,8 @@ async def test_credential(
         raise
     except Exception as e:
         logger.error(f"Failed to test credential: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to test credential: {str(e)}")
+        # Generic error message to avoid leaking API details or internal errors
+        raise HTTPException(status_code=500, detail="Failed to test credential. Please verify your credentials and try again.")
 
 
 @router.get("/services", response_model=List[ServiceInfo])
