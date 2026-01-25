@@ -99,8 +99,8 @@ import redis.asyncio as aioredis
 from local_users_api import router as admin_local_users_router
 from platform_settings_api import router as platform_settings_router
 from user_management_api import router as user_management_router
-# TODO: Install Pillow dependency before enabling avatar storage
-# from avatar_storage import router as avatar_storage_router  # Avatar storage & caching
+# Avatar Storage API (November 2025 - CORS fix for bolt.diy)
+from avatar_storage import router as avatar_storage_router  # Avatar storage & caching
 from redis_session import redis_session_manager
 from account_management_api import router as account_management_router
 from subscription_tiers_api import router as subscription_tiers_router
@@ -789,8 +789,7 @@ app.include_router(account_management_router)
 logger.info("Account & System Management API endpoints registered")
 
 # Avatar Storage API (November 2025 - CORS fix for bolt.diy)
-# TODO: Uncomment when Pillow dependency is installed
-# app.include_router(avatar_storage_router)
+app.include_router(avatar_storage_router)
 logger.info("Avatar storage API endpoints registered at /api/v1/users/{user_id}/avatar")
 
 # Subscription Tier Management API (Epic 4.4)
@@ -3955,7 +3954,7 @@ async def update_profile(
                 raise HTTPException(status_code=400, detail="File size must be less than 2MB")
 
             # Create avatars directory if it doesn't exist
-            avatar_dir = "/app/public/avatars"
+            avatar_dir = "/app/avatars"
             os.makedirs(avatar_dir, exist_ok=True)
 
             # Generate unique filename
