@@ -85,7 +85,8 @@ const Brigade = lazy(() => import('./pages/Brigade'));
 const LLMHub = lazy(() => import('./pages/LLMHub'));
 const LLMManagement = lazy(() => import('./pages/LLMManagement'));
 const LiteLLMManagement = lazy(() => import('./pages/LiteLLMManagement'));
-const LiteLLMManagementV2 = lazy(() => import('./pages/LiteLLMManagementV2')); // Epic 3.1
+const LiteLLMManagementV2 = lazy(() => import('./pages/LiteLLMManagementV2'));
+const AtlasChat = lazy(() => import('./pages/AtlasChat')); // Epic 3.1
 const LLMManagementUnified = lazy(() => import('./pages/LLMManagementUnified'));
 const OpenRouterSettings = lazy(() => import('./pages/OpenRouterSettings'));
 const LLMUsage = lazy(() => import('./pages/LLMUsage'));
@@ -355,6 +356,7 @@ function AppRoutes() {
                   {/* SERVICES SECTION - Platform services */}
                   {/* ============================================================ */}
                   <Route path="brigade" element={<Brigade />} />
+                  <Route path="atlas" element={<AtlasChat />} /> {/* Epic 6.1 - AI Assistant */}
                   <Route path="llm-hub" element={<LLMHub />} />
                   <Route path="llm-management" element={<LLMManagement />} />
                   <Route path="litellm-providers" element={<LiteLLMManagement />} />

@@ -215,6 +215,7 @@ export default function MobileNavigation({ user, currentPath }) {
       visible: userRole === 'admin',
       children: [
         { label: 'Services', path: '/admin/services', icon: <ServerIcon /> },
+        { label: 'Lt. Colonel Atlas 🎖️', path: '/admin/atlas', icon: <AutoAwesomeIcon />, badge: 'AI' },
         { label: 'Hardware', path: '/admin/infrastructure/hardware', icon: <BuildIcon /> },
         { label: 'Monitoring', path: '/admin/system', icon: <BarChartIcon /> },
         { label: 'LLM Management', path: '/admin/llm-management', icon: <CloudIcon /> },

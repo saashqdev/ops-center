@@ -224,6 +224,9 @@ from traefik_live_api import router as traefik_live_router  # NEW: Live data fro
 # Brigade Integration API (H23)
 from brigade_api import router as brigade_router
 
+# Lt. Colonel Atlas - AI Infrastructure Assistant (Epic 6.1)
+from atlas.atlas_api import router as atlas_router
+
 # System Metrics & Analytics (Epic 2.5)
 from system_metrics_api import router as system_metrics_router
 from metrics_collector import MetricsCollector
@@ -884,6 +887,10 @@ logger.info("Traefik Middlewares API endpoints registered at /api/v1/traefik/mid
 # Brigade Integration API (H23)
 app.include_router(brigade_router)
 logger.info("Brigade Proxy API endpoints registered at /api/v1/brigade (H23)")
+
+# Lt. Colonel Atlas - AI Infrastructure Assistant (Epic 6.1)
+app.include_router(atlas_router)
+logger.info("🎖️  Lt. Colonel Atlas AI Assistant registered at /api/v1/atlas (Epic 6.1)")
 
 # Storage & Backup Management
 app.include_router(storage_backup_router)
