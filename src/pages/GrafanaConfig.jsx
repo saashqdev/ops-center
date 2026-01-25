@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ChartBarIcon, ServerIcon, KeyIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 
 /**
  * GrafanaConfig - Grafana Dashboard Configuration
@@ -37,7 +36,7 @@ export default function GrafanaConfig() {
     is_default: false,
   });
 
-  const API_BASE = 'http://localhost:8084/api/v1/monitoring/grafana';
+  const API_BASE = '/api/v1/monitoring/grafana';
 
   // Load health status on mount
   useEffect(() => {
@@ -50,8 +49,11 @@ export default function GrafanaConfig() {
 
   const checkHealth = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/health`);
-      setHealth(response.data);
+      const response = await fetch(`${API_BASE}/health`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setHealth(data);
     } catch (err) {
       console.error('Health check failed:', err);
       setHealth({ success: false, status: 'error', error: err.message });
@@ -64,17 +66,23 @@ export default function GrafanaConfig() {
     setSuccess(null);
 
     try {
-      const response = await axios.post(`${API_BASE}/test-connection`, config);
-      if (response.data.success) {
-        setSuccess(response.data.message);
+      const response = await fetch(`${API_BASE}/test-connection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(config)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccess(data.message);
         // Auto-load data sources and dashboards on successful connection
         loadDatasources();
         loadDashboards();
       } else {
-        setError(response.data.message);
+        setError(data.message);
       }
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Connection test failed');
+      setError(err.message || 'Connection test failed');
     } finally {
       setTesting(false);
     }
@@ -83,11 +91,15 @@ export default function GrafanaConfig() {
   const loadDatasources = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE}/datasources`, {
-        params: { api_key: config.apiKey || undefined }
+      const url = new URL(`${window.location.origin}${API_BASE}/datasources`);
+      if (config.apiKey) url.searchParams.set('api_key', config.apiKey);
+      
+      const response = await fetch(url, {
+        credentials: 'include'
       });
-      if (response.data.success) {
-        setDatasources(response.data.datasources || []);
+      const data = await response.json();
+      if (data.success) {
+        setDatasources(data.datasources || []);
       }
     } catch (err) {
       console.error('Failed to load datasources:', err);
@@ -98,11 +110,15 @@ export default function GrafanaConfig() {
 
   const loadDashboards = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/dashboards`, {
-        params: { api_key: config.apiKey || undefined }
+      const url = new URL(`${window.location.origin}${API_BASE}/dashboards`);
+      if (config.apiKey) url.searchParams.set('api_key', config.apiKey);
+      
+      const response = await fetch(url, {
+        credentials: 'include'
       });
-      if (response.data.success) {
-        setDashboards(response.data.dashboards || []);
+      const data = await response.json();
+      if (data.success) {
+        setDashboards(data.dashboards || []);
       }
     } catch (err) {
       console.error('Failed to load dashboards:', err);
@@ -125,12 +141,18 @@ export default function GrafanaConfig() {
     setSuccess(null);
 
     try {
-      const response = await axios.post(
-        `${API_BASE}/datasources?api_key=${config.apiKey}`,
-        newDatasource
-      );
-      if (response.data.success) {
-        setSuccess(response.data.message);
+      const url = new URL(`${window.location.origin}${API_BASE}/datasources`);
+      url.searchParams.set('api_key', config.apiKey);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newDatasource)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccess(data.message);
         // Reset form
         setNewDatasource({
           name: '',
@@ -141,9 +163,11 @@ export default function GrafanaConfig() {
         });
         // Reload datasources
         loadDatasources();
+      } else {
+        setError(data.message || 'Failed to create data source');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to create data source');
+      setError(err.message || 'Failed to create data source');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { CircleStackIcon, ServerIcon, BellAlertIcon, ClockIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 
 /**
  * PrometheusConfig - Prometheus Metrics Configuration
@@ -36,7 +35,7 @@ export default function PrometheusConfig() {
     labels: {}
   });
 
-  const API_BASE = 'http://localhost:8084/api/v1/monitoring/prometheus';
+  const API_BASE = '/api/v1/monitoring/prometheus';
 
   // Load health status on mount
   useEffect(() => {
@@ -46,8 +45,11 @@ export default function PrometheusConfig() {
 
   const checkHealth = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/health`);
-      setHealth(response.data);
+      const response = await fetch(`${API_BASE}/health`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setHealth(data);
     } catch (err) {
       console.error('Health check failed:', err);
       setHealth({ success: false, status: 'error', error: err.message });
@@ -60,16 +62,22 @@ export default function PrometheusConfig() {
     setSuccess(null);
 
     try {
-      const response = await axios.post(`${API_BASE}/test-connection`, config);
-      if (response.data.success) {
-        setSuccess(response.data.message);
+      const response = await fetch(`${API_BASE}/test-connection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(config)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccess(data.message);
         // Reload targets on successful connection
         loadTargets();
       } else {
-        setError(response.data.message);
+        setError(data.message);
       }
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Connection test failed');
+      setError(err.message || 'Connection test failed');
     } finally {
       setTesting(false);
     }
@@ -78,10 +86,13 @@ export default function PrometheusConfig() {
   const loadTargets = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE}/targets`);
-      if (response.data.success) {
-        setTargets(response.data.targets || []);
-        setDefaultTargets(response.data.default_targets || []);
+      const response = await fetch(`${API_BASE}/targets`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTargets(data.targets || []);
+        setDefaultTargets(data.default_targets || []);
       }
     } catch (err) {
       console.error('Failed to load targets:', err);
@@ -101,11 +112,17 @@ export default function PrometheusConfig() {
     setSuccess(null);
 
     try {
-      const response = await axios.post(`${API_BASE}/targets`, newTarget);
-      if (response.data.success) {
-        setSuccess(response.data.message);
+      const response = await fetch(`${API_BASE}/targets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newTarget)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccess(data.message);
         // Show the generated config
-        console.log('Generated config:', response.data.config);
+        console.log('Generated config:', data.config);
         // Reset form
         setNewTarget({
           name: '',
@@ -116,9 +133,11 @@ export default function PrometheusConfig() {
         });
         // Reload targets
         loadTargets();
+      } else {
+        setError(data.message || 'Failed to create target');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to create target');
+      setError(err.message || 'Failed to create target');
     } finally {
       setLoading(false);
     }

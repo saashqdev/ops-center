@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ChartPieIcon, GlobeAltIcon, CodeBracketIcon, KeyIcon, CheckCircleIcon, ExclamationCircleIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 
 /**
  * UmamiConfig - Umami Web Analytics Configuration
@@ -38,7 +37,7 @@ export default function UmamiConfig() {
   const [selectedWebsite, setSelectedWebsite] = useState(null);
   const [websiteStats, setWebsiteStats] = useState(null);
 
-  const API_BASE = 'http://localhost:8084/api/v1/monitoring/umami';
+  const API_BASE = '/api/v1/monitoring/umami';
 
   // Load health status on mount
   useEffect(() => {
@@ -48,8 +47,11 @@ export default function UmamiConfig() {
 
   const checkHealth = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/health`);
-      setHealth(response.data);
+      const response = await fetch(`${API_BASE}/health`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setHealth(data);
     } catch (err) {
       console.error('Health check failed:', err);
       setHealth({ success: false, status: 'error', error: err.message });
@@ -62,16 +64,22 @@ export default function UmamiConfig() {
     setSuccess(null);
 
     try {
-      const response = await axios.post(`${API_BASE}/test-connection`, config);
-      if (response.data.success) {
-        setSuccess(response.data.message);
+      const response = await fetch(`${API_BASE}/test-connection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(config)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccess(data.message);
         // Reload websites on successful connection
         loadWebsites();
       } else {
-        setError(response.data.message);
+        setError(data.message);
       }
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Connection test failed');
+      setError(err.message || 'Connection test failed');
     } finally {
       setTesting(false);
     }
@@ -80,11 +88,15 @@ export default function UmamiConfig() {
   const loadWebsites = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE}/websites`, {
-        params: { api_key: config.apiKey || undefined }
+      const url = new URL(`${window.location.origin}${API_BASE}/websites`);
+      if (config.apiKey) url.searchParams.set('api_key', config.apiKey);
+      
+      const response = await fetch(url, {
+        credentials: 'include'
       });
-      if (response.data.success) {
-        setWebsites(response.data.websites || []);
+      const data = await response.json();
+      if (data.success) {
+        setWebsites(data.websites || []);
       }
     } catch (err) {
       console.error('Failed to load websites:', err);
@@ -109,12 +121,18 @@ export default function UmamiConfig() {
     setSuccess(null);
 
     try {
-      const response = await axios.post(
-        `${API_BASE}/websites?api_key=${config.apiKey}`,
-        newWebsite
-      );
-      if (response.data.success) {
-        setSuccess(response.data.message);
+      const url = new URL(`${window.location.origin}${API_BASE}/websites`);
+      url.searchParams.set('api_key', config.apiKey);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newWebsite)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccess(data.message);
         // Reset form
         setNewWebsite({
           name: '',
@@ -123,9 +141,11 @@ export default function UmamiConfig() {
         });
         // Reload websites
         loadWebsites();
+      } else {
+        setError(data.message || 'Failed to create website');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to create website');
+      setError(err.message || 'Failed to create website');
     } finally {
       setLoading(false);
     }
@@ -151,11 +171,16 @@ export default function UmamiConfig() {
     if (!config.apiKey) return;
 
     try {
-      const response = await axios.get(
-        `${API_BASE}/stats?website_id=${websiteId}&api_key=${config.apiKey}`
-      );
-      if (response.data.success) {
-        setWebsiteStats(response.data.stats);
+      const url = new URL(`${window.location.origin}${API_BASE}/stats`);
+      url.searchParams.set('website_id', websiteId);
+      url.searchParams.set('api_key', config.apiKey);
+      
+      const response = await fetch(url, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.success) {
+        setWebsiteStats(data.stats);
         setSelectedWebsite(websiteId);
       }
     } catch (err) {
