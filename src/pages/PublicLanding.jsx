@@ -743,14 +743,15 @@ export default function PublicLanding() {
         <div className={`${styles.searchBg} p-8 rounded-2xl`}>
           <form onSubmit={handleSearch} className="relative">
             <div className="relative">
-              <MagnifyingGlassIcon className={`absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 ${styles.searchIcon}`} />
+              <MagnifyingGlassIcon className={`absolute left-6 top-1/2 transform -translate-y-1/2 h-6 w-6 ${styles.searchIcon}`} />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className={`w-full pl-12 pr-16 py-4 text-lg rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${styles.searchInput}`}
+                style={{ paddingLeft: '64px' }}
+                className={`w-full pr-32 py-4 text-lg rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${styles.searchInput}`}
                 placeholder="Search the web with Center-Deep..."
               />
               <button

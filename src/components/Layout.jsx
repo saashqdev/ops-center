@@ -988,7 +988,7 @@ export default function Layout({ children }) {
               : currentTheme === 'light'
               ? 'bg-white border-b border-gray-200'
               : 'bg-slate-800 border-b border-slate-700'
-          } shadow-sm`}>
+          } shadow-sm relative z-[12000]`}>
             <div className="flex items-center justify-between px-4 md:px-4 py-3 pl-20 md:pl-4">
               {/* pl-20 on mobile to account for hamburger menu button */}
               {/* Left: Page Title or Breadcrumbs */}
