@@ -174,33 +174,49 @@ function ProtectedRoute({ children }) {
   const [authenticated, setAuthenticated] = useState(false);
   
   useEffect(() => {
+    console.log('ProtectedRoute: Checking authentication...');
+    
     // First check if we have a token
     const token = localStorage.getItem('authToken');
     if (token) {
+      console.log('ProtectedRoute: Found authToken in localStorage');
       setAuthenticated(true);
       setChecking(false);
       return;
     }
     
-    // If no token, check for OAuth session
-    fetch('/api/v1/auth/session')
+    console.log('ProtectedRoute: No authToken, checking OAuth session...');
+    
+    // If no token, check for OAuth session with credentials to send cookies
+    fetch('/api/v1/auth/session', {
+      credentials: 'include', // Important: send cookies with request
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
       .then(res => {
+        console.log('ProtectedRoute: Session check status:', res.status);
         if (res.ok) {
           return res.json();
         }
         throw new Error('Not authenticated');
       })
       .then(data => {
+        console.log('ProtectedRoute: Session data:', data);
         if (data.authenticated && data.token) {
           // Store the token for future use
           localStorage.setItem('authToken', data.token);
           // Use 'userInfo' key to match Layout.jsx
           localStorage.setItem('userInfo', JSON.stringify(data.user));
-          console.log('DEBUG: Stored userInfo:', data.user);
+          console.log('ProtectedRoute: Stored userInfo:', data.user);
           setAuthenticated(true);
+        } else {
+          console.log('ProtectedRoute: Session check failed - not authenticated');
+          setAuthenticated(false);
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log('ProtectedRoute: Session check error:', error);
         setAuthenticated(false);
       })
       .finally(() => {
@@ -209,18 +225,30 @@ function ProtectedRoute({ children }) {
   }, []);
   
   if (checking) {
-    return <div>Loading...</div>;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div>Checking authentication...</div>
+      </div>
+    );
   }
   
   if (!authenticated) {
+    console.log('ProtectedRoute: Not authenticated, redirecting to /auth/login from:', window.location.pathname);
     // Redirect to OAuth login using window.location to force full page load
     // This allows the backend /auth/login endpoint to handle the Keycloak redirect
     if (!window.location.pathname.startsWith('/auth/')) {
+      // Store the intended destination to redirect back after login
+      sessionStorage.setItem('redirect_after_login', window.location.pathname);
       window.location.href = '/auth/login';
     }
-    return <div>Loading...</div>;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div>Redirecting to login...</div>
+      </div>
+    );
   }
   
+  console.log('ProtectedRoute: Authenticated, rendering children');
   return children;
 }
 
