@@ -107,6 +107,7 @@ from account_management_api import router as account_management_router
 from subscription_tiers_api import router as subscription_tiers_router
 from tier_features_api import router as tier_features_router
 from app_definitions_api import router as app_definitions_router
+from organization_branding_api import router as organization_branding_router
 from routers.forgejo import router as forgejo_router
 
 # Model List Management API
@@ -812,6 +813,10 @@ logger.info("Avatar storage API endpoints registered at /api/v1/users/{user_id}/
 # Subscription Tier Management API (Epic 4.4)
 app.include_router(subscription_tiers_router)
 logger.info("Subscription Tier Management API endpoints registered at /api/v1/admin/tiers")
+
+# Organization Branding API (Epic 4.5)
+app.include_router(organization_branding_router)
+logger.info("Organization Branding API endpoints registered at /api/v1/organizations/{org_id}/branding")
 
 # Tier Features Association API
 app.include_router(tier_features_router)
