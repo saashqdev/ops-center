@@ -201,6 +201,10 @@ const CostOptimizationAdmin = lazy(() => import('./pages/costs/CostOptimizationA
 // Epic 15: Fleet Management - Multi-server orchestration
 const FleetDashboard = lazy(() => import('./pages/fleet/FleetDashboard'));
 
+// Epic 16: Kubernetes Integration - K8s cluster management
+const KubernetesDashboard = lazy(() => import('./pages/KubernetesDashboard'));
+const ClusterDetail = lazy(() => import('./pages/ClusterDetail'));
+
 // Lazy load non-critical components
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 const HelpPanel = lazy(() => import('./components/HelpPanel'));
@@ -539,6 +543,12 @@ function AppRoutes() {
                   {/* FLEET MANAGEMENT - Epic 15 */}
                   {/* ============================================================ */}
                   <Route path="fleet" element={<FleetDashboard />} />
+
+                  {/* ============================================================ */}
+                  {/* KUBERNETES INTEGRATION - Epic 16 */}
+                  {/* ============================================================ */}
+                  <Route path="kubernetes" element={<KubernetesDashboard />} />
+                  <Route path="kubernetes/clusters/:clusterId" element={<ClusterDetail />} />
 
                   {/* ============================================================ */}
                   {/* WEBHOOK MANAGEMENT - Epic 8.1 */}

@@ -249,6 +249,9 @@ from atlas.atlas_api import router as atlas_router
 # Multi-Server Fleet Management (Epic 15)
 from multi_server_api import router as fleet_router
 
+# Kubernetes Integration (Epic 16)
+from k8s_api import router as k8s_router
+
 # System Metrics & Analytics (Epic 2.5)
 from system_metrics_api import router as system_metrics_router
 from metrics_collector import MetricsCollector
@@ -671,6 +674,22 @@ async def startup_event():
         except Exception as e:
             logger.error(f"Failed to start fleet workers: {e}")
             # Don't block startup if fleet workers fail
+        
+        # Start Kubernetes workers (Epic 16)
+        try:
+            from k8s_sync_worker import start_k8s_sync_worker
+            from k8s_cost_calculator import start_k8s_cost_calculator
+            
+            # Start K8s sync worker (30s interval)
+            await start_k8s_sync_worker(app.state.db_pool, interval=30)
+            logger.info("☸️  K8s sync worker started (30s interval)")
+            
+            # Start cost calculator (1 hour interval)
+            await start_k8s_cost_calculator(app.state.db_pool, interval=3600)
+            logger.info("💰 K8s cost calculator started (1h interval)")
+        except Exception as e:
+            logger.error(f"Failed to start K8s workers: {e}")
+            # Don't block startup if K8s workers fail
 
 
 async def check_alerts_periodically():
@@ -722,6 +741,17 @@ async def shutdown_event():
             logger.info("Fleet workers stopped")
         except Exception as e:
             logger.error(f"Error stopping fleet workers: {e}")
+        
+        # Stop K8s workers (Epic 16)
+        try:
+            from k8s_sync_worker import stop_k8s_sync_worker
+            from k8s_cost_calculator import stop_k8s_cost_calculator
+            
+            await stop_k8s_sync_worker()
+            await stop_k8s_cost_calculator()
+            logger.info("K8s workers stopped")
+        except Exception as e:
+            logger.error(f"Error stopping K8s workers: {e}")
         
         try:
             await app.state.db_pool.close()
@@ -1020,6 +1050,10 @@ logger.info("🎖️  Lt. Colonel Atlas AI Assistant registered at /api/v1/atlas
 # Multi-Server Fleet Management (Epic 15)
 app.include_router(fleet_router)
 logger.info("🚢 Fleet Management API registered at /api/v1/fleet (Epic 15)")
+
+# Kubernetes Integration (Epic 16)
+app.include_router(k8s_router)
+logger.info("☸️  Kubernetes API registered at /api/v1/k8s (Epic 16)")
 
 # Storage & Backup Management
 app.include_router(storage_backup_router)

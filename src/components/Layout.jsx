@@ -623,6 +623,12 @@ export default function Layout({ children }) {
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
+                        name="Kubernetes"
+                        href="/admin/kubernetes"
+                        icon={iconMap.ServerStackIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
                         name="Webhooks"
                         href="/admin/webhooks"
                         icon={iconMap.BellAlertIcon}
