@@ -24,16 +24,8 @@ const Checkout = () => {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
   
-  // Form state
-  const [formData, setFormData] = useState({
-    email: '',
-    cardName: '',
-    cardNumber: '',
-    expiry: '',
-    cvc: '',
-    country: 'US',
-    postalCode: ''
-  });
+  // Form state - only email needed for Stripe Checkout
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
     fetchTierDetails();
@@ -61,42 +53,50 @@ const Checkout = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Format card number with spaces
-    if (name === 'cardNumber') {
-      const formatted = value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
-      setFormData(prev => ({ ...prev, [name]: formatted }));
-      return;
-    }
-    
-    // Format expiry date
-    if (name === 'expiry') {
-      const formatted = value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2').substr(0, 5);
-      setFormData(prev => ({ ...prev, [name]: formatted }));
-      return;
-    }
-    
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setProcessing(true);
     setError(null);
 
     try {
-      // TODO: Integrate with Stripe payment API
-      // For now, simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Redirect to success page
-      navigate(`/checkout/success?tier=${tierCode}`);
+      // Validate email
+      if (!email || !email.includes('@')) {
+        setError('Please enter a valid email address');
+        setProcessing(false);
+        return;
+      }
+
+      // Create Stripe checkout session
+      const response = await fetch('/api/v1/checkout/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tier_code: tierCode,
+          billing_cycle: billingCycle,
+          email: email,
+          success_url: `${window.location.origin}/checkout/success?tier=${tierCode}&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${window.location.origin}/checkout/cancelled`
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to create checkout session');
+      }
+
+      const data = await response.json();
+
+      // Redirect to Stripe Checkout
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
     } catch (err) {
       console.error('Payment error:', err);
-      setError('Payment failed. Please try again.');
-    } finally {
+      setError(err.message || 'Payment failed. Please try again.');
       setProcessing(false);
     }
   };
@@ -266,108 +266,28 @@ const Checkout = () => {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="you@example.com"
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  We'll send your receipt and account details to this email
+                </p>
               </div>
 
-              {/* Card Information */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Card Information
-                </label>
-                <div className="space-y-3">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={handleInputChange}
-                      required
-                      maxLength="19"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="1234 5678 9012 3456"
-                    />
-                    <CreditCard className="absolute right-4 top-3.5 w-5 h-5 text-gray-400" />
+              {/* Info Box */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <CreditCard className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900">Secure Payment</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      You'll be redirected to our secure payment processor (Stripe) to complete your purchase. 
+                      Your card details are never stored on our servers.
+                    </p>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      name="expiry"
-                      value={formData.expiry}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="MM/YY"
-                      className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                    <input
-                      type="text"
-                      name="cvc"
-                      value={formData.cvc}
-                      onChange={handleInputChange}
-                      required
-                      maxLength="4"
-                      placeholder="CVC"
-                      className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Cardholder Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cardholder Name
-                </label>
-                <input
-                  type="text"
-                  name="cardName"
-                  value={formData.cardName}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              {/* Billing Address */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Country
-                  </label>
-                  <select
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value="US">United States</option>
-                    <option value="CA">Canada</option>
-                    <option value="GB">United Kingdom</option>
-                    <option value="AU">Australia</option>
-                    <option value="DE">Germany</option>
-                    <option value="FR">France</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    name="postalCode"
-                    value={formData.postalCode}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="12345"
-                  />
                 </div>
               </div>
 
