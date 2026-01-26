@@ -148,6 +148,9 @@ const SystemBillingOverview = lazy(() => import('./pages/admin/SystemBillingOver
 const SubscriptionTierManagement = lazy(() => import('./pages/admin/SubscriptionTierManagement'));
 const TierFeatureManagement = lazy(() => import('./pages/admin/TierFeatureManagement'));
 
+// Epic 7.1: Edge Device Management
+const EdgeDeviceManagement = lazy(() => import('./pages/EdgeDeviceManagement'));
+
 // Epic 4.5: Organization Branding
 const OrganizationBranding = lazy(() => import('./pages/admin/OrganizationBranding'));
 
@@ -497,6 +500,11 @@ function AppRoutes() {
                   <Route path="monitoring/umami" element={<UmamiConfig />} />
                   <Route path="monitoring/logs" element={<Logs />} />
                   <Route path="monitoring/geeses" element={<Geeses />} />
+                  
+                  {/* ============================================================ */}
+                  {/* EDGE DEVICE MANAGEMENT SECTION - Epic 7.1 */}
+                  {/* ============================================================ */}
+                  <Route path="edge/devices" element={<EdgeDeviceManagement />} />
 
                   {/* ATLAS Multi-Agent System (Geeses) */}
                   <Route path="geeses" element={<Geeses />} />

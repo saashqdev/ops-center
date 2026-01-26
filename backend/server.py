@@ -198,6 +198,10 @@ from provider_keys_api import router as provider_keys_router
 from uc_api_keys import router as uc_api_keys_router
 from platform_keys_api import router as platform_keys_router
 
+# Edge Device Management (Epic 7.1 - January 2026)
+from edge_device_api import device_router as edge_device_router
+from edge_device_api import admin_router as edge_admin_router
+
 # LLM Testing Lab API (Epic 3.2 - Unified LLM Management)
 from testing_lab_api import router as testing_lab_router
 
@@ -848,6 +852,12 @@ app.include_router(invite_codes_admin_router)
 logger.info("Invite Codes Admin API endpoints registered at /api/v1/admin/invite-codes")
 app.include_router(invite_codes_user_router)
 logger.info("Invite Codes User API endpoints registered at /api/v1/invite-codes")
+
+# Edge Device Management (Epic 7.1)
+app.include_router(edge_device_router)
+logger.info("Edge Device API endpoints registered at /api/v1/edge/devices")
+app.include_router(edge_admin_router)
+logger.info("Edge Device Admin API endpoints registered at /api/v1/admin/edge")
 
 # Keycloak Status API
 app.include_router(keycloak_status_router)
