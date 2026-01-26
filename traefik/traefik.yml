@@ -1,0 +1,114 @@
+# Traefik Static Configuration
+# https://doc.traefik.io/traefik/reference/static-configuration/file/
+
+# Global configuration
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+# API and Dashboard
+api:
+  dashboard: true
+  insecure: false  # Dashboard accessible only via HTTPS with auth
+
+# Entry Points
+entryPoints:
+  # HTTP (port 80) - redirects to HTTPS
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  
+  # HTTPS (port 443)
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+        domains:
+          # Main domain and wildcard
+          - main: ${APP_DOMAIN:-ops-center.com}
+            sans:
+              - "*.${APP_DOMAIN:-ops-center.com}"
+
+# Certificate Resolvers
+certificatesResolvers:
+  # Let's Encrypt with DNS-01 challenge (supports wildcards)
+  letsencrypt:
+    acme:
+      email: ${ACME_EMAIL:-admin@ops-center.com}
+      storage: /letsencrypt/acme.json
+      
+      # DNS Challenge for wildcard certificates
+      # Uncomment the provider you're using:
+      
+      # Cloudflare
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+        delayBeforeCheck: 30
+      
+      # For AWS Route53, replace dnsChallenge above with:
+      # dnsChallenge:
+      #   provider: route53
+      #   resolvers:
+      #     - "8.8.8.8:53"
+      #   delayBeforeCheck: 30
+      
+      # For DigitalOcean, replace dnsChallenge above with:
+      # dnsChallenge:
+      #   provider: digitalocean
+      #   resolvers:
+      #     - "8.8.8.8:53"
+      #   delayBeforeCheck: 30
+      
+      # STAGING ENVIRONMENT (for testing, remove in production)
+      # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+
+# Providers
+providers:
+  # Docker provider for automatic service discovery
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false  # Only expose services with traefik.enable=true
+    network: web
+    watch: true
+  
+  # File provider for additional dynamic configuration
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# Logging
+log:
+  level: INFO
+  # Available levels: DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+  filePath: /var/log/traefik/traefik.log
+  format: json
+
+# Access logs
+accessLog:
+  filePath: /var/log/traefik/access.log
+  format: json
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: keep
+
+# Metrics (optional - for monitoring)
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    entryPoint: metrics
+
+# Additional entry point for metrics
+entryPoints:
+  metrics:
+    address: ":8082"

@@ -40,11 +40,11 @@ services:
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-vz9cA8-kuX-oso3DC-w7}
-      - KEYCLOAK_FRONTEND_URL=https://auth.kubeworkz.io
+      - KEYCLOAK_FRONTEND_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
       # Allow framing from our domain; tighten as needed
-      - KC_HTTP_RESPONSE_HEADER__CONTENT_SECURITY_POLICY=frame-ancestors 'self' https://auth.kubeworkz.io
+      - KC_HTTP_RESPONSE_HEADER__CONTENT_SECURITY_POLICY=frame-ancestors 'self' https://auth.${APP_DOMAIN:-kubeworkz.io} https://${APP_DOMAIN:-kubeworkz.io}
     command: >-
-      start-dev --proxy edge --hostname auth.kubeworkz.io --hostname-strict=true --hostname-strict-https=true
+      start-dev --proxy edge --hostname auth.${APP_DOMAIN:-kubeworkz.io} --hostname-strict=true --hostname-strict-https=true
     volumes:
       # Mount custom UC-1 Pro theme
       - ./keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro      
@@ -53,7 +53,7 @@ services:
       - uchub-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.keycloak.rule=Host(`auth.kubeworkz.io`)"
+      - "traefik.http.routers.keycloak.rule=Host(`auth.${APP_DOMAIN:-kubeworkz.io}`)"
       - "traefik.http.routers.keycloak.entrypoints=web,websecure"
       - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
@@ -82,8 +82,8 @@ services:
       - EXTERNAL_PROTOCOL=https
       - OAUTH_CLIENT_ID=ops-center
       - OPS_CENTER_OAUTH_CLIENT_SECRET=vz9cA8-kuX-oso3DC-w7
-      - KEYCLOAK_URL=https://auth.kubeworkz.io
-      - KEYCLOAK_PUBLIC_URL=https://auth.kubeworkz.io
+      - KEYCLOAK_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
+      - KEYCLOAK_PUBLIC_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
       - KEYCLOAK_REALM=uchub
       - KEYCLOAK_LOGOUT_REDIRECT=https://${APP_DOMAIN:-kubeworkz.io}/auth/logged-out
       - KEYCLOAK_ADMIN_USER=admin
@@ -169,6 +169,16 @@ services:
       - "traefik.http.routers.ops-center-api-http.entrypoints=http"
       - "traefik.http.routers.ops-center-api-http.service=ops-center-svc"
       # Note: No redirect middleware - Cloudflare handles HTTP→HTTPS redirect
+
+      # Wildcard subdomain routing for multi-tenant (Epic 10)
+      # Matches any subdomain like acme.ops-center.com, contoso.ops-center.com
+      - "traefik.http.routers.ops-center-wildcard.rule=HostRegexp(`{subdomain:[a-z0-9-]+}.${APP_DOMAIN:-localhost}`)"
+      - "traefik.http.routers.ops-center-wildcard.priority=50"
+      - "traefik.http.routers.ops-center-wildcard.entrypoints=http,https"
+      - "traefik.http.routers.ops-center-wildcard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.ops-center-wildcard.tls.domains[0].main=${APP_DOMAIN:-localhost}"
+      - "traefik.http.routers.ops-center-wildcard.tls.domains[0].sans=*.${APP_DOMAIN:-localhost}"
+      - "traefik.http.routers.ops-center-wildcard.service=ops-center-svc"
 
 networks:
   web:

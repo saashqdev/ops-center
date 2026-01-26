@@ -1,0 +1,90 @@
+# Traefik Dynamic Configuration
+# Additional routing rules and middlewares
+
+http:
+  # Routers
+  routers:
+    # Catch-all router for undefined subdomains
+    catch-all:
+      rule: "HostRegexp(`{subdomain:[a-z0-9-]+}.${APP_DOMAIN}`)"
+      priority: 1
+      entryPoints:
+        - websecure
+      service: default-backend
+      tls:
+        certResolver: letsencrypt
+  
+  # Services
+  services:
+    # Default backend for undefined routes
+    default-backend:
+      loadBalancer:
+        servers:
+          - url: "http://ops-center-direct:8084"
+  
+  # Middlewares
+  middlewares:
+    # Rate limiting (global)
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1s
+    
+    # Rate limiting (per IP)
+    rate-limit-per-ip:
+      rateLimit:
+        average: 20
+        burst: 50
+        period: 1s
+        sourceCriterion:
+          ipStrategy:
+            depth: 1
+    
+    # Compression
+    compress:
+      compress: {}
+    
+    # CORS headers
+    cors-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+          - OPTIONS
+        accessControlAllowOriginList:
+          - "*"
+        accessControlAllowHeaders:
+          - "*"
+        accessControlExposeHeaders:
+          - "*"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+    
+    # Tenant isolation headers
+    tenant-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Host: ""
+          X-Forwarded-Proto: "https"
+    
+    # Strip www prefix
+    strip-www:
+      redirectRegex:
+        regex: "^https://www\\.(.+)"
+        replacement: "https://${1}"
+        permanent: true
+
+# TLS configuration
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      sniStrict: true

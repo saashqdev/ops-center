@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: ops-center-traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+      # Traefik dashboard (optional, comment out in production)
+      - "8080:8080"
+    environment:
+      # Cloudflare DNS API credentials (for wildcard SSL certificates)
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_API_KEY=${CF_API_KEY}
+      # Alternative: Cloudflare API token
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      # AWS Route53 credentials (alternative to Cloudflare)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+    volumes:
+      # Traefik static configuration
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      # Dynamic configuration (optional)
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+      # Let's Encrypt certificates storage
+      - ./traefik/letsencrypt:/letsencrypt
+      # Docker socket for service discovery
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+    labels:
+      # Enable Traefik dashboard
+      - "traefik.enable=true"
+      
+      # Dashboard router
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${APP_DOMAIN:-localhost}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      
+      # Dashboard authentication (change password!)
+      # Password: admin (hash generated with: htpasswd -nb admin admin)
+      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$8EVjn/nj$$GiLUZqcbueTFeD23SuB6x0"
+      
+      # HTTP to HTTPS redirect middleware
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+      
+      # Security headers middleware
+      - "traefik.http.middlewares.security-headers.headers.frameDeny=true"
+      - "traefik.http.middlewares.security-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.security-headers.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
+
+networks:
+  web:
+    name: web
+    driver: bridge
+
+volumes:
+  traefik-certs:

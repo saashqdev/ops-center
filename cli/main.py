@@ -20,7 +20,7 @@ from rich.table import Table
 console = Console()
 
 # Import command groups
-from cli.commands import server, users, orgs, devices, webhooks, logs
+from cli.commands import server, users, orgs, devices, webhooks, logs, tenants
 
 
 @click.group()
@@ -51,6 +51,7 @@ cli.add_command(orgs.orgs)
 cli.add_command(devices.devices)
 cli.add_command(webhooks.webhooks)
 cli.add_command(logs.logs)
+cli.add_command(tenants.tenants)
 
 
 @cli.command()
