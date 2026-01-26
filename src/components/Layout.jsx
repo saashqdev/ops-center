@@ -60,7 +60,10 @@ import {
   ShoppingBagIcon,
   TicketIcon,
   BellAlertIcon,
-  DevicePhoneMobileIcon
+  DevicePhoneMobileIcon,
+  ChatBubbleLeftRightIcon,
+  BanknotesIcon,
+  ServerStackIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../contexts/ThemeContext';
 import { ColonelLogo, MagicUnicornLogo, CenterDeepLogo } from './Logos';
@@ -108,7 +111,10 @@ const iconMap = {
   ShoppingBagIcon,
   TicketIcon,
   BellAlertIcon,
-  DevicePhoneMobileIcon
+  DevicePhoneMobileIcon,
+  ChatBubbleLeftRightIcon,
+  BanknotesIcon,
+  ServerStackIcon
 };
 
 export default function Layout({ children }) {
@@ -591,6 +597,12 @@ export default function Layout({ children }) {
                           icon={iconMap.RectangleStackIcon}
                           indent={true}
                         />
+                        <NavigationItem collapsed={sidebarCollapsed}
+                          name="The Colonel"
+                          href="/admin/colonel"
+                          icon={iconMap.ChatBubbleLeftRightIcon}
+                          indent={true}
+                        />
                       </NavigationSection>
                       <NavigationItem collapsed={sidebarCollapsed}
                         name="Cloudflare DNS"
@@ -602,6 +614,12 @@ export default function Layout({ children }) {
                         name="Edge Devices"
                         href="/admin/edge/devices"
                         icon={iconMap.DevicePhoneMobileIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Fleet Management"
+                        href="/admin/fleet"
+                        icon={iconMap.ServerStackIcon}
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
@@ -767,6 +785,18 @@ export default function Layout({ children }) {
                         icon={iconMap.ShoppingBagIcon}
                         indent={true}
                       />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Cost Optimization"
+                        href="/admin/costs"
+                        icon={iconMap.ChartPieIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Cost Optimization Admin"
+                        href="/admin/system/costs"
+                        icon={iconMap.BanknotesIcon}
+                        indent={true}
+                      />
                     </NavigationSection>
                   </>
                 )}
@@ -825,6 +855,12 @@ export default function Layout({ children }) {
                         name="Usage Metrics"
                         href="/admin/system/usage-metrics"
                         icon={iconMap.ChartPieIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Smart Alerts"
+                        href="/admin/monitoring/alerts"
+                        icon={iconMap.BellAlertIcon}
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}

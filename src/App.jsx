@@ -198,6 +198,9 @@ const SmartAlerts = lazy(() => import('./pages/monitoring/SmartAlerts'));
 const CostOptimization = lazy(() => import('./pages/costs/CostOptimization'));
 const CostOptimizationAdmin = lazy(() => import('./pages/costs/CostOptimizationAdmin'));
 
+// Epic 15: Fleet Management - Multi-server orchestration
+const FleetDashboard = lazy(() => import('./pages/fleet/FleetDashboard'));
+
 // Lazy load non-critical components
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 const HelpPanel = lazy(() => import('./components/HelpPanel'));
@@ -531,6 +534,11 @@ function AppRoutes() {
                   {/* OTA DEPLOYMENT SECTION - Epic 7.2 */}
                   {/* ============================================================ */}
                   <Route path="edge/ota" element={<OTADeployment />} />
+
+                  {/* ============================================================ */}
+                  {/* FLEET MANAGEMENT - Epic 15 */}
+                  {/* ============================================================ */}
+                  <Route path="fleet" element={<FleetDashboard />} />
 
                   {/* ============================================================ */}
                   {/* WEBHOOK MANAGEMENT - Epic 8.1 */}

@@ -246,6 +246,9 @@ from brigade_api import router as brigade_router
 # Lt. Colonel Atlas - AI Infrastructure Assistant (Epic 6.1)
 from atlas.atlas_api import router as atlas_router
 
+# Multi-Server Fleet Management (Epic 15)
+from multi_server_api import router as fleet_router
+
 # System Metrics & Analytics (Epic 2.5)
 from system_metrics_api import router as system_metrics_router
 from metrics_collector import MetricsCollector
@@ -652,6 +655,23 @@ async def startup_event():
         logger.error(f"Failed to start alert checker: {e}")
         # Don't block startup if alert checking fails
 
+    # Start Fleet Management workers (Epic 15)
+    if hasattr(app.state, 'db_pool') and app.state.db_pool:
+        try:
+            from fleet_health_worker import start_health_worker
+            from fleet_metrics_worker import start_metrics_worker
+            
+            # Start health check worker (30s interval)
+            await start_health_worker(app.state.db_pool, interval=30)
+            logger.info("🏥 Fleet health worker started (30s interval)")
+            
+            # Start metrics collection worker (60s interval)
+            await start_metrics_worker(app.state.db_pool, interval=60)
+            logger.info("📊 Fleet metrics worker started (60s interval)")
+        except Exception as e:
+            logger.error(f"Failed to start fleet workers: {e}")
+            # Don't block startup if fleet workers fail
+
 
 async def check_alerts_periodically():
     """
@@ -692,6 +712,17 @@ async def shutdown_event():
 
     # Close credit system connections
     if hasattr(app.state, 'db_pool') and app.state.db_pool:
+        try:
+            # Stop fleet workers (Epic 15)
+            from fleet_health_worker import stop_health_worker
+            from fleet_metrics_worker import stop_metrics_worker
+            
+            await stop_health_worker()
+            await stop_metrics_worker()
+            logger.info("Fleet workers stopped")
+        except Exception as e:
+            logger.error(f"Error stopping fleet workers: {e}")
+        
         try:
             await app.state.db_pool.close()
             logger.info("PostgreSQL connection pool closed")
@@ -985,6 +1016,10 @@ logger.info("Brigade Proxy API endpoints registered at /api/v1/brigade (H23)")
 # Lt. Colonel Atlas - AI Infrastructure Assistant (Epic 6.1)
 app.include_router(atlas_router)
 logger.info("🎖️  Lt. Colonel Atlas AI Assistant registered at /api/v1/atlas (Epic 6.1)")
+
+# Multi-Server Fleet Management (Epic 15)
+app.include_router(fleet_router)
+logger.info("🚢 Fleet Management API registered at /api/v1/fleet (Epic 15)")
 
 # Storage & Backup Management
 app.include_router(storage_backup_router)

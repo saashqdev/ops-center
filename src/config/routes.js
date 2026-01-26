@@ -366,6 +366,33 @@ export const routes = {
             name: 'Traefik',
             description: 'Reverse proxy, SSL/TLS, routing configuration',
             icon: 'ArrowsRightLeftIcon'
+          },
+          edgeDevices: {
+            path: '/admin/edge/devices',
+            component: 'EdgeDeviceManagement',
+            roles: ['admin'],
+            name: 'Edge Devices',
+            description: 'Manage distributed edge computing devices with real-time monitoring',
+            icon: 'CpuChipIcon',
+            status: 'active'
+          },
+          otaDeployment: {
+            path: '/admin/edge/ota',
+            component: 'OTADeployment',
+            roles: ['admin'],
+            name: 'OTA Updates',
+            description: 'Over-the-air firmware updates with canary and rolling deployments',
+            icon: 'ArrowDownTrayIcon',
+            status: 'active'
+          },
+          fleet: {
+            path: '/admin/fleet',
+            component: 'FleetDashboard',
+            roles: ['admin'],
+            name: 'Fleet Management',
+            description: 'Multi-server orchestration with automated health checks and metrics',
+            icon: 'ServerStackIcon',
+            status: 'active'
           }
         }
       },
@@ -399,8 +426,15 @@ export const routes = {
             roles: ['admin'],
             name: 'DNS Management',
             description: 'Cloudflare DNS zones and record management',
-            icon: 'GlobeAltIcon'
-          }
+            icon: 'GlobeAltIcon'          },
+          webhooks: {
+            path: '/admin/webhooks',
+            component: 'WebhookManagement',
+            roles: ['admin'],
+            name: 'Webhooks',
+            description: 'Event-driven integrations with external services and automatic delivery',
+            icon: 'BoltIcon',
+            status: 'active'          }
         }
       },
 
