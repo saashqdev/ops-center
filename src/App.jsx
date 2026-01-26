@@ -67,6 +67,8 @@ const AccountProfile = lazy(() => import('./pages/account/AccountProfile'));
 const AccountNotifications = lazy(() => import('./pages/account/AccountNotifications'));
 const AccountSecurity = lazy(() => import('./pages/account/AccountSecurity'));
 const AccountAPIKeys = lazy(() => import('./pages/account/AccountAPIKeys'));
+const ProgrammaticAPIKeys = lazy(() => import('./pages/account/ProgrammaticAPIKeys')); // Epic 7.0
+const APIUsageDashboard = lazy(() => import('./pages/account/APIUsageDashboard')); // Epic 7.0
 const NotificationSettings = lazy(() => import('./pages/NotificationSettings'));
 
 // Subscription pages (lazy loaded)
@@ -390,6 +392,8 @@ function AppRoutes() {
                   <Route path="account/notification-settings" element={<NotificationSettings />} />
                   <Route path="account/security" element={<AccountSecurity />} />
                   <Route path="account/api-keys" element={<AccountAPIKeys />} />
+                  <Route path="account/api-keys/programmatic" element={<ProgrammaticAPIKeys />} /> {/* Epic 7.0 */}
+                  <Route path="account/api-usage" element={<APIUsageDashboard />} /> {/* Epic 7.0 */}
 
                   {/* ============================================================ */}
                   {/* SUBSCRIPTION SECTION - Personal billing & usage */}

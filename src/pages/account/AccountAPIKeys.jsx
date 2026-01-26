@@ -35,7 +35,8 @@ import {
   ClipboardDocumentIcon,
   CodeBracketIcon,
   PencilIcon,
-  BeakerIcon
+  BeakerIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -639,6 +640,42 @@ fetch(\`\${BASE_URL}/v1/chat/completions\`, {
 
   return (
     <div className="space-y-6">
+      {/* Epic 7.0 Banner - Programmatic API Keys */}
+      <div className={`rounded-xl border p-4 ${currentTheme === 'unicorn' ? 'bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500/30' : currentTheme === 'light' ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200' : 'bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border-blue-500/30'}`}>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <KeyIcon className="h-5 w-5 text-blue-400" />
+              <h3 className={`text-lg font-semibold ${themeClasses.text}`}>
+                🎉 New: Programmatic API Keys
+              </h3>
+              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full font-semibold">
+                Epic 7.0
+              </span>
+            </div>
+            <p className={`${themeClasses.subtext} text-sm mb-3`}>
+              Create secure API keys for programmatic access with rate limiting, usage tracking, and monthly quotas.
+            </p>
+            <div className="flex gap-3">
+              <a
+                href="/admin/account/api-keys/programmatic"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <KeyIcon className="h-4 w-4" />
+                Manage Programmatic Keys
+              </a>
+              <a
+                href="/admin/account/api-usage"
+                className={`px-4 py-2 ${themeClasses.input} border rounded-lg text-sm font-medium transition-colors hover:bg-slate-700/50 flex items-center gap-2`}
+              >
+                <ChartBarIcon className="h-4 w-4" />
+                View Usage Dashboard
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
