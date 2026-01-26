@@ -1,7 +1,7 @@
 """Create edge device management tables
 
 Revision ID: 20260126_1000
-Revises: 20251023_1230
+Revises: 20251101_extensions
 Create Date: 2026-01-26 10:00:00.000000
 
 Epic 7.1: Edge Device Management
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '20260126_1000'
-down_revision = '20251023_1230'
+down_revision = '20251101_extensions'
 branch_labels = None
 depends_on = None
 

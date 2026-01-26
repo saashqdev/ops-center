@@ -1,7 +1,7 @@
 """Create webhook tables
 
 Revision ID: 20260126_1100_create_webhook_tables
-Revises: 20260126_1000_create_edge_device_tables
+Revises: 20260126_1000
 Create Date: 2026-01-26 11:00:00.000000
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '20260126_1100_create_webhook_tables'
-down_revision = '20260126_1000_create_edge_device_tables'
+down_revision = '20260126_1000'
 branch_labels = None
 depends_on = None
 
