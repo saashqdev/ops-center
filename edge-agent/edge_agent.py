@@ -57,6 +57,7 @@ class EdgeAgent:
                 self.heartbeat_loop(),
                 self.config_watcher(),
                 self.metrics_collector(),
+                self.ota_update_checker(),
                 return_exceptions=True
             )
         except Exception as e:
@@ -359,6 +360,278 @@ class EdgeAgent:
                 )
         except Exception as e:
             logger.error(f"Failed to send log: {e}")
+    
+    # ==================== OTA Update Handling ====================
+    
+    async def ota_update_checker(self):
+        """Check for OTA updates periodically"""
+        while self.running:
+            try:
+                # Check for available updates
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(
+                        f"{self.cloud_url}/api/v1/ota/check-update",
+                        params={"device_id": self.device_id},
+                        headers={"Authorization": f"Bearer {self.auth_token}"}
+                    ) as resp:
+                        if resp.status == 200:
+                            update_info = await resp.json()
+                            
+                            if update_info.get('update_available'):
+                                logger.info(
+                                    f"OTA update available: {update_info['target_version']} "
+                                    f"(current: {platform.platform()})"
+                                )
+                                
+                                # Start update process
+                                await self.perform_ota_update(update_info)
+                        elif resp.status != 200:
+                            logger.warning(f"OTA check failed: HTTP {resp.status}")
+                
+            except Exception as e:
+                logger.error(f"OTA update checker error: {e}")
+            
+            await asyncio.sleep(300)  # Check every 5 minutes
+    
+    async def perform_ota_update(self, update_info: Dict[str, Any]):
+        """Perform OTA update"""
+        deployment_id = update_info['deployment_id']
+        target_version = update_info['target_version']
+        update_package_url = update_info.get('update_package_url')
+        checksum = update_info.get('checksum')
+        
+        logger.info(f"Starting OTA update to version {target_version}")
+        
+        try:
+            # Report downloading status
+            await self.report_ota_status(deployment_id, "downloading")
+            
+            # Download update package
+            if not update_package_url:
+                raise Exception("No update package URL provided")
+            
+            update_file = await self.download_update_package(
+                update_package_url, 
+                checksum
+            )
+            
+            # Report installing status
+            await self.report_ota_status(deployment_id, "installing")
+            
+            # Install update
+            await self.install_update(update_file)
+            
+            # Report verifying status
+            await self.report_ota_status(deployment_id, "verifying")
+            
+            # Verify installation
+            verification_passed = await self.verify_update(target_version)
+            
+            if verification_passed:
+                # Report completed
+                await self.report_ota_status(deployment_id, "completed")
+                logger.info(f"OTA update to {target_version} completed successfully")
+                
+                # Schedule reboot if needed
+                logger.info("Update may require reboot to take full effect")
+            else:
+                # Verification failed - rollback
+                raise Exception("Update verification failed")
+                
+        except Exception as e:
+            logger.error(f"OTA update failed: {e}")
+            
+            # Report failed status
+            await self.report_ota_status(
+                deployment_id, 
+                "failed",
+                error_message=str(e)
+            )
+            
+            # Attempt rollback
+            await self.rollback_update(deployment_id)
+    
+    async def download_update_package(
+        self, 
+        url: str, 
+        expected_checksum: Optional[str] = None
+    ) -> Path:
+        """Download and verify update package"""
+        import hashlib
+        
+        logger.info(f"Downloading update package from {url}")
+        
+        download_dir = Path("/tmp/ota-updates")
+        download_dir.mkdir(parents=True, exist_ok=True)
+        
+        update_file = download_dir / "update.tar.gz"
+        
+        # Download file
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Download failed: HTTP {resp.status}")
+                
+                # Save to file
+                with open(update_file, 'wb') as f:
+                    async for chunk in resp.content.iter_chunked(8192):
+                        f.write(chunk)
+        
+        logger.info(f"Downloaded {update_file.stat().st_size} bytes")
+        
+        # Verify checksum if provided
+        if expected_checksum:
+            logger.info("Verifying checksum...")
+            sha256_hash = hashlib.sha256()
+            
+            with open(update_file, 'rb') as f:
+                for chunk in iter(lambda: f.read(8192), b""):
+                    sha256_hash.update(chunk)
+            
+            actual_checksum = sha256_hash.hexdigest()
+            
+            if actual_checksum != expected_checksum:
+                raise Exception(
+                    f"Checksum mismatch! Expected: {expected_checksum}, "
+                    f"Got: {actual_checksum}"
+                )
+            
+            logger.info("Checksum verified successfully")
+        
+        return update_file
+    
+    async def install_update(self, update_file: Path):
+        """Install the update package"""
+        logger.info(f"Installing update from {update_file}")
+        
+        # Extract update package
+        extract_dir = Path("/tmp/ota-updates/extracted")
+        extract_dir.mkdir(parents=True, exist_ok=True)
+        
+        proc = await asyncio.create_subprocess_exec(
+            'tar', '-xzf', str(update_file), '-C', str(extract_dir),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode != 0:
+            raise Exception(f"Failed to extract update: {stderr.decode()}")
+        
+        # Run installation script if present
+        install_script = extract_dir / "install.sh"
+        if install_script.exists():
+            logger.info("Running installation script...")
+            
+            proc = await asyncio.create_subprocess_exec(
+                'bash', str(install_script),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await proc.communicate()
+            
+            if proc.returncode != 0:
+                raise Exception(f"Installation script failed: {stderr.decode()}")
+            
+            logger.info(f"Installation output: {stdout.decode()}")
+        else:
+            # Default installation: copy files to system
+            logger.info("No install script found, using default installation")
+            
+            # Copy edge-agent binary if present
+            agent_binary = extract_dir / "edge_agent.py"
+            if agent_binary.exists():
+                import shutil
+                shutil.copy(agent_binary, __file__)
+                logger.info("Updated edge agent binary")
+    
+    async def verify_update(self, target_version: str) -> bool:
+        """Verify that update was installed correctly"""
+        logger.info(f"Verifying update installation for version {target_version}")
+        
+        # Basic verification - check if services are still running
+        try:
+            services = await self.check_services()
+            
+            # Check if critical services are running
+            critical_services_running = True
+            for service in services:
+                if service['status'] != 'running':
+                    logger.warning(f"Service {service['name']} not running after update")
+                    critical_services_running = False
+            
+            if not critical_services_running:
+                return False
+            
+            # Check system health
+            metrics = await self.collect_metrics()
+            if not metrics:
+                logger.warning("Failed to collect metrics after update")
+                return False
+            
+            logger.info("Update verification passed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Update verification failed: {e}")
+            return False
+    
+    async def rollback_update(self, deployment_id: str):
+        """Rollback to previous version"""
+        logger.warning("Attempting rollback to previous version")
+        
+        try:
+            # Get current version (before update attempt)
+            previous_version = platform.platform()
+            
+            # Notify cloud of rollback
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.cloud_url}/api/v1/admin/ota/deployments/{deployment_id}/devices/{self.device_id}/rollback",
+                    json={"previous_version": previous_version},
+                    headers={"Authorization": f"Bearer {self.auth_token}"}
+                ) as resp:
+                    if resp.status == 200:
+                        logger.info("Rollback reported to cloud")
+            
+            # Restore from backup if available
+            backup_agent = Path("/etc/edge-agent/edge_agent.py.backup")
+            if backup_agent.exists():
+                import shutil
+                shutil.copy(backup_agent, __file__)
+                logger.info("Restored agent from backup")
+                
+                # Restart agent
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+            else:
+                logger.warning("No backup available for rollback")
+                
+        except Exception as e:
+            logger.error(f"Rollback failed: {e}")
+    
+    async def report_ota_status(
+        self, 
+        deployment_id: str, 
+        status: str,
+        error_message: Optional[str] = None
+    ):
+        """Report OTA update status to cloud"""
+        try:
+            async with aiohttp.ClientSession() as session:
+                await session.post(
+                    f"{self.cloud_url}/api/v1/ota/deployments/{deployment_id}/status",
+                    params={"device_id": self.device_id},
+                    json={
+                        "status": status,
+                        "error_message": error_message
+                    },
+                    headers={"Authorization": f"Bearer {self.auth_token}"}
+                )
+                
+            logger.info(f"Reported OTA status: {status}")
+            
+        except Exception as e:
+            logger.error(f"Failed to report OTA status: {e}")
     
     def stop(self):
         """Stop the agent"""

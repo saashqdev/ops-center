@@ -5,7 +5,7 @@ Epic 7.1: Edge Device Management
 REST API for device registration, heartbeat, configuration, monitoring, and OTA updates.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
@@ -13,7 +13,7 @@ from uuid import UUID
 from datetime import datetime
 import logging
 
-from auth_dependencies import get_current_user, require_role, get_optional_user
+from auth_dependencies import require_authenticated_user, require_admin_user
 from database import get_db_connection
 
 logger = logging.getLogger(__name__)
@@ -363,10 +363,10 @@ async def submit_metrics(device_id: UUID, request: MetricsRequest):
 
 # ==================== Admin Endpoints ====================
 
-@admin_router.post("/devices/generate-token", dependencies=[Depends(require_role(["admin", "org_admin"]))])
+@admin_router.post("/devices/generate-token")
 async def generate_registration_token(
     request: GenerateTokenRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(require_admin_user)
 ):
     """
     Generate a registration token for a new device.
@@ -423,7 +423,7 @@ async def generate_registration_token(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@admin_router.get("/devices", dependencies=[Depends(require_role(["admin", "org_admin"]))])
+@admin_router.get("/devices")
 async def list_devices(
     organization_id: Optional[UUID] = Query(None),
     status: Optional[str] = Query(None),
@@ -431,7 +431,7 @@ async def list_devices(
     search: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(require_admin_user)
 ):
     """List devices with filtering and pagination"""
     try:
@@ -518,8 +518,11 @@ async def list_devices(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@admin_router.get("/devices/{device_id}", dependencies=[Depends(require_role(["admin", "org_admin"]))])
-async def get_device_detail(device_id: UUID):
+@admin_router.get("/devices/{device_id}")
+async def get_device_detail(
+    device_id: UUID,
+    current_user: dict = Depends(require_admin_user)
+):
     """Get detailed device information"""
     try:
         conn = await get_db_connection()
@@ -600,11 +603,11 @@ async def get_device_detail(device_id: UUID):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@admin_router.post("/devices/{device_id}/config", dependencies=[Depends(require_role(["admin", "org_admin"]))])
+@admin_router.post("/devices/{device_id}/config")
 async def push_device_config(
     device_id: UUID,
     request: PushConfigRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(require_admin_user)
 ):
     """Push new configuration to a device"""
     try:
@@ -654,8 +657,12 @@ async def push_device_config(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@admin_router.put("/devices/{device_id}", dependencies=[Depends(require_role(["admin", "org_admin"]))])
-async def update_device(device_id: UUID, request: UpdateDeviceRequest):
+@admin_router.put("/devices/{device_id}")
+async def update_device(
+    device_id: UUID,
+    request: UpdateDeviceRequest,
+    current_user: dict = Depends(require_admin_user)
+):
     """Update device properties"""
     try:
         conn = await get_db_connection()
@@ -706,8 +713,11 @@ async def update_device(device_id: UUID, request: UpdateDeviceRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@admin_router.delete("/devices/{device_id}", dependencies=[Depends(require_role(["admin"]))])
-async def delete_device(device_id: UUID):
+@admin_router.delete("/devices/{device_id}")
+async def delete_device(
+    device_id: UUID,
+    current_user: dict = Depends(require_admin_user)
+):
     """Delete a device and all associated data"""
     try:
         conn = await get_db_connection()
@@ -734,12 +744,13 @@ async def delete_device(device_id: UUID):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@admin_router.get("/devices/{device_id}/logs", dependencies=[Depends(require_role(["admin", "org_admin"]))])
+@admin_router.get("/devices/{device_id}/logs")
 async def get_device_logs(
     device_id: UUID,
     log_level: Optional[str] = Query(None),
     service_name: Optional[str] = Query(None),
-    limit: int = Query(100, ge=1, le=1000)
+    limit: int = Query(100, ge=1, le=1000),
+    current_user: dict = Depends(require_admin_user)
 ):
     """Get device logs with filtering"""
     try:
@@ -793,8 +804,11 @@ async def get_device_logs(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@admin_router.get("/statistics", dependencies=[Depends(require_role(["admin", "org_admin"]))])
-async def get_device_statistics(organization_id: Optional[UUID] = Query(None)):
+@admin_router.get("/statistics")
+async def get_device_statistics(
+    organization_id: Optional[UUID] = Query(None),
+    current_user: dict = Depends(require_admin_user)
+):
     """Get device statistics and health summary"""
     try:
         conn = await get_db_connection()

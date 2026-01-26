@@ -151,6 +151,9 @@ const TierFeatureManagement = lazy(() => import('./pages/admin/TierFeatureManage
 // Epic 7.1: Edge Device Management
 const EdgeDeviceManagement = lazy(() => import('./pages/EdgeDeviceManagement'));
 
+// Epic 7.2: OTA Deployment Management
+const OTADeployment = lazy(() => import('./pages/OTADeployment'));
+
 // Epic 4.5: Organization Branding
 const OrganizationBranding = lazy(() => import('./pages/admin/OrganizationBranding'));
 
@@ -505,6 +508,11 @@ function AppRoutes() {
                   {/* EDGE DEVICE MANAGEMENT SECTION - Epic 7.1 */}
                   {/* ============================================================ */}
                   <Route path="edge/devices" element={<EdgeDeviceManagement />} />
+                  
+                  {/* ============================================================ */}
+                  {/* OTA DEPLOYMENT SECTION - Epic 7.2 */}
+                  {/* ============================================================ */}
+                  <Route path="edge/ota" element={<OTADeployment />} />
 
                   {/* ATLAS Multi-Agent System (Geeses) */}
                   <Route path="geeses" element={<Geeses />} />

@@ -202,6 +202,9 @@ from platform_keys_api import router as platform_keys_router
 from edge_device_api import device_router as edge_device_router
 from edge_device_api import admin_router as edge_admin_router
 
+# OTA Update Management (Epic 7.2 - January 2026)
+from ota_api import ota_admin_router, ota_device_router
+
 # LLM Testing Lab API (Epic 3.2 - Unified LLM Management)
 from testing_lab_api import router as testing_lab_router
 
@@ -858,6 +861,12 @@ app.include_router(edge_device_router)
 logger.info("Edge Device API endpoints registered at /api/v1/edge/devices")
 app.include_router(edge_admin_router)
 logger.info("Edge Device Admin API endpoints registered at /api/v1/admin/edge")
+
+# OTA Update Management (Epic 7.2)
+app.include_router(ota_device_router)
+logger.info("OTA Device API endpoints registered at /api/v1/ota")
+app.include_router(ota_admin_router)
+logger.info("OTA Admin API endpoints registered at /api/v1/admin/ota")
 
 # Keycloak Status API
 app.include_router(keycloak_status_router)
