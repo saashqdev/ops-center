@@ -78,6 +78,9 @@ class TrialManager:
                 
                 logger.info(f"Assigned {trial_days}-day trial to {email}, expires: {trial_end}")
                 
+                # Send welcome email
+                await self._send_welcome_email(email, trial_days, trial_end)
+                
                 return {
                     "subscription_id": result['id'],
                     "email": email,
@@ -141,7 +144,11 @@ class TrialManager:
                         "new_tier": self.free_tier_code
                     })
                     
-                    # TODO: Send trial expired email
+                    # Send trial expired email
+                    await self._send_expired_email(
+                        sub['email'],
+                        sub['current_period_end']
+                    )
                 
                 return downgraded
                 
@@ -339,6 +346,46 @@ class TrialManager:
         except Exception as e:
             logger.error(f"Error getting trial stats: {e}", exc_info=True)
             return {}
+    
+    # ===== EMAIL HELPERS =====
+    
+    async def _send_welcome_email(self, email: str, trial_days: int, trial_end: datetime):
+        """Send welcome email when trial starts"""
+        try:
+            from email_service import email_service
+            
+            await email_service.send_trial_welcome(
+                to=email,
+                trial_days=trial_days,
+                trial_end_date=trial_end.strftime('%B %d, %Y')
+            )
+        except Exception as e:
+            logger.error(f"Error sending welcome email to {email}: {e}")
+    
+    async def _send_expired_email(self, email: str, expired_date: datetime):
+        """Send notification email when trial expires"""
+        try:
+            from email_service import email_service
+            
+            await email_service.send_trial_expired(
+                to=email,
+                trial_end_date=expired_date.strftime('%B %d, %Y')
+            )
+        except Exception as e:
+            logger.error(f"Error sending expired email to {email}: {e}")
+    
+    async def _send_extension_email(self, email: str, additional_days: int, new_end_date: datetime):
+        """Send notification email when trial is extended"""
+        try:
+            from email_service import email_service
+            
+            await email_service.send_trial_extended(
+                to=email,
+                additional_days=additional_days,
+                new_end_date=new_end_date.strftime('%B %d, %Y')
+            )
+        except Exception as e:
+            logger.error(f"Error sending extension email to {email}: {e}")
 
 
 # Global singleton

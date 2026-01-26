@@ -5,9 +5,10 @@ Handles transactional emails for subscription events
 
 import os
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 import httpx
 from datetime import datetime
+from database import get_db_pool
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,97 @@ class EmailService:
         logger.info(f"Email service initialized: provider={self.provider}, enabled={self.enabled}")
 
     async def send_email(
+        self,
+        to: str,
+        subject: str,
+        html_content: str,
+        text_content: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Send email using configured provider
+
+        Args:
+            to: Recipient email address
+            subject: Email subject line
+            html_content: HTML email body
+            text_content: Plain text email body (optional)
+            metadata: Additional data to log (e.g., subscription_id, invoice_id)
+
+        Returns:
+            True if sent successfully, False otherwise
+        """
+        success = False
+        error_message = None
+        
+        if not self.enabled:
+            logger.info(f"[EMAIL DISABLED] Would send to {to}: {subject}")
+            logger.debug(f"Email content: {html_content}")
+            success = True
+        else:
+            try:
+                if self.provider == "console":
+                    # Console logger for development
+                    logger.info(f"[EMAIL] To: {to}")
+                    logger.info(f"[EMAIL] Subject: {subject}")
+                    logger.info(f"[EMAIL] Content:\n{html_content}")
+                    success = True
+
+                elif self.provider == "sendgrid":
+                    success = await self._send_via_sendgrid(to, subject, html_content, text_content)
+
+                elif self.provider == "mailgun":
+                    success = await self._send_via_mailgun(to, subject, html_content, text_content)
+
+                elif self.provider == "smtp":
+                    success = await self._send_via_smtp(to, subject, html_content, text_content)
+
+                else:
+                    logger.error(f"Unknown email provider: {self.provider}")
+                    error_message = f"Unknown email provider: {self.provider}"
+                    success = False
+
+            except Exception as e:
+                logger.error(f"Failed to send email to {to}: {type(e).__name__}: {e}")
+                error_message = f"{type(e).__name__}: {e}"
+                success = False
+        
+        # Log email attempt
+        await self._log_email(to, subject, html_content, text_content, success, error_message, metadata)
+        
+        return success
+    
+    async def _log_email(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: Optional[str],
+        success: bool,
+        error_message: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ):
+        """Log email send attempt to database"""
+        try:
+            pool = await get_db_pool()
+            async with pool.acquire() as conn:
+                # Import json for metadata serialization
+                import json
+                metadata_json = json.dumps(metadata) if metadata else None
+                
+                await conn.execute("""
+                    INSERT INTO email_logs (
+                        to_email, subject, html_body, text_body,
+                        success, error_message, metadata, sent_at
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)
+                """, to_email, subject, html_body, text_body, success, 
+                error_message, metadata_json, datetime.utcnow())
+                
+                logger.debug(f"Logged email to {to_email}: success={success}")
+        except Exception as e:
+            logger.error(f"Error logging email: {e}")
+
+    async def send_email_old(
         self,
         to: str,
         subject: str,
@@ -439,6 +531,281 @@ class EmailService:
         """
 
         return await self.send_email(to, subject, html_content)
+
+    # ===== TRIAL EMAIL TEMPLATES =====
+
+    async def send_trial_welcome(
+        self,
+        to: str,
+        trial_days: int = 14,
+        trial_end_date: Optional[str] = None
+    ) -> bool:
+        """Send welcome email when trial starts"""
+        subject = f"Welcome! Your {trial_days}-Day Trial Starts Now 🚀"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">🦄 Welcome to KubeWorkz!</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #333;">Your Free Trial Has Started!</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    Thank you for signing up! You now have <strong>{trial_days} days</strong> of full access to explore all features.
+                </p>
+
+                <div style="background: #e7f3ff; padding: 20px; border-left: 4px solid #2196f3; margin: 20px 0;">
+                    <p style="margin: 0; color: #1976d2;">
+                        <strong>Trial Period:</strong> {trial_days} days<br>
+                        {f'<strong>Trial Ends:</strong> {trial_end_date}' if trial_end_date else ''}
+                    </p>
+                </div>
+
+                <h3 style="color: #333; margin-top: 30px;">What's Included in Your Trial:</h3>
+                <ul style="color: #666; line-height: 1.8;">
+                    <li>🤖 Access to 50+ AI models via OpenRouter</li>
+                    <li>💬 Open-WebUI chat interface</li>
+                    <li>🔍 Center-Deep AI-powered search</li>
+                    <li>🔑 Bring Your Own API Keys (BYOK)</li>
+                    <li>📊 Full dashboard access</li>
+                    <li>🎯 All Pro features unlocked</li>
+                </ul>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/dashboard"
+                       style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                        Get Started →
+                    </a>
+                </div>
+
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #856404;">
+                        <strong>💡 Pro Tip:</strong> Connect your own API keys to use your preferred AI models without consuming trial credits!
+                    </p>
+                </div>
+
+                <p style="color: #666;">
+                    Need help getting started? Check out our <a href="https://kubeworkz.io/docs" style="color: #667eea;">documentation</a> or reply to this email.
+                </p>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Questions? We're here to help at <a href="mailto:support@kubeworkz.io">support@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "trial_welcome", "trial_days": trial_days}
+        )
+
+    async def send_trial_expiring_soon(
+        self,
+        to: str,
+        days_remaining: int,
+        trial_end_date: str
+    ) -> bool:
+        """Send reminder that trial is expiring soon"""
+        subject = f"⏰ Your Trial Expires in {days_remaining} Day{'s' if days_remaining != 1 else ''}"
+
+        urgency_color = "#ffc107" if days_remaining > 1 else "#dc3545"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, {urgency_color} 0%, {'#ff9800' if days_remaining > 1 else '#c82333'} 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">⏰ Trial Ending Soon</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #333;">Your Trial Expires in {days_remaining} Day{'s' if days_remaining != 1 else ''}!</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    We hope you've been enjoying KubeWorkz! Your free trial will end on <strong>{trial_end_date}</strong>.
+                </p>
+
+                <div style="background: #fff3cd; padding: 20px; border-left: 4px solid {urgency_color}; margin: 20px 0;">
+                    <p style="margin: 0; color: #856404;">
+                        <strong>Trial Ends:</strong> {trial_end_date}<br>
+                        <strong>Time Remaining:</strong> {days_remaining} day{'s' if days_remaining != 1 else ''}
+                    </p>
+                </div>
+
+                <h3 style="color: #333;">Don't Lose Access! Upgrade Now to:</h3>
+                <ul style="color: #666; line-height: 1.8;">
+                    <li>✅ Keep unlimited access to 50+ AI models</li>
+                    <li>✅ Maintain your chat history and saved data</li>
+                    <li>✅ Continue using BYOK features</li>
+                    <li>✅ Get priority support</li>
+                    <li>✅ Access future premium features first</li>
+                </ul>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/checkout"
+                       style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+                        Upgrade to Pro Now →
+                    </a>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="https://kubeworkz.io/pricing" style="color: #667eea; text-decoration: none;">
+                        View Pricing Plans
+                    </a>
+                </div>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Questions about upgrading? Contact us at <a href="mailto:sales@kubeworkz.io">sales@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "trial_expiring", "days_remaining": days_remaining}
+        )
+
+    async def send_trial_expired(
+        self,
+        to: str,
+        trial_end_date: str
+    ) -> bool:
+        """Send notification that trial has expired"""
+        subject = "Your Trial Has Ended - Upgrade to Continue"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">Trial Period Ended</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #333;">Your Free Trial Has Expired</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    Your 14-day trial ended on <strong>{trial_end_date}</strong>. We hope you enjoyed exploring KubeWorkz!
+                </p>
+
+                <div style="background: #f8d7da; padding: 20px; border-left: 4px solid #dc3545; margin: 20px 0;">
+                    <p style="margin: 0; color: #721c24;">
+                        <strong>Status:</strong> Trial Expired<br>
+                        <strong>Access:</strong> Limited to free tier features
+                    </p>
+                </div>
+
+                <h3 style="color: #333;">Upgrade Now to Restore Full Access:</h3>
+                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="padding: 10px;">✅ Unlimited AI model access</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;">✅ Full chat history</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;">✅ BYOK features</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;">✅ Priority support</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;">✅ Advanced analytics</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/checkout"
+                       style="background: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+                        Upgrade to Pro →
+                    </a>
+                </div>
+
+                <div style="background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #0c5460;">
+                        <strong>Special Offer:</strong> Upgrade within 7 days and get your first month at 20% off! Use code <strong>COMEBACK20</strong>
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="https://kubeworkz.io/pricing" style="color: #667eea; text-decoration: none;">
+                        View All Plans
+                    </a>
+                </div>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Have questions? We're here to help at <a href="mailto:sales@kubeworkz.io">sales@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "trial_expired", "expired_on": trial_end_date}
+        )
+
+    async def send_trial_extended(
+        self,
+        to: str,
+        additional_days: int,
+        new_end_date: str
+    ) -> bool:
+        """Send notification that trial was extended"""
+        subject = f"🎉 Your Trial Has Been Extended by {additional_days} Days!"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">🎉 Trial Extended!</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #333;">Great News! Your Trial Has Been Extended</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    We've added <strong>{additional_days} extra days</strong> to your trial period!
+                </p>
+
+                <div style="background: #d4edda; padding: 20px; border-left: 4px solid #28a745; margin: 20px 0;">
+                    <p style="margin: 0; color: #155724;">
+                        <strong>Extension:</strong> +{additional_days} days<br>
+                        <strong>New Trial End Date:</strong> {new_end_date}
+                    </p>
+                </div>
+
+                <p style="color: #666;">
+                    Continue exploring all the features KubeWorkz has to offer with your extended trial!
+                </p>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/dashboard"
+                       style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                        Return to Dashboard →
+                    </a>
+                </div>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Questions? Contact us at <a href="mailto:support@kubeworkz.io">support@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "trial_extended", "additional_days": additional_days}
+        )
 
 
 # Singleton instance

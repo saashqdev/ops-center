@@ -346,13 +346,46 @@ class InvoiceManager:
                     invoice_pdf=invoice_pdf
                 )
                 
-                # TODO: Send invoice email to customer
+                # Send invoice email to customer
+                if our_status == 'paid':
+                    subscription_data = await conn.fetchrow("""
+                        SELECT email FROM user_subscriptions WHERE id = $1
+                    """, subscription['id'])
+                    
+                    if subscription_data:
+                        await self._send_invoice_email(
+                            email=subscription_data['email'],
+                            invoice_id=result['id'],
+                            amount=amount,
+                            invoice_url=invoice_url
+                        )
                 
                 return result
                 
         except Exception as e:
             logger.error(f"Error processing Stripe invoice: {e}", exc_info=True)
             return None
+    
+    async def _send_invoice_email(
+        self,
+        email: str,
+        invoice_id: int,
+        amount: float,
+        invoice_url: Optional[str] = None
+    ):
+        """Send invoice receipt email to customer"""
+        try:
+            from email_service import email_service
+            
+            await email_service.send_invoice(
+                to=email,
+                invoice_number=f"INV-{invoice_id:06d}",
+                amount=amount,
+                invoice_url=invoice_url
+            )
+            logger.info(f"Sent invoice email to {email} for invoice {invoice_id}")
+        except Exception as e:
+            logger.error(f"Error sending invoice email: {e}")
 
 
 # Global singleton
