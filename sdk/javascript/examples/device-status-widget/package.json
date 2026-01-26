@@ -1,0 +1,21 @@
+{
+  "name": "@ops-center-examples/device-status-widget",
+  "version": "1.0.0",
+  "description": "Dashboard widget showing device status overview",
+  "main": "index.tsx",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@ops-center/plugin-sdk": "^0.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

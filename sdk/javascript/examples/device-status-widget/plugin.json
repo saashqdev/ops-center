@@ -1,0 +1,74 @@
+{
+  "id": "device-status-widget",
+  "name": "Device Status Widget",
+  "version": "1.0.0",
+  "description": "Dashboard widget showing device status overview",
+  "author": "Ops-Center Team",
+  "type": "frontend",
+  "category": "monitoring",
+  "homepage": "https://github.com/ops-center/plugins/device-status-widget",
+  "repository": "https://github.com/ops-center/plugins",
+  "license": "MIT",
+  "keywords": ["dashboard", "devices", "monitoring", "widget"],
+  "pricing": {
+    "model": "free",
+    "price": 0
+  },
+  "permissions": [
+    "devices:read"
+  ],
+  "slots": [
+    {
+      "name": "dashboard.widget",
+      "component": "DeviceStatusWidget",
+      "priority": 10
+    }
+  ],
+  "routes": [
+    {
+      "path": "/settings",
+      "component": "WidgetSettings",
+      "exact": true
+    }
+  ],
+  "hooks": [
+    {
+      "event": "device.created",
+      "handler": "onDeviceCreated"
+    },
+    {
+      "event": "device.status_changed",
+      "handler": "onDeviceStatusChanged"
+    }
+  ],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "refreshInterval": {
+        "type": "number",
+        "default": 30000,
+        "description": "Refresh interval in milliseconds",
+        "minimum": 5000,
+        "maximum": 300000
+      },
+      "showOfflineDevices": {
+        "type": "boolean",
+        "default": true,
+        "description": "Show offline devices in widget"
+      },
+      "maxDevices": {
+        "type": "number",
+        "default": 10,
+        "description": "Maximum devices to display",
+        "minimum": 1,
+        "maximum": 50
+      }
+    }
+  },
+  "runtime": {
+    "type": "javascript",
+    "framework": "react",
+    "version": "18.x",
+    "entrypoint": "index.tsx"
+  }
+}
