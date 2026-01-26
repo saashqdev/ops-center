@@ -511,28 +511,30 @@ async def handle_invoice_payment_failed(invoice: Dict[str, Any]):
         # Create failed invoice record
         await invoice_manager.process_stripe_invoice(invoice)
         
-        # Send payment failed email
+        # Create dunning campaign for payment retry
         from database import get_db_pool
+        from dunning_manager import dunning_manager
+        
         pool = await get_db_pool()
         async with pool.acquire() as conn:
             subscription = await conn.fetchrow("""
-                SELECT email FROM user_subscriptions
+                SELECT id, email FROM user_subscriptions
                 WHERE stripe_subscription_id = $1
             """, stripe_subscription_id)
             
             if subscription:
-                from email_service import email_service
                 amount = invoice.get('amount_due', 0) / 100
                 failure_reason = invoice.get('last_payment_error', {}).get('message')
                 
-                await email_service.send_payment_failed(
-                    to=subscription['email'],
-                    amount=amount,
-                    reason=failure_reason
+                # Create dunning campaign (sends first email automatically)
+                await dunning_manager.create_dunning_campaign(
+                    subscription_id=subscription['id'],
+                    stripe_invoice_id=invoice_id,
+                    amount_due=amount,
+                    currency='usd',
+                    failure_reason=failure_reason
                 )
-                logger.info(f"Sent payment failed email to {subscription['email']}")
-        
-        # TODO: Implement retry logic with dunning
+                logger.info(f"Created dunning campaign for subscription {subscription['id']}")
         
     except Exception as e:
         logger.error(f"Error handling failed payment: {e}")

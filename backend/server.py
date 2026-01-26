@@ -606,6 +606,15 @@ async def startup_event():
         logger.error(f"Failed to start trial scheduler: {e}")
         # Don't block startup if trial scheduler fails
 
+    # Start dunning scheduler (Epic 6.0 Phase 4)
+    try:
+        from dunning_scheduler import dunning_scheduler
+        await dunning_scheduler.start()
+        logger.info("Dunning scheduler started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start dunning scheduler: {e}")
+        # Don't block startup if dunning scheduler fails
+
     # Start backup scheduler (TODO: Install apscheduler in container first)
     # try:
     #     backup_scheduler.start()

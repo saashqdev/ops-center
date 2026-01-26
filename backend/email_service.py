@@ -807,6 +807,265 @@ class EmailService:
             metadata={"type": "trial_extended", "additional_days": additional_days}
         )
 
+    # ===== DUNNING EMAIL TEMPLATES =====
+
+    async def send_payment_retry_reminder(
+        self,
+        to: str,
+        amount: float,
+        attempt: int,
+        days_until_suspension: int,
+        failure_reason: Optional[str] = None
+    ) -> bool:
+        """Send first payment retry reminder (gentle)"""
+        subject = "Payment Failed - Please Update Your Payment Method"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">⚠️ Payment Issue</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #333;">We Couldn't Process Your Payment</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    We attempted to charge your payment method <strong>${amount:.2f}</strong> but the payment was declined.
+                </p>
+
+                {f'<div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;"><p style="margin: 0; color: #856404;"><strong>Reason:</strong> {failure_reason}</p></div>' if failure_reason else ''}
+
+                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Amount Due:</strong> ${amount:.2f}</p>
+                    <p style="margin: 10px 0 0 0;"><strong>Retry Attempt:</strong> {attempt} of 3</p>
+                    <p style="margin: 10px 0 0 0;"><strong>Days Until Suspension:</strong> {days_until_suspension}</p>
+                </div>
+
+                <p style="color: #666;">
+                    <strong>What happens next?</strong><br>
+                    We'll automatically retry the payment in a few days. To avoid service interruption, please update your payment method now.
+                </p>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/dashboard/billing"
+                       style="background: #ffc107; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                        Update Payment Method
+                    </a>
+                </div>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Questions? Contact us at <a href="mailto:billing@kubeworkz.io">billing@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "dunning_reminder", "attempt": attempt}
+        )
+
+    async def send_payment_retry_urgent(
+        self,
+        to: str,
+        amount: float,
+        attempt: int,
+        days_until_suspension: int
+    ) -> bool:
+        """Send urgent payment retry notification (2nd attempt)"""
+        subject = "⚠️ URGENT: Payment Required - Service at Risk"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">⚠️ URGENT: Action Required</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #e65100;">Your Service Will Be Suspended Soon</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    We've tried {attempt} times to process your payment of <strong>${amount:.2f}</strong> without success.
+                </p>
+
+                <div style="background: #ffebee; padding: 20px; border-left: 4px solid #f44336; margin: 20px 0;">
+                    <p style="margin: 0; color: #c62828;">
+                        <strong>⚠️ CRITICAL:</strong> Your subscription will be suspended in <strong>{days_until_suspension} days</strong> if payment is not received.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Amount Due:</strong> ${amount:.2f}</p>
+                    <p style="margin: 10px 0 0 0;"><strong>Retry Attempt:</strong> {attempt} of 3</p>
+                    <p style="margin: 10px 0 0 0; color: #f44336;"><strong>⏰ Service Suspension:</strong> {days_until_suspension} days</p>
+                </div>
+
+                <h3 style="color: #333;">To Avoid Suspension:</h3>
+                <ol style="color: #666; line-height: 1.8;">
+                    <li>Update your payment method immediately</li>
+                    <li>Ensure sufficient funds are available</li>
+                    <li>Contact your bank if needed</li>
+                </ol>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/dashboard/billing"
+                       style="background: #f44336; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+                        Update Payment Now →
+                    </a>
+                </div>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Need help? Our billing team is standing by: <a href="mailto:billing@kubeworkz.io">billing@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "dunning_urgent", "attempt": attempt}
+        )
+
+    async def send_payment_retry_final(
+        self,
+        to: str,
+        amount: float,
+        days_until_suspension: int
+    ) -> bool:
+        """Send final payment retry notification (last chance)"""
+        subject = "🚨 FINAL NOTICE: Payment Required to Avoid Suspension"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">🚨 FINAL NOTICE</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #b71c1c;">Last Chance to Avoid Suspension</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    This is our <strong>final attempt</strong> to collect payment of <strong>${amount:.2f}</strong>.
+                </p>
+
+                <div style="background: #ffcdd2; padding: 25px; border: 2px solid #d32f2f; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; color: #b71c1c; font-size: 18px; font-weight: bold;">
+                        🚨 YOUR SERVICE WILL BE SUSPENDED IN {days_until_suspension} DAY{'S' if days_until_suspension != 1 else ''}
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Outstanding Amount:</strong> ${amount:.2f}</p>
+                    <p style="margin: 10px 0 0 0;"><strong>Failed Attempts:</strong> 3 of 3</p>
+                    <p style="margin: 10px 0 0 0; color: #d32f2f; font-weight: bold;"><strong>⏰ Suspension Date:</strong> {days_until_suspension} days from now</p>
+                </div>
+
+                <h3 style="color: #333;">What Happens After Suspension:</h3>
+                <ul style="color: #666; line-height: 1.8;">
+                    <li>❌ Immediate loss of access to all features</li>
+                    <li>❌ Your data will be retained for 30 days only</li>
+                    <li>❌ Reactivation requires payment of all outstanding amounts</li>
+                    <li>❌ Additional reactivation fees may apply</li>
+                </ul>
+
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #856404;">
+                        <strong>💡 Tip:</strong> If you're experiencing financial difficulties, contact us. We may be able to work out a payment plan.
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/dashboard/billing"
+                       style="background: #d32f2f; color: white; padding: 20px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 18px;">
+                        Pay Now to Avoid Suspension →
+                    </a>
+                </div>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    <strong>Urgent billing assistance:</strong> <a href="mailto:billing@kubeworkz.io">billing@kubeworkz.io</a> or call 1-800-XXX-XXXX
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "dunning_final", "attempt": 3}
+        )
+
+    async def send_subscription_suspended(
+        self,
+        to: str,
+        amount_due: float
+    ) -> bool:
+        """Send notification that subscription has been suspended"""
+        subject = "Subscription Suspended - Payment Required"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #424242 0%, #212121 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">🔒 Subscription Suspended</h1>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #333;">Your Account Has Been Suspended</h2>
+
+                <p style="color: #666; font-size: 16px;">
+                    Your subscription has been suspended due to non-payment of <strong>${amount_due:.2f}</strong>.
+                </p>
+
+                <div style="background: #e0e0e0; padding: 20px; border-left: 4px solid #424242; margin: 20px 0;">
+                    <p style="margin: 0; color: #424242;">
+                        <strong>Status:</strong> Suspended<br>
+                        <strong>Outstanding Balance:</strong> ${amount_due:.2f}<br>
+                        <strong>Access:</strong> Restricted
+                    </p>
+                </div>
+
+                <h3 style="color: #333;">To Reactivate Your Account:</h3>
+                <ol style="color: #666; line-height: 1.8;">
+                    <li>Update your payment method</li>
+                    <li>Pay the outstanding balance of ${amount_due:.2f}</li>
+                    <li>Your access will be restored immediately upon payment</li>
+                </ol>
+
+                <div style="background: #ffebee; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #c62828;">
+                        <strong>⚠️ Important:</strong> Your data will be retained for 30 days. After that, it will be permanently deleted.
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://kubeworkz.io/dashboard/billing"
+                       style="background: #424242; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                        Reactivate Your Account →
+                    </a>
+                </div>
+
+                <p style="color: #666;">
+                    If you believe this is an error or need assistance, please contact our billing team immediately.
+                </p>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Contact billing support: <a href="mailto:billing@kubeworkz.io">billing@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "subscription_suspended", "amount_due": amount_due}
+        )
+
 
 # Singleton instance
 email_service = EmailService()
