@@ -135,6 +135,15 @@ export const routes = {
           description: 'View credit balance, usage metrics, and transaction history',
           status: 'active'
         },
+        costOptimization: {
+          path: '/admin/costs',
+          component: 'CostOptimization',
+          roles: ['admin', 'power_user', 'user', 'viewer'],
+          name: 'Cost Optimization',
+          description: 'LLM cost analysis, budgets, and savings recommendations',
+          icon: 'ChartPieIcon',
+          status: 'active'
+        },
         tiers: {
           path: '/admin/credits/tiers',
           component: 'TierComparison',
@@ -249,6 +258,15 @@ export const routes = {
         icon: 'SparklesIcon',
         roles: ['admin'],
         children: {
+          colonel: {
+            path: '/admin/colonel',
+            component: 'ColonelAgent',
+            roles: ['admin', 'power_user', 'user', 'viewer'],
+            name: 'The Colonel',
+            description: 'AI-powered infrastructure assistant - natural language queries and orchestration',
+            icon: 'ChatBubbleLeftRightIcon',
+            status: 'active'
+          },
           models: {
             path: '/admin/system/models',
             component: 'AIModelManagement',
@@ -280,6 +298,15 @@ export const routes = {
             name: 'Usage Analytics',
             description: 'LLM API usage analytics and cost tracking',
             icon: 'ChartBarIcon'
+          },
+          costOptimization: {
+            path: '/admin/system/costs',
+            component: 'CostOptimizationAdmin',
+            roles: ['admin'],
+            name: 'Cost Optimization',
+            description: 'Platform-wide cost analysis, budgets, forecasts, and recommendations',
+            icon: 'BanknotesIcon',
+            status: 'active'
           }
         }
       },
@@ -393,6 +420,15 @@ export const routes = {
             description: 'System health, metrics, and alerts dashboard',
             icon: 'PresentationChartBarIcon',
             status: 'planned'
+          },
+          smartAlerts: {
+            path: '/admin/monitoring/alerts',
+            component: 'SmartAlerts',
+            roles: ['admin', 'power_user'],
+            name: 'Smart Alerts',
+            description: 'AI-powered anomaly detection, predictions, and intelligent alerting',
+            icon: 'BellAlertIcon',
+            status: 'active'
           },
           grafana: {
             path: '/admin/monitoring/grafana',

@@ -188,6 +188,16 @@ const PrometheusConfig = lazy(() => import('./pages/PrometheusConfig'));
 const UmamiConfig = lazy(() => import('./pages/UmamiConfig'));
 const Geeses = lazy(() => import('./pages/Geeses'));
 
+// Epic 12: The Colonel - AI Infrastructure Assistant
+const ColonelAgent = lazy(() => import('./pages/colonel/ColonelAgent'));
+
+// Epic 13: Smart Alerts - AI-powered alerting
+const SmartAlerts = lazy(() => import('./pages/monitoring/SmartAlerts'));
+
+// Epic 14: Cost Optimization - Cost analysis and budgeting
+const CostOptimization = lazy(() => import('./pages/costs/CostOptimization'));
+const CostOptimizationAdmin = lazy(() => import('./pages/costs/CostOptimizationAdmin'));
+
 // Lazy load non-critical components
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 const HelpPanel = lazy(() => import('./components/HelpPanel'));
@@ -441,6 +451,7 @@ function AppRoutes() {
                   {/* ============================================================ */}
                   <Route path="brigade" element={<Brigade />} />
                   <Route path="atlas" element={<AtlasChat />} /> {/* Epic 6.1 - AI Assistant */}
+                  <Route path="colonel" element={<ColonelAgent />} /> {/* Epic 12 - The Colonel */}
                   <Route path="llm-hub" element={<LLMHub />} />
                   <Route path="llm-management" element={<LLMManagement />} />
                   <Route path="litellm-providers" element={<LiteLLMManagement />} />
@@ -497,11 +508,13 @@ function AppRoutes() {
                   <Route path="system/settings" element={<SystemSettings />} />
                   <Route path="system/forgejo" element={<ForgejoManagement />} />
                   <Route path="system/invite-codes" element={<InviteCodesManagement />} />
+                  <Route path="system/costs" element={<CostOptimizationAdmin />} /> {/* Epic 14 - Admin Cost Dashboard */}
 
                   {/* ============================================================ */}
                   {/* MONITORING & ANALYTICS SECTION - Metrics, Logs, Analytics */}
                   {/* ============================================================ */}
                   <Route path="monitoring/overview" element={<MonitoringOverview />} />
+                  <Route path="monitoring/alerts" element={<SmartAlerts />} /> {/* Epic 13 - Smart Alerts */}
                   <Route path="monitoring/grafana" element={<GrafanaConfig />} />
                   <Route path="monitoring/grafana/dashboards" element={<GrafanaViewer />} />
                   <Route path="monitoring/prometheus" element={<PrometheusConfig />} />
@@ -557,6 +570,7 @@ function AppRoutes() {
                   <Route path="credits" element={<CreditDashboard />} />
                   <Route path="credits/purchase" element={<CreditPurchase />} />
                   <Route path="credits/tiers" element={<TierComparison />} />
+                  <Route path="costs" element={<CostOptimization />} /> {/* Epic 14 - Personal Cost Dashboard */}
 
                   {/* ============================================================ */}
                   {/* BILLING SECTION - Organization billing dashboards */}
