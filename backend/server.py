@@ -103,6 +103,7 @@ from public_checkout_api import router as public_checkout_router
 from my_subscription_api import router as my_subscription_router
 from trial_api import router as trial_router
 from public_signup_api import router as public_signup_router
+from invoice_api import router as invoice_router
 from platform_settings_api import router as platform_settings_router
 from user_management_api import router as user_management_router
 # Avatar Storage API (November 2025 - CORS fix for bolt.diy)
@@ -711,6 +712,9 @@ logger.info("Trial Management API registered at /api/v1/admin/trials (admin only
 
 app.include_router(public_signup_router)
 logger.info("Public Signup API registered at /api/v1/public/signup")
+
+app.include_router(invoice_router)
+logger.info("Invoice API registered at /api/v1/invoices (authenticated)")
 
 # Register audit logs router
 if AUDIT_ENABLED:

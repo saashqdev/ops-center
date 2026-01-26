@@ -13,6 +13,7 @@ import os
 import stripe
 from datetime import datetime
 from subscription_manager_simple import subscription_manager
+from invoice_manager import invoice_manager
 
 logger = logging.getLogger(__name__)
 
@@ -271,6 +272,14 @@ async def handle_checkout_webhook(request: Request):
             subscription = event.data.object
             await handle_subscription_deleted(subscription)
         
+        elif event.type == 'invoice.paid':
+            invoice = event.data.object
+            await handle_invoice_paid(invoice)
+        
+        elif event.type == 'invoice.payment_failed':
+            invoice = event.data.object
+            await handle_invoice_payment_failed(invoice)
+        
         else:
             logger.info(f"Unhandled webhook event type: {event.type}")
         
@@ -406,4 +415,105 @@ async def handle_subscription_deleted(subscription: Dict[str, Any]):
         
     except Exception as e:
         logger.error(f"Error handling subscription deletion: {e}")
+        raise
+
+
+async def handle_invoice_paid(invoice: Dict[str, Any]):
+    """
+    Process successful invoice payment
+    - Create invoice record
+    - Send invoice email
+    """
+    try:
+        from invoice_manager import invoice_manager
+        
+        invoice_id = invoice.get('id')
+        logger.info(f"Processing paid invoice: {invoice_id}")
+        
+        # Create invoice record
+        await invoice_manager.process_stripe_invoice(invoice)
+        
+        # TODO: Send invoice email to customer
+        
+    except Exception as e:
+        logger.error(f"Error handling invoice payment: {e}")
+        raise
+
+
+async def handle_invoice_payment_failed(invoice: Dict[str, Any]):
+    """
+    Process failed invoice payment
+    - Update subscription status
+    - Send payment failed email
+    """
+    try:
+        from invoice_manager import invoice_manager
+        
+        invoice_id = invoice.get('id')
+        stripe_subscription_id = invoice.get('subscription')
+        
+        logger.warning(f"Payment failed for invoice {invoice_id}, subscription {stripe_subscription_id}")
+        
+        # Update subscription status to past_due
+        await subscription_manager.update_subscription_status(
+            stripe_subscription_id=stripe_subscription_id,
+            status='past_due'
+        )
+        
+        # Create failed invoice record
+        await invoice_manager.process_stripe_invoice(invoice)
+        
+        # TODO: Send payment failed email
+        # TODO: Implement retry logic
+        
+    except Exception as e:
+        logger.error(f"Error handling failed payment: {e}")
+        raise
+
+async def handle_invoice_paid(invoice: Dict[str, Any]):
+    """
+    Process successful invoice payment
+    - Create invoice record
+    - Send invoice email
+    """
+    try:
+        invoice_id = invoice.get('id')
+        logger.info(f"Processing paid invoice: {invoice_id}")
+        
+        # Create invoice record
+        await invoice_manager.process_stripe_invoice(invoice)
+        
+        # TODO: Send invoice email to customer
+        
+    except Exception as e:
+        logger.error(f"Error handling invoice payment: {e}")
+        raise
+
+
+async def handle_invoice_payment_failed(invoice: Dict[str, Any]):
+    """
+    Process failed invoice payment
+    - Update subscription status
+    - Send payment failed email
+    """
+    try:
+        invoice_id = invoice.get('id')
+        stripe_subscription_id = invoice.get('subscription')
+        
+        logger.warning(f"Payment failed for invoice {invoice_id}, subscription {stripe_subscription_id}")
+        
+        # Update subscription status to past_due
+        await subscription_manager.update_subscription_status(
+            stripe_subscription_id=stripe_subscription_id,
+            status='past_due'
+        )
+        
+        # Create failed invoice record
+        await invoice_manager.process_stripe_invoice(invoice)
+        
+        # TODO: Send payment failed email
+        # TODO: Implement retry logic
+        
+    except Exception as e:
+        logger.error(f"Error handling failed payment: {e}")
         raise

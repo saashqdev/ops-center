@@ -43,6 +43,7 @@ const PublicLanding = lazy(() => import('./pages/PublicLanding'));
 const Pricing = lazy(() => import('./pages/public/Pricing'));
 const Signup = lazy(() => import('./pages/public/Signup'));
 const Checkout = lazy(() => import('./pages/public/Checkout'));
+const BillingSettings = lazy(() => import('./pages/settings/BillingSettings'));
 const CheckoutSuccess = lazy(() => import('./pages/public/CheckoutSuccess'));
 const CheckoutCancelled = lazy(() => import('./pages/public/CheckoutCancelled'));
 const Login = lazy(() => import('./pages/Login'));
@@ -351,6 +352,13 @@ function AppRoutes() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/checkout/success" element={<CheckoutSuccess />} />
           <Route path="/checkout/cancelled" element={<CheckoutCancelled />} />
+          
+          {/* Billing Settings - Epic 5.0 Phase 5 */}
+          <Route path="/settings/billing" element={
+            <ProtectedRoute>
+              <BillingSettings />
+            </ProtectedRoute>
+          } />
 
           {/* User Landing Page - Authenticated users (search bar, apps, user dropdown) */}
           <Route path="/dashboard" element={
