@@ -113,43 +113,31 @@ async def get_my_subscription(user_email: str = Depends(get_current_user_email))
 @router.post("/upgrade")
 async def upgrade_subscription(
     request: UpgradeRequest,
-    user_id: int = Depends(get_current_user_id)
+    user_email: str = Depends(get_current_user_email)
 ):
     """
     Upgrade to a higher tier
+    TODO: Implement upgrade logic for email-based subscriptions
     """
-    try:
-        result = await subscription_manager.upgrade_subscription(
-            user_id=user_id,
-            new_tier_code=request.tier_code,
-            billing_cycle=request.billing_cycle,
-            prorate=True
-        )
-        
-        return {
-            "status": "success",
-            "message": f"Upgraded to {result['new_tier']}",
-            "details": result
-        }
-        
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error upgrading subscription: {e}")
-        raise HTTPException(status_code=500, detail="Failed to upgrade subscription")
+    # For now, redirect to checkout page with new tier
+    return {
+        "status": "not_implemented",
+        "message": "Please visit /checkout to upgrade your subscription",
+        "redirect": f"/checkout?tier={request.tier_code}&billing={request.billing_cycle}"
+    }
 
 
 @router.post("/cancel")
 async def cancel_subscription(
     request: CancelRequest,
-    user_id: int = Depends(get_current_user_id)
+    user_email: str = Depends(get_current_user_email)
 ):
     """
     Cancel subscription
     """
     try:
         result = await subscription_manager.cancel_subscription(
-            user_id=user_id,
+            email=user_email,
             at_period_end=request.at_period_end
         )
         
@@ -173,7 +161,7 @@ async def cancel_subscription(
 
 
 @router.post("/reactivate")
-async def reactivate_subscription(user_id: int = Depends(get_current_user_id)):
+async def reactivate_subscription(user_email: str = Depends(get_current_user_email)):
     """
     Reactivate a canceled subscription before period end
     """
@@ -186,8 +174,8 @@ async def reactivate_subscription(user_id: int = Depends(get_current_user_id)):
             subscription = await conn.fetchrow("""
                 SELECT stripe_subscription_id, cancel_at
                 FROM user_subscriptions
-                WHERE user_id = $1 AND status = 'active'
-            """, user_id)
+                WHERE email = $1 AND status = 'active'
+            """, user_email)
             
             if not subscription:
                 raise HTTPException(status_code=404, detail="No subscription found")
@@ -205,10 +193,10 @@ async def reactivate_subscription(user_id: int = Depends(get_current_user_id)):
             await conn.execute("""
                 UPDATE user_subscriptions
                 SET cancel_at = NULL, updated_at = NOW()
-                WHERE user_id = $1
-            """, user_id)
+                WHERE email = $1
+            """, user_email)
             
-            logger.info(f"Reactivated subscription for user {user_id}")
+            logger.info(f"Reactivated subscription for email {user_email}")
             
             return {
                 "status": "success",
@@ -223,7 +211,7 @@ async def reactivate_subscription(user_id: int = Depends(get_current_user_id)):
 
 
 @router.get("/usage")
-async def get_subscription_usage(user_id: int = Depends(get_current_user_id)):
+async def get_subscription_usage(user_email: str = Depends(get_current_user_email)):
     """
     Get current usage statistics for the subscription
     """
@@ -241,8 +229,8 @@ async def get_subscription_usage(user_id: int = Depends(get_current_user_id)):
                     st.team_seats
                 FROM user_subscriptions us
                 JOIN subscription_tiers st ON us.tier_id = st.id
-                WHERE us.user_id = $1
-            """, user_id)
+                WHERE us.email = $1
+            """, user_email)
             
             if not subscription:
                 raise HTTPException(status_code=404, detail="No subscription found")

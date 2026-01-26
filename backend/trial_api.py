@@ -9,7 +9,7 @@ from typing import Optional, List
 import logging
 
 from trial_manager import trial_manager
-from auth_dependencies import require_admin
+from auth_dependencies import require_admin_user
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class TrialResponse(BaseModel):
 @router.post("/assign", response_model=TrialResponse)
 async def assign_trial(
     request: TrialAssignmentRequest,
-    admin: dict = Depends(require_admin)
+    admin: dict = Depends(require_admin_user)
 ):
     """
     Assign a trial subscription to a user (admin only)
@@ -65,7 +65,7 @@ async def assign_trial(
 @router.post("/extend")
 async def extend_trial(
     request: TrialExtensionRequest,
-    admin: dict = Depends(require_admin)
+    admin: dict = Depends(require_admin_user)
 ):
     """
     Extend a trial subscription (admin only)
@@ -94,7 +94,7 @@ async def extend_trial(
 @router.get("/expiring")
 async def get_expiring_trials(
     days: int = 7,
-    admin: dict = Depends(require_admin)
+    admin: dict = Depends(require_admin_user)
 ):
     """
     Get trials expiring within N days (admin only)
@@ -115,7 +115,7 @@ async def get_expiring_trials(
 
 @router.post("/check-expirations")
 async def check_expirations(
-    admin: dict = Depends(require_admin)
+    admin: dict = Depends(require_admin_user)
 ):
     """
     Manually trigger trial expiration check (admin only)
@@ -137,7 +137,7 @@ async def check_expirations(
 
 @router.get("/stats")
 async def get_trial_stats(
-    admin: dict = Depends(require_admin)
+    admin: dict = Depends(require_admin_user)
 ):
     """
     Get trial statistics (admin only)
