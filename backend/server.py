@@ -101,6 +101,8 @@ from local_users_api import router as admin_local_users_router
 from public_api import router as public_api_router
 from public_checkout_api import router as public_checkout_router
 from my_subscription_api import router as my_subscription_router
+from trial_api import router as trial_router
+from public_signup_api import router as public_signup_router
 from platform_settings_api import router as platform_settings_router
 from user_management_api import router as user_management_router
 # Avatar Storage API (November 2025 - CORS fix for bolt.diy)
@@ -594,6 +596,15 @@ async def startup_event():
         logger.error(f"Failed to start email scheduler: {e}")
         # Don't block startup if email fails
 
+    # Start trial expiration scheduler (Epic 5.0 Phase 4)
+    try:
+        from trial_scheduler import trial_scheduler
+        await trial_scheduler.start()
+        logger.info("Trial expiration scheduler started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start trial scheduler: {e}")
+        # Don't block startup if trial scheduler fails
+
     # Start backup scheduler (TODO: Install apscheduler in container first)
     # try:
     #     backup_scheduler.start()
@@ -694,6 +705,12 @@ logger.info("Public Checkout API registered at /api/v1/checkout (Stripe integrat
 # Register My Subscription API (Epic 5.0 - Subscription Management)
 app.include_router(my_subscription_router)
 logger.info("My Subscription API registered at /api/v1/my-subscription (authenticated)")
+
+app.include_router(trial_router)
+logger.info("Trial Management API registered at /api/v1/admin/trials (admin only)")
+
+app.include_router(public_signup_router)
+logger.info("Public Signup API registered at /api/v1/public/signup")
 
 # Register audit logs router
 if AUDIT_ENABLED:

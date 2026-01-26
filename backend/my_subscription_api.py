@@ -40,8 +40,8 @@ class CancelRequest(BaseModel):
     reason: Optional[str] = None
 
 
-async def get_current_user_id(request: Request) -> int:
-    """Get current user ID from session"""
+async def get_current_user_email(request: Request) -> str:
+    """Get current user email from session"""
     from redis_session import redis_session_manager
     
     session_token = request.cookies.get("session_token")
@@ -53,24 +53,39 @@ async def get_current_user_id(request: Request) -> int:
         raise HTTPException(status_code=401, detail="Session expired")
     
     user = session_data.get("user", {})
-    user_id = user.get("id")
+    email = user.get("email")
     
-    if not user_id:
-        raise HTTPException(status_code=401, detail="User ID not found in session")
+    if not email:
+        raise HTTPException(status_code=401, detail="User email not found in session")
     
-    return user_id
+    return email
 
 
 @router.get("/", response_model=SubscriptionResponse)
-async def get_my_subscription(user_id: int = Depends(get_current_user_id)):
+async def get_my_subscription(user_email: str = Depends(get_current_user_email)):
     """
     Get current user's subscription details
     """
     try:
-        subscription = await subscription_manager.get_user_subscription(user_id)
+        from datetime import datetime
+        from subscription_manager_simple import subscription_manager
+        
+        subscription = await subscription_manager.get_subscription_by_email(user_email)
         
         if not subscription:
             raise HTTPException(status_code=404, detail="No subscription found")
+        
+        # Add trial information if applicable
+        trial_info = None
+        if subscription.get('status') == 'trialing':
+            trial_end = subscription.get('current_period_end')
+            if trial_end:
+                days_remaining = (trial_end - datetime.utcnow()).days
+                trial_info = {
+                    "trial_end": trial_end.isoformat(),
+                    "days_remaining": max(0, days_remaining),
+                    "is_active_trial": days_remaining > 0
+                }
         
         return SubscriptionResponse(
             id=subscription['id'],

@@ -41,6 +41,7 @@ import RootRedirect from './components/RootRedirect';
 // Lazy load all pages (loaded on-demand when route is accessed)
 const PublicLanding = lazy(() => import('./pages/PublicLanding'));
 const Pricing = lazy(() => import('./pages/public/Pricing'));
+const Signup = lazy(() => import('./pages/public/Signup'));
 const Checkout = lazy(() => import('./pages/public/Checkout'));
 const CheckoutSuccess = lazy(() => import('./pages/public/CheckoutSuccess'));
 const CheckoutCancelled = lazy(() => import('./pages/public/CheckoutCancelled'));
@@ -342,6 +343,9 @@ function AppRoutes() {
 
           {/* Public Pricing Page - Epic 5.0 E-commerce */}
           <Route path="/pricing" element={<Pricing />} />
+          
+          {/* Public Signup with Trial - Epic 5.0 Phase 4 */}
+          <Route path="/signup" element={<Signup />} />
           
           {/* Checkout Flow - Epic 5.0 E-commerce */}
           <Route path="/checkout" element={<Checkout />} />

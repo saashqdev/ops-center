@@ -84,6 +84,13 @@ class SubscriptionManager:
                 
                 logger.info(f"Created subscription {result['id']} for {email}: {tier_code}/{billing_cycle}")
                 
+                # Check if this is a trial conversion
+                from trial_manager import trial_manager
+                await trial_manager.convert_trial_to_paid(
+                    email=email,
+                    stripe_subscription_id=stripe_subscription_id
+                )
+                
                 return {
                     "subscription_id": result['id'],
                     "email": email,
