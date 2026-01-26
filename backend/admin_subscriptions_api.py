@@ -9,6 +9,9 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import logging
+import asyncpg
+import os
+from webhook_manager import WebhookManager
 from keycloak_integration import (
     get_all_users,
     get_user_by_email,
@@ -196,6 +199,28 @@ async def update_user_subscription(
 
         if not success:
             raise HTTPException(status_code=500, detail="Failed to update subscription")
+
+        # Trigger webhook for subscription.updated event
+        try:
+            db_url = os.getenv("DATABASE_URL")
+            if db_url and db_url.startswith("postgresql://"):
+                pool = await asyncpg.create_pool(db_url)
+                webhook_manager = WebhookManager(pool)
+                await webhook_manager.trigger_event(
+                    org_id=None,
+                    event='subscription.updated',
+                    data={
+                        'email': email,
+                        'tier': update.tier,
+                        'status': update.status,
+                        'updated_at': datetime.utcnow().isoformat(),
+                        'updated_by': admin.get('email', 'admin'),
+                        'notes': update.notes
+                    }
+                )
+                await pool.close()
+        except Exception as e:
+            logger.warning(f"Webhook trigger failed for subscription.updated: {e}")
 
         return {
             "success": True,

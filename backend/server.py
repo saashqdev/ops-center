@@ -98,6 +98,8 @@ from byok_manager import BYOKManager
 import asyncpg
 import redis.asyncio as aioredis
 from local_users_api import router as admin_local_users_router
+from tenant_management_api import router as tenant_management_router
+from cross_tenant_analytics_api import router as cross_tenant_analytics_router
 from public_api import router as public_api_router
 from public_checkout_api import router as public_checkout_router
 from my_subscription_api import router as my_subscription_router
@@ -204,6 +206,9 @@ from edge_device_api import admin_router as edge_admin_router
 
 # OTA Update Management (Epic 7.2 - January 2026)
 from ota_api import ota_admin_router, ota_device_router
+
+# Webhook System (Epic 8.1 - January 2026)
+from webhook_api import router as webhook_router
 
 # LLM Testing Lab API (Epic 3.2 - Unified LLM Management)
 from testing_lab_api import router as testing_lab_router
@@ -867,6 +872,16 @@ app.include_router(ota_device_router)
 logger.info("OTA Device API endpoints registered at /api/v1/ota")
 app.include_router(ota_admin_router)
 logger.info("OTA Admin API endpoints registered at /api/v1/admin/ota")
+
+# Webhook System (Epic 8.1)
+app.include_router(webhook_router)
+logger.info("Webhook API endpoints registered at /api/v1/webhooks")
+
+# Multi-Tenant Management (Epic 10)
+app.include_router(tenant_management_router)
+logger.info("Tenant Management API endpoints registered at /api/v1/admin/tenants")
+app.include_router(cross_tenant_analytics_router)
+logger.info("Cross-Tenant Analytics API endpoints registered at /api/v1/admin/analytics")
 
 # Keycloak Status API
 app.include_router(keycloak_status_router)

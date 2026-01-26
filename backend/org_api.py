@@ -10,6 +10,8 @@ import logging
 from datetime import datetime
 import sys
 import os
+import asyncpg
+from webhook_manager import WebhookManager
 
 # Add parent directory to path to import from server.py
 if '/app' not in sys.path:
@@ -391,6 +393,28 @@ async def create_organization(
         members = org_manager.get_org_users(org_id)
 
         logger.info(f"Created organization {org_id} ({org_data.name}) with owner {user_id}")
+
+        # Trigger webhook for organization.created event
+        try:
+            db_url = os.getenv("DATABASE_URL")
+            if db_url and db_url.startswith("postgresql://"):
+                pool = await asyncpg.create_pool(db_url)
+                webhook_manager = WebhookManager(pool)
+                await webhook_manager.trigger_event(
+                    org_id=org_id,
+                    event='organization.created',
+                    data={
+                        'organization_id': org.id,
+                        'name': org.name,
+                        'plan_tier': org.plan_tier,
+                        'owner': user_id,
+                        'created_at': org.created_at.isoformat(),
+                        'member_count': len(members)
+                    }
+                )
+                await pool.close()
+        except Exception as e:
+            logger.warning(f"Webhook trigger failed for organization.created: {e}")
 
         return {
             "success": True,

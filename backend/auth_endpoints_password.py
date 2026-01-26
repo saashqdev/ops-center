@@ -5,6 +5,9 @@ Add these to server.py
 from pydantic import BaseModel
 from fastapi import HTTPException, Response
 import secrets
+import asyncpg
+from datetime import datetime
+from webhook_manager import WebhookManager
 
 
 class RegisterRequest(BaseModel):
@@ -53,6 +56,30 @@ def add_password_auth_endpoints(app, password_auth, session_manager, get_db):
                 INSERT INTO users (id, email, name, password_hash, password_salt, subscription_tier, oauth_provider, oauth_id)
                 VALUES (?, ?, ?, ?, ?, 'trial', 'password', ?)
             """, (user_id, data.email, data.name, password_hash, salt, user_id))
+        
+        # Trigger webhook for user.created event (async, non-blocking)
+        try:
+            import os
+            db_url = os.getenv("DATABASE_URL")
+            if db_url and db_url.startswith("postgresql://"):
+                pool = await asyncpg.create_pool(db_url)
+                webhook_manager = WebhookManager(pool)
+                # Get org_id if available (default to None for now)
+                await webhook_manager.trigger_event(
+                    org_id=None,  # Will be set when org context is available
+                    event='user.created',
+                    data={
+                        'user_id': user_id,
+                        'email': data.email,
+                        'name': data.name,
+                        'subscription_tier': 'trial',
+                        'created_at': datetime.utcnow().isoformat()
+                    }
+                )
+                await pool.close()
+        except Exception as e:
+            # Don't fail registration if webhook fails
+            print(f"Webhook trigger failed for user.created: {e}")
         
         # Create session
         session_token = session_manager.create_session({
@@ -107,6 +134,26 @@ def add_password_auth_endpoints(app, password_auth, session_manager, get_db):
             "name": user["name"],
             "subscription_tier": user["subscription_tier"]
         })
+        
+        # Trigger webhook for user.login event (async, non-blocking)
+        try:
+            import os
+            db_url = os.getenv("DATABASE_URL")
+            if db_url and db_url.startswith("postgresql://"):
+                pool = await asyncpg.create_pool(db_url)
+                webhook_manager = WebhookManager(pool)
+                await webhook_manager.trigger_event(
+                    org_id=None,
+                    event='user.login',
+                    data={
+                        'user_id': user["id"],
+                        'email': user["email"],
+                        'login_at': datetime.utcnow().isoformat()
+                    }
+                )
+                await pool.close()
+        except Exception as e:
+            print(f"Webhook trigger failed for user.login: {e}")
         
         # Set session cookie
         response.set_cookie(

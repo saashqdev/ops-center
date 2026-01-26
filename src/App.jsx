@@ -126,6 +126,7 @@ const SubscriptionManagement = lazy(() => import('./pages/admin/SubscriptionMana
 const AppManagement = lazy(() => import('./pages/admin/AppManagement'));
 const WhiteLabelBuilder = lazy(() => import('./pages/admin/WhiteLabelBuilder'));
 const DynamicPricingManagement = lazy(() => import('./pages/admin/DynamicPricingManagement'));
+const TenantManagement = lazy(() => import('./pages/admin/TenantManagement'));
 const UserManagement = lazy(() => import('./pages/UserManagement'));
 const UserDetail = lazy(() => import('./pages/UserDetail'));
 // Consolidated: Using LocalUserManagement for all local user operations
@@ -153,6 +154,9 @@ const EdgeDeviceManagement = lazy(() => import('./pages/EdgeDeviceManagement'));
 
 // Epic 7.2: OTA Deployment Management
 const OTADeployment = lazy(() => import('./pages/OTADeployment'));
+
+// Epic 8.1: Webhook System
+const WebhookManagement = lazy(() => import('./pages/WebhookManagement'));
 
 // Epic 4.5: Organization Branding
 const OrganizationBranding = lazy(() => import('./pages/admin/OrganizationBranding'));
@@ -478,6 +482,7 @@ function AppRoutes() {
                   <Route path="system/app-management" element={<AppManagement />} />
                   <Route path="system/pricing-management" element={<DynamicPricingManagement />} />
                   <Route path="platform/white-label" element={<WhiteLabelBuilder />} />
+                  <Route path="platform/tenants" element={<TenantManagement />} /> {/* Epic 10 */}
                   <Route path="system/users" element={<UserManagement />} />
                   <Route path="system/users/:userId" element={<UserDetail />} />
                   {/* Local User Management - consolidated to single route */}
@@ -513,6 +518,11 @@ function AppRoutes() {
                   {/* OTA DEPLOYMENT SECTION - Epic 7.2 */}
                   {/* ============================================================ */}
                   <Route path="edge/ota" element={<OTADeployment />} />
+
+                  {/* ============================================================ */}
+                  {/* WEBHOOK MANAGEMENT - Epic 8.1 */}
+                  {/* ============================================================ */}
+                  <Route path="webhooks" element={<WebhookManagement />} />
 
                   {/* ATLAS Multi-Agent System (Geeses) */}
                   <Route path="geeses" element={<Geeses />} />

@@ -9,6 +9,8 @@ configuration management, and device lifecycle management.
 import secrets
 import hashlib
 import logging
+import os
+import asyncpg
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from uuid import UUID, uuid4
@@ -16,6 +18,7 @@ from uuid import UUID, uuid4
 from fastapi import HTTPException
 from sqlalchemy import select, and_, or_, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from webhook_manager import WebhookManager
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +140,27 @@ class EdgeDeviceManager:
         
         logger.info(f"Device registered successfully: {device.device_name} ({hardware_id})")
         
+        # Trigger webhook for device.registered event
+        try:
+            db_url = os.getenv("DATABASE_URL")
+            if db_url and db_url.startswith("postgresql://"):
+                pool = await asyncpg.create_pool(db_url)
+                webhook_manager = WebhookManager(pool)
+                await webhook_manager.trigger_event(
+                    org_id=str(device.organization_id),
+                    event='device.registered',
+                    data={
+                        'device_id': str(device.id),
+                        'device_name': device.device_name,
+                        'hardware_id': hardware_id,
+                        'firmware_version': firmware_version,
+                        'registered_at': datetime.utcnow().isoformat()
+                    }
+                )
+                await pool.close()
+        except Exception as e:
+            logger.warning(f"Webhook trigger failed for device.registered: {e}")
+        
         return {
             "device_id": str(device.id),
             "device_name": device.device_name,
@@ -189,8 +213,32 @@ class EdgeDeviceManager:
             raise HTTPException(status_code=404, detail="Device not found")
         
         # Update device status
+        old_status = device.status
         device.status = status
         device.last_seen = datetime.utcnow()
+        
+        # Trigger webhook if status changed to online/offline
+        if old_status != status and status in ['online', 'offline']:
+            try:
+                db_url = os.getenv("DATABASE_URL")
+                if db_url and db_url.startswith("postgresql://"):
+                    pool = await asyncpg.create_pool(db_url)
+                    webhook_manager = WebhookManager(pool)
+                    event_name = f'device.{status}'
+                    await webhook_manager.trigger_event(
+                        org_id=str(device.organization_id),
+                        event=event_name,
+                        data={
+                            'device_id': str(device.id),
+                            'device_name': device.device_name,
+                            'status': status,
+                            'previous_status': old_status,
+                            'timestamp': datetime.utcnow().isoformat()
+                        }
+                    )
+                    await pool.close()
+            except Exception as e:
+                logger.warning(f"Webhook trigger failed for {event_name}: {e}")
         
         if ip_address:
             device.ip_address = ip_address

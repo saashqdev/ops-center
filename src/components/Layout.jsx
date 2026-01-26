@@ -58,7 +58,9 @@ import {
   LockClosedIcon,
   CpuChipIcon,
   ShoppingBagIcon,
-  TicketIcon
+  TicketIcon,
+  BellAlertIcon,
+  DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../contexts/ThemeContext';
 import { ColonelLogo, MagicUnicornLogo, CenterDeepLogo } from './Logos';
@@ -104,7 +106,9 @@ const iconMap = {
   LockClosedIcon,
   CpuChipIcon,
   ShoppingBagIcon,
-  TicketIcon
+  TicketIcon,
+  BellAlertIcon,
+  DevicePhoneMobileIcon
 };
 
 export default function Layout({ children }) {
@@ -595,6 +599,18 @@ export default function Layout({ children }) {
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
+                        name="Edge Devices"
+                        href="/admin/edge/devices"
+                        icon={iconMap.DevicePhoneMobileIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Webhooks"
+                        href="/admin/webhooks"
+                        icon={iconMap.BellAlertIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
                         name="Traefik"
                         href="/admin/traefik/dashboard"
                         icon={iconMap.ServerIcon}
@@ -882,6 +898,12 @@ export default function Layout({ children }) {
                         name="White-Label Config"
                         href="/admin/platform/white-label"
                         icon={iconMap.PaintBrushIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Tenant Management"
+                        href="/admin/platform/tenants"
+                        icon={iconMap.BuildingOfficeIcon}
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
