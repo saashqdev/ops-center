@@ -111,6 +111,7 @@ services:
       - POSTGRES_USER=unicorn
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me}
       - POSTGRES_DB=unicorn_db
+      - DATABASE_URL=postgresql://unicorn:${POSTGRES_PASSWORD:-change-me}@postgresql:5432/unicorn_db
       # Credential Encryption Key (Fernet)
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-IbK1FMAifmKLomWWd4qRNdfg8P6ZOJFhdMwuHXtjFoc=}
       # BYOK Encryption Key (for user API keys)

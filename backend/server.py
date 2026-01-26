@@ -98,6 +98,7 @@ from byok_manager import BYOKManager
 import asyncpg
 import redis.asyncio as aioredis
 from local_users_api import router as admin_local_users_router
+from public_api import router as public_api_router
 from platform_settings_api import router as platform_settings_router
 from user_management_api import router as user_management_router
 # Avatar Storage API (November 2025 - CORS fix for bolt.diy)
@@ -679,6 +680,10 @@ async def shutdown_event():
 # Register Model Access Control FIRST - Epic 3.3 (HIGH PRIORITY)
 app.include_router(model_access_router)
 logger.info("⭐ Model Access Control API registered at /api/v1/models (PRIORITY ROUTE)")
+
+# Register Public API endpoints (Epic 5.0 - E-commerce)
+app.include_router(public_api_router)
+logger.info("Public API endpoints registered at /api/v1/public (no auth required)")
 
 # Register audit logs router
 if AUDIT_ENABLED:
