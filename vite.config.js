@@ -33,6 +33,7 @@ export default defineConfig({
       filename: 'dist/stats.html',
     }),
     VitePWA({
+      disable: true, // Temporarily disable PWA to force cache refresh
       registerType: 'prompt', // Changed from autoUpdate to prompt for manual control
       injectRegister: false, // Disable automatic SW registration
       includeAssets: ['favicon.ico', 'robots.txt', 'logos/**/*.png', 'logos/**/*.svg'],

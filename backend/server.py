@@ -1164,71 +1164,21 @@ async def bolt_github_template_proxy(repo: str):
 # Root redirect must be defined early to take precedence
 @app.get("/", include_in_schema=False)
 async def root_redirect(request: Request):
-    """Show registration page or serve dashboard for authenticated users"""
+    """Always serve the React app - let React handle authentication"""
     print("Root redirect handler called!")
-    session_token = request.cookies.get("session_token")
-    print(f"Session token from cookie: {session_token[:20] if session_token else 'None'}...")
-    print(f"Session token exists in Redis: {session_token in sessions if session_token else False}")
-
-    if session_token and session_token in sessions:
-                print("User authenticated, serving React app")
-                # Serve built frontend if present
-                for path in ["dist/index.html", "public/index.html", "../public/index.html"]:
-                        if os.path.exists(path):
-                                response = FileResponse(path)
-                                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-                                response.headers["Pragma"] = "no-cache"
-                                response.headers["Expires"] = "0"
-                                return response
-
-                # Fallback: show a minimal signed-in page so the user sees success
-                session = sessions.get(session_token) if hasattr(sessions, "get") else None
-                user_info = (session or {}).get("user", {})
-                username = user_info.get("preferred_username") or user_info.get("username") or user_info.get("email") or "unknown"
-                email = user_info.get("email", "unknown")
-                role = user_info.get("role", "viewer")
-                org_name = (session or {}).get("org_name") or "None"
-                html = f"""
-                <!doctype html>
-                <html lang=\"en\">
-                <head>
-                    <meta charset=\"utf-8\" />
-                    <title>Ops Center</title>
-                    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
-                    <style>
-                        body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background: #0b1621; color: #e9eff5; display: flex; min-height: 100vh; align-items: center; justify-content: center; }}
-                        .card {{ background: #142433; padding: 32px; border-radius: 12px; width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.35); }}
-                        h1 {{ margin: 0 0 12px 0; font-size: 24px; }}
-                        p {{ margin: 0 0 10px 0; line-height: 1.5; }}
-                        .meta {{ font-size: 14px; color: #9fb3c8; margin-top: 12px; }}
-                        a {{ color: #7be0b5; font-weight: 600; text-decoration: none; }}
-                        .actions {{ margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }}
-                        .btn {{ padding: 10px 14px; border-radius: 8px; background: #7be0b5; color: #0b1621; text-decoration: none; font-weight: 700; }}
-                    </style>
-                </head>
-                <body>
-                    <div class=\"card\">
-                        <h1>Signed in</h1>
-                        <p>You are signed in as <strong>{username}</strong>.</p>
-                        <p class=\"meta\">Email: {email}<br/>Role: {role}<br/>Org: {org_name}</p>
-                        <div class=\"actions\">
-                            <a class=\"btn\" href=\"/auth/logout\">Logout</a>
-                            <a class=\"btn\" href=\"/auth/login\">Re-auth</a>
-                            <a class=\"btn\" href=\"/signup-flow.html\">Signup flow</a>
-                        </div>
-                        <p class=\"meta\">If you expected the full UI, ensure the frontend build is available at dist/index.html.</p>
-                    </div>
-                </body>
-                </html>
-                """
-                return HTMLResponse(content=html, headers={
-                        "Cache-Control": "no-cache, no-store, must-revalidate",
-                        "Pragma": "no-cache",
-                        "Expires": "0"
-                })
-    else:
-        print("User not authenticated, redirecting to Keycloak login")
-        return RedirectResponse(url="/auth/login", status_code=302)
+    
+    # ALWAYS serve the React app HTML - React will handle auth check
+    # This allows the app to load and React Router to handle protected routes
+    for path in ["dist/index.html", "public/index.html", "../public/index.html"]:
+        if os.path.exists(path):
+            response = FileResponse(path)
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+    
+    # Fallback if no HTML found
+    raise HTTPException(status_code=404, detail="Frontend not found")
 
 # Initialize Docker client
 try:
@@ -5655,36 +5605,18 @@ async def serve_login():
 @app.get("/admin")
 @app.get("/admin/{path:path}")
 async def serve_admin(request: Request, path: str = ""):
-    """Serve the React admin app for all /admin routes"""
-    # Check if user is authenticated via session cookie
-    session_token = request.cookies.get("session_token")
-
-    # If authenticated via OAuth, create a bridge to the React app
-    if session_token and session_token in sessions:
-        # User is authenticated, serve the admin page
-        # The React app will need to call /api/v1/auth/me to get user info
-        if os.path.exists("public/index.html"):
-            response = FileResponse("public/index.html")
+    """Serve the React admin app for all /admin routes - React handles auth"""
+    # ALWAYS serve the React app HTML - React ProtectedRoute will handle authentication
+    # This allows the app to load and React Router to handle protected routes
+    for html_path in ["dist/index.html", "public/index.html", "../public/index.html"]:
+        if os.path.exists(html_path):
+            response = FileResponse(html_path)
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
             return response
-        elif os.path.exists("dist/index.html"):
-            response = FileResponse("dist/index.html")
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-        elif os.path.exists("../public/index.html"):
-            response = FileResponse("../public/index.html")
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-    else:
-        # Not authenticated, redirect to OAuth login
-        return RedirectResponse(url="/auth/login", status_code=302)
-
+    
+    # Fallback if no HTML found
     raise HTTPException(status_code=404, detail="Admin interface not found")
 
 # Serve the React app for all non-API routes

@@ -2,6 +2,12 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+// VERSION CHECK - Immediate execution
+const BUILD_VERSION = '2026-01-26-03:00-PWA-DISABLED-FIXED';
+console.log(`%c🔧 APP VERSION: ${BUILD_VERSION}`, 'background: #7c3aed; color: white; padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 16px;');
+console.log('%c✅ App.jsx loaded - React is working!', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
+console.log('%c✅ credentials: include IS PRESENT IN CODE', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
+
 // Eagerly load critical components (needed on first render)
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -174,6 +180,11 @@ function ProtectedRoute({ children }) {
   const [authenticated, setAuthenticated] = useState(false);
   
   useEffect(() => {
+    // VERSION CHECK - Build timestamp
+    const BUILD_VERSION = '2026-01-26-02:50-PWA-DISABLED-FIXED';
+    console.log(`%c🔧 APP VERSION: ${BUILD_VERSION}`, 'background: #7c3aed; color: white; padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 14px;');
+    console.log('%c✅ credentials: include IS PRESENT IN CODE', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
+    
     console.log('ProtectedRoute: Checking authentication...');
     
     // First check if we have a token
