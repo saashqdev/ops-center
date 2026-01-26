@@ -100,6 +100,7 @@ import redis.asyncio as aioredis
 from local_users_api import router as admin_local_users_router
 from public_api import router as public_api_router
 from public_checkout_api import router as public_checkout_router
+from my_subscription_api import router as my_subscription_router
 from platform_settings_api import router as platform_settings_router
 from user_management_api import router as user_management_router
 # Avatar Storage API (November 2025 - CORS fix for bolt.diy)
@@ -689,6 +690,10 @@ logger.info("Public API endpoints registered at /api/v1/public (no auth required
 # Register Public Checkout API (Epic 5.0 - Self-Service Checkout)
 app.include_router(public_checkout_router)
 logger.info("Public Checkout API registered at /api/v1/checkout (Stripe integration)")
+
+# Register My Subscription API (Epic 5.0 - Subscription Management)
+app.include_router(my_subscription_router)
+logger.info("My Subscription API registered at /api/v1/my-subscription (authenticated)")
 
 # Register audit logs router
 if AUDIT_ENABLED:

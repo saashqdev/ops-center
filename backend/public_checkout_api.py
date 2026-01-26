@@ -11,6 +11,8 @@ from typing import Optional, Dict, Any
 import logging
 import os
 import stripe
+from datetime import datetime
+from subscription_manager_simple import subscription_manager
 
 logger = logging.getLogger(__name__)
 
@@ -286,14 +288,37 @@ async def handle_checkout_completed(session: Dict[str, Any]):
     - Activate subscription
     - Send welcome email
     """
-    customer_email = session.get('customer_details', {}).get('email')
-    tier_code = session.get('metadata', {}).get('tier_code')
-    
-    logger.info(f"Checkout completed for {customer_email}, tier: {tier_code}")
-    
-    # TODO: Implement user account creation and subscription activation
-    # This will be handled by the subscription manager in the next phase
-    pass
+    try:
+        customer_email = session.get('customer_details', {}).get('email')
+        tier_code = session.get('metadata', {}).get('tier_code')
+        billing_cycle = session.get('metadata', {}).get('billing_cycle', 'monthly')
+        
+        stripe_customer_id = session.get('customer')
+        stripe_subscription_id = session.get('subscription')
+        
+        if not all([customer_email, tier_code, stripe_customer_id, stripe_subscription_id]):
+            logger.error(f"Missing required data in checkout session: {session.get('id')}")
+            return
+        
+        logger.info(f"Processing checkout completion for {customer_email}, tier: {tier_code}")
+        
+        # Create/update subscription
+        result = await subscription_manager.create_subscription_from_checkout(
+            email=customer_email,
+            tier_code=tier_code,
+            stripe_customer_id=stripe_customer_id,
+            stripe_subscription_id=stripe_subscription_id,
+            billing_cycle=billing_cycle
+        )
+        
+        logger.info(f"Subscription created: {result}")
+        
+        # TODO: Send welcome email
+        # TODO: Trigger onboarding flow
+        
+    except Exception as e:
+        logger.error(f"Error handling checkout completion: {e}")
+        raise
 
 
 async def handle_subscription_created(subscription: Dict[str, Any]):
@@ -302,14 +327,29 @@ async def handle_subscription_created(subscription: Dict[str, Any]):
     - Update user tier in database
     - Grant feature access
     """
-    customer_id = subscription.get('customer')
-    subscription_id = subscription.get('id')
-    status = subscription.get('status')
-    
-    logger.info(f"Subscription created: {subscription_id} for customer {customer_id}, status: {status}")
-    
-    # TODO: Update user subscription in database
-    pass
+    try:
+        subscription_id = subscription.get('id')
+        customer_id = subscription.get('customer')
+        status = subscription.get('status')
+        
+        current_period_start = datetime.fromtimestamp(subscription.get('current_period_start', 0))
+        current_period_end = datetime.fromtimestamp(subscription.get('current_period_end', 0))
+        
+        logger.info(f"Processing subscription created: {subscription_id}, status: {status}")
+        
+        # Update subscription status
+        await subscription_manager.update_subscription_status(
+            stripe_subscription_id=subscription_id,
+            status=status,
+            current_period_start=current_period_start,
+            current_period_end=current_period_end
+        )
+        
+        logger.info(f"Subscription status updated: {subscription_id}")
+        
+    except Exception as e:
+        logger.error(f"Error handling subscription creation: {e}")
+        raise
 
 
 async def handle_subscription_updated(subscription: Dict[str, Any]):
@@ -318,13 +358,28 @@ async def handle_subscription_updated(subscription: Dict[str, Any]):
     - Handle plan changes
     - Update billing cycle
     """
-    subscription_id = subscription.get('id')
-    status = subscription.get('status')
-    
-    logger.info(f"Subscription updated: {subscription_id}, status: {status}")
-    
-    # TODO: Update subscription status in database
-    pass
+    try:
+        subscription_id = subscription.get('id')
+        status = subscription.get('status')
+        
+        current_period_start = datetime.fromtimestamp(subscription.get('current_period_start', 0))
+        current_period_end = datetime.fromtimestamp(subscription.get('current_period_end', 0))
+        
+        logger.info(f"Processing subscription update: {subscription_id}, status: {status}")
+        
+        # Update subscription status
+        await subscription_manager.update_subscription_status(
+            stripe_subscription_id=subscription_id,
+            status=status,
+            current_period_start=current_period_start,
+            current_period_end=current_period_end
+        )
+        
+        logger.info(f"Subscription updated: {subscription_id}")
+        
+    except Exception as e:
+        logger.error(f"Error handling subscription update: {e}")
+        raise
 
 
 async def handle_subscription_deleted(subscription: Dict[str, Any]):
@@ -333,9 +388,22 @@ async def handle_subscription_deleted(subscription: Dict[str, Any]):
     - Downgrade user to free tier
     - Send cancellation email
     """
-    subscription_id = subscription.get('id')
-    
-    logger.info(f"Subscription deleted: {subscription_id}")
-    
-    # TODO: Handle subscription cancellation
-    pass
+    try:
+        subscription_id = subscription.get('id')
+        
+        logger.info(f"Processing subscription deletion: {subscription_id}")
+        
+        # Update subscription status to canceled
+        await subscription_manager.update_subscription_status(
+            stripe_subscription_id=subscription_id,
+            status='canceled'
+        )
+        
+        logger.info(f"Subscription canceled: {subscription_id}")
+        
+        # TODO: Send cancellation confirmation email
+        # TODO: Downgrade to trial tier if needed
+        
+    except Exception as e:
+        logger.error(f"Error handling subscription deletion: {e}")
+        raise
