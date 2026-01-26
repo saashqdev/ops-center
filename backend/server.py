@@ -725,6 +725,16 @@ logger.info("Public Signup API registered at /api/v1/public/signup")
 app.include_router(invoice_router)
 logger.info("Invoice API registered at /api/v1/invoices (authenticated)")
 
+# Epic 7.0: API Key & Usage Management
+try:
+    from api_key_usage_endpoints import router as api_keys_router, usage_router as usage_dashboard_router
+    app.include_router(api_keys_router)
+    app.include_router(usage_dashboard_router)
+    logger.info("✅ Epic 7.0: API Keys registered at /api/v1/keys")
+    logger.info("✅ Epic 7.0: Usage Dashboard registered at /api/v1/usage")
+except Exception as e:
+    logger.error(f"❌ Failed to load Epic 7.0 endpoints: {e}")
+
 # Register audit logs router
 if AUDIT_ENABLED:
     app.include_router(audit_router)
