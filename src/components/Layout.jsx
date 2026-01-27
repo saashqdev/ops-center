@@ -972,6 +972,24 @@ export default function Layout({ children }) {
                         icon={iconMap.ShieldCheckIcon}
                         indent={true}
                       />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="SOC2 Compliance"
+                        href="/admin/system/compliance"
+                        icon={iconMap.ShieldCheckIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Terraform / IaC"
+                        href="/admin/system/terraform"
+                        icon={iconMap.ServerIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="SAML SSO"
+                        href="/admin/system/saml"
+                        icon={iconMap.ShieldCheckIcon}
+                        indent={true}
+                      />
                     </NavigationSection>
                   </>
                 )}

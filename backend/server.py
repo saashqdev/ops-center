@@ -258,6 +258,15 @@ from rbac_api import router as rbac_router
 # Health Check & Monitoring (Epic 17 HA)
 from health_check_api import router as health_router, init_health_checker
 
+# SOC2 Compliance Reporting (Epic 18)
+from compliance_api import router as compliance_router
+
+# Terraform/IaC Integration (Epic 19)
+from terraform_api import router as terraform_router
+
+# SAML Support (Epic 20)
+from saml_api import router as saml_router
+
 # System Metrics & Analytics (Epic 2.5)
 from system_metrics_api import router as system_metrics_router
 from metrics_collector import MetricsCollector
@@ -609,6 +618,21 @@ async def startup_event():
         # Initialize Health Checker (Epic 17: High Availability)
         init_health_checker(db_pool, redis_client)
         logger.info("Health Checker initialized successfully")
+
+        # Initialize Compliance Manager (Epic 18: SOC2 Compliance)
+        from compliance_manager import init_compliance_manager
+        init_compliance_manager(db_pool)
+        logger.info("Compliance Manager initialized successfully")
+
+        # Initialize Terraform Manager (Epic 19: Terraform/IaC Integration)
+        from terraform_manager import init_terraform_manager
+        init_terraform_manager(db_pool)
+        logger.info("Terraform Manager initialized successfully")
+
+        # Initialize SAML Manager (Epic 20: SAML Support)
+        from saml_manager import init_saml_manager
+        init_saml_manager(db_pool)
+        logger.info("SAML Manager initialized successfully")
 
         # Initialize Landing Page Settings API (Phase 2)
         # TODO: Re-enable when landing_page_settings_api module is implemented
@@ -1077,6 +1101,18 @@ logger.info("🔐 Advanced RBAC API registered at /api/v1/rbac (Epic 17)")
 # Health Check & Monitoring (Epic 17 HA)
 app.include_router(health_router)
 logger.info("💚 Health Check API registered at /api/v1/health (Epic 17 HA)")
+
+# SOC2 Compliance Reporting (Epic 18)
+app.include_router(compliance_router)
+logger.info("📋 SOC2 Compliance API registered at /api/v1/compliance (Epic 18)")
+
+# Terraform/IaC Integration (Epic 19)
+app.include_router(terraform_router)
+logger.info("🏗️  Terraform/IaC API registered at /api/v1/terraform (Epic 19)")
+
+# SAML Support (Epic 20)
+app.include_router(saml_router)
+logger.info("🔐 SAML SSO API registered at /api/v1/saml (Epic 20)")
 
 # Storage & Backup Management
 app.include_router(storage_backup_router)

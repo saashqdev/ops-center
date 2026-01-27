@@ -164,6 +164,15 @@ const OrganizationBranding = lazy(() => import('./pages/admin/OrganizationBrandi
 // Epic 17: Advanced RBAC
 const RBACManagement = lazy(() => import('./pages/admin/RBACManagement'));
 
+// Epic 18: SOC2 Compliance
+const ComplianceDashboard = lazy(() => import('./pages/admin/ComplianceDashboard'));
+
+// Epic 19: Terraform/IaC Integration
+const TerraformDashboard = lazy(() => import('./pages/admin/TerraformDashboard'));
+
+// Epic 20: SAML Support
+const SAMLDashboard = lazy(() => import('./pages/admin/SAMLDashboard'));
+
 // Infrastructure pages (lazy loaded)
 const CloudflareDNS = lazy(() => import('./components/CloudflareDNS'));
 const MigrationWizard = lazy(() => import('./pages/migration/MigrationWizard'));
@@ -501,6 +510,9 @@ function AppRoutes() {
                   <Route path="system/tier-features" element={<TierFeatureManagement />} /> {/* Epic 4.4 */}
                   <Route path="system/organization-branding" element={<OrganizationBranding />} /> {/* Epic 4.5 */}
                   <Route path="system/rbac" element={<RBACManagement />} /> {/* Epic 17 */}
+                  <Route path="system/compliance" element={<ComplianceDashboard />} /> {/* Epic 18 */}
+                  <Route path="system/terraform" element={<TerraformDashboard />} /> {/* Epic 19 */}
+                  <Route path="system/saml" element={<SAMLDashboard />} /> {/* Epic 20 */}
                   <Route path="system/app-management" element={<AppManagement />} />
                   <Route path="system/pricing-management" element={<DynamicPricingManagement />} />
                   <Route path="platform/white-label" element={<WhiteLabelBuilder />} />
