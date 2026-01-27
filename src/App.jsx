@@ -8,6 +8,23 @@ console.log(`%c🔧 APP VERSION: ${BUILD_VERSION}`, 'background: #7c3aed; color:
 console.log('%c✅ App.jsx loaded - React is working!', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
 console.log('%c✅ credentials: include IS PRESENT IN CODE', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
 
+// Global session timeout handler - intercept all fetch responses
+const originalFetch = window.fetch;
+window.fetch = function(...args) {
+  return originalFetch.apply(this, args).then(response => {
+    // If session expired (401 only), redirect to login
+    // Note: 403 means forbidden/insufficient permissions, not session timeout
+    if (response.status === 401 && 
+        !args[0].includes('/auth/login') && 
+        !args[0].includes('/auth/session') &&
+        !args[0].includes('/auth/callback')) {
+      console.warn('Session expired, redirecting to login...');
+      window.location.href = '/auth/login';
+    }
+    return response;
+  });
+};
+
 // Eagerly load critical components (needed on first render)
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -317,8 +334,13 @@ function AdminContent({ children }) {
 
   useEffect(() => {
     // Simple check if backend is available
-    fetch('/api/v1/system/status')
+    fetch('/api/v1/system/status', { credentials: 'include' })
       .then(res => {
+        // Session timeout - redirect to login (401 only, not 403)
+        if (res.status === 401) {
+          window.location.href = '/auth/login';
+          return;
+        }
         if (!res.ok) throw new Error('Backend not available');
         setLoading(false);
       })

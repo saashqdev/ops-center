@@ -58,12 +58,21 @@ async def require_authenticated_user(request: Request) -> Dict[str, Any]:
     redis_port = int(os.getenv("REDIS_PORT", "6379"))
 
     sessions = RedisSessionManager(host=redis_host, port=redis_port)
-    user_data = sessions.get(session_token)
+    session_data = sessions.get(session_token)
 
-    if not user_data:
+    if not session_data:
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired session. Please login again."
+        )
+
+    # Extract user data from session (it's nested under "user" key)
+    user_data = session_data.get("user", {})
+    
+    if not user_data:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid session data. Please login again."
         )
 
     # Ensure user_id field exists (map from Keycloak 'sub' if needed)
@@ -98,12 +107,19 @@ async def require_admin_user(request: Request) -> Dict[str, Any]:
     # First check authentication
     user = await require_authenticated_user(request)
 
-    # Check admin role
-    user_roles = user.get("roles", [])
-    is_admin = "admin" in user_roles or "system_admin" in user_roles
+    # Check admin role - support both "role" (singular) and "roles" (array)
+    user_role = user.get("role")  # OAuth session stores as "role"
+    user_roles = user.get("roles", [])  # Some endpoints may use "roles" array
+    
+    # Check if admin in either format
+    is_admin = (
+        user_role in ["admin", "system_admin"] or
+        "admin" in user_roles or
+        "system_admin" in user_roles
+    )
 
     if not is_admin:
-        logger.warning(f"Non-admin user {user.get('email')} attempted admin access")
+        logger.warning(f"Non-admin user {user.get('email')} attempted admin access (role: {user_role}, roles: {user_roles})")
         raise HTTPException(
             status_code=403,
             detail="Admin access required. You do not have permission to access this resource."

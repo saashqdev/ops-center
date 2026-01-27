@@ -317,9 +317,15 @@ async def list_tenants(
             
             list_query = f"""
                 SELECT 
-                    o.*,
-                    (SELECT COUNT(*) FROM users WHERE organization_id = o.organization_id) as member_count,
-                    (SELECT email FROM users WHERE organization_id = o.organization_id ORDER BY created_at LIMIT 1) as owner_email
+                    o.id,
+                    o.name,
+                    o.slug,
+                    o.website,
+                    o.is_active,
+                    o.created_at,
+                    o.updated_at,
+                    (SELECT COUNT(*) FROM organization_members om WHERE om.organization_id = o.id) as member_count,
+                    (SELECT user_id FROM organization_members om WHERE om.organization_id = o.id AND om.role = 'OWNER' LIMIT 1) as owner_id
                 FROM organizations o
                 {where_clause}
                 ORDER BY created_at DESC
@@ -330,15 +336,25 @@ async def list_tenants(
             
             tenants = []
             for row in rows:
-                resource_counts = await get_resource_counts(pool, row['organization_id'])
+                # Simple resource counts
+                resource_counts = {
+                    'users': row['member_count'],
+                    'devices': 0,
+                    'webhooks': 0,
+                    'api_keys': 0,
+                    'alerts': 0
+                }
+                
+                # Get owner info - show user_id (could enhance to fetch email from Keycloak later)
+                owner_display = row['owner_id'] if row['owner_id'] else 'unknown'
                 
                 tenants.append(TenantResponse(
-                    organization_id=row['organization_id'],
+                    organization_id=row['id'],
                     name=row['name'],
-                    plan_tier=row['plan_tier'],
-                    owner_email=row['owner_email'] or 'unknown',
-                    subdomain=row['subdomain'],
-                    custom_domain=row['custom_domain'],
+                    plan_tier='trial',  # Default since column doesn't exist
+                    owner_email=owner_display,  # Showing user_id for now
+                    subdomain=row['slug'],  # Use slug as subdomain
+                    custom_domain=row['website'],
                     is_active=row['is_active'],
                     created_at=row['created_at'],
                     updated_at=row['updated_at'],

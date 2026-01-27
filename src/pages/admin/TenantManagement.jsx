@@ -79,10 +79,8 @@ export default function TenantManagement() {
   const loadTenants = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/admin/tenants', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await fetch('/api/v1/admin/tenants/', {
+        credentials: 'include'
       });
       
       if (!response.ok) throw new Error('Failed to load tenants');
@@ -100,9 +98,7 @@ export default function TenantManagement() {
   const loadPlatformStats = async () => {
     try {
       const response = await fetch('/api/v1/admin/analytics/platform-stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        credentials: 'include'
       });
       
       if (!response.ok) throw new Error('Failed to load platform stats');
@@ -116,10 +112,10 @@ export default function TenantManagement() {
 
   const handleCreateTenant = async () => {
     try {
-      const response = await fetch('/api/v1/admin/tenants', {
+      const response = await fetch('/api/v1/admin/tenants/', {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
@@ -150,8 +146,8 @@ export default function TenantManagement() {
     try {
       const response = await fetch(`/api/v1/admin/tenants/${selectedTenant.organization_id}`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -180,9 +176,7 @@ export default function TenantManagement() {
     try {
       const response = await fetch(`/api/v1/admin/tenants/${tenantId}?hard_delete=${hardDelete}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        credentials: 'include'
       });
       
       if (!response.ok) throw new Error('Failed to delete tenant');
