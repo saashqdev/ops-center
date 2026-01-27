@@ -535,7 +535,7 @@ const SubscriptionManagement = () => {
           <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 0.5 }}>
             Subscription Management
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="purple.300">
             Manage subscription tiers, apps, and user migrations
           </Typography>
         </Box>

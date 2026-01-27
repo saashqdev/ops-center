@@ -309,14 +309,15 @@ export default function AccountProfile() {
                 Email Address *
               </label>
               <div className="relative">
-                <EnvelopeIcon className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 ${themeClasses.subtext}`} />
+                <EnvelopeIcon className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 ${themeClasses.subtext} pointer-events-none`} />
                 <input
                   type="email"
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  className={`w-full pl-10 pr-4 py-2 rounded-lg border ${themeClasses.input} ${
+                  className={`w-full pr-4 py-2 rounded-lg border ${themeClasses.input} ${
                     errors.email ? 'border-red-500' : ''
                   }`}
+                  style={{ paddingLeft: '48px' }}
                   placeholder="your@email.com"
                 />
               </div>
