@@ -161,6 +161,9 @@ const WebhookManagement = lazy(() => import('./pages/WebhookManagement'));
 // Epic 4.5: Organization Branding
 const OrganizationBranding = lazy(() => import('./pages/admin/OrganizationBranding'));
 
+// Epic 17: Advanced RBAC
+const RBACManagement = lazy(() => import('./pages/admin/RBACManagement'));
+
 // Infrastructure pages (lazy loaded)
 const CloudflareDNS = lazy(() => import('./components/CloudflareDNS'));
 const MigrationWizard = lazy(() => import('./pages/migration/MigrationWizard'));
@@ -497,6 +500,7 @@ function AppRoutes() {
                   <Route path="system/subscription-tiers" element={<SubscriptionTierManagement />} /> {/* Epic 4.4 */}
                   <Route path="system/tier-features" element={<TierFeatureManagement />} /> {/* Epic 4.4 */}
                   <Route path="system/organization-branding" element={<OrganizationBranding />} /> {/* Epic 4.5 */}
+                  <Route path="system/rbac" element={<RBACManagement />} /> {/* Epic 17 */}
                   <Route path="system/app-management" element={<AppManagement />} />
                   <Route path="system/pricing-management" element={<DynamicPricingManagement />} />
                   <Route path="platform/white-label" element={<WhiteLabelBuilder />} />

@@ -252,6 +252,9 @@ from multi_server_api import router as fleet_router
 # Kubernetes Integration (Epic 16)
 from k8s_api import router as k8s_router
 
+# Advanced RBAC (Epic 17)
+from rbac_api import router as rbac_router
+
 # System Metrics & Analytics (Epic 2.5)
 from system_metrics_api import router as system_metrics_router
 from metrics_collector import MetricsCollector
@@ -594,6 +597,11 @@ async def startup_event():
         from api_key_manager import initialize_api_key_manager
         await initialize_api_key_manager(db_pool)
         logger.info("API Key Manager initialized successfully")
+
+        # Initialize RBAC Manager (Epic 17: Advanced RBAC)
+        from rbac_manager import init_rbac_manager
+        init_rbac_manager(db_pool)
+        logger.info("RBAC Manager initialized successfully")
 
         # Initialize Landing Page Settings API (Phase 2)
         # TODO: Re-enable when landing_page_settings_api module is implemented
@@ -1054,6 +1062,10 @@ logger.info("🚢 Fleet Management API registered at /api/v1/fleet (Epic 15)")
 # Kubernetes Integration (Epic 16)
 app.include_router(k8s_router)
 logger.info("☸️  Kubernetes API registered at /api/v1/k8s (Epic 16)")
+
+# Advanced RBAC (Epic 17)
+app.include_router(rbac_router)
+logger.info("🔐 Advanced RBAC API registered at /api/v1/rbac (Epic 17)")
 
 # Storage & Backup Management
 app.include_router(storage_backup_router)

@@ -966,6 +966,12 @@ export default function Layout({ children }) {
                         icon={iconMap.SparklesIcon}
                         indent={true}
                       />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="RBAC & Permissions"
+                        href="/admin/system/rbac"
+                        icon={iconMap.ShieldCheckIcon}
+                        indent={true}
+                      />
                     </NavigationSection>
                   </>
                 )}
