@@ -284,12 +284,12 @@ async def list_providers(request: Request):
     """Get list of supported providers"""
     try:
         user_email = await get_user_email(request)
+        
+        # Try to get user from Keycloak (optional for provider list)
         user = await get_user_from_keycloak(user_email)
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        attributes = user.get("attributes", {})
+        
+        # Get attributes if available, otherwise use empty dict
+        attributes = user.get("attributes", {}) if user else {}
 
         providers = []
         for provider_id, config in SUPPORTED_PROVIDERS.items():
@@ -317,14 +317,17 @@ async def list_keys(request: Request):
     """List user's configured API keys (masked)"""
     try:
         user_email = await get_user_email(request)
+        
+        # Try to get user from Keycloak first for user_id
         user = await get_user_from_keycloak(user_email)
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        user_id = user.get("id")
-        if not user_id:
-            raise HTTPException(status_code=404, detail="User ID not found")
+        
+        # Use Keycloak user_id if available, otherwise fallback to email as identifier
+        if user and user.get("id"):
+            user_id = user.get("id")
+        else:
+            # Fallback: use email as user_id if Keycloak lookup fails
+            logger.warning(f"Using email as user_id for {user_email} (Keycloak lookup failed)")
+            user_id = user_email
 
         encryption = get_encryption()
         keys = []
@@ -385,6 +388,9 @@ async def list_keys(request: Request):
                     test_status=metadata.get('test_status')
                 ))
 
+            logger.info(f"Returning {len(keys)} BYOK keys for {user_email}")
+            return keys
+
         except Exception as e:
             logger.error(f"Error querying database for BYOK keys: {e}")
             # Fall back to Keycloak attributes for backward compatibility
@@ -429,14 +435,17 @@ async def add_key(key_data: APIKeyAdd, request: Request):
     """Add or update an API key (stores in PostgreSQL database)"""
     try:
         user_email = await get_user_email(request)
+        
+        # Try to get user from Keycloak first for user_id
         user = await get_user_from_keycloak(user_email)
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        user_id = user.get("id")
-        if not user_id:
-            raise HTTPException(status_code=404, detail="User ID not found")
+        
+        # Use Keycloak user_id if available, otherwise fallback to email as identifier
+        if user and user.get("id"):
+            user_id = user.get("id")
+        else:
+            # Fallback: use email as user_id if Keycloak lookup fails
+            logger.warning(f"Using email as user_id for {user_email} (Keycloak lookup failed)")
+            user_id = user_email
 
         # Encrypt the key
         encryption = get_encryption()
@@ -503,30 +512,32 @@ async def delete_key(provider: str, request: Request):
             raise HTTPException(status_code=400, detail="Invalid provider")
 
         user_email = await get_user_email(request)
+        
+        # Try to get user from Keycloak
         user = await get_user_from_keycloak(user_email)
+        
+        # Use Keycloak user_id if available, otherwise use email
+        if user and user.get("id"):
+            user_id = user.get("id")
+        else:
+            logger.warning(f"Using email as user_id for {user_email} (Keycloak lookup failed)")
+            user_id = user_email
 
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # Import Keycloak delete function
-        from keycloak_integration import update_user_attributes as kc_update_attrs
-
-        # Get current attributes
-        attributes = user.get("attributes", {})
-
-        # Remove all related attributes
-        attributes.pop(f"byok_{provider}_key", None)
-        attributes.pop(f"byok_{provider}_label", None)
-        attributes.pop(f"byok_{provider}_added_date", None)
-        attributes.pop(f"byok_{provider}_endpoint", None)
-        attributes.pop(f"byok_{provider}_last_tested", None)
-        attributes.pop(f"byok_{provider}_test_status", None)
-
-        # Update user with cleaned attributes
-        success = await kc_update_attrs(user_email, attributes)
-
-        if not success:
-            raise HTTPException(status_code=500, detail="Failed to remove API key")
+        # Delete from PostgreSQL database
+        import asyncpg
+        
+        db_pool = request.app.state.db_pool
+        if not db_pool:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+        
+        async with db_pool.acquire() as conn:
+            result = await conn.execute("""
+                DELETE FROM user_provider_keys
+                WHERE user_id = $1 AND provider = $2
+            """, user_id, provider)
+        
+        if result == "DELETE 0":
+            logger.warning(f"No key found to delete for {user_email}: {provider}")
 
         logger.info(f"Removed BYOK key for {user_email}: {provider}")
 
@@ -546,14 +557,16 @@ async def test_key(provider: str, request: Request):
             raise HTTPException(status_code=400, detail="Invalid provider")
 
         user_email = await get_user_email(request)
+        
+        # Try to get user from Keycloak
         user = await get_user_from_keycloak(user_email)
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        user_id = user.get("id")
-        if not user_id:
-            raise HTTPException(status_code=404, detail="User ID not found")
+        
+        # Use Keycloak user_id if available, otherwise use email
+        if user and user.get("id"):
+            user_id = user.get("id")
+        else:
+            logger.warning(f"Using email as user_id for {user_email} (Keycloak lookup failed)")
+            user_id = user_email
 
         # Get key from database
         import asyncpg
@@ -623,14 +636,16 @@ async def get_byok_stats(request: Request):
     """Get statistics about user's BYOK configuration (from PostgreSQL database)"""
     try:
         user_email = await get_user_email(request)
+        
+        # Try to get user from Keycloak
         user = await get_user_from_keycloak(user_email)
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        user_id = user.get("id")
-        if not user_id:
-            raise HTTPException(status_code=404, detail="User ID not found")
+        
+        # Use Keycloak user_id if available, otherwise use email
+        if user and user.get("id"):
+            user_id = user.get("id")
+        else:
+            logger.warning(f"Using email as user_id for {user_email} (Keycloak lookup failed)")
+            user_id = user_email
 
         configured_count = 0
         tested_count = 0

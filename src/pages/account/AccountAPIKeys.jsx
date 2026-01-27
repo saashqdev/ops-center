@@ -427,7 +427,10 @@ export default function AccountAPIKeys() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log('[BYOK DEBUG] Loaded keys from API:', data);
         setBYOKKeys(data);
+      } else {
+        console.error('[BYOK DEBUG] Failed to load keys, status:', response.status);
       }
     } catch (error) {
       console.error('Error loading keys:', error);
@@ -461,6 +464,7 @@ export default function AccountAPIKeys() {
 
     setSavingKey(true);
     try {
+      console.log('[BYOK DEBUG] Adding key for provider:', selectedProvider);
       const response = await fetch('/api/v1/byok/keys/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -472,15 +476,21 @@ export default function AccountAPIKeys() {
         })
       });
 
+      console.log('[BYOK DEBUG] Add key response status:', response.status);
       if (response.ok) {
+        const result = await response.json();
+        console.log('[BYOK DEBUG] Add key result:', result);
         showToast('success', `${providerInfo[selectedProvider].name} API key added successfully!`);
         setShowAddModal(false);
         setSelectedProvider(null);
         setApiKeyInput('');
         setLabelInput('');
+        console.log('[BYOK DEBUG] Calling loadData to refresh keys...');
         await loadData();
+        console.log('[BYOK DEBUG] loadData completed');
       } else {
         const error = await response.json();
+        console.error('[BYOK DEBUG] Error response:', error);
         showToast('error', error.detail || 'Failed to add API key');
       }
     } catch (error) {
