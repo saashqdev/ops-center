@@ -960,6 +960,12 @@ export default function Layout({ children }) {
                         icon={iconMap.CogIcon}
                         indent={true}
                       />
+                      <NavigationItem collapsed={sidebarCollapsed}
+                        name="Organization Branding"
+                        href="/admin/system/organization-branding"
+                        icon={iconMap.SparklesIcon}
+                        indent={true}
+                      />
                     </NavigationSection>
                   </>
                 )}
