@@ -1,0 +1,58 @@
+# Prometheus Configuration for Ops-Center HA Monitoring
+# Epic 17: High Availability
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'ops-center-ha'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load rules
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+# Scrape configurations
+scrape_configs:
+  # Backend replicas
+  - job_name: 'backend'
+    static_configs:
+      - targets:
+          - 'backend-1:8084'
+          - 'backend-2:8084'
+          - 'backend-3:8084'
+    metrics_path: '/api/v1/health/metrics'
+    scrape_interval: 10s
+
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets:
+          - 'postgresql-primary:5432'
+          - 'postgresql-standby:5432'
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets:
+          - 'redis-master:6379'
+          - 'redis-replica-1:6379'
+          - 'redis-replica-2:6379'
+
+  # Traefik
+  - job_name: 'traefik'
+    static_configs:
+      - targets:
+          - 'traefik:8080'
+    metrics_path: '/metrics'
+
+  # Node exporter (if deployed)
+  - job_name: 'node'
+    static_configs:
+      - targets: []

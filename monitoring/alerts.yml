@@ -1,0 +1,153 @@
+# Prometheus Alert Rules for Ops-Center HA
+# Epic 17: High Availability Monitoring
+
+groups:
+  - name: ops_center_ha
+    interval: 30s
+    rules:
+      # Backend Health
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Backend instance {{ $labels.instance }} is down"
+          description: "Backend {{ $labels.instance }} has been unreachable for 1 minute"
+      
+      - alert: BackendHighLatency
+        expr: postgres_latency_ms > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High database latency on {{ $labels.instance }}"
+          description: "Database latency is {{ $value }}ms (threshold: 100ms)"
+      
+      # Database Health
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL instance {{ $labels.instance }} is down"
+          description: "PostgreSQL {{ $labels.instance }} has been unreachable for 30 seconds"
+      
+      - alert: PostgreSQLConnectionPoolHigh
+        expr: postgres_pool_utilization > 80
+        for: 2m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High database connection pool utilization"
+          description: "Connection pool is {{ $value }}% utilized (threshold: 80%)"
+      
+      - alert: PostgreSQLConnectionPoolExhausted
+        expr: postgres_pool_utilization >= 100
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "All database connections are in use"
+      
+      # Redis Health
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis instance {{ $labels.instance }} is down"
+          description: "Redis {{ $labels.instance }} has been unreachable for 1 minute"
+      
+      - alert: RedisHighLatency
+        expr: redis_latency_ms > 50
+        for: 3m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "High Redis latency"
+          description: "Redis latency is {{ $value }}ms (threshold: 50ms)"
+      
+      # System Resources
+      - alert: HighCPUUsage
+        expr: system_cpu_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}% (threshold: 90%)"
+      
+      - alert: HighMemoryUsage
+        expr: system_memory_percent > 90
+        for: 3m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}% (threshold: 90%)"
+      
+      - alert: HighDiskUsage
+        expr: system_disk_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High disk usage on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value }}% (threshold: 85%)"
+      
+      - alert: CriticalDiskUsage
+        expr: system_disk_percent > 95
+        for: 1m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Critical disk usage on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value }}% (threshold: 95%)"
+      
+      # Application Errors
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "High HTTP error rate detected"
+          description: "Error rate is {{ $value }} errors/second (threshold: 0.05)"
+      
+      # Traefik
+      - alert: TraefikDown
+        expr: up{job="traefik"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: loadbalancer
+        annotations:
+          summary: "Traefik load balancer is down"
+          description: "Traefik has been unreachable for 30 seconds"
+      
+      # Replication Lag (if metrics available)
+      - alert: PostgreSQLReplicationLag
+        expr: pg_replication_lag_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High PostgreSQL replication lag"
+          description: "Replication lag is {{ $value }} seconds (threshold: 300s)"

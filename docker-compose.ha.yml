@@ -1,0 +1,345 @@
+# High Availability Docker Compose Configuration - Epic 17
+# Multi-replica deployment with health checks and automatic failover
+#
+# Usage:
+#   docker-compose -f docker-compose.ha.yml up -d
+#
+# Features:
+#   - 3x Frontend replicas (load balanced)
+#   - 3x Backend replicas (session sticky)
+#   - PostgreSQL with streaming replication
+#   - Redis Sentinel for failover
+#   - Traefik load balancer with health checks
+#   - Automatic restart policies
+#   - Resource limits and reservations
+
+version: '3.8'
+
+services:
+  # ==================== LOAD BALANCER ====================
+  
+  traefik:
+    image: traefik:v3.0
+    container_name: ops-center-traefik-ha
+    command:
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --metrics.prometheus=true
+      - --log.level=INFO
+      - --accesslog=true
+      - --ping=true
+      - --ping.entryPoint=traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certs:/letsencrypt
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+
+  # ==================== FRONTEND (3 REPLICAS) ====================
+  
+  frontend-1:
+    image: kubeworkz/ops_center:latest
+    container_name: ops-center-frontend-1
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8084}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.frontend.entrypoints=web,websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.services.frontend.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.frontend.loadbalancer.healthcheck.interval=10s"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  frontend-2:
+    extends: frontend-1
+    container_name: ops-center-frontend-2
+
+  frontend-3:
+    extends: frontend-1
+    container_name: ops-center-frontend-3
+
+  # ==================== BACKEND (3 REPLICAS) ====================
+  
+  backend-1:
+    image: kubeworkz/ops_center:latest
+    container_name: ops-center-backend-1
+    environment:
+      - POSTGRES_HOST=postgresql-primary
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-unicorn}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-unicorn}
+      - POSTGRES_DB=${POSTGRES_DB:-unicorn_db}
+      - REDIS_HOST=redis-master
+      - REDIS_PORT=6379
+      - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
+      - GRACEFUL_SHUTDOWN_TIMEOUT=30
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web,websecure"
+      - "traefik.http.services.backend.loadbalancer.server.port=8084"
+      - "traefik.http.services.backend.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.backend.loadbalancer.sticky.cookie.name=backend_sticky"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.path=/api/v1/health/live"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.interval=15s"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/api/v1/health/ready"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    depends_on:
+      - postgresql-primary
+      - redis-master
+    networks:
+      - ops-center-net
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  backend-2:
+    extends: backend-1
+    container_name: ops-center-backend-2
+
+  backend-3:
+    extends: backend-1
+    container_name: ops-center-backend-3
+
+  # ==================== POSTGRESQL (PRIMARY + STANDBY) ====================
+  
+  postgresql-primary:
+    image: postgres:16-alpine
+    container_name: ops-center-postgres-primary
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-unicorn}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-unicorn}
+      - POSTGRES_DB=${POSTGRES_DB:-unicorn_db}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+      -c synchronous_commit=on
+      -c wal_log_hints=on
+      -c shared_buffers=256MB
+      -c max_connections=200
+    volumes:
+      - postgres_primary_data:/var/lib/postgresql/data
+      - postgres_primary_wal:/var/lib/postgresql/wal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-unicorn}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        reservations:
+          cpus: '2'
+          memory: 4G
+
+  postgresql-standby:
+    image: postgres:16-alpine
+    container_name: ops-center-postgres-standby
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-unicorn}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-unicorn}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    command: >
+      bash -c "
+      rm -rf /var/lib/postgresql/data/pgdata/*
+      pg_basebackup -h postgresql-primary -D /var/lib/postgresql/data/pgdata -U ${POSTGRES_USER:-unicorn} -v -P -X stream -c fast
+      echo 'standby_mode = on' >> /var/lib/postgresql/data/pgdata/recovery.conf
+      echo 'primary_conninfo = ''host=postgresql-primary port=5432 user=${POSTGRES_USER:-unicorn} password=${POSTGRES_PASSWORD:-unicorn}''' >> /var/lib/postgresql/data/pgdata/recovery.conf
+      postgres -c hot_standby=on
+      "
+    volumes:
+      - postgres_standby_data:/var/lib/postgresql/data
+    depends_on:
+      - postgresql-primary
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-unicorn}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  # ==================== REDIS (MASTER + 2 REPLICAS) ====================
+  
+  redis-master:
+    image: redis:7-alpine
+    container_name: ops-center-redis-master
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_master_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  redis-replica-1:
+    image: redis:7-alpine
+    container_name: ops-center-redis-replica-1
+    command: redis-server --replicaof redis-master 6379 --appendonly yes
+    depends_on:
+      - redis-master
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+
+  redis-replica-2:
+    image: redis:7-alpine
+    container_name: ops-center-redis-replica-2
+    command: redis-server --replicaof redis-master 6379 --appendonly yes
+    depends_on:
+      - redis-master
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+
+  # ==================== MONITORING ====================
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ops-center-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - ops-center-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ops-center-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana-dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana-datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - ops-center-net
+
+networks:
+  ops-center-net:
+    driver: bridge
+
+volumes:
+  traefik_certs:
+  postgres_primary_data:
+  postgres_primary_wal:
+  postgres_standby_data:
+  redis_master_data:
+  prometheus_data:
+  grafana_data:

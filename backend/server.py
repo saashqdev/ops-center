@@ -255,6 +255,9 @@ from k8s_api import router as k8s_router
 # Advanced RBAC (Epic 17)
 from rbac_api import router as rbac_router
 
+# Health Check & Monitoring (Epic 17 HA)
+from health_check_api import router as health_router, init_health_checker
+
 # System Metrics & Analytics (Epic 2.5)
 from system_metrics_api import router as system_metrics_router
 from metrics_collector import MetricsCollector
@@ -602,6 +605,10 @@ async def startup_event():
         from rbac_manager import init_rbac_manager
         init_rbac_manager(db_pool)
         logger.info("RBAC Manager initialized successfully")
+
+        # Initialize Health Checker (Epic 17: High Availability)
+        init_health_checker(db_pool, redis_client)
+        logger.info("Health Checker initialized successfully")
 
         # Initialize Landing Page Settings API (Phase 2)
         # TODO: Re-enable when landing_page_settings_api module is implemented
@@ -1066,6 +1073,10 @@ logger.info("☸️  Kubernetes API registered at /api/v1/k8s (Epic 16)")
 # Advanced RBAC (Epic 17)
 app.include_router(rbac_router)
 logger.info("🔐 Advanced RBAC API registered at /api/v1/rbac (Epic 17)")
+
+# Health Check & Monitoring (Epic 17 HA)
+app.include_router(health_router)
+logger.info("💚 Health Check API registered at /api/v1/health (Epic 17 HA)")
 
 # Storage & Backup Management
 app.include_router(storage_backup_router)
