@@ -33,12 +33,12 @@ GET /api/v1/admin/system/local-users
   "success": true,
   "users": [
     {
-      "username": "muut",
+      "username": "ubuntu",
       "uid": 1000,
       "gid": 1000,
       "home": "/home/ubuntu",
       "shell": "/bin/bash",
-      "groups": ["muut", "sudo", "docker"],
+      "groups": ["ubuntu", "sudo", "docker"],
       "has_sudo": true,
       "last_login": "2025-10-23T02:00:00Z",
       "ssh_keys_count": 2,
@@ -297,12 +297,12 @@ GET /api/v1/admin/system/local-users/groups
     {
       "name": "sudo",
       "gid": 27,
-      "members": ["muut", "aaron"]
+      "members": ["ubuntu", "aaron"]
     },
     {
       "name": "docker",
       "gid": 999,
-      "members": ["muut"]
+      "members": ["ubuntu"]
     }
   ]
 }

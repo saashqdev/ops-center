@@ -60,7 +60,7 @@ print_header "Keycloak Theme Deployment - Pre-flight Checks"
 
 # Check if running as proper user
 if [ "$EUID" -eq 0 ]; then
-    print_warning "Running as root. Consider running as the 'muut' user instead."
+    print_warning "Running as root. Consider running as the 'ubuntu' user instead."
 fi
 
 # Check if Docker is available

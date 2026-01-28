@@ -54,7 +54,7 @@ The Ops-Center frontend has **40 existing pages** but is missing several critica
 - Sudo permissions toggle
 - Group management (add/remove from groups)
 - Audit log viewer
-- Protected user warnings (cannot delete root, postgres, muut, ucadmin)
+- Protected user warnings (cannot delete root, postgres, ubuntu, ucadmin)
 
 **API Integration** (confirmed from code):
 - ✅ GET `/api/v1/local-users` - List users (line 149)

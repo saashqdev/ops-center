@@ -68,12 +68,12 @@ This security audit analyzes the proposed Traefik Configuration Management syste
 
 **Current State**:
 ```bash
--rw------- 1 muut muut 206995 Oct 23 02:06 acme.json
+-rw------- 1 ubuntu ubuntu 206995 Oct 23 02:06 acme.json
 ```
 
 **Vulnerabilities**:
 - File stored in plaintext on disk
-- Accessible by any process running as user `muut`
+- Accessible by any process running as user `ubuntu`
 - Readable by Ops-Center backend (FastAPI process)
 - No encryption at rest
 - Backups may leak keys to insecure locations
@@ -319,11 +319,11 @@ def require_admin(user_info: Dict = Depends(lambda: {"role": "admin", "username"
 
 ```bash
 # Traefik configuration directory
-drwxrwxr-x 2 muut muut 4096 Oct 23 02:06 dynamic/
+drwxrwxr-x 2 ubuntu ubuntu 4096 Oct 23 02:06 dynamic/
 # ⚠️ Issue: Group-writable, world-readable
 
 # ACME JSON (SSL private keys)
--rw------- 1 muut muut 206995 Oct 23 02:06 acme.json
+-rw------- 1 ubuntu ubuntu 206995 Oct 23 02:06 acme.json
 # ✅ Good: Owner-only read/write
 
 # Backup files
@@ -331,14 +331,14 @@ drwxrwxr-x 2 muut muut 4096 Oct 23 02:06 dynamic/
 # ⚠️ Issue: World-readable, owned by root (permission mismatch)
 
 # Dynamic config files
--rw-rw-r-- 1 muut muut 8692 Oct 22 21:01 domains.yml
+-rw-rw-r-- 1 ubuntu ubuntu 8692 Oct 22 21:01 domains.yml
 # ⚠️ Issue: Group-writable, world-readable
 ```
 
 **Problems**:
-1. **Group-writable directories** - Any user in `muut` group can modify configs
+1. **Group-writable directories** - Any user in `ubuntu` group can modify configs
 2. **World-readable files** - Any process can read configuration
-3. **Inconsistent ownership** - Mix of `muut` and `root` owned files
+3. **Inconsistent ownership** - Mix of `ubuntu` and `root` owned files
 4. **Backup permission leakage** - Backups more permissive than originals
 
 **Severity**: **HIGH**
@@ -975,7 +975,7 @@ Before Epic 1.3 can be deployed to production, the following controls MUST be im
 #### Access Control
 - [ ] File permissions: 0600 for acme.json, 0640 for configs
 - [ ] Directory permissions: 0750 for config directories
-- [ ] Separate service account for Ops-Center (not root, not muut)
+- [ ] Separate service account for Ops-Center (not root, not ubuntu)
 - [ ] Docker socket access via proxy (no direct socket mount)
 - [ ] Network segmentation (admin panel on separate network)
 
@@ -1090,24 +1090,24 @@ Implement these for enhanced security posture:
 ### 7.1 Directory Structure
 ```bash
 /home/ubuntu/Infrastructure/traefik/
-├── acme/               (0750, muut:traefik-admin)
-│   └── acme.json       (0400, muut:traefik-admin) ⚠️ ENCRYPTED
-├── dynamic/            (0750, muut:traefik-admin)
-│   ├── domains.yml     (0640, muut:traefik-admin)
-│   ├── middlewares.yml (0640, muut:traefik-admin)
+├── acme/               (0750, ubuntu:traefik-admin)
+│   └── acme.json       (0400, ubuntu:traefik-admin) ⚠️ ENCRYPTED
+├── dynamic/            (0750, ubuntu:traefik-admin)
+│   ├── domains.yml     (0640, ubuntu:traefik-admin)
+│   ├── middlewares.yml (0640, ubuntu:traefik-admin)
 │   └── ...
-├── backups/            (0700, muut:traefik-admin)
-│   └── backup_*/       (0700, muut:traefik-admin)
-│       └── *.yml.enc   (0400, muut:traefik-admin) ⚠️ ENCRYPTED
-├── scripts/            (0750, muut:traefik-admin)
-└── traefik.yml         (0640, muut:traefik-admin)
+├── backups/            (0700, ubuntu:traefik-admin)
+│   └── backup_*/       (0700, ubuntu:traefik-admin)
+│       └── *.yml.enc   (0400, ubuntu:traefik-admin) ⚠️ ENCRYPTED
+├── scripts/            (0750, ubuntu:traefik-admin)
+└── traefik.yml         (0640, ubuntu:traefik-admin)
 ```
 
 ### 7.2 Permission Commands
 ```bash
 # Create dedicated group
 sudo groupadd traefik-admin
-sudo usermod -a -G traefik-admin muut
+sudo usermod -a -G traefik-admin ubuntu
 
 # Set directory permissions
 sudo chmod 0750 /home/ubuntu/Infrastructure/traefik/acme
@@ -1119,7 +1119,7 @@ sudo chmod 0400 /home/ubuntu/Infrastructure/traefik/acme/acme.json
 sudo find /home/ubuntu/Infrastructure/traefik/dynamic -name "*.yml" -exec chmod 0640 {} \;
 
 # Set ownership
-sudo chown -R muut:traefik-admin /home/ubuntu/Infrastructure/traefik/
+sudo chown -R ubuntu:traefik-admin /home/ubuntu/Infrastructure/traefik/
 
 # Verify
 sudo find /home/ubuntu/Infrastructure/traefik -ls
@@ -1129,12 +1129,12 @@ sudo find /home/ubuntu/Infrastructure/traefik -ls
 
 | Path | Permission | Owner:Group | Rationale |
 |------|------------|-------------|-----------|
-| `acme/` | 0750 | muut:traefik-admin | Owner RWX, group RX, no world access |
-| `acme.json` | 0400 | muut:traefik-admin | Owner read-only, contains private keys |
-| `dynamic/` | 0750 | muut:traefik-admin | Owner RWX, group RX, no world access |
-| `*.yml` | 0640 | muut:traefik-admin | Owner RW, group read, no world access |
-| `backups/` | 0700 | muut:traefik-admin | Owner only, sensitive data |
-| `*.yml.enc` | 0400 | muut:traefik-admin | Read-only encrypted backups |
+| `acme/` | 0750 | ubuntu:traefik-admin | Owner RWX, group RX, no world access |
+| `acme.json` | 0400 | ubuntu:traefik-admin | Owner read-only, contains private keys |
+| `dynamic/` | 0750 | ubuntu:traefik-admin | Owner RWX, group RX, no world access |
+| `*.yml` | 0640 | ubuntu:traefik-admin | Owner RW, group read, no world access |
+| `backups/` | 0700 | ubuntu:traefik-admin | Owner only, sensitive data |
+| `*.yml.enc` | 0400 | ubuntu:traefik-admin | Read-only encrypted backups |
 
 ---
 
@@ -1176,7 +1176,7 @@ sudo mkfs.ext4 /dev/mapper/traefik_secure
 # Mount encrypted filesystem
 sudo mkdir /secure/traefik
 sudo mount /dev/mapper/traefik_secure /secure/traefik
-sudo chown muut:traefik-admin /secure/traefik
+sudo chown ubuntu:traefik-admin /secure/traefik
 
 # Auto-mount on boot (store key in secure location)
 echo "traefik_secure /home/traefik-encrypted.img /secure/traefik-keyfile" | sudo tee -a /etc/crypttab

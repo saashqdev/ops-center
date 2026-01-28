@@ -65,7 +65,7 @@ All endpoints require **admin** role:
 
 2. **Protection Mechanisms**
    - System users (UID < 1000) protected
-   - Hardcoded protected user list (root, daemon, postgres, muut, ucadmin, etc.)
+   - Hardcoded protected user list (root, daemon, postgres, ubuntu, ucadmin, etc.)
    - Command injection prevention
    - Subprocess timeout (30 seconds)
 
@@ -94,8 +94,8 @@ All endpoints require **admin** role:
    
    ```
    # Ops-Center backend user needs these commands for user management
-   # Replace 'muut' with the actual user running the ops-center container
-   muut ALL=(ALL) NOPASSWD: /usr/sbin/useradd, /usr/sbin/userdel, /usr/sbin/usermod, /usr/bin/chpasswd, /usr/bin/gpasswd, /usr/bin/du
+   # Replace 'ubuntu' with the actual user running the ops-center container
+   ubuntu ALL=(ALL) NOPASSWD: /usr/sbin/useradd, /usr/sbin/userdel, /usr/sbin/usermod, /usr/bin/chpasswd, /usr/bin/gpasswd, /usr/bin/du
    ```
 
 3. **Restart Backend**

@@ -188,7 +188,7 @@ Added Material-UI Alert component with:
 
 **What it shows**:
 - Linux system users inside the Docker container
-- Users like "nobody", "root", "www-data", "muut"
+- Users like "nobody", "root", "www-data", "ubuntu"
 
 **When to use**:
 - Setting up SSH access to the container

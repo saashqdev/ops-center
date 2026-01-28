@@ -419,11 +419,11 @@ $ curl http://localhost:8084/health
 ```bash
 $ ls -lh /home/ubuntu/Ops-Center-OSS/src/services/ops-center/public/
 total 8.7M
-drwxrwxr-x 2 muut muut 112K Nov 26 05:09 assets/      # ✅ 1,045 files
--rw-rw-r-- 1 muut muut 4.1K Nov 26 05:09 index.html   # ✅
--rw-rw-r-- 1 muut muut  472 Nov 26 05:09 manifest.webmanifest  # ✅
--rw-rw-r-- 1 muut muut  66K Nov 26 05:09 sw.js        # ✅
--rw-rw-r-- 1 muut muut 8.4M Nov 26 05:09 stats.html   # ✅
+drwxrwxr-x 2 ubuntu ubuntu 112K Nov 26 05:09 assets/      # ✅ 1,045 files
+-rw-rw-r-- 1 ubuntu ubuntu 4.1K Nov 26 05:09 index.html   # ✅
+-rw-rw-r-- 1 ubuntu ubuntu  472 Nov 26 05:09 manifest.webmanifest  # ✅
+-rw-rw-r-- 1 ubuntu ubuntu  66K Nov 26 05:09 sw.js        # ✅
+-rw-rw-r-- 1 ubuntu ubuntu 8.4M Nov 26 05:09 stats.html   # ✅
 ```
 
 **All Required Assets Present**: ✅ VERIFIED

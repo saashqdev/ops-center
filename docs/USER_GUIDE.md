@@ -144,7 +144,7 @@ The main dashboard provides an at-a-glance view of your system health and activi
 
 **What it shows**:
 - Linux system users inside the Docker container (ops-center-direct)
-- Users like "nobody", "root", "www-data", "muut"
+- Users like "nobody", "root", "www-data", "ubuntu"
 - System accounts used for process isolation and security
 
 **What you can do**:

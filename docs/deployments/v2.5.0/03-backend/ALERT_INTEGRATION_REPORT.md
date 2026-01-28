@@ -33,11 +33,11 @@ All files were already created by the Backend Team Lead and were present in the 
 
 ```bash
 # Files exist and have correct permissions
--rw------- 1 muut muut  16K Nov 29 20:45 backend/alert_conditions.py
--rw------- 1 muut muut  14K Nov 29 20:45 backend/alert_triggers.py
--rw------- 1 muut muut  13K Nov 29 20:46 backend/alert_triggers_api.py
--rw------- 1 muut muut 3.7K Nov 29 21:11 backend/migrations/alert_triggers_schema.sql
--rw------- 1 muut muut 8.4K Nov 29 20:47 backend/scripts/initialize_alert_triggers.py
+-rw------- 1 ubuntu ubuntu  16K Nov 29 20:45 backend/alert_conditions.py
+-rw------- 1 ubuntu ubuntu  14K Nov 29 20:45 backend/alert_triggers.py
+-rw------- 1 ubuntu ubuntu  13K Nov 29 20:46 backend/alert_triggers_api.py
+-rw------- 1 ubuntu ubuntu 3.7K Nov 29 21:11 backend/migrations/alert_triggers_schema.sql
+-rw------- 1 ubuntu ubuntu 8.4K Nov 29 20:47 backend/scripts/initialize_alert_triggers.py
 ```
 
 **No conflicts** - All files integrated cleanly without overwriting existing code.

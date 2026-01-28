@@ -278,12 +278,12 @@ class LocalUser(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "username": "muut",
+                "username": "ubuntu",
                 "uid": 1000,
                 "gid": 1000,
                 "home": "/home/ubuntu",
                 "shell": "/bin/bash",
-                "groups": ["muut", "sudo", "docker"],
+                "groups": ["ubuntu", "sudo", "docker"],
                 "has_sudo": True,
                 "last_login": "2025-10-23T02:00:00Z",
                 "ssh_keys_count": 2,

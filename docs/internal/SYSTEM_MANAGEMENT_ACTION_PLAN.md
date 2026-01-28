@@ -262,7 +262,7 @@ After=network.target
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/python3 /path/to/run_backup.py
-User=muut
+User=ubuntu
 
 # Create /etc/systemd/system/uc1-backup.timer
 [Unit]

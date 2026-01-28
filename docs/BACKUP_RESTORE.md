@@ -436,8 +436,8 @@ Description=Ops-Center Database Backup Service
 [Service]
 Type=oneshot
 ExecStart=/home/ubuntu/Ops-Center-OSS/src/services/ops-center/scripts/database/backup_database.sh
-User=muut
-Group=muut
+User=ubuntu
+Group=ubuntu
 EOF
 
 # Enable and start

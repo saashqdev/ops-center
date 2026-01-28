@@ -60,7 +60,7 @@ const UserDetailModal = ({
           <IconButton
             onClick={() => onDeleteUser(user.username)}
             color="error"
-            disabled={user.username === 'muut'} // Protect current user
+            disabled={user.username === 'ubuntu'} // Protect current user
           >
             <Trash2 size={20} />
           </IconButton>

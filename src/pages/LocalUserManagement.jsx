@@ -499,7 +499,7 @@ const LocalUserManagement = () => {
                       What You See Here:
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Linux users like "muut", "root", "ubuntu" (server accounts with SSH access)
+                      Linux users like "ubuntu", "root", "ubuntu" (server accounts with SSH access)
                     </Typography>
                   </Box>
                 </Box>
@@ -919,7 +919,7 @@ const LocalUserManagement = () => {
                 <IconButton
                   onClick={() => setDeleteConfirm(selectedUser.username)}
                   color="error"
-                  disabled={selectedUser.username === 'muut'} // Protect current user
+                  disabled={selectedUser.username === 'ubuntu'} // Protect current user
                 >
                   <Trash2 size={20} />
                 </IconButton>

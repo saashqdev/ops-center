@@ -412,7 +412,7 @@ const handleEdit = (key, value) => {
 **Verification**:
 ```bash
 ✅ Frontend deployed to public/
--rw-rw-r-- 1 muut muut 4.0K Oct 25 22:30 public/index.html
+-rw-rw-r-- 1 ubuntu ubuntu 4.0K Oct 25 22:30 public/index.html
 ```
 
 **Access**: Changes live at `https://your-domain.com` after backend restart

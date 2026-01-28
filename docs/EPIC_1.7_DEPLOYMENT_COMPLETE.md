@@ -165,7 +165,7 @@ npm run build
 ```bash
 cp -r dist/* public/
 ls -lh public/index.html
-# Result: ✅ -rw-rw-r-- 1 muut muut 484 Oct 23 00:02 public/index.html
+# Result: ✅ -rw-rw-r-- 1 ubuntu ubuntu 484 Oct 23 00:02 public/index.html
 ```
 
 #### Route Test (Manual)

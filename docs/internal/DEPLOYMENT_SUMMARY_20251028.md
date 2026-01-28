@@ -226,7 +226,7 @@ GET /api/v1/admin/2fa/users/{user_id}/credentials
 **Problem**: Root-owned avatar files prevent overwriting with `cp` command
 **Workaround**: Using `rsync` with `--exclude='avatars'` flag
 **Impact**: None - avatar files don't need updating during frontend deployment
-**Permanent Fix**: Consider `chown` avatars directory to muut:muut
+**Permanent Fix**: Consider `chown` avatars directory to ubuntu:ubuntu
 
 ### Issue 3: Database Migration Index Warning
 **Warning**: `functions in index predicate must be marked IMMUTABLE`

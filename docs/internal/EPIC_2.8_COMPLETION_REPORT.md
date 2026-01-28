@@ -1097,8 +1097,8 @@ INFO:server:API Documentation endpoints registered at /api/v1/docs (Epic 2.8)
 ✅ PASS - Backend router registered
 
 $ ls -lh public/assets/ | grep ApiDocumentation
--rw-rw-r-- 1 muut muut 151K Oct 25 01:01 ApiDocumentation-BTp0M7e-.css
--rw-rw-r-- 1 muut muut 2.4M Oct 25 01:01 ApiDocumentation-CntClLMq.js
+-rw-rw-r-- 1 ubuntu ubuntu 151K Oct 25 01:01 ApiDocumentation-BTp0M7e-.css
+-rw-rw-r-- 1 ubuntu ubuntu 2.4M Oct 25 01:01 ApiDocumentation-CntClLMq.js
 ✅ PASS - Frontend deployed to public/
 
 $ curl -s -o /dev/null -w "%{http_code}" https://your-domain.com/admin/platform/api-docs

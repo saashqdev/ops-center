@@ -31,7 +31,7 @@ PROTECTED_USERS = {
     'nobody', 'systemd-network', 'systemd-resolve', 'messagebus', 'systemd-timesync',
     'syslog', '_apt', 'tss', 'uuidd', 'tcpdump', 'landscape', 'fwupd-refresh',
     'pollinate', 'lxd', 'postgres', 'redis', 'docker', 'nginx', 'keycloak',
-    'muut', 'ucadmin'  # Protect main admin users
+    'ubuntu', 'ucadmin'  # Protect main admin users
 }
 
 

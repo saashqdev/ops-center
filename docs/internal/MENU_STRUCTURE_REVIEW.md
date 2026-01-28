@@ -7217,7 +7217,7 @@ Linux system user management interface for creating users, managing SSH keys, an
 - **Error Alert**: "⚠️ This action cannot be undone"
 - **Message**: "Are you sure you want to delete user {username}?"
 - **Description**: "This will remove the user account and all associated data."
-- **Protection**: Current user (muut) cannot be deleted
+- **Protection**: Current user (ubuntu) cannot be deleted
 
 **Toggle Sudo**:
 - **Warning Alert**: Granting/removing sudo privileges
@@ -7247,7 +7247,7 @@ DELETE /api/v1/admin/system/local-users/{username}/ssh-keys/{keyId} // Delete SS
 2. **Password Strength Meter** → Real-time visual feedback
 3. **Sudo Protection** → Warnings and confirmations
 4. **SSH Key Validation** → Validates key format before adding
-5. **Current User Protection** → Can't delete "muut" (current user)
+5. **Current User Protection** → Can't delete "ubuntu" (current user)
 6. **Email Record Protection** → Warns about email-related DNS records
 7. **Form Validation** → Username regex, password complexity
 8. **Statistics Cards** → Clear overview of user landscape
@@ -7385,7 +7385,7 @@ alert('Invalid SSH key format. Key must start with ssh-rsa...');
 
 **Problem**:
 ```javascript
-disabled={selectedUser.username === 'muut'} // Protect current user
+disabled={selectedUser.username === 'ubuntu'} // Protect current user
 ```
 
 **Issues**:
@@ -7573,7 +7573,7 @@ showToast('Invalid SSH key format. Key must start with ssh-rsa, ssh-ed25519, or 
 
 **Before**:
 ```javascript
-disabled={selectedUser.username === 'muut'}
+disabled={selectedUser.username === 'ubuntu'}
 ```
 
 **After**:

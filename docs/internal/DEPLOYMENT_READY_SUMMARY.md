@@ -59,7 +59,7 @@ drwxr-xr-x 2 root root 4096 public/avatars
 
 **After**:
 ```bash
-drwxr-xr-x 2 muut muut 4096 public/avatars
+drwxr-xr-x 2 ubuntu ubuntu 4096 public/avatars
 ```
 
 **Result**: Profile picture uploads should work now ✅
@@ -215,10 +215,10 @@ Comprehensive 600+ line checklist covering:
 
 **Permissions**: ✅ Fixed
 
-- Source code: muut:muut (correct)
-- Public assets: muut:muut (correct)
-- Avatars: muut:muut (fixed with docker)
-- Build artifacts: muut:muut (correct)
+- Source code: ubuntu:ubuntu (correct)
+- Public assets: ubuntu:ubuntu (correct)
+- Avatars: ubuntu:ubuntu (fixed with docker)
+- Build artifacts: ubuntu:ubuntu (correct)
 
 ---
 
@@ -351,7 +351,7 @@ Comprehensive 600+ line checklist covering:
 
 ### Modified
 - Database: `credit_transactions`, `usage_events`, `llm_usage_logs` tables
-- Filesystem: `public/avatars/` ownership (root → muut)
+- Filesystem: `public/avatars/` ownership (root → ubuntu)
 
 ### Verified (No Changes Needed)
 - Frontend React build (already deployed correctly)

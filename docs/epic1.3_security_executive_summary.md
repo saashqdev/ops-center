@@ -43,7 +43,7 @@ def require_admin(user_info: Dict = Depends(lambda: {"role": "admin", "username"
 
 **Current State**:
 ```bash
--rw------- 1 muut muut 206995 Oct 23 02:06 acme.json  # PLAINTEXT!
+-rw------- 1 ubuntu ubuntu 206995 Oct 23 02:06 acme.json  # PLAINTEXT!
 ```
 
 **Impact**: If `acme.json` is compromised, attacker can perform man-in-the-middle attacks on all HTTPS traffic.

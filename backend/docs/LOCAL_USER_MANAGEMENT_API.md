@@ -39,7 +39,7 @@ The Local User Management API provides secure management of Linux system users o
 2. **Protected Users**
    - System users (UID < 1000) are protected
    - Hardcoded list of critical users (root, daemon, postgres, etc.)
-   - Current server admin users (muut, ucadmin) are protected
+   - Current server admin users (ubuntu, ucadmin) are protected
 
 3. **SSH Key Validation**
    - Keys must be valid public key format

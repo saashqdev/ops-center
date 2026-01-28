@@ -153,7 +153,7 @@ Test 1: List Users
 ✓ List users successful (HTTP 200)
 {
   "users": [
-    {"username": "muut", "uid": 1000, "home_dir": "/home/ubuntu", ...}
+    {"username": "ubuntu", "uid": 1000, "home_dir": "/home/ubuntu", ...}
   ]
 }
 ```

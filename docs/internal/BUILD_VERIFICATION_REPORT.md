@@ -93,7 +93,7 @@ INFO:get_credential:Credential 'LAGO_API_KEY' loaded from database
 - **Issue**: Only showing "nobody" container user
 - **Fixed**: Added volume mounts for `/etc/passwd` and `/etc/group` (read-only)
 - **Fixed**: Updated `local_users_api.py` to parse host files
-- **Result**: Now shows actual server users (muut, ubuntu, etc.)
+- **Result**: Now shows actual server users (ubuntu, ubuntu, etc.)
 
 ### 4. Traefik Live Data
 - **Issue**: Showing static/mock data

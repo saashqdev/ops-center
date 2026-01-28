@@ -133,7 +133,7 @@ test_endpoint "GET" "/api/v1/admin/system/local-users/groups" \
     "List available system groups" 200
 
 # Test 3: Get specific user (will fail if user doesn't exist, but tests endpoint)
-test_endpoint "GET" "/api/v1/admin/system/local-users/muut" \
+test_endpoint "GET" "/api/v1/admin/system/local-users/ubuntu" \
     "Get specific user details" 200
 
 # Test 4: Create user (will likely fail without auth)
@@ -142,16 +142,16 @@ test_endpoint "POST" "/api/v1/admin/system/local-users" \
     '{"username": "testuser", "password": "TestPass123!", "groups": ["users"]}'
 
 # Test 5: SSH key management endpoints exist
-test_endpoint "GET" "/api/v1/admin/system/local-users/muut/ssh-keys" \
+test_endpoint "GET" "/api/v1/admin/system/local-users/ubuntu/ssh-keys" \
     "List SSH keys for user" 200
 
 # Test 6: Add SSH key (will fail without auth, but tests endpoint)
-test_endpoint "POST" "/api/v1/admin/system/local-users/muut/ssh-keys" \
+test_endpoint "POST" "/api/v1/admin/system/local-users/ubuntu/ssh-keys" \
     "Add SSH key" 401 \
     '{"key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC test@example.com"}'
 
 # Test 7: Delete SSH key (will fail without proper key_id)
-test_endpoint "DELETE" "/api/v1/admin/system/local-users/muut/ssh-keys/1" \
+test_endpoint "DELETE" "/api/v1/admin/system/local-users/ubuntu/ssh-keys/1" \
     "Delete SSH key by ID" 401
 
 # ============================================================================

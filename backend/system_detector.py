@@ -79,7 +79,7 @@ class SystemDetector:
     def get_home_directory() -> str:
         """
         Get current user's home directory dynamically.
-        Works across different users (ucadmin, muut, etc.)
+        Works across different users (ucadmin, ubuntu, etc.)
 
         Returns:
             str: Absolute path to home directory

@@ -85,7 +85,7 @@ class EncryptedACMEStorage:
 - [ ] **Set correct file permissions**
   ```bash
   sudo chmod 0400 /home/ubuntu/Infrastructure/traefik/acme/acme.json
-  sudo chown muut:traefik-admin /home/ubuntu/Infrastructure/traefik/acme/acme.json
+  sudo chown ubuntu:traefik-admin /home/ubuntu/Infrastructure/traefik/acme/acme.json
   ```
 
 **Acceptance Criteria**:
@@ -437,7 +437,7 @@ async def list_certificates(admin: Dict = Depends(require_admin)):
 
 # Create dedicated group
 sudo groupadd traefik-admin
-sudo usermod -a -G traefik-admin muut
+sudo usermod -a -G traefik-admin ubuntu
 
 # Set directory permissions
 sudo chmod 0750 /home/ubuntu/Infrastructure/traefik/acme
@@ -449,7 +449,7 @@ sudo chmod 0400 /home/ubuntu/Infrastructure/traefik/acme/acme.json
 sudo find /home/ubuntu/Infrastructure/traefik/dynamic -name "*.yml" -exec chmod 0640 {} \;
 
 # Set ownership
-sudo chown -R muut:traefik-admin /home/ubuntu/Infrastructure/traefik/
+sudo chown -R ubuntu:traefik-admin /home/ubuntu/Infrastructure/traefik/
 
 # Verify
 echo "Verifying permissions..."
@@ -464,7 +464,7 @@ echo "✅ Permissions set successfully"
 - ✅ acme.json has permissions 0400
 - ✅ Dynamic configs have permissions 0640
 - ✅ Backup directory has permissions 0700
-- ✅ All files owned by muut:traefik-admin
+- ✅ All files owned by ubuntu:traefik-admin
 
 ---
 

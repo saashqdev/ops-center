@@ -54,12 +54,12 @@ sudo visudo -f /etc/sudoers.d/ops-center
 Add these lines:
 ```
 # Ops-Center backend user needs these commands for user management
-muut ALL=(ALL) NOPASSWD: /usr/sbin/useradd, /usr/sbin/userdel, /usr/sbin/usermod, /usr/bin/chpasswd, /usr/bin/gpasswd, /usr/bin/du
+ubuntu ALL=(ALL) NOPASSWD: /usr/sbin/useradd, /usr/sbin/userdel, /usr/sbin/usermod, /usr/bin/chpasswd, /usr/bin/gpasswd, /usr/bin/du
 ```
 
 **Verify**:
 ```bash
-sudo -l -U muut | grep NOPASSWD
+sudo -l -U ubuntu | grep NOPASSWD
 ```
 
 Should show the commands listed above.
@@ -290,7 +290,7 @@ docker logs ops-center-direct 2>&1 | grep -i import
 **Symptom**: Operations fail with permission errors
 **Check**:
 ```bash
-sudo -l -U muut
+sudo -l -U ubuntu
 ```
 
 **Fix**: Configure /etc/sudoers.d/ops-center correctly
