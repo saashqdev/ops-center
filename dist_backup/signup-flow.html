@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Signup Flow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #0b1621; color: #e9eff5; display: flex; min-height: 100vh; align-items: center; justify-content: center; }
+    .card { background: #142433; padding: 32px; border-radius: 12px; width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.35); }
+    h1 { margin: 0 0 12px 0; font-size: 22px; }
+    p { margin: 0 0 16px 0; line-height: 1.5; }
+    .status { padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; }
+    .ok { background: #163526; color: #7be0b5; }
+    .err { background: #3a1a1a; color: #f8c6c6; }
+    a { color: #7be0b5; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Signup</h1>
+    <div id="status" class="status"></div>
+    <p id="message">Processing…</p>
+    <p><a href="/auth/login">Return to login</a></p>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const statusEl = document.getElementById('status');
+    const msgEl = document.getElementById('message');
+    if (params.get('success') === 'true') {
+      statusEl.textContent = 'Payment successful';
+      statusEl.className = 'status ok';
+      msgEl.textContent = 'Your subscription was completed successfully.';
+    } else if (params.get('canceled') === 'true') {
+      statusEl.textContent = 'Payment canceled';
+      statusEl.className = 'status err';
+      msgEl.textContent = 'The payment was canceled. You can try again from the billing page.';
+    } else if (params.get('plan')) {
+      statusEl.textContent = 'Plan selected';
+      statusEl.className = 'status ok';
+      msgEl.textContent = `You selected the ${params.get('plan')} plan.`;
+    } else {
+      statusEl.textContent = 'Signup flow';
+      statusEl.className = 'status ok';
+      msgEl.textContent = 'You are signed in but no organization is linked yet. Choose a plan or contact an admin to get access.';
+    }
+  </script>
+</body>
+</html>

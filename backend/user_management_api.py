@@ -255,6 +255,10 @@ async def list_users(
                 if user_org != org_id:
                     continue
 
+            # Get user roles
+            user_roles = await get_user_realm_roles(user.get("id"))
+            role_names = [role.get("name") for role in user_roles if role.get("name")]
+
             # Add to filtered list
             filtered_users.append({
                 "id": user.get("id"),
@@ -271,7 +275,8 @@ async def list_users(
                 "api_calls_used": _get_attr_value(attrs, "api_calls_used", "0"),
                 "org_id": _get_attr_value(attrs, "org_id"),
                 "org_name": _get_attr_value(attrs, "org_name"),
-                "byok_enabled": _get_attr_value(attrs, "byok_enabled", "false") == "true"
+                "byok_enabled": _get_attr_value(attrs, "byok_enabled", "false") == "true",
+                "roles": role_names
             })
 
         # Apply pagination
@@ -447,6 +452,15 @@ async def get_user_details(user_id: str, admin: bool = Depends(require_admin)):
             raise HTTPException(status_code=404, detail="User not found")
 
         attrs = user.get("attributes", {})
+        
+        # Parse numeric values
+        calls_used = int(_get_attr_value(attrs, "api_calls_used", "0") or 0)
+        calls_limit = int(_get_attr_value(attrs, "api_calls_limit", "1000") or 1000)
+        usage_percentage = round((calls_used / calls_limit) * 100) if calls_limit > 0 else 0
+
+        # Get user roles
+        user_roles = await get_user_realm_roles(user_id)
+        role_names = [role.get("name") for role in user_roles if role.get("name")]
 
         return {
             "id": user.get("id"),
@@ -457,15 +471,31 @@ async def get_user_details(user_id: str, admin: bool = Depends(require_admin)):
             "enabled": user.get("enabled", True),
             "emailVerified": user.get("emailVerified", False),
             "createdTimestamp": user.get("createdTimestamp"),
-            "subscription_tier": _get_attr_value(attrs, "subscription_tier", "trial"),
-            "subscription_status": _get_attr_value(attrs, "subscription_status", "active"),
-            "api_calls_limit": _get_attr_value(attrs, "api_calls_limit", "1000"),
-            "api_calls_used": _get_attr_value(attrs, "api_calls_used", "0"),
-            "api_calls_reset_date": _get_attr_value(attrs, "api_calls_reset_date"),
-            "org_id": _get_attr_value(attrs, "org_id"),
-            "org_name": _get_attr_value(attrs, "org_name"),
-            "org_role": _get_attr_value(attrs, "org_role", "member"),
-            "byok_enabled": _get_attr_value(attrs, "byok_enabled", "false") == "true",
+            # Nested subscription object for frontend compatibility
+            "subscription": {
+                "tier": _get_attr_value(attrs, "subscription_tier", "trial"),
+                "status": _get_attr_value(attrs, "subscription_status", "active"),
+                "billing_email": user.get("email", "")
+            },
+            # Nested api_usage object for frontend compatibility
+            "api_usage": {
+                "calls_used": calls_used,
+                "calls_limit": calls_limit,
+                "usage_percentage": usage_percentage,
+                "reset_date": _get_attr_value(attrs, "api_calls_reset_date"),
+                "byok_enabled": _get_attr_value(attrs, "byok_enabled", "false") == "true",
+                "rate_limits": {
+                    "per_minute": 60,
+                    "per_day": 10000
+                }
+            },
+            # Nested organization object for frontend compatibility
+            "organization": {
+                "id": _get_attr_value(attrs, "org_id"),
+                "name": _get_attr_value(attrs, "org_name"),
+                "role": _get_attr_value(attrs, "org_role", "member")
+            },
+            "roles": role_names,
             "last_login": _get_attr_value(attrs, "last_login"),
             "attributes": attrs
         }
