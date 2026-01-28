@@ -192,7 +192,7 @@ const CreditPurchase = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Buy Credits
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: '#e9d5ff' }}>
           Purchase credits to use AI models, tools, and services
         </Typography>
       </Box>
@@ -388,23 +388,23 @@ const CreditPurchase = () => {
 
       {/* Info Box */}
       <Paper sx={{ p: 3, mt: 4, bgcolor: 'action.hover' }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom sx={{ color: '#e9d5ff' }}>
           How Credits Work
         </Typography>
         <Stack spacing={1}>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
             • Credits are used for AI model inference, embeddings, and other services
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
             • Credits never expire and roll over month-to-month
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
             • Larger packages include discounts for better value
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
             • All payments are processed securely through Stripe
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
             • Credits are added instantly after successful payment
           </Typography>
         </Stack>
