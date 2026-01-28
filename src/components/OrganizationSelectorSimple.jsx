@@ -117,23 +117,9 @@ export default function OrganizationSelector({ onOrgCreated }) {
     );
   }
 
-  // No organizations state
+  // No organizations state - hide the selector entirely
   if (!organizations || organizations.length === 0) {
-    return (
-      <button
-        onClick={handleCreateOrg}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-          currentTheme === 'unicorn'
-            ? 'bg-purple-600/20 text-purple-200 hover:bg-purple-600/30'
-            : currentTheme === 'light'
-            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-        }`}
-      >
-        <PlusCircleIcon className="h-5 w-5" />
-        <span className="text-sm font-medium">Create Organization</span>
-      </button>
-    );
+    return null;
   }
 
   return (
@@ -294,32 +280,8 @@ export default function OrganizationSelector({ onOrgCreated }) {
               ))
             )}
           </div>
-
-          {/* Create New Organization Button */}
-          <div className="border-t border-gray-200 dark:border-gray-700 p-2">
-            <button
-              onClick={handleCreateOrg}
-              className={`w-full flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-150 ${
-                currentTheme === 'unicorn'
-                  ? 'text-purple-200 hover:bg-purple-600/20'
-                  : currentTheme === 'light'
-                  ? 'text-gray-700 hover:bg-gray-100'
-                  : 'text-gray-300 hover:bg-gray-800'
-              }`}
-            >
-              <PlusCircleIcon className="h-5 w-5" />
-              <span className="text-sm font-medium">Create New Organization</span>
-            </button>
-          </div>
         </div>
       )}
-
-      {/* Create Organization Modal */}
-      <CreateOrganizationModal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onCreated={handleOrgCreated}
-      />
     </div>
   );
 }

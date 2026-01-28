@@ -252,6 +252,18 @@ const OrganizationsList = () => {
     }
   };
 
+  // Get tier label
+  const getTierLabel = (tier) => {
+    const labels = {
+      trial: 'Trial',
+      starter: 'Starter',
+      professional: 'Professional',
+      enterprise: 'Enterprise',
+      founders_friend: 'Founder Friend'
+    };
+    return labels[tier] || tier;
+  };
+
   // Get tier badge color
   const getTierColor = (tier) => {
     switch (tier) {
@@ -260,6 +272,7 @@ const OrganizationsList = () => {
       case 'professional':
         return 'secondary';
       case 'starter':
+      case 'founders_friend':
         return 'primary';
       case 'trial':
         return 'warning';
@@ -495,7 +508,7 @@ const OrganizationsList = () => {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={org.subscription_tier}
+                          label={getTierLabel(org.subscription_tier)}
                           color={getTierColor(org.subscription_tier)}
                           size="small"
                         />

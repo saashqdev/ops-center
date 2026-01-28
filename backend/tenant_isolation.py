@@ -212,7 +212,7 @@ class TenantIsolation:
             Count of resources
         """
         table_map = {
-            'users': 'users',
+            'users': 'organization_members',
             'devices': 'edge_devices',
             'webhooks': 'webhooks',
             'api_keys': 'api_keys',
@@ -291,7 +291,7 @@ class TenantIsolation:
             List of resource records
         """
         table_map = {
-            'users': 'users',
+            'users': 'organization_members',
             'devices': 'edge_devices',
             'webhooks': 'webhooks',
             'api_keys': 'api_keys',

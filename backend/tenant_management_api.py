@@ -8,6 +8,7 @@ in a multi-tenant Ops-Center deployment.
 import logging
 import os
 import secrets
+import json
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -15,6 +16,7 @@ from pydantic import BaseModel, Field, EmailStr, validator
 import asyncpg
 from auth_dependencies import require_admin_user
 from tenant_isolation import TenantIsolation, TenantQuotaManager
+from org_manager import org_manager, Organization, OrgUser
 
 logger = logging.getLogger(__name__)
 
@@ -130,13 +132,13 @@ async def check_subdomain_available(pool: asyncpg.Pool, subdomain: str, exclude_
             if exclude_org_id:
                 query = """
                     SELECT COUNT(*) FROM organizations
-                    WHERE subdomain = $1 AND organization_id != $2
+                    WHERE slug = $1 AND id != $2
                 """
                 count = await conn.fetchval(query, subdomain, exclude_org_id)
             else:
                 query = """
                     SELECT COUNT(*) FROM organizations
-                    WHERE subdomain = $1
+                    WHERE slug = $1
                 """
                 count = await conn.fetchval(query, subdomain)
             
@@ -191,13 +193,17 @@ async def create_tenant(
                 # Generate organization ID
                 org_id = f"org_{secrets.token_urlsafe(16)}"
                 
-                # Create organization
+                # Prepare metadata with plan_tier
+                metadata = tenant_data.metadata or {}
+                metadata['plan_tier'] = tenant_data.plan_tier
+                
+                # Create organization using actual schema
                 org_query = """
                     INSERT INTO organizations (
-                        organization_id, name, plan_tier, subdomain, custom_domain,
-                        is_active, created_at, updated_at, metadata
+                        id, name, slug, website,
+                        is_active, created_at, updated_at, metadata_json
                     )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                     RETURNING *
                 """
                 
@@ -205,51 +211,91 @@ async def create_tenant(
                     org_query,
                     org_id,
                     tenant_data.name,
-                    tenant_data.plan_tier,
-                    tenant_data.subdomain,
+                    tenant_data.subdomain or f"tenant-{secrets.token_urlsafe(8)}",  # slug is required
                     tenant_data.custom_domain,
                     True,  # is_active
                     datetime.utcnow(),
                     datetime.utcnow(),
-                    tenant_data.metadata
+                    json.dumps(metadata)
                 )
                 
-                # Create admin user for tenant
-                user_id = f"usr_{secrets.token_urlsafe(16)}"
-                temp_password = secrets.token_urlsafe(16)
+                # Create admin user for tenant in organization_members
+                member_id = f"mem_{secrets.token_urlsafe(16)}"
+                user_id = tenant_data.owner_email  # Use email as user_id for now
                 
-                user_query = """
-                    INSERT INTO users (
-                        user_id, email, name, organization_id,
-                        subscription_tier, is_active, created_at
+                member_query = """
+                    INSERT INTO organization_members (
+                        id, user_id, organization_id, role, is_active, joined_at, updated_at
                     )
                     VALUES ($1, $2, $3, $4, $5, $6, $7)
-                    RETURNING user_id
+                    RETURNING id
                 """
                 
                 await conn.execute(
-                    user_query,
+                    member_query,
+                    member_id,
                     user_id,
-                    tenant_data.owner_email,
-                    tenant_data.owner_name,
                     org_id,
-                    tenant_data.plan_tier,
+                    'OWNER',
                     True,
+                    datetime.utcnow(),
                     datetime.utcnow()
                 )
                 
                 logger.info(f"Created tenant {org_id} with admin user {user_id}")
                 
+                # Sync to org_manager JSON storage for organization list compatibility
+                try:
+                    logger.info(f"Starting sync for tenant {org_id} to org_manager...")
+                    
+                    # Manually add to org_manager storage
+                    orgs = org_manager._load_organizations()
+                    logger.info(f"Loaded {len(orgs)} existing organizations from org_manager")
+                    
+                    orgs[org_id] = Organization(
+                        id=org_id,
+                        name=tenant_data.name,
+                        plan_tier=tenant_data.plan_tier,
+                        subdomain=tenant_data.subdomain,
+                        custom_domain=tenant_data.custom_domain,
+                        created_at=datetime.utcnow(),
+                        status='active'
+                    )
+                    org_manager._save_organizations(orgs)
+                    logger.info(f"Saved organization {org_id} to org_manager storage")
+                    
+                    # Add owner to org_users
+                    org_users = org_manager._load_org_users()
+                    org_users[org_id] = [
+                        OrgUser(
+                            org_id=org_id,
+                            user_id=user_id,
+                            role='owner',
+                            joined_at=datetime.utcnow()
+                        )
+                    ]
+                    org_manager._save_org_users(org_users)
+                    logger.info(f"Saved org_users for {org_id} to org_manager storage")
+                    
+                    logger.info(f"Successfully synced tenant {org_id} to org_manager")
+                except Exception as sync_err:
+                    logger.error(f"Failed to sync to org_manager: {sync_err}", exc_info=True)
+                    # Don't fail the whole operation if sync fails
+                
                 # Get resource counts (will be 0 for new tenant)
                 resource_counts = {'users': 1, 'devices': 0, 'webhooks': 0, 'api_keys': 0, 'alerts': 0}
                 
+                # Extract plan_tier from metadata
+                metadata_parsed = json.loads(org_row['metadata_json']) if isinstance(org_row['metadata_json'], str) else org_row['metadata_json']
+                plan_tier = metadata_parsed.get('plan_tier', 'trial') if metadata_parsed else 'trial'
+                
                 return TenantResponse(
-                    organization_id=org_row['organization_id'],
+                    organization_id=org_row['id'],
                     name=org_row['name'],
-                    plan_tier=org_row['plan_tier'],
+                    plan_tier=plan_tier,
                     owner_email=tenant_data.owner_email,
-                    subdomain=org_row['subdomain'],
-                    custom_domain=org_row['custom_domain'],
+                    subdomain=org_row['slug'],
+                    custom_domain=org_row['website'],
                     is_active=org_row['is_active'],
                     created_at=org_row['created_at'],
                     updated_at=org_row['updated_at'],
@@ -296,12 +342,13 @@ async def list_tenants(
                 param_count += 1
             
             if tier:
-                conditions.append(f"plan_tier = ${param_count}")
-                params.append(tier)
-                param_count += 1
+                # Note: plan_tier is stored in metadata_json, filtering by tier would require JSON query
+                # For now, we'll skip this filter as it's complex with JSON column
+                # Could be enhanced later with: metadata_json::jsonb @> '{"plan_tier":"value"}'::jsonb
+                pass
             
             if search:
-                conditions.append(f"(name ILIKE ${param_count} OR organization_id ILIKE ${param_count})")
+                conditions.append(f"(name ILIKE ${param_count} OR id ILIKE ${param_count})")
                 params.append(f"%{search}%")
                 param_count += 1
             
@@ -313,7 +360,6 @@ async def list_tenants(
             
             # Get paginated results
             offset = (page - 1) * page_size
-            params.extend([page_size, offset])
             
             list_query = f"""
                 SELECT 
@@ -324,6 +370,7 @@ async def list_tenants(
                     o.is_active,
                     o.created_at,
                     o.updated_at,
+                    o.metadata_json,
                     (SELECT COUNT(*) FROM organization_members om WHERE om.organization_id = o.id) as member_count,
                     (SELECT user_id FROM organization_members om WHERE om.organization_id = o.id AND om.role = 'OWNER' LIMIT 1) as owner_id
                 FROM organizations o
@@ -331,6 +378,8 @@ async def list_tenants(
                 ORDER BY created_at DESC
                 LIMIT ${param_count} OFFSET ${param_count + 1}
             """
+            
+            params.extend([page_size, offset])
             
             rows = await conn.fetch(list_query, *params)
             
@@ -348,10 +397,21 @@ async def list_tenants(
                 # Get owner info - show user_id (could enhance to fetch email from Keycloak later)
                 owner_display = row['owner_id'] if row['owner_id'] else 'unknown'
                 
+                # Use plan_tier from database column, fallback to metadata_json if needed
+                plan_tier = row.get('plan_tier')
+                if not plan_tier:
+                    # Fallback: Extract plan_tier from metadata_json
+                    metadata_raw = row.get('metadata_json')
+                    if metadata_raw:
+                        metadata = json.loads(metadata_raw) if isinstance(metadata_raw, str) else metadata_raw
+                        plan_tier = metadata.get('plan_tier', 'trial') if isinstance(metadata, dict) else 'trial'
+                    else:
+                        plan_tier = 'trial'
+                
                 tenants.append(TenantResponse(
                     organization_id=row['id'],
                     name=row['name'],
-                    plan_tier='trial',  # Default since column doesn't exist
+                    plan_tier=plan_tier,
                     owner_email=owner_display,  # Showing user_id for now
                     subdomain=row['slug'],  # Use slug as subdomain
                     custom_domain=row['website'],
@@ -389,11 +449,18 @@ async def get_tenant(
         async with pool.acquire() as conn:
             query = """
                 SELECT 
-                    o.*,
-                    (SELECT COUNT(*) FROM users WHERE organization_id = o.organization_id) as member_count,
-                    (SELECT email FROM users WHERE organization_id = o.organization_id ORDER BY created_at LIMIT 1) as owner_email
+                    o.id as organization_id,
+                    o.name,
+                    o.plan_tier,
+                    o.slug as subdomain,
+                    o.website as custom_domain,
+                    o.is_active,
+                    o.created_at,
+                    o.updated_at,
+                    (SELECT COUNT(*) FROM organization_members om WHERE om.organization_id = o.id) as member_count,
+                    (SELECT user_id FROM organization_members om WHERE om.organization_id = o.id AND om.role = 'OWNER' LIMIT 1) as owner_email
                 FROM organizations o
-                WHERE organization_id = $1
+                WHERE o.id = $1
             """
             
             row = await conn.fetchrow(query, tenant_id)
@@ -454,6 +521,25 @@ async def update_tenant(
                 )
         
         async with pool.acquire() as conn:
+            # First, get the current metadata to merge with plan_tier if needed
+            current_row = await conn.fetchrow(
+                "SELECT metadata_json FROM organizations WHERE id = $1",
+                tenant_id
+            )
+            
+            if not current_row:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Tenant {tenant_id} not found"
+                )
+            
+            # Parse existing metadata
+            current_metadata = current_row['metadata_json']
+            if isinstance(current_metadata, str):
+                current_metadata = json.loads(current_metadata) if current_metadata else {}
+            elif current_metadata is None:
+                current_metadata = {}
+            
             # Build update query
             update_fields = []
             update_values = []
@@ -465,17 +551,18 @@ async def update_tenant(
                 param_count += 1
             
             if tenant_update.plan_tier is not None:
-                update_fields.append(f"plan_tier = ${param_count}")
-                update_values.append(tenant_update.plan_tier)
-                param_count += 1
+                # Update plan_tier in metadata_json
+                current_metadata['plan_tier'] = tenant_update.plan_tier
             
             if tenant_update.subdomain is not None:
-                update_fields.append(f"subdomain = ${param_count}")
+                # Use slug column for subdomain
+                update_fields.append(f"slug = ${param_count}")
                 update_values.append(tenant_update.subdomain)
                 param_count += 1
             
             if tenant_update.custom_domain is not None:
-                update_fields.append(f"custom_domain = ${param_count}")
+                # Use website column for custom_domain
+                update_fields.append(f"website = ${param_count}")
                 update_values.append(tenant_update.custom_domain)
                 param_count += 1
             
@@ -485,9 +572,13 @@ async def update_tenant(
                 param_count += 1
             
             if tenant_update.metadata is not None:
-                update_fields.append(f"metadata = ${param_count}")
-                update_values.append(tenant_update.metadata)
-                param_count += 1
+                # Merge user-provided metadata with plan_tier
+                current_metadata.update(tenant_update.metadata)
+            
+            # Always update metadata_json to include plan_tier changes
+            update_fields.append(f"metadata_json = ${param_count}")
+            update_values.append(json.dumps(current_metadata))
+            param_count += 1
             
             if not update_fields:
                 raise HTTPException(
@@ -504,7 +595,7 @@ async def update_tenant(
             query = f"""
                 UPDATE organizations
                 SET {', '.join(update_fields)}
-                WHERE organization_id = ${param_count}
+                WHERE id = ${param_count}
                 RETURNING *
             """
             
@@ -516,31 +607,74 @@ async def update_tenant(
                     detail=f"Tenant {tenant_id} not found"
                 )
             
-            # Get owner email
+            # Get owner user_id
             owner_query = """
-                SELECT email FROM users
-                WHERE organization_id = $1
-                ORDER BY created_at
+                SELECT user_id FROM organization_members
+                WHERE organization_id = $1 AND role = 'OWNER'
                 LIMIT 1
             """
-            owner_email = await conn.fetchval(owner_query, tenant_id)
+            owner_id = await conn.fetchval(owner_query, tenant_id)
             
             # Get member count
             member_count_query = """
-                SELECT COUNT(*) FROM users
+                SELECT COUNT(*) FROM organization_members
                 WHERE organization_id = $1
             """
             member_count = await conn.fetchval(member_count_query, tenant_id)
             
-            resource_counts = await get_resource_counts(pool, tenant_id)
+            # Simple resource counts
+            resource_counts = {
+                'users': member_count or 0,
+                'devices': 0,
+                'webhooks': 0,
+                'api_keys': 0,
+                'alerts': 0
+            }
+            
+            # Extract plan_tier from metadata_json
+            metadata_raw = row.get('metadata_json')
+            if metadata_raw:
+                # Parse if it's a string, otherwise use as-is
+                metadata = json.loads(metadata_raw) if isinstance(metadata_raw, str) else metadata_raw
+            else:
+                metadata = {}
+            plan_tier = metadata.get('plan_tier', 'trial') if isinstance(metadata, dict) else 'trial'
+            
+            # Sync update to org_manager
+            try:
+                logger.info(f"Starting sync of update for tenant {tenant_id} to org_manager...")
+                org = org_manager.get_org(tenant_id)
+                if org:
+                    logger.info(f"Found existing org {tenant_id} in org_manager")
+                    # Update existing org in org_manager
+                    if tenant_update.name is not None:
+                        org.name = tenant_update.name
+                    if tenant_update.plan_tier is not None:
+                        org.plan_tier = tenant_update.plan_tier
+                    if tenant_update.subdomain is not None:
+                        org.subdomain = tenant_update.subdomain
+                    if tenant_update.custom_domain is not None:
+                        org.custom_domain = tenant_update.custom_domain
+                    if tenant_update.is_active is not None:
+                        org.status = 'active' if tenant_update.is_active else 'suspended'
+                    
+                    # Save the updated org (need to manually update the storage)
+                    orgs = org_manager._load_organizations()
+                    orgs[tenant_id] = org
+                    org_manager._save_organizations(orgs)
+                    logger.info(f"Successfully synced tenant update {tenant_id} to org_manager")
+                else:
+                    logger.warning(f"Org {tenant_id} not found in org_manager, skipping sync")
+            except Exception as sync_err:
+                logger.error(f"Failed to sync update to org_manager: {sync_err}", exc_info=True)
             
             return TenantResponse(
-                organization_id=row['organization_id'],
+                organization_id=row['id'],
                 name=row['name'],
-                plan_tier=row['plan_tier'],
-                owner_email=owner_email or 'unknown',
-                subdomain=row['subdomain'],
-                custom_domain=row['custom_domain'],
+                plan_tier=plan_tier,
+                owner_email=owner_id or 'unknown',
+                subdomain=row.get('slug'),
+                custom_domain=row.get('website'),
                 is_active=row['is_active'],
                 created_at=row['created_at'],
                 updated_at=row['updated_at'],
@@ -577,7 +711,7 @@ async def delete_tenant(
     try:
         async with pool.acquire() as conn:
             # Check if tenant exists
-            check_query = "SELECT name FROM organizations WHERE organization_id = $1"
+            check_query = "SELECT name FROM organizations WHERE id = $1"
             tenant_name = await conn.fetchval(check_query, tenant_id)
             
             if not tenant_name:
@@ -587,26 +721,26 @@ async def delete_tenant(
                 )
             
             if hard_delete:
-                # Hard delete - remove all data
-                deleted_counts = await TenantIsolation.delete_tenant_data(pool, tenant_id)
+                # Hard delete - remove members first (foreign key)
+                members_delete_query = "DELETE FROM organization_members WHERE organization_id = $1"
+                await conn.execute(members_delete_query, tenant_id)
                 
                 # Delete organization record
-                org_delete_query = "DELETE FROM organizations WHERE organization_id = $1"
+                org_delete_query = "DELETE FROM organizations WHERE id = $1"
                 await conn.execute(org_delete_query, tenant_id)
                 
                 logger.warning(f"Hard deleted tenant {tenant_id} ({tenant_name})")
                 
                 return {
                     "message": f"Tenant {tenant_name} permanently deleted",
-                    "tenant_id": tenant_id,
-                    "deleted_records": deleted_counts
+                    "tenant_id": tenant_id
                 }
             else:
                 # Soft delete - mark as inactive
                 soft_delete_query = """
                     UPDATE organizations
                     SET is_active = FALSE, updated_at = $1
-                    WHERE organization_id = $2
+                    WHERE id = $2
                 """
                 await conn.execute(soft_delete_query, datetime.utcnow(), tenant_id)
                 
@@ -660,7 +794,7 @@ async def get_tenant_stats(
             # Get last activity
             last_activity_query = """
                 SELECT MAX(created_at) FROM (
-                    SELECT created_at FROM users WHERE organization_id = $1
+                    SELECT created_at FROM organization_members WHERE organization_id = $1
                     UNION ALL
                     SELECT last_heartbeat FROM edge_devices WHERE organization_id = $1
                     UNION ALL

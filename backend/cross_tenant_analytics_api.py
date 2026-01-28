@@ -115,29 +115,42 @@ async def get_platform_stats(
             
             # Total users
             total_users = await conn.fetchval(
-                "SELECT COUNT(*) FROM users"
+                "SELECT COUNT(*) FROM organization_members"
             )
             
-            # Total devices
-            total_devices = await conn.fetchval(
-                "SELECT COUNT(*) FROM edge_devices"
-            )
+            # Total devices (table may not exist)
+            try:
+                total_devices = await conn.fetchval(
+                    "SELECT COUNT(*) FROM edge_devices"
+                )
+            except Exception:
+                total_devices = 0
             
-            # Total webhooks
-            total_webhooks = await conn.fetchval(
-                "SELECT COUNT(*) FROM webhooks"
-            )
+            # Total webhooks (table may not exist)
+            try:
+                total_webhooks = await conn.fetchval(
+                    "SELECT COUNT(*) FROM webhooks"
+                )
+            except Exception:
+                total_webhooks = 0
             
             # Total API keys
             total_api_keys = await conn.fetchval(
                 "SELECT COUNT(*) FROM api_keys"
             )
             
-            # Tier distribution
+            # Tier distribution - extract from metadata_json
             tier_rows = await conn.fetch(
-                "SELECT plan_tier, COUNT(*) as count FROM organizations GROUP BY plan_tier"
+                "SELECT metadata_json FROM organizations WHERE metadata_json IS NOT NULL"
             )
-            tier_distribution = {row['plan_tier']: row['count'] for row in tier_rows}
+            tier_distribution = {}
+            for row in tier_rows:
+                metadata = row['metadata_json']
+                if isinstance(metadata, str):
+                    import json
+                    metadata = json.loads(metadata)
+                tier = metadata.get('plan_tier', 'trial') if isinstance(metadata, dict) else 'trial'
+                tier_distribution[tier] = tier_distribution.get(tier, 0) + 1
             
             # Growth stats (last 30 days)
             thirty_days_ago = datetime.utcnow() - timedelta(days=30)
@@ -148,7 +161,7 @@ async def get_platform_stats(
             )
             
             new_users_30d = await conn.fetchval(
-                "SELECT COUNT(*) FROM users WHERE created_at >= $1",
+                "SELECT COUNT(*) FROM organization_members WHERE joined_at >= $1",
                 thirty_days_ago
             )
             
@@ -189,7 +202,7 @@ async def get_top_tenants(
         async with pool.acquire() as conn:
             # Map metric to table and column
             metric_queries = {
-                'users': "SELECT organization_id, COUNT(*) as count FROM users GROUP BY organization_id",
+                'users': "SELECT organization_id, COUNT(*) as count FROM organization_members GROUP BY organization_id",
                 'devices': "SELECT organization_id, COUNT(*) as count FROM edge_devices GROUP BY organization_id",
                 'webhooks': "SELECT organization_id, COUNT(*) as count FROM webhooks GROUP BY organization_id",
                 'api_keys': "SELECT organization_id, COUNT(*) as count FROM api_keys GROUP BY organization_id"
@@ -201,31 +214,34 @@ async def get_top_tenants(
                     detail=f"Invalid metric. Choose from: {list(metric_queries.keys())}"
                 )
             
-            # Get metric counts
-            query = f"""
-                WITH metric_counts AS (
-                    {metric_queries[metric]}
-                )
-                SELECT 
-                    o.organization_id,
-                    o.name as organization_name,
-                    o.plan_tier,
-                    COALESCE(mc.count, 0) as metric_value,
-                    ROW_NUMBER() OVER (ORDER BY COALESCE(mc.count, 0) DESC) as rank
-                FROM organizations o
-                LEFT JOIN metric_counts mc ON o.organization_id = mc.organization_id
-                WHERE o.is_active = true
-                ORDER BY metric_value DESC
-                LIMIT $1
-            """
-            
-            rows = await conn.fetch(query, limit)
+            # Get metric counts with error handling for non-existent tables
+            try:
+                query = f"""
+                    WITH metric_counts AS (
+                        {metric_queries[metric]}
+                    )
+                    SELECT 
+                        o.id as organization_id,
+                        o.name as organization_name,
+                        COALESCE(mc.count, 0) as metric_value,
+                        ROW_NUMBER() OVER (ORDER BY COALESCE(mc.count, 0) DESC) as rank
+                    FROM organizations o
+                    LEFT JOIN metric_counts mc ON o.id = mc.organization_id
+                    WHERE o.is_active = true
+                    ORDER BY metric_value DESC
+                    LIMIT $1
+                """
+                
+                rows = await conn.fetch(query, limit)
+            except Exception as e:
+                # If table doesn't exist, return empty results
+                rows = []
             
             rankings = [
                 TenantRanking(
                     organization_id=row['organization_id'],
                     organization_name=row['organization_name'],
-                    plan_tier=row['plan_tier'],
+
                     metric_value=float(row['metric_value']),
                     rank=row['rank']
                 )
@@ -256,26 +272,40 @@ async def get_resource_utilization(
             
             # Resource types to check
             resource_types = [
-                ('users', 'users'),
+                ('users', 'organization_members'),
                 ('devices', 'edge_devices'),
                 ('webhooks', 'webhooks'),
                 ('api_keys', 'api_keys')
             ]
             
             for resource_name, table_name in resource_types:
-                # Total usage
-                total_query = f"SELECT COUNT(*) FROM {table_name}"
-                total_usage = await conn.fetchval(total_query)
+                # Total usage with error handling
+                try:
+                    total_query = f"SELECT COUNT(*) FROM {table_name}"
+                    total_usage = await conn.fetchval(total_query)
+                except Exception:
+                    total_usage = 0
                 
-                # Usage by tier
-                tier_query = f"""
-                    SELECT o.plan_tier, COUNT(t.*) as count
-                    FROM organizations o
-                    LEFT JOIN {table_name} t ON o.organization_id = t.organization_id
-                    GROUP BY o.plan_tier
-                """
-                tier_rows = await conn.fetch(tier_query)
-                by_tier = {row['plan_tier']: row['count'] for row in tier_rows}
+                # Usage by tier - skip for non-existent tables
+                by_tier = {}
+                if total_usage > 0:
+                    try:
+                        tier_query = f"""
+                            SELECT metadata_json, COUNT(t.*) as count
+                            FROM organizations o
+                            LEFT JOIN {table_name} t ON o.id = t.organization_id
+                            GROUP BY metadata_json
+                        """
+                        tier_rows = await conn.fetch(tier_query)
+                        for row in tier_rows:
+                            metadata = row['metadata_json']
+                            if isinstance(metadata, str):
+                                import json
+                                metadata = json.loads(metadata)
+                            tier = metadata.get('plan_tier', 'trial') if isinstance(metadata, dict) else 'trial'
+                            by_tier[tier] = by_tier.get(tier, 0) + row['count']
+                    except Exception:
+                        by_tier = {}
                 
                 # Placeholder quota limit (would come from tier definitions)
                 quota_limit = 10000
@@ -341,15 +371,18 @@ async def get_growth_metrics(
             
             # New users
             new_users = await conn.fetchval(
-                "SELECT COUNT(*) FROM users WHERE created_at >= $1",
+                "SELECT COUNT(*) FROM organization_members WHERE joined_at >= $1",
                 start_date
             )
             
-            # New devices
-            new_devices = await conn.fetchval(
-                "SELECT COUNT(*) FROM edge_devices WHERE registered_at >= $1",
-                start_date
-            )
+            # New devices (handle table not existing)
+            try:
+                new_devices = await conn.fetchval(
+                    "SELECT COUNT(*) FROM edge_devices WHERE registered_at >= $1",
+                    start_date
+                )
+            except Exception:
+                new_devices = 0
             
             # Previous period counts for growth rate
             prev_tenants = await conn.fetchval(

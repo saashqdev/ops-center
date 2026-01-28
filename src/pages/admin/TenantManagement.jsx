@@ -80,7 +80,11 @@ export default function TenantManagement() {
     try {
       setLoading(true);
       const response = await fetch('/api/v1/admin/tenants/', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
       
       if (!response.ok) throw new Error('Failed to load tenants');
@@ -98,7 +102,11 @@ export default function TenantManagement() {
   const loadPlatformStats = async () => {
     try {
       const response = await fetch('/api/v1/admin/analytics/platform-stats', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
       
       if (!response.ok) throw new Error('Failed to load platform stats');
@@ -112,11 +120,18 @@ export default function TenantManagement() {
 
   const handleCreateTenant = async () => {
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+      
       const response = await fetch('/api/v1/admin/tenants/', {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
         },
         body: JSON.stringify(formData)
       });
@@ -144,11 +159,18 @@ export default function TenantManagement() {
 
   const handleUpdateTenant = async () => {
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+      
       const response = await fetch(`/api/v1/admin/tenants/${selectedTenant.organization_id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
         },
         body: JSON.stringify({
           name: formData.name,
@@ -158,7 +180,10 @@ export default function TenantManagement() {
         })
       });
       
-      if (!response.ok) throw new Error('Failed to update tenant');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update tenant');
+      }
       
       setEditDialogOpen(false);
       setSelectedTenant(null);
@@ -174,12 +199,24 @@ export default function TenantManagement() {
     }
 
     try {
-      const response = await fetch(`/api/v1/admin/tenants/${tenantId}?hard_delete=${hardDelete}`, {
-        method: 'DELETE',
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
         credentials: 'include'
       });
+      const csrfData = await csrfResponse.json();
       
-      if (!response.ok) throw new Error('Failed to delete tenant');
+      const response = await fetch(`/api/v1/admin/tenants/${tenantId}?hard_delete=${hardDelete}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'X-CSRF-Token': csrfData.csrf_token
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to delete tenant');
+      }
       
       loadTenants();
       loadPlatformStats();
@@ -201,12 +238,24 @@ export default function TenantManagement() {
     setEditDialogOpen(true);
   };
 
+  const getTierLabel = (tier) => {
+    const labels = {
+      trial: 'Trial',
+      starter: 'Starter',
+      professional: 'Professional',
+      enterprise: 'Enterprise',
+      founders_friend: 'Founder Friend'
+    };
+    return labels[tier] || tier;
+  };
+
   const getTierColor = (tier) => {
     const colors = {
       trial: 'default',
       starter: 'primary',
       professional: 'secondary',
-      enterprise: 'success'
+      enterprise: 'success',
+      founders_friend: 'primary'
     };
     return colors[tier] || 'default';
   };
@@ -311,7 +360,7 @@ export default function TenantManagement() {
                 </Box>
               </TableCell>
               <TableCell>
-                <Chip label={tenant.plan_tier} color={getTierColor(tenant.plan_tier)} size="small" />
+                <Chip label={getTierLabel(tenant.plan_tier)} color={getTierColor(tenant.plan_tier)} size="small" />
               </TableCell>
               <TableCell>{tenant.owner_email}</TableCell>
               <TableCell>{tenant.member_count}</TableCell>
