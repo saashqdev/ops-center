@@ -5863,11 +5863,29 @@ async def serve_spa(full_path: str, request: Request):
         # First check public directory
         public_path = os.path.join("public", full_path)
         if os.path.exists(public_path):
-            return FileResponse(public_path)
+            response = FileResponse(public_path)
+            # HTML files should not be cached
+            if full_path.endswith(".html"):
+                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                response.headers["Pragma"] = "no-cache"
+                response.headers["Expires"] = "0"
+            # Vite-hashed assets can be cached aggressively
+            elif full_path.startswith("assets/"):
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return response
         # Then check dist directory
         file_path = os.path.join("dist", full_path)
         if os.path.exists(file_path):
-            return FileResponse(file_path)
+            response = FileResponse(file_path)
+            # HTML files should not be cached
+            if full_path.endswith(".html"):
+                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                response.headers["Pragma"] = "no-cache"
+                response.headers["Expires"] = "0"
+            # Vite-hashed assets can be cached aggressively
+            elif full_path.startswith("assets/"):
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return response
 
     # For all other routes, return the index.html (for React Router)
     index_path = "dist/index.html"

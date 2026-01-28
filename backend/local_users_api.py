@@ -582,8 +582,15 @@ def get_user_last_login(username: str) -> Optional[str]:
 def count_ssh_keys(username: str) -> int:
     """Count number of SSH keys for user"""
     try:
-        user_info = pwd.getpwnam(username)
-        ssh_dir = Path(user_info.pw_dir) / '.ssh'
+        # Use host passwd data instead of container passwd
+        host_users = parse_host_passwd()
+        user_info = next((u for u in host_users if u['username'] == username), None)
+        
+        if not user_info:
+            logger.warning(f"User {username} not found in host passwd")
+            return 0
+            
+        ssh_dir = Path(user_info['home']) / '.ssh'
         authorized_keys = ssh_dir / 'authorized_keys'
 
         if not authorized_keys.exists():

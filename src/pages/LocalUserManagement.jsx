@@ -124,8 +124,10 @@ const LocalUserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/admin/system/local-users', {
-        credentials: 'include'
+      const timestamp = Date.now();
+      const response = await fetch(`/api/v1/admin/system/local-users?t=${timestamp}`, {
+        credentials: 'include',
+        cache: 'no-store'
       });
       const data = await response.json();
 
@@ -167,8 +169,10 @@ const LocalUserManagement = () => {
 
   const fetchUserSSHKeys = async (username) => {
     try {
-      const response = await fetch(`/api/v1/admin/system/local-users/${username}/ssh-keys`, {
-        credentials: 'include'
+      const timestamp = Date.now();
+      const response = await fetch(`/api/v1/admin/system/local-users/${username}/ssh-keys?t=${timestamp}`, {
+        credentials: 'include',
+        cache: 'no-store'
       });
       const data = await response.json();
       if (data.success) {
@@ -297,8 +301,7 @@ const LocalUserManagement = () => {
 
       if (data.success) {
         setDeleteConfirm(null);
-        setDetailModalOpen(false);
-        fetchUsers();
+        closeUserDetail();
       }
     } catch (error) {
       console.error('Failed to delete user:', error);
@@ -353,7 +356,37 @@ const LocalUserManagement = () => {
       if (data.success) {
         setNewSSHKey('');
         toast.success('SSH key added successfully');
-        fetchUserSSHKeys(selectedUser.username);
+        // Small delay to ensure filesystem sync
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // Refresh SSH keys list in modal
+        await fetchUserSSHKeys(selectedUser.username);
+        // Refresh users list to update stats and get updated user data with cache-busting
+        const timestamp = Date.now();
+        const response = await fetch(`/api/v1/admin/system/local-users?t=${timestamp}`, {
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        const updatedData = await response.json();
+        if (updatedData.success) {
+          setUsers(updatedData.users || []);
+          
+          // Calculate and update stats
+          const totalUsers = updatedData.users.filter(u => u.uid >= 1000).length;
+          const sudoUsers = updatedData.users.filter(u => u.groups?.includes('sudo')).length;
+          const sshKeysConfigured = updatedData.users.filter(u => u.ssh_keys_count > 0).length;
+          setStats({
+            totalUsers,
+            sudoUsers,
+            activeSessions: updatedData.active_sessions || 0,
+            sshKeysConfigured,
+          });
+          
+          // Update selectedUser with fresh data
+          const updatedUser = updatedData.users.find(u => u.username === selectedUser.username);
+          if (updatedUser) {
+            setSelectedUser(updatedUser);
+          }
+        }
       } else {
         toast.error(`Failed to add SSH key: ${data.error || 'Unknown error'}`);
       }
@@ -365,6 +398,9 @@ const LocalUserManagement = () => {
 
   const handleDeleteSSHKey = async (keyId) => {
     try {
+      // Optimistically remove the key from the UI immediately
+      setUserSSHKeys(prevKeys => prevKeys.filter(key => (key.id || prevKeys.indexOf(key)) !== keyId));
+      
       const response = await fetch(`/api/v1/admin/system/local-users/${selectedUser.username}/ssh-keys/${keyId}`, {
         method: 'DELETE',
         credentials: 'include',
@@ -374,11 +410,45 @@ const LocalUserManagement = () => {
 
       if (data.success) {
         toast.success('SSH key deleted successfully');
+        // Small delay to ensure filesystem sync
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // Refresh SSH keys list in modal to confirm deletion
         await fetchUserSSHKeys(selectedUser.username);
+        // Refresh users list to update stats and get updated user data with cache-busting
+        const timestamp = Date.now();
+        const response = await fetch(`/api/v1/admin/system/local-users?t=${timestamp}`, {
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        const updatedData = await response.json();
+        if (updatedData.success) {
+          setUsers(updatedData.users || []);
+          
+          // Calculate and update stats
+          const totalUsers = updatedData.users.filter(u => u.uid >= 1000).length;
+          const sudoUsers = updatedData.users.filter(u => u.groups?.includes('sudo')).length;
+          const sshKeysConfigured = updatedData.users.filter(u => u.ssh_keys_count > 0).length;
+          setStats({
+            totalUsers,
+            sudoUsers,
+            activeSessions: updatedData.active_sessions || 0,
+            sshKeysConfigured,
+          });
+          
+          // Update selectedUser with fresh data
+          const updatedUser = updatedData.users.find(u => u.username === selectedUser.username);
+          if (updatedUser) {
+            setSelectedUser(updatedUser);
+          }
+        }
       } else {
+        // If deletion failed, restore the keys by re-fetching
+        await fetchUserSSHKeys(selectedUser.username);
         toast.error(`Failed to delete SSH key: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
+      // If error occurred, restore the keys by re-fetching
+      await fetchUserSSHKeys(selectedUser.username);
       console.error('Failed to delete SSH key:', error);
       toast.error('Failed to delete SSH key. Please try again.');
     }
@@ -407,6 +477,12 @@ const LocalUserManagement = () => {
     setDetailModalOpen(true);
     setActiveTab(0);
     fetchUserSSHKeys(user.username);
+  };
+
+  const closeUserDetail = () => {
+    setDetailModalOpen(false);
+    // Refresh users list to ensure stats are up to date
+    fetchUsers();
   };
 
   const filteredUsers = users.filter(user => {
@@ -899,7 +975,7 @@ const LocalUserManagement = () => {
       {/* User Detail Modal */}
       <Dialog
         open={detailModalOpen}
-        onClose={() => setDetailModalOpen(false)}
+        onClose={closeUserDetail}
         maxWidth="md"
         fullWidth
       >
@@ -1113,7 +1189,7 @@ const LocalUserManagement = () => {
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDetailModalOpen(false)}>Close</Button>
+              <Button onClick={closeUserDetail}>Close</Button>
             </DialogActions>
           </>
         )}
