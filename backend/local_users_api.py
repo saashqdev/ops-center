@@ -355,8 +355,11 @@ class AddSSHKeyRequest(BaseModel):
 
     @validator('ssh_key')
     def validate_key_format(cls, v):
+        logger.info(f"Validating SSH key: '{v}' (length: {len(v)}, repr: {repr(v)})")
         if not validate_ssh_key(v):
+            logger.error(f"SSH key validation failed for: '{v}'")
             raise ValueError("Invalid SSH public key format")
+        logger.info("SSH key validation passed")
         return v
 
 
@@ -1165,17 +1168,18 @@ async def list_ssh_keys(
     Admin only.
     """
     try:
-        # Get user info
-        try:
-            user_info = pwd.getpwnam(username)
-        except KeyError:
+        # Get user info from host passwd file
+        host_users = parse_host_passwd()
+        user_info = next((u for u in host_users if u['username'] == username), None)
+        
+        if not user_info:
             raise HTTPException(
                 status_code=404,
                 detail=f"User '{username}' not found"
             )
 
         # Check authorized_keys file
-        ssh_dir = Path(user_info.pw_dir) / '.ssh'
+        ssh_dir = Path(user_info['home']) / '.ssh'
         authorized_keys = ssh_dir / 'authorized_keys'
 
         keys = []
@@ -1228,22 +1232,23 @@ async def add_ssh_key(
     Admin only. All key additions are audited.
     """
     try:
-        # Get user info
-        try:
-            user_info = pwd.getpwnam(username)
-        except KeyError:
+        # Get user info from host passwd file
+        host_users = parse_host_passwd()
+        user_info = next((u for u in host_users if u['username'] == username), None)
+        
+        if not user_info:
             raise HTTPException(
                 status_code=404,
                 detail=f"User '{username}' not found"
             )
 
         # Prepare SSH directory and authorized_keys
-        ssh_dir = Path(user_info.pw_dir) / '.ssh'
+        ssh_dir = Path(user_info['home']) / '.ssh'
         authorized_keys = ssh_dir / 'authorized_keys'
 
         # Create .ssh directory if it doesn't exist
         ssh_dir.mkdir(mode=0o700, exist_ok=True)
-        os.chown(ssh_dir, user_info.pw_uid, user_info.pw_gid)
+        os.chown(ssh_dir, user_info['uid'], user_info['gid'])
 
         # Format key with comment if provided
         key_line = request_data.ssh_key.strip()
@@ -1259,7 +1264,7 @@ async def add_ssh_key(
 
         # Set proper permissions
         os.chmod(authorized_keys, 0o600)
-        os.chown(authorized_keys, user_info.pw_uid, user_info.pw_gid)
+        os.chown(authorized_keys, user_info['uid'], user_info['gid'])
 
         # Audit log
         await audit_log(
@@ -1303,17 +1308,18 @@ async def remove_ssh_key(
     Admin only. All key removals are audited.
     """
     try:
-        # Get user info
-        try:
-            user_info = pwd.getpwnam(username)
-        except KeyError:
+        # Get user info from host passwd file
+        host_users = parse_host_passwd()
+        user_info = next((u for u in host_users if u['username'] == username), None)
+        
+        if not user_info:
             raise HTTPException(
                 status_code=404,
                 detail=f"User '{username}' not found"
             )
 
         # Check authorized_keys file
-        ssh_dir = Path(user_info.pw_dir) / '.ssh'
+        ssh_dir = Path(user_info['home']) / '.ssh'
         authorized_keys = ssh_dir / 'authorized_keys'
 
         if not authorized_keys.exists():
@@ -1348,6 +1354,10 @@ async def remove_ssh_key(
         # Write back
         with open(authorized_keys, 'w') as f:
             f.writelines(new_lines)
+
+        # Set proper permissions
+        os.chmod(authorized_keys, 0o600)
+        os.chown(authorized_keys, user_info['uid'], user_info['gid'])
 
         # Audit log
         await audit_log(

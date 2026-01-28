@@ -509,6 +509,7 @@ csrf_protect, csrf_middleware_factory = create_csrf_protection(
         "/api/v1/monitoring/grafana/",  # Grafana integration API - monitoring endpoints
         "/api/v1/admin/users/",  # User management and API key endpoints - REST API operations
         "/api/v1/admin/tenants/",  # Tenant management API - REST API operations
+        "/api/v1/admin/system/local-users/",  # Local user management API - REST API operations
         "/api/v1/org/",  # Organization management API - CRUD operations
         "/api/v1/org",    # Organization management API (without trailing slash)
         "/api/v1/alerts/",  # Email alert system - REST API operations

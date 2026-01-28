@@ -345,17 +345,21 @@ const LocalUserManagement = () => {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: newSSHKey }),
+        body: JSON.stringify({ ssh_key: newSSHKey }),
       });
 
       const data = await response.json();
 
       if (data.success) {
         setNewSSHKey('');
+        toast.success('SSH key added successfully');
         fetchUserSSHKeys(selectedUser.username);
+      } else {
+        toast.error(`Failed to add SSH key: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Failed to add SSH key:', error);
+      toast.error('Failed to add SSH key. Please try again.');
     }
   };
 
@@ -535,11 +539,11 @@ const LocalUserManagement = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <User size={24} color="#667eea" />
-                <Typography variant="h6" sx={{ ml: 1 }}>
+                <Typography variant="h6" sx={{ ml: 1, color: '#e9d5ff' }}>
                   {stats.totalUsers}
                 </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
                 Total Users
               </Typography>
             </CardContent>
@@ -556,11 +560,11 @@ const LocalUserManagement = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Shield size={24} color="#f093fb" />
-                <Typography variant="h6" sx={{ ml: 1 }}>
+                <Typography variant="h6" sx={{ ml: 1, color: '#e9d5ff' }}>
                   {stats.sudoUsers}
                 </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
                 Sudo Users
               </Typography>
             </CardContent>
@@ -577,11 +581,11 @@ const LocalUserManagement = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Terminal size={24} color="#4facfe" />
-                <Typography variant="h6" sx={{ ml: 1 }}>
+                <Typography variant="h6" sx={{ ml: 1, color: '#e9d5ff' }}>
                   {stats.activeSessions}
                 </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
                 Active Sessions
               </Typography>
             </CardContent>
@@ -598,11 +602,11 @@ const LocalUserManagement = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Key size={24} color="#43e97b" />
-                <Typography variant="h6" sx={{ ml: 1 }}>
+                <Typography variant="h6" sx={{ ml: 1, color: '#e9d5ff' }}>
                   {stats.sshKeysConfigured}
                 </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
                 SSH Keys Configured
               </Typography>
             </CardContent>
@@ -1015,13 +1019,10 @@ const LocalUserManagement = () => {
 
                     <List>
                       {userSSHKeys.map((key, index) => {
-                        // Generate a stable fingerprint from the key for use as unique identifier
-                        // Use the key itself as the ID (will be URL-encoded in the API call)
-                        const keyId = typeof key === 'object' && key.id
-                          ? key.id
-                          : typeof key === 'object' && key.fingerprint
-                            ? key.fingerprint
-                            : index;
+                        // Use the key ID from the backend
+                        const keyId = key.id || index;
+                        // Get the full key string for display
+                        const keyString = key.full_key || `${key.key_type} ${key.key_data}${key.comment ? ' ' + key.comment : ''}`;
 
                         return (
                           <React.Fragment key={keyId}>
@@ -1029,21 +1030,22 @@ const LocalUserManagement = () => {
                               <ListItemText
                                 primary={
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Chip label={getSSHKeyType(typeof key === 'string' ? key : key.key || key)} size="small" />
+                                    <Chip label={key.key_type || getSSHKeyType(keyString)} size="small" />
                                     <code style={{ fontSize: '0.75rem' }}>
-                                      {truncateSSHKey(typeof key === 'string' ? key : key.key || key)}
+                                      {truncateSSHKey(keyString)}
                                     </code>
                                   </Box>
                                 }
+                                secondary={key.comment ? `Comment: ${key.comment}` : null}
                               />
                               <ListItemSecondaryAction>
-                                <Tooltip title={copiedKey === (typeof key === 'string' ? key : key.key) ? 'Copied!' : 'Copy'}>
+                                <Tooltip title={copiedKey === keyString ? 'Copied!' : 'Copy'}>
                                   <IconButton
-                                    onClick={() => handleCopyKey(typeof key === 'string' ? key : key.key || key)}
+                                    onClick={() => handleCopyKey(keyString)}
                                     size="small"
                                     sx={{ mr: 1 }}
                                   >
-                                    {copiedKey === (typeof key === 'string' ? key : key.key) ? <Check size={16} /> : <Copy size={16} />}
+                                    {copiedKey === keyString ? <Check size={16} /> : <Copy size={16} />}
                                   </IconButton>
                                 </Tooltip>
                                 <IconButton
