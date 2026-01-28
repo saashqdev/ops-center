@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 # Keycloak Configuration
 KEYCLOAK_URL = os.getenv("KEYCLOAK_URL", "https://auth.your-domain.com")
 KEYCLOAK_REALM = os.getenv("KEYCLOAK_REALM", "master")
-KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "admin-cli")
+# For admin operations, always use admin-cli client
+KEYCLOAK_ADMIN_CLIENT_ID = "admin-cli"
+# For regular operations, use the configured client
+KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "ops-center")
 KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "")
 KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_USER", os.getenv("KEYCLOAK_ADMIN_USERNAME", "admin"))
 KEYCLOAK_ADMIN_PASSWORD = os.getenv("KEYCLOAK_ADMIN_PASSWORD", "")
@@ -43,7 +46,7 @@ async def get_admin_token() -> str:
                 f"{KEYCLOAK_URL}/realms/master/protocol/openid-connect/token",
                 data={
                     "grant_type": "password",
-                    "client_id": KEYCLOAK_CLIENT_ID,
+                    "client_id": KEYCLOAK_ADMIN_CLIENT_ID,
                     "username": KEYCLOAK_ADMIN_USERNAME,
                     "password": KEYCLOAK_ADMIN_PASSWORD
                 },
@@ -285,7 +288,7 @@ async def create_user(email: str, username: str, first_name: str = "", last_name
 
 async def delete_user(email: str) -> bool:
     """
-    Delete a user from Keycloak
+    Delete a user from Keycloak by email
     """
     try:
         # Get user first
@@ -313,6 +316,107 @@ async def delete_user(email: str) -> bool:
 
     except Exception as e:
         logger.error(f"Error deleting user: {e}")
+        return False
+
+
+async def delete_user_by_id(user_id: str) -> bool:
+    """
+    Delete a user from Keycloak by user ID
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.delete(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if response.status_code == 204:
+                logger.info(f"Successfully deleted user ID: {user_id}")
+                return True
+            else:
+                logger.error(f"Failed to delete user: {response.status_code} - {response.text}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error deleting user by ID: {e}")
+        return False
+
+
+async def update_user_by_id(user_id: str, updates: Dict[str, Any]) -> bool:
+    """
+    Update user details in Keycloak by user ID
+    
+    Args:
+        user_id: Keycloak user ID
+        updates: Dictionary containing fields to update. Can include:
+            - email, username, firstName, lastName, enabled, emailVerified
+            - attributes: dict of custom attributes
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        token = await get_admin_token()
+
+        # Get current user data first
+        user = await get_user_by_id(user_id)
+        if not user:
+            logger.error(f"User not found: {user_id}")
+            return False
+
+        # Prepare update payload
+        update_payload = {}
+        
+        # Basic fields
+        if 'email' in updates:
+            update_payload['email'] = updates['email']
+        if 'username' in updates:
+            update_payload['username'] = updates['username']
+        if 'firstName' in updates:
+            update_payload['firstName'] = updates['firstName']
+        if 'lastName' in updates:
+            update_payload['lastName'] = updates['lastName']
+        if 'enabled' in updates:
+            update_payload['enabled'] = updates['enabled']
+        if 'emailVerified' in updates:
+            update_payload['emailVerified'] = updates['emailVerified']
+        
+        # Handle attributes separately
+        if 'attributes' in updates:
+            existing_attrs = user.get('attributes', {})
+            # Merge attributes
+            merged_attrs = {**existing_attrs}
+            for key, value in updates['attributes'].items():
+                # Ensure values are lists (Keycloak requirement)
+                if isinstance(value, list):
+                    merged_attrs[key] = value
+                else:
+                    merged_attrs[key] = [str(value)]
+            update_payload['attributes'] = merged_attrs
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.put(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                },
+                json=update_payload,
+                timeout=10.0
+            )
+
+            if response.status_code == 204:
+                logger.info(f"Successfully updated user ID: {user_id}")
+                return True
+            else:
+                logger.error(f"Failed to update user: {response.status_code} - {response.text}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error updating user by ID: {e}")
         return False
 
 
@@ -345,6 +449,276 @@ async def get_user_groups(email: str) -> List[str]:
     except Exception as e:
         logger.error(f"Error getting user groups: {e}")
         return []
+
+
+# ============================================================================
+# ROLE MANAGEMENT
+# ============================================================================
+
+async def get_realm_roles() -> List[Dict[str, Any]]:
+    """
+    Get all available realm roles
+    
+    Returns:
+        List of role dictionaries with id, name, description, composite
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.get(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/roles",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if response.status_code == 200:
+                roles = response.json()
+                logger.info(f"Retrieved {len(roles)} realm roles")
+                return roles
+            else:
+                logger.error(f"Failed to get realm roles: {response.status_code}")
+                return []
+
+    except Exception as e:
+        logger.error(f"Error getting realm roles: {e}")
+        return []
+
+
+async def get_user_realm_roles(user_id: str) -> List[Dict[str, Any]]:
+    """
+    Get realm-level roles assigned to a user
+    
+    Returns:
+        List of role dictionaries
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.get(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/role-mappings/realm",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if response.status_code == 200:
+                roles = response.json()
+                logger.info(f"User {user_id} has {len(roles)} realm roles")
+                return roles
+            else:
+                logger.error(f"Failed to get user roles: {response.status_code}")
+                return []
+
+    except Exception as e:
+        logger.error(f"Error getting user realm roles: {e}")
+        return []
+
+
+async def assign_realm_role_to_user(user_id: str, role_name: str) -> bool:
+    """
+    Assign a realm role to a user
+    
+    Args:
+        user_id: Keycloak user ID
+        role_name: Name of the role to assign
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        token = await get_admin_token()
+
+        # First, get the role details by name
+        async with httpx.AsyncClient(verify=False) as client:
+            role_response = await client.get(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/roles/{role_name}",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if role_response.status_code != 200:
+                logger.error(f"Role {role_name} not found")
+                return False
+
+            role = role_response.json()
+
+            # Now assign the role to the user
+            assign_response = await client.post(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/role-mappings/realm",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                },
+                json=[{
+                    "id": role.get("id"),
+                    "name": role.get("name")
+                }],
+                timeout=10.0
+            )
+
+            if assign_response.status_code == 204:
+                logger.info(f"Assigned role {role_name} to user {user_id}")
+                return True
+            else:
+                logger.error(f"Failed to assign role: {assign_response.status_code}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error assigning realm role: {e}")
+        return False
+
+
+async def remove_realm_role_from_user(user_id: str, role_name: str) -> bool:
+    """
+    Remove a realm role from a user
+    
+    Args:
+        user_id: Keycloak user ID
+        role_name: Name of the role to remove
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        token = await get_admin_token()
+
+        # First, get the role details by name
+        async with httpx.AsyncClient(verify=False) as client:
+            role_response = await client.get(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/roles/{role_name}",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if role_response.status_code != 200:
+                logger.error(f"Role {role_name} not found")
+                return False
+
+            role = role_response.json()
+
+            # Now remove the role from the user
+            remove_response = await client.delete(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/role-mappings/realm",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                },
+                json=[{
+                    "id": role.get("id"),
+                    "name": role.get("name")
+                }],
+                timeout=10.0
+            )
+
+            if remove_response.status_code == 204:
+                logger.info(f"Removed role {role_name} from user {user_id}")
+                return True
+            else:
+                logger.error(f"Failed to remove role: {remove_response.status_code}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error removing realm role: {e}")
+        return False
+
+
+# ============================================================================
+# SESSION MANAGEMENT
+# ============================================================================
+
+async def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
+    """
+    Get all active sessions for a user
+    
+    Returns:
+        List of session dictionaries with id, start, lastAccess, clients, ipAddress, etc.
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.get(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/sessions",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if response.status_code == 200:
+                sessions = response.json()
+                logger.info(f"User {user_id} has {len(sessions)} active sessions")
+                return sessions
+            else:
+                logger.error(f"Failed to get user sessions: {response.status_code}")
+                return []
+
+    except Exception as e:
+        logger.error(f"Error getting user sessions: {e}")
+        return []
+
+
+async def logout_user_session(session_id: str) -> bool:
+    """
+    Logout a specific user session
+    
+    Args:
+        session_id: Keycloak session ID
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.delete(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/sessions/{session_id}",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if response.status_code == 204:
+                logger.info(f"Logged out session {session_id}")
+                return True
+            else:
+                logger.error(f"Failed to logout session: {response.status_code}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error logging out session: {e}")
+        return False
+
+
+async def logout_all_user_sessions(user_id: str) -> bool:
+    """
+    Logout all sessions for a user
+    
+    Args:
+        user_id: Keycloak user ID
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.post(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/logout",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if response.status_code == 204:
+                logger.info(f"Logged out all sessions for user {user_id}")
+                return True
+            else:
+                logger.error(f"Failed to logout user: {response.status_code}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error logging out all user sessions: {e}")
+        return False
 
 
 # Tier-specific helper functions

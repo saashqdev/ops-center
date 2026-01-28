@@ -363,10 +363,11 @@ const UserManagement = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to save user');
+        throw new Error(error.detail || error.message || 'Failed to save user');
       }
 
-      showToast(isEditMode ? 'User updated successfully' : 'User created successfully');
+      const data = await response.json();
+      showToast(data.message || (isEditMode ? 'User updated successfully' : 'User created successfully'));
       setCreateEditModalOpen(false);
       fetchUsers();
       fetchStats();

@@ -203,10 +203,10 @@ const AppsLauncher = () => {
 
       {apps.length === 0 && (
         <Box textAlign="center" py={8}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+          <Typography variant="h6" sx={{ color: '#e9d5ff' }} gutterBottom>
             No apps in your tier
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
             Upgrade your subscription to access more apps
           </Typography>
           <Button

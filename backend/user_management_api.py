@@ -18,6 +18,7 @@ import asyncio
 import csv
 import io
 import logging
+import httpx
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from fastapi import APIRouter, HTTPException, Query, Depends, Request, UploadFile, File, Response
@@ -32,12 +33,28 @@ from keycloak_integration import (
     get_all_users,
     get_user_by_id,
     get_user_by_email,
+    get_user_by_username,
     create_user as keycloak_create_user,
     update_user_attributes as keycloak_update_user,
+    update_user_by_id as keycloak_update_user_by_id,
     delete_user as keycloak_delete_user,
+    delete_user_by_id as keycloak_delete_user_by_id,
     set_subscription_tier,
     set_user_password,
-    _get_attr_value
+    get_admin_token,
+    _get_attr_value,
+    # Role management
+    get_realm_roles,
+    get_user_realm_roles,
+    assign_realm_role_to_user,
+    remove_realm_role_from_user,
+    # Session management
+    get_user_sessions,
+    logout_user_session,
+    logout_all_user_sessions,
+    # Keycloak config
+    KEYCLOAK_URL,
+    KEYCLOAK_REALM
 )
 
 from audit_logger import audit_logger
@@ -81,6 +98,27 @@ class BulkTierChange(BaseModel):
 class BulkOperationRequest(BaseModel):
     """Bulk operation request"""
     user_ids: List[str]
+
+class UserCreateRequest(BaseModel):
+    """User creation request"""
+    email: str
+    username: str
+    firstName: Optional[str] = ""
+    lastName: Optional[str] = ""
+    password: Optional[str] = None
+    enabled: bool = True
+    emailVerified: bool = False
+    subscription_tier: str = "trial"
+
+class UserUpdateRequest(BaseModel):
+    """User update request"""
+    email: Optional[str] = None
+    username: Optional[str] = None
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    enabled: Optional[bool] = None
+    emailVerified: Optional[bool] = None
+    subscription_tier: Optional[str] = None
 
 class APIKeyCreate(BaseModel):
     """API key creation request"""
@@ -290,20 +328,115 @@ async def get_user_analytics_summary(admin: bool = Depends(require_admin)):
 
 @router.get("/roles/available")
 async def get_available_roles(admin: bool = Depends(require_admin)):
-    """Get list of available roles"""
-    return {
-        "roles": [
-            {"name": "admin", "description": "Full system access", "level": 1},
-            {"name": "moderator", "description": "User & content management", "level": 2},
-            {"name": "developer", "description": "Service access & API keys", "level": 3},
-            {"name": "analyst", "description": "Read-only analytics", "level": 4},
-            {"name": "viewer", "description": "Basic read access", "level": 5}
-        ]
-    }
+    """Get list of available realm roles from Keycloak"""
+    try:
+        roles = await get_realm_roles()
+        
+        # Format roles for frontend
+        formatted_roles = []
+        for role in roles:
+            formatted_roles.append({
+                "name": role.get("name"),
+                "description": role.get("description", ""),
+                "composite": role.get("composite", False)
+            })
+        
+        return {"roles": formatted_roles}
+        
+    except Exception as e:
+        logger.error(f"Error getting available roles: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
 # INDIVIDUAL USER OPERATIONS
 # ============================================================================
+
+@router.post("")
+async def create_user(
+    request: UserCreateRequest,
+    admin: bool = Depends(require_admin)
+):
+    """
+    Create a new user in Keycloak
+    
+    Request body:
+    {
+        "email": "user@example.com",
+        "username": "username",
+        "firstName": "John",
+        "lastName": "Doe",
+        "password": "optional-password",
+        "enabled": true,
+        "emailVerified": false,
+        "subscription_tier": "trial"
+    }
+    """
+    try:
+        # Check if user already exists
+        existing = await get_user_by_email(request.email)
+        if existing:
+            raise HTTPException(status_code=409, detail=f"User with email {request.email} already exists")
+        
+        existing_username = await get_user_by_username(request.username)
+        if existing_username:
+            raise HTTPException(status_code=409, detail=f"User with username {request.username} already exists")
+
+        # Prepare attributes
+        attributes = {
+            "subscription_tier": [request.subscription_tier],
+            "subscription_status": ["active"],
+            "api_calls_limit": ["1000"],  # Default trial limit
+            "api_calls_used": ["0"]
+        }
+
+        # Create user in Keycloak
+        user_id = await keycloak_create_user(
+            email=request.email,
+            username=request.username,
+            first_name=request.firstName,
+            last_name=request.lastName,
+            attributes=attributes,
+            email_verified=request.emailVerified
+        )
+
+        if not user_id:
+            raise HTTPException(status_code=500, detail="Failed to create user in Keycloak")
+
+        # Set password if provided
+        if request.password:
+            success = await set_user_password(user_id, request.password, temporary=False)
+            if not success:
+                logger.warning(f"User created but password setting failed for {user_id}")
+
+        # Audit log
+        await audit_logger.log(
+            action="user.created",
+            user_id=user_id,
+            details={"email": request.email, "username": request.username}
+        )
+
+        # Get created user details
+        user = await get_user_by_id(user_id)
+        
+        return {
+            "success": True,
+            "message": "User created successfully",
+            "user": {
+                "id": user.get("id"),
+                "email": user.get("email"),
+                "username": user.get("username"),
+                "firstName": user.get("firstName", ""),
+                "lastName": user.get("lastName", ""),
+                "enabled": user.get("enabled", True),
+                "emailVerified": user.get("emailVerified", False)
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{user_id}")
 async def get_user_details(user_id: str, admin: bool = Depends(require_admin)):
@@ -346,19 +479,73 @@ async def get_user_details(user_id: str, admin: bool = Depends(require_admin)):
 @router.put("/{user_id}")
 async def update_user(
     user_id: str,
-    updates: Dict[str, Any],
+    request: UserUpdateRequest,
     admin: bool = Depends(require_admin)
 ):
-    """Update user details"""
+    """
+    Update user details in Keycloak
+    
+    Only fields provided in the request will be updated.
+    """
     try:
-        # Update user in Keycloak
-        success = await keycloak_update_user(user_id, updates)
-        if not success:
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
+
+        # Prepare updates dictionary
+        updates = {}
+        
+        if request.email is not None:
+            updates['email'] = request.email
+        if request.username is not None:
+            updates['username'] = request.username
+        if request.firstName is not None:
+            updates['firstName'] = request.firstName
+        if request.lastName is not None:
+            updates['lastName'] = request.lastName
+        if request.enabled is not None:
+            updates['enabled'] = request.enabled
+        if request.emailVerified is not None:
+            updates['emailVerified'] = request.emailVerified
+        
+        # Handle subscription tier update
+        if request.subscription_tier is not None:
+            if 'attributes' not in updates:
+                updates['attributes'] = {}
+            updates['attributes']['subscription_tier'] = request.subscription_tier
+
+        # Update user in Keycloak
+        success = await keycloak_update_user_by_id(user_id, updates)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to update user in Keycloak")
+
+        # Audit log
+        await audit_logger.log(
+            action="user.updated",
+            user_id=user_id,
+            details={"updates": updates}
+        )
 
         # Get updated user
         updated_user = await get_user_by_id(user_id)
-        return updated_user
+        attrs = updated_user.get("attributes", {})
+        
+        return {
+            "success": True,
+            "message": "User updated successfully",
+            "user": {
+                "id": updated_user.get("id"),
+                "username": updated_user.get("username"),
+                "email": updated_user.get("email"),
+                "firstName": updated_user.get("firstName", ""),
+                "lastName": updated_user.get("lastName", ""),
+                "enabled": updated_user.get("enabled", True),
+                "emailVerified": updated_user.get("emailVerified", False),
+                "subscription_tier": _get_attr_value(attrs, "subscription_tier", "trial")
+            }
+        }
 
     except HTTPException:
         raise
@@ -368,13 +555,32 @@ async def update_user(
 
 @router.delete("/{user_id}")
 async def delete_user(user_id: str, admin: bool = Depends(require_admin)):
-    """Delete a user"""
+    """Delete a user from Keycloak"""
     try:
-        success = await keycloak_delete_user(user_id)
-        if not success:
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        
+        email = user.get("email")
+        
+        # Delete from Keycloak
+        success = await keycloak_delete_user_by_id(user_id)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to delete user from Keycloak")
 
-        return {"message": "User deleted successfully"}
+        # Audit log
+        await audit_logger.log(
+            action="user.deleted",
+            user_id=user_id,
+            details={"email": email}
+        )
+
+        return {
+            "success": True,
+            "message": "User deleted successfully"
+        }
 
     except HTTPException:
         raise
@@ -385,26 +591,93 @@ async def delete_user(user_id: str, admin: bool = Depends(require_admin)):
 @router.post("/{user_id}/reset-password")
 async def reset_user_password(
     user_id: str,
+    send_email: bool = True,
     admin: bool = Depends(require_admin)
 ):
-    """Reset user password (generates temporary password)"""
+    """
+    Reset user password
+    
+    Options:
+    - send_email=true: Sends Keycloak password reset email (recommended)
+    - send_email=false: Generates temporary password and returns it (for testing)
+    """
     try:
-        # Generate temporary password
-        temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
-
-        # Set password in Keycloak
-        success = await set_user_password(user_id, temp_password, temporary=True)
-
-        if not success:
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        
+        email = user.get("email")
+        username = user.get("username")
 
-        # TODO: Implement email sending
-        # For now, log securely and return message
-        logger.info(f"Password reset for user {user_id} (temp password generated but not returned for security)")
-        return {
-            "message": "Password reset successfully. A new temporary password has been set.",
-            "note": "The user will need to contact admin to receive the password securely, or implement email notification."
-        }
+        if send_email:
+            # Use Keycloak's built-in email system
+            try:
+                token = await get_admin_token()
+                
+                async with httpx.AsyncClient(verify=False) as client:
+                    # Send execute-actions email with UPDATE_PASSWORD action
+                    response = await client.put(
+                        f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/execute-actions-email",
+                        headers={
+                            "Authorization": f"Bearer {token}",
+                            "Content-Type": "application/json"
+                        },
+                        json=["UPDATE_PASSWORD"],
+                        params={"lifespan": 86400},  # 24 hours
+                        timeout=10.0
+                    )
+
+                    if response.status_code == 204:
+                        # Audit log
+                        await audit_logger.log(
+                            action="user.password_reset_email_sent",
+                            user_id=user_id,
+                            details={"email": email}
+                        )
+                        
+                        return {
+                            "success": True,
+                            "message": f"Password reset email sent to {email}",
+                            "method": "email",
+                            "note": "User will receive an email with a password reset link valid for 24 hours"
+                        }
+                    else:
+                        logger.error(f"Failed to send password reset email: {response.status_code}")
+                        raise HTTPException(
+                            status_code=500,
+                            detail=f"Failed to send password reset email: {response.text}"
+                        )
+                        
+            except httpx.HTTPError as e:
+                logger.error(f"HTTP error sending reset email: {e}")
+                raise HTTPException(status_code=500, detail=f"Failed to send reset email: {str(e)}")
+        
+        else:
+            # Generate temporary password (for testing/development)
+            temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
+
+            # Set password in Keycloak
+            success = await set_user_password(user_id, temp_password, temporary=True)
+
+            if not success:
+                raise HTTPException(status_code=500, detail="Failed to set temporary password")
+
+            # Audit log
+            await audit_logger.log(
+                action="user.password_reset_manual",
+                user_id=user_id,
+                details={"email": email}
+            )
+            
+            logger.info(f"Temporary password generated for user {user_id} (not logging password for security)")
+            return {
+                "success": True,
+                "message": "Temporary password generated",
+                "method": "manual",
+                "temporary_password": temp_password,
+                "note": "This password is temporary and must be changed on first login. Do NOT share this via insecure channels."
+            }
 
     except HTTPException:
         raise
@@ -418,11 +691,29 @@ async def reset_user_password(
 
 @router.get("/{user_id}/roles")
 async def get_user_roles_endpoint(user_id: str, admin: bool = Depends(require_admin)):
-    """Get user's current roles"""
+    """Get user's current realm roles"""
     try:
-        # TODO: Implement role retrieval from Keycloak
-        # For now, return empty list
-        return {"roles": []}
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get user's roles from Keycloak
+        roles = await get_user_realm_roles(user_id)
+        
+        # Format roles for frontend
+        formatted_roles = []
+        for role in roles:
+            formatted_roles.append({
+                "name": role.get("name"),
+                "description": role.get("description", ""),
+                "id": role.get("id")
+            })
+        
+        return {"roles": formatted_roles}
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting user roles: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -430,13 +721,38 @@ async def get_user_roles_endpoint(user_id: str, admin: bool = Depends(require_ad
 @router.post("/{user_id}/roles/assign")
 async def assign_role(
     user_id: str,
-    role: str,
+    request: Dict[str, str],
     admin: bool = Depends(require_admin)
 ):
-    """Assign a role to user"""
+    """Assign a realm role to user"""
     try:
-        # TODO: Implement role assignment in Keycloak
-        return {"message": f"Role '{role}' assigned successfully (not yet implemented)"}
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        role_name = request.get("role")
+        if not role_name:
+            raise HTTPException(status_code=400, detail="Role name is required")
+        
+        # Assign role in Keycloak
+        success = await assign_realm_role_to_user(user_id, role_name)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail=f"Failed to assign role '{role_name}'")
+        
+        # Audit log
+        await audit_logger.log(
+            action="user.role_assigned",
+            user_id=user_id,
+            details={"role": role_name}
+        )
+        
+        return {
+            "success": True,
+            "message": f"Role '{role_name}' assigned successfully"
+        }
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -449,10 +765,31 @@ async def remove_role(
     role: str,
     admin: bool = Depends(require_admin)
 ):
-    """Remove a role from user"""
+    """Remove a realm role from user"""
     try:
-        # TODO: Implement role removal in Keycloak
-        return {"message": f"Role '{role}' removed successfully (not yet implemented)"}
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Remove role from Keycloak
+        success = await remove_realm_role_from_user(user_id, role)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail=f"Failed to remove role '{role}'")
+        
+        # Audit log
+        await audit_logger.log(
+            action="user.role_removed",
+            user_id=user_id,
+            details={"role": role}
+        )
+        
+        return {
+            "success": True,
+            "message": f"Role '{role}' removed successfully"
+        }
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -465,10 +802,39 @@ async def remove_role(
 
 @router.get("/{user_id}/sessions")
 async def get_user_sessions_endpoint(user_id: str, admin: bool = Depends(require_admin)):
-    """Get user's active sessions"""
+    """Get user's active sessions from Keycloak"""
     try:
-        # TODO: Implement session retrieval from Keycloak
-        return {"sessions": []}
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get sessions from Keycloak
+        sessions = await get_user_sessions(user_id)
+        
+        # Format sessions for frontend
+        formatted_sessions = []
+        for session in sessions:
+            # Convert timestamps from milliseconds to ISO format
+            start_time = session.get("start", 0)
+            last_access = session.get("lastAccess", 0)
+            
+            formatted_sessions.append({
+                "id": session.get("id"),
+                "ipAddress": session.get("ipAddress", "Unknown"),
+                "start": datetime.fromtimestamp(start_time / 1000).isoformat() if start_time else None,
+                "lastAccess": datetime.fromtimestamp(last_access / 1000).isoformat() if last_access else None,
+                "clients": session.get("clients", {}),
+                "username": session.get("username", "")
+            })
+        
+        return {
+            "sessions": formatted_sessions,
+            "total": len(formatted_sessions)
+        }
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting user sessions: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -481,8 +847,29 @@ async def revoke_session(
 ):
     """Revoke a specific user session"""
     try:
-        # TODO: Implement session revocation in Keycloak
-        return {"message": "Session revoked successfully (not yet implemented)"}
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Logout session in Keycloak
+        success = await logout_user_session(session_id)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to revoke session")
+        
+        # Audit log
+        await audit_logger.log(
+            action="user.session_revoked",
+            user_id=user_id,
+            details={"session_id": session_id}
+        )
+        
+        return {
+            "success": True,
+            "message": "Session revoked successfully"
+        }
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -491,10 +878,31 @@ async def revoke_session(
 
 @router.delete("/{user_id}/sessions")
 async def revoke_all_sessions(user_id: str, admin: bool = Depends(require_admin)):
-    """Revoke all user sessions"""
+    """Revoke all user sessions (logout user from all devices)"""
     try:
-        # TODO: Implement session revocation in Keycloak
-        return {"message": "All sessions revoked successfully (not yet implemented)"}
+        # Check if user exists
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Logout all sessions in Keycloak
+        success = await logout_all_user_sessions(user_id)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to revoke all sessions")
+        
+        # Audit log
+        await audit_logger.log(
+            action="user.all_sessions_revoked",
+            user_id=user_id,
+            details={"email": user.get("email")}
+        )
+        
+        return {
+            "success": True,
+            "message": "All sessions revoked successfully"
+        }
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -510,21 +918,41 @@ async def bulk_delete_users(
     request: BulkOperationRequest,
     admin: bool = Depends(require_admin)
 ):
-    """Delete multiple users"""
+    """Delete multiple users from Keycloak"""
     try:
         results = {"success": [], "failed": []}
 
         for user_id in request.user_ids:
             try:
-                success = await keycloak_delete_user(user_id)
+                # Check if user exists
+                user = await get_user_by_id(user_id)
+                if not user:
+                    results["failed"].append({"user_id": user_id, "error": "User not found"})
+                    continue
+                
+                # Delete from Keycloak
+                success = await keycloak_delete_user_by_id(user_id)
                 if success:
                     results["success"].append(user_id)
+                    # Audit log
+                    await audit_logger.log(
+                        action="user.bulk_deleted",
+                        user_id=user_id,
+                        details={"email": user.get("email")}
+                    )
                 else:
-                    results["failed"].append({"user_id": user_id, "error": "User not found"})
+                    results["failed"].append({"user_id": user_id, "error": "Failed to delete from Keycloak"})
+                    
             except Exception as e:
                 results["failed"].append({"user_id": user_id, "error": str(e)})
 
-        return results
+        return {
+            "success": results["success"],
+            "failed": results["failed"],
+            "total_requested": len(request.user_ids),
+            "total_deleted": len(results["success"]),
+            "total_failed": len(results["failed"])
+        }
 
     except Exception as e:
         logger.error(f"Error in bulk delete: {e}")
@@ -535,15 +963,41 @@ async def bulk_assign_roles(
     request: BulkRoleAssignment,
     admin: bool = Depends(require_admin)
 ):
-    """Assign role to multiple users"""
+    """Assign role to multiple users in Keycloak"""
     try:
         results = {"success": [], "failed": []}
 
-        # TODO: Implement bulk role assignment
         for user_id in request.user_ids:
-            results["failed"].append({"user_id": user_id, "error": "Bulk role assignment not yet implemented"})
+            try:
+                # Check if user exists
+                user = await get_user_by_id(user_id)
+                if not user:
+                    results["failed"].append({"user_id": user_id, "error": "User not found"})
+                    continue
+                
+                # Assign role in Keycloak
+                success = await assign_realm_role_to_user(user_id, request.role)
+                if success:
+                    results["success"].append(user_id)
+                    # Audit log
+                    await audit_logger.log(
+                        action="user.bulk_role_assigned",
+                        user_id=user_id,
+                        details={"role": request.role, "email": user.get("email")}
+                    )
+                else:
+                    results["failed"].append({"user_id": user_id, "error": "Failed to assign role"})
+                    
+            except Exception as e:
+                results["failed"].append({"user_id": user_id, "error": str(e)})
 
-        return results
+        return {
+            "success": results["success"],
+            "failed": results["failed"],
+            "total_requested": len(request.user_ids),
+            "total_assigned": len(results["success"]),
+            "total_failed": len(results["failed"])
+        }
 
     except Exception as e:
         logger.error(f"Error in bulk role assignment: {e}")
@@ -554,21 +1008,47 @@ async def bulk_set_tier(
     request: BulkTierChange,
     admin: bool = Depends(require_admin)
 ):
-    """Change subscription tier for multiple users"""
+    """Change subscription tier for multiple users in Keycloak"""
     try:
         results = {"success": [], "failed": []}
 
         for user_id in request.user_ids:
             try:
-                success = await set_subscription_tier(user_id, request.tier)
+                # Check if user exists
+                user = await get_user_by_id(user_id)
+                if not user:
+                    results["failed"].append({"user_id": user_id, "error": "User not found"})
+                    continue
+                
+                # Update tier via attributes
+                updates = {
+                    "attributes": {
+                        "subscription_tier": request.tier
+                    }
+                }
+                
+                success = await keycloak_update_user_by_id(user_id, updates)
                 if success:
                     results["success"].append(user_id)
+                    # Audit log
+                    await audit_logger.log(
+                        action="user.bulk_tier_changed",
+                        user_id=user_id,
+                        details={"tier": request.tier, "email": user.get("email")}
+                    )
                 else:
                     results["failed"].append({"user_id": user_id, "error": "Failed to update tier"})
+                    
             except Exception as e:
                 results["failed"].append({"user_id": user_id, "error": str(e)})
 
-        return results
+        return {
+            "success": results["success"],
+            "failed": results["failed"],
+            "total_requested": len(request.user_ids),
+            "total_updated": len(results["success"]),
+            "total_failed": len(results["failed"])
+        }
 
     except Exception as e:
         logger.error(f"Error in bulk tier change: {e}")

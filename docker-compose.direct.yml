@@ -87,7 +87,7 @@ services:
       - KEYCLOAK_REALM=uchub
       - KEYCLOAK_LOGOUT_REDIRECT=https://${APP_DOMAIN:-kubeworkz.io}/auth/logged-out
       - KEYCLOAK_ADMIN_USER=admin
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-change-me}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-vz9cA8-kuX-oso3DC-w7}
       - SESSION_SECRET_KEY=${SESSION_SECRET_KEY:-generate-with-openssl-rand-hex-32}
       # Stripe Configuration
       - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
