@@ -96,7 +96,7 @@
                                         </form>
 
                                         <div id="kc-info" class="uc1-registration">
-                                            <span>${msg("backToLogin")?no_esc} <a href="${url.loginRestartFlowUrl}" class="uc1-link">${msg("doLogIn")}</a></span>
+                                            <span>${msg("backToLogin")?no_esc} <a href="${url.loginUrl}" class="uc1-link">${msg("doLogIn")}</a></span>
                                         </div>
                                     </div>
                                 </div>
