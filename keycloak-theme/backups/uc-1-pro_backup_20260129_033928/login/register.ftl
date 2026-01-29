@@ -164,7 +164,7 @@
                                         </form>
 
                                         <div id="kc-registration" class="uc1-registration">
-                                            <span>${msg("backToLogin")?no_esc} <a href="${url.loginUrl}" class="uc1-link">${msg("doLogIn")}</a></span>
+                                            <span>${msg("backToLogin")} <a href="${url.loginUrl}" class="uc1-link">${msg("doLogIn")}</a></span>
                                         </div>
                                     </div>
                                 </div>
