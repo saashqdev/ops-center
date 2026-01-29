@@ -416,8 +416,9 @@ async def create_user(
         # Audit log
         await audit_logger.log(
             action="user.created",
+            result="success",
             user_id=user_id,
-            details={"email": request.email, "username": request.username}
+            metadata={"email": request.email, "username": request.username}
         )
 
         # Get created user details
@@ -443,15 +444,79 @@ async def create_user(
         logger.error(f"Error creating user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# ============================================================================
+# HELPER FUNCTIONS FOR USER DETAILS
+# ============================================================================
+
+def get_role_permissions(role_name: str) -> list:
+    """Map role names to permissions"""
+    role_perms = {
+        "admin": ["users.read", "users.write", "users.delete", "system.admin", "org.manage"],
+        "user": ["profile.read", "profile.write", "services.execute"],
+        "viewer": ["profile.read", "services.read"]
+    }
+    return role_perms.get(role_name, ["profile.read"])
+
+
+async def get_user_organizations(uid: str, email: str) -> list:
+    """Get user's organization memberships from database"""
+    try:
+        from database.connection import get_db_connection
+        conn = await get_db_connection()
+        
+        orgs = await conn.fetch("""
+            SELECT 
+                o.id,
+                o.name,
+                o.tier,
+                om.role,
+                o.status,
+                om.joined_at
+            FROM organization_members om
+            JOIN organizations o ON om.org_id = o.id
+            WHERE om.user_id = $1 OR om.user_id = $2
+            ORDER BY om.joined_at DESC
+        """, uid, email)
+        
+        org_list = []
+        for org in orgs:
+            org_list.append({
+                "id": org["id"],
+                "name": org["name"],
+                "plan_tier": org["tier"],
+                "role": org["role"],
+                "status": org["status"],
+                "joined_at": org["joined_at"].isoformat() if org["joined_at"] else None
+            })
+        
+        return org_list
+    except Exception as e:
+        logger.warning(f"Failed to get user organizations: {e}")
+        return []
+
+
 @router.get("/{user_id}")
 async def get_user_details(user_id: str, admin: bool = Depends(require_admin)):
-    """Get detailed information about a specific user"""
+    """Get detailed information about a specific user (flat format for old dist)"""
     try:
         user = await get_user_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         attrs = user.get("attributes", {})
+        
+        # Build full name
+        first_name = user.get("firstName", "")
+        last_name = user.get("lastName", "")
+        full_name = f"{first_name} {last_name}".strip() if first_name or last_name else ""
+        
+        # Convert timestamp to ISO format
+        created_timestamp = user.get("createdTimestamp")
+        created_at_iso = None
+        if created_timestamp:
+            from datetime import datetime
+            created_at_iso = datetime.fromtimestamp(created_timestamp / 1000).isoformat()
         
         # Parse numeric values
         calls_used = int(_get_attr_value(attrs, "api_calls_used", "0") or 0)
@@ -462,15 +527,95 @@ async def get_user_details(user_id: str, admin: bool = Depends(require_admin)):
         user_roles = await get_user_realm_roles(user_id)
         role_names = [role.get("name") for role in user_roles if role.get("name")]
 
+        # Get user sessions
+        sessions_data = await get_user_sessions(user_id)
+        sessions_list = []
+        for session in sessions_data:
+            sessions_list.append({
+                "id": session.get("id"),
+                "ipAddress": session.get("ipAddress", "Unknown"),
+                "started": session.get("start"),
+                "lastActivity": session.get("lastAccess"),
+                "clients": session.get("clients", {})
+            })
+
+        # Get recent activity from audit logs (short list)
+        from models.audit_log import AuditLogFilter
+        from datetime import datetime, timedelta
+        
+        filter_params = AuditLogFilter(
+            user_id=user_id,
+            limit=10,
+            start_date=(datetime.now() - timedelta(days=30)).isoformat()
+        )
+        audit_response = await audit_logger.query_logs(filter_params)
+        
+        recent_actions = []
+        for log in audit_response.logs:
+            recent_actions.append({
+                "action": log.action,
+                "timestamp": log.timestamp,
+                "result": log.result,
+                "ip_address": log.ip_address,
+                "resource_type": log.resource_type
+            })
+        
+        # Get full activity timeline (for Activity Timeline tab)
+        timeline_filter = AuditLogFilter(
+            user_id=user_id,
+            limit=100,
+            start_date=(datetime.now() - timedelta(days=90)).isoformat()
+        )
+        timeline_response = await audit_logger.query_logs(timeline_filter)
+        
+        timeline_actions = []
+        for log in timeline_response.logs:
+            timeline_actions.append({
+                "action": log.action,
+                "timestamp": log.timestamp,
+                "result": log.result,
+                "ip_address": log.ip_address,
+                "resource_type": log.resource_type,
+                "resource_id": log.resource_id,
+                "details": log.metadata if hasattr(log, 'metadata') else {}
+            })
+        
+        # Build role_details for Roles & Permissions tab
+        role_details = []
+        for role in user_roles:
+            role_name = role.get("name")
+            if role_name:
+                # Map role to details (you can expand this with actual permission data)
+                role_obj = {
+                    "name": role_name,
+                    "display_name": role_name.replace("_", " ").title(),
+                    "description": role.get("description", f"{role_name} role"),
+                    "level": 2 if role_name == "admin" else 3,
+                    "permissions": get_role_permissions(role_name)
+                }
+                role_details.append(role_obj)
+        
+        # Get user's organization memberships (for Organizations tab)
+        organizations = await get_user_organizations(user_id, user.get("email"))
+
         return {
             "id": user.get("id"),
+            "user_id": user.get("id"),
             "username": user.get("username"),
             "email": user.get("email"),
-            "firstName": user.get("firstName", ""),
-            "lastName": user.get("lastName", ""),
+            "first_name": first_name,
+            "last_name": last_name,
+            "firstName": first_name,
+            "lastName": last_name,
+            "full_name": full_name,
             "enabled": user.get("enabled", True),
             "emailVerified": user.get("emailVerified", False),
-            "createdTimestamp": user.get("createdTimestamp"),
+            "email_verified": user.get("emailVerified", False),
+            "createdTimestamp": created_timestamp,
+            "created_timestamp": created_timestamp,
+            "created_at": created_timestamp,
+            "created_at_iso": created_at_iso,
+            "account_source": "keycloak",
             # Nested subscription object for frontend compatibility
             "subscription": {
                 "tier": _get_attr_value(attrs, "subscription_tier", "trial"),
@@ -496,7 +641,19 @@ async def get_user_details(user_id: str, admin: bool = Depends(require_admin)):
                 "role": _get_attr_value(attrs, "org_role", "member")
             },
             "roles": role_names,
+            "role_details": role_details,
+            "organizations": organizations,
             "last_login": _get_attr_value(attrs, "last_login"),
+            # Sessions and activity for old dist
+            "sessions": {
+                "active_count": len(sessions_list),
+                "sessions": sessions_list
+            },
+            "activity": {
+                "recent_actions": recent_actions,
+                "timeline": timeline_actions,
+                "total_actions": len(timeline_actions)
+            },
             "attributes": attrs
         }
 
@@ -554,8 +711,9 @@ async def update_user(
         # Audit log
         await audit_logger.log(
             action="user.updated",
+            result="success",
             user_id=user_id,
-            details={"updates": updates}
+            metadata={"updates": updates}
         )
 
         # Get updated user
@@ -603,8 +761,9 @@ async def delete_user(user_id: str, admin: bool = Depends(require_admin)):
         # Audit log
         await audit_logger.log(
             action="user.deleted",
+            result="success",
             user_id=user_id,
-            details={"email": email}
+            metadata={"email": email}
         )
 
         return {
@@ -662,8 +821,9 @@ async def reset_user_password(
                         # Audit log
                         await audit_logger.log(
                             action="user.password_reset_email_sent",
+                            result="success",
                             user_id=user_id,
-                            details={"email": email}
+                            metadata={"email": email}
                         )
                         
                         return {
@@ -696,8 +856,9 @@ async def reset_user_password(
             # Audit log
             await audit_logger.log(
                 action="user.password_reset_manual",
+                result="success",
                 user_id=user_id,
-                details={"email": email}
+                metadata={"email": email}
             )
             
             logger.info(f"Temporary password generated for user {user_id} (not logging password for security)")
@@ -774,8 +935,9 @@ async def assign_role(
         # Audit log
         await audit_logger.log(
             action="user.role_assigned",
+            result="success",
             user_id=user_id,
-            details={"role": role_name}
+            metadata={"role": role_name}
         )
         
         return {
@@ -811,8 +973,9 @@ async def remove_role(
         # Audit log
         await audit_logger.log(
             action="user.role_removed",
+            result="success",
             user_id=user_id,
-            details={"role": role}
+            metadata={"role": role}
         )
         
         return {
@@ -891,8 +1054,9 @@ async def revoke_session(
         # Audit log
         await audit_logger.log(
             action="user.session_revoked",
+            result="success",
             user_id=user_id,
-            details={"session_id": session_id}
+            metadata={"session_id": session_id}
         )
         
         return {
@@ -925,7 +1089,7 @@ async def revoke_all_sessions(user_id: str, admin: bool = Depends(require_admin)
         await audit_logger.log(
             action="user.all_sessions_revoked",
             user_id=user_id,
-            details={"email": user.get("email")}
+            metadata={"email": user.get("email")}
         )
         
         return {
@@ -968,7 +1132,7 @@ async def bulk_delete_users(
                     await audit_logger.log(
                         action="user.bulk_deleted",
                         user_id=user_id,
-                        details={"email": user.get("email")}
+                        metadata={"email": user.get("email")}
                     )
                 else:
                     results["failed"].append({"user_id": user_id, "error": "Failed to delete from Keycloak"})
@@ -1013,7 +1177,7 @@ async def bulk_assign_roles(
                     await audit_logger.log(
                         action="user.bulk_role_assigned",
                         user_id=user_id,
-                        details={"role": request.role, "email": user.get("email")}
+                        metadata={"role": request.role, "email": user.get("email")}
                     )
                 else:
                     results["failed"].append({"user_id": user_id, "error": "Failed to assign role"})
@@ -1064,7 +1228,7 @@ async def bulk_set_tier(
                     await audit_logger.log(
                         action="user.bulk_tier_changed",
                         user_id=user_id,
-                        details={"tier": request.tier, "email": user.get("email")}
+                        metadata={"tier": request.tier, "email": user.get("email")}
                     )
                 else:
                     results["failed"].append({"user_id": user_id, "error": "Failed to update tier"})

@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel
 import logging
+import json
 from datetime import datetime
 import sys
 import os
@@ -258,74 +259,111 @@ async def list_all_organizations(
     await require_admin(request)
 
     try:
-        # Get all organizations from manager
-        all_orgs = org_manager.list_all_organizations()
+        # Query database directly for accurate data
+        from database.connection import get_db_connection
 
-        # Apply filters
-        filtered_orgs = all_orgs
+        # Build query conditions
+        conditions = []
+        params = []
+        param_idx = 1
 
-        # Filter by status
         if status:
-            filtered_orgs = [org for org in filtered_orgs if org.status == status]
+            if status == "active":
+                conditions.append(f"o.is_active = ${param_idx}")
+                params.append(True)
+                param_idx += 1
+            elif status == "suspended":
+                conditions.append(f"o.is_active = ${param_idx}")
+                params.append(False)
+                param_idx += 1
 
-        # Filter by tier
         if tier:
-            filtered_orgs = [org for org in filtered_orgs if org.plan_tier == tier]
+            # Filter by tier from metadata_json using JSONB query
+            conditions.append(f"o.metadata_json::jsonb @> ${param_idx}::jsonb")
+            params.append(json.dumps({"plan_tier": tier}))
+            param_idx += 1
 
-        # Filter by search query (name)
         if search:
-            search_lower = search.lower()
-            filtered_orgs = [org for org in filtered_orgs if search_lower in org.name.lower()]
+            conditions.append(f"o.name ILIKE ${param_idx}")
+            params.append(f"%{search}%")
+            param_idx += 1
 
-        # Get total count before pagination
-        total = len(filtered_orgs)
+        where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
-        # Apply pagination
-        paginated_orgs = filtered_orgs[offset:offset + limit]
+        # Get database connection (already a context manager)
+        async with await get_db_connection() as conn:
+            # Get total count
+            count_query = f"SELECT COUNT(*) FROM organizations o {where_clause}"
+            total = await conn.fetchval(count_query, *params)
 
-        # Enrich with member counts and owner info
-        enriched_orgs = []
-        for org in paginated_orgs:
-            # Get member count
-            members = org_manager.get_org_users(org.id)
-            member_count = len(members)
+            # Get paginated organizations with member counts
+            list_query = f"""
+                SELECT 
+                    o.id,
+                    o.name,
+                    o.is_active,
+                    o.created_at,
+                    o.metadata_json,
+                    o.slug,
+                    (SELECT COUNT(*) FROM organization_members om WHERE om.organization_id = o.id) as member_count,
+                    (SELECT user_id FROM organization_members om WHERE om.organization_id = o.id AND om.role = 'OWNER' LIMIT 1) as owner_id
+                FROM organizations o
+                {where_clause}
+                ORDER BY o.created_at DESC
+                LIMIT ${param_idx} OFFSET ${param_idx + 1}
+            """
+            params.extend([limit, offset])
+            
+            rows = await conn.fetch(list_query, *params)
 
-            # Find owner and get their email from Keycloak
-            owner_display = "Unknown"
-            for member in members:
-                if member.role == "owner":
-                    # Look up user in Keycloak to get email/username
+            # Enrich with owner info from Keycloak (inside connection context to access rows)
+            enriched_orgs = []
+            for row in rows:
+                owner_display = "Unknown"
+                if row['owner_id']:
                     try:
-                        user_data = await get_user_by_id(member.user_id)
+                        user_data = await get_user_by_id(row['owner_id'])
                         if user_data:
-                            owner_display = user_data.get('email') or user_data.get('username') or member.user_id
+                            owner_display = user_data.get('email') or user_data.get('username') or row['owner_id']
                         else:
-                            owner_display = member.user_id
+                            owner_display = row['owner_id']
                     except Exception as e:
-                        logger.warning(f"Failed to fetch user info for owner {member.user_id}: {e}")
-                        owner_display = member.user_id  # Fallback to user_id
-                    break
+                        logger.warning(f"Failed to fetch user info for owner {row['owner_id']}: {e}")
+                        owner_display = row['owner_id']
 
-            enriched_orgs.append({
-                "id": org.id,
-                "name": org.name,
+                # Extract plan_tier from metadata_json
+                plan_tier = 'trial'
+                if row.get('metadata_json'):
+                    try:
+                        metadata = json.loads(row['metadata_json']) if isinstance(row['metadata_json'], str) else row['metadata_json']
+                        if isinstance(metadata, dict):
+                            plan_tier = metadata.get('plan_tier', 'trial')
+                    except:
+                        plan_tier = 'trial'
+
+                # Determine status
+                org_status = "active" if row['is_active'] else "suspended"
+
+                enriched_orgs.append({
+                "id": row['id'],
+                "name": row['name'],
                 "owner": owner_display,
-                "member_count": member_count,
-                "created_at": org.created_at.isoformat(),
-                "subscription_tier": org.plan_tier,
-                "status": org.status,
-                "lago_customer_id": org.lago_customer_id,
-                "stripe_customer_id": org.stripe_customer_id
+                "member_count": row['member_count'],
+                "created_at": row['created_at'].isoformat(),
+                "subscription_tier": plan_tier,
+                "status": org_status,
+                "lago_customer_id": None,  # Add if available in database
+                "stripe_customer_id": None  # Add if available in database
             })
 
-        logger.info(f"Listed {len(enriched_orgs)} organizations (total: {total}, filters: status={status}, tier={tier}, search={search})")
+            logger.info(f"Listed {len(enriched_orgs)} organizations from database (total: {total}, filters: status={status}, tier={tier}, search={search})")
 
-        return {
-            "organizations": enriched_orgs,
-            "total": total,
-            "limit": limit,
-            "offset": offset
-        }
+            return {
+                "organizations": enriched_orgs,
+                "total": total,
+                "limit": limit,
+                "offset": offset
+            }
 
     except Exception as e:
         logger.error(f"Error listing organizations: {e}")

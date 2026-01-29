@@ -647,6 +647,9 @@ async def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
             if response.status_code == 200:
                 sessions = response.json()
                 logger.info(f"User {user_id} has {len(sessions)} active sessions")
+                # Debug: Log first session structure
+                if sessions:
+                    logger.info(f"Sample session data: {sessions[0]}")
                 return sessions
             else:
                 logger.error(f"Failed to get user sessions: {response.status_code}")
