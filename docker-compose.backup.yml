@@ -1,0 +1,59 @@
+# Docker Compose Configuration for Database Backups
+
+# Add this to your docker-compose.yml file to enable persistent backup storage
+
+# Option 1: Named volume (simple, managed by Docker)
+volumes:
+  backup-data:
+    driver: local
+
+services:
+  ops-center:
+    volumes:
+      - backup-data:/app/backups
+    environment:
+      - BACKUP_DIR=/app/backups/database
+      - BACKUP_RETENTION_DAYS=7
+      - BACKUP_MAX_COUNT=30
+      - BACKUP_INTERVAL_HOURS=24
+      - BACKUP_ENABLED=true
+
+# Option 2: Bind mount to host directory (more control)
+# This allows you to easily access backups from the host
+
+services:
+  ops-center:
+    volumes:
+      - ./backups:/app/backups
+    environment:
+      - BACKUP_DIR=/app/backups/database
+      - BACKUP_RETENTION_DAYS=7
+      - BACKUP_MAX_COUNT=30
+      - BACKUP_INTERVAL_HOURS=24
+      - BACKUP_ENABLED=true
+
+# Option 3: External NFS/Network storage (production)
+# For distributed systems or network storage
+
+volumes:
+  backup-data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.0.0.10,rw
+      device: ":/mnt/backups"
+
+services:
+  ops-center:
+    volumes:
+      - backup-data:/app/backups
+    environment:
+      - BACKUP_DIR=/app/backups/database
+      - BACKUP_RETENTION_DAYS=14  # Keep longer for production
+      - BACKUP_MAX_COUNT=60
+      - BACKUP_INTERVAL_HOURS=12  # Backup twice daily
+      - BACKUP_ENABLED=true
+
+# Note: Make sure to also mount the backup volume if using docker exec
+# Example for accessing backups from host:
+# docker cp ops-center:/app/backups/database ./local-backup-copy

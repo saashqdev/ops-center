@@ -148,6 +148,9 @@ from extensions_admin_api import router as extensions_admin_api_router
 # Advanced Log Search API (Epic 2.5)
 from logs_search_api import router as logs_search_router
 
+# Database Backup API
+from backup_api import router as backup_router
+
 # System Metrics & Health Monitoring (Epic 2.5)
 from system_metrics_api import router as system_metrics_router
 from metrics_collector import MetricsCollector
@@ -641,6 +644,14 @@ async def startup_event():
         # from landing_page_settings_api import init_landing_settings
         # init_landing_settings(db_pool, redis_client)
         # logger.info("Landing Page Settings API initialized successfully")
+        
+        # Initialize Database Backup Service (scheduled backups)
+        from database_backup_service import get_backup_service
+        backup_service = get_backup_service()
+        # Start scheduled backup task in background
+        asyncio.create_task(backup_service.run_scheduled_backups())
+        logger.info(f"Database Backup Service initialized (interval: {backup_service.auto_backup_interval_hours}h)")
+        
     except Exception as e:
         logger.error(f"Failed to initialize credit system / BYOK / API keys: {e}")
         # Don't block startup, but credit-based features will fail
@@ -920,6 +931,10 @@ logger.info("My Apps API endpoints registered at /api/v1/my-apps (RBAC-filtered)
 # Advanced Log Search API (Epic 2.5)
 app.include_router(logs_search_router)
 logger.info("Advanced Log Search API endpoints registered at /api/v1/logs/search/advanced, /api/v1/logs/services, /api/v1/logs/stats")
+
+# Database Backup API
+app.include_router(backup_router)
+logger.info("Database Backup API endpoints registered at /api/backups")
 
 # Epic 1.8: Credit & Usage Metering System
 app.include_router(credit_router)

@@ -151,6 +151,7 @@ const LocalUserManagement = lazy(() => import('./pages/LocalUserManagement'));
 const UsageMetrics = lazy(() => import('./pages/UsageMetrics'));
 const Network = lazy(() => import('./pages/NetworkTabbed'));
 const StorageBackup = lazy(() => import('./pages/StorageBackup'));
+const BackupDashboard = lazy(() => import('../frontend/src/components/BackupDashboard.jsx'));
 const Security = lazy(() => import('./pages/Security'));
 const Authentication = lazy(() => import('./pages/Authentication'));
 const Extensions = lazy(() => import('./pages/Extensions'));
@@ -546,6 +547,7 @@ function AppRoutes() {
                   <Route path="system/usage-metrics" element={<UsageMetrics />} />
                   <Route path="system/network" element={<Network />} />
                   <Route path="system/storage" element={<StorageBackup />} />
+                  <Route path="backups" element={<BackupDashboard />} />
                   <Route path="system/security" element={<Security />} />
                   <Route path="system/authentication" element={<Authentication />} />
                   <Route path="system/extensions" element={<Extensions />} />

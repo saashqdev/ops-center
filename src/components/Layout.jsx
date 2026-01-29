@@ -538,6 +538,12 @@ export default function Layout({ children }) {
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
+                        name="Database Backups"
+                        href="/admin/backups"
+                        icon={iconMap.ArchiveBoxIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
                         name="Forgejo (Git)"
                         href="/admin/system/forgejo"
                         icon={iconMap.CodeBracketIcon}
