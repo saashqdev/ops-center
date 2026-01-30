@@ -134,7 +134,9 @@ const TraefikServices = () => {
       }
 
       const data = await response.json();
-      const successMsg = `Discovered ${data.count} services`;
+      // API returns array directly, calculate count
+      const count = Array.isArray(data) ? data.length : (data.count || 0);
+      const successMsg = `Discovered ${count} services`;
       setSuccess(successMsg);
       toast.success(successMsg);
       setErrors(prev => ({ ...prev, discover: null }));

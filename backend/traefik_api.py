@@ -24,8 +24,10 @@ from traefik_manager import (
 router = APIRouter(prefix="/api/v1/traefik", tags=["Traefik Management (Epic 1.3)"])
 logger = logging.getLogger(__name__)
 
-# Initialize Traefik manager
-traefik_manager = TraefikManager()
+# Initialize Traefik manager with correct path
+import os
+traefik_dir = os.getenv('TRAEFIK_DIR', '/home/ubuntu/Ops-Center-OSS/traefik')
+traefik_manager = TraefikManager(traefik_dir=traefik_dir)
 
 
 # ==================== Simple Request Models ====================
@@ -343,11 +345,13 @@ async def list_services():
 
                 if config and 'http' in config and 'services' in config['http']:
                     for name, service in config['http']['services'].items():
+                        servers = service.get('loadBalancer', {}).get('servers', [])
                         services.append({
                             'name': name,
                             'type': 'loadBalancer' if 'loadBalancer' in service else 'unknown',
-                            'servers': service.get('loadBalancer', {}).get('servers', []),
+                            'servers': servers,
                             'healthCheck': service.get('loadBalancer', {}).get('healthCheck', None),
+                            'healthy': len(servers) > 0,  # Basic check: has servers configured
                             'source_file': config_path.name
                         })
             except Exception as e:
@@ -703,49 +707,98 @@ async def get_traefik_dashboard():
 
 
 @router.get("/metrics")
-async def get_traefik_metrics(format: str = Query(default="json", regex="^(json|csv)$")):
+async def get_traefik_metrics(range: str = Query(default="24h"), format: str = Query(default="json", regex="^(json|csv)$")):
     """
-    Get Traefik metrics with optional CSV export (C13)
+    Get Traefik traffic metrics from Prometheus endpoint (C13)
 
     Query Parameters:
+        range: Time range (e.g., '24h', 'day', 'week') - currently not used
         format: Response format - 'json' (default) or 'csv'
 
     Returns:
-        JSON or CSV formatted metrics
+        JSON or CSV formatted traffic metrics
     """
     try:
+        import httpx
         from fastapi.responses import StreamingResponse
         import io
 
-        # Gather metrics
-        routes = traefik_manager.list_routes()
-        certificates = traefik_manager.list_certificates()
-        services = []
-        middleware = traefik_manager.list_middleware()
+        # Fetch Prometheus metrics from Traefik
+        TRAEFIK_METRICS_URL = "http://ops-center-traefik:8082/metrics"
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(TRAEFIK_METRICS_URL, timeout=10.0)
+            response.raise_for_status()
+            metrics_text = response.text
 
-        # Parse services from configs
-        for config_path in traefik_manager.dynamic_dir.glob("*.yml"):
+        # Parse metrics
+        requests_by_route = []
+        response_times = []
+        error_rates = []
+        status_codes = {}
+        
+        # Simple parsing of Prometheus metrics
+        service_requests = {}
+        service_durations = {}
+        
+        for line in metrics_text.split('\n'):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+                
             try:
-                import yaml
-                with open(config_path, 'r') as f:
-                    config = yaml.safe_load(f)
-                if config and 'http' in config and 'services' in config['http']:
-                    services.extend(config['http']['services'].keys())
-            except Exception:
-                pass
-
-        # Build metrics
+                if 'traefik_service_requests_total{' in line:
+                    # Extract service and count
+                    if 'service="' in line:
+                        service = line.split('service="')[1].split('"')[0]
+                        code = line.split('code="')[1].split('"')[0] if 'code="' in line else '200'
+                        value = int(float(line.split('}')[1].strip()))
+                        
+                        if service not in service_requests:
+                            service_requests[service] = {'total': 0, 'codes': {}}
+                        service_requests[service]['total'] += value
+                        service_requests[service]['codes'][code] = service_requests[service]['codes'].get(code, 0) + value
+                        
+                        # Aggregate status codes
+                        status_codes[code] = status_codes.get(code, 0) + value
+                        
+                elif 'traefik_service_request_duration_seconds_sum{' in line:
+                    if 'service="' in line:
+                        service = line.split('service="')[1].split('"')[0]
+                        value = float(line.split('}')[1].strip())
+                        service_durations[service] = value * 1000  # Convert to ms
+            except Exception as e:
+                logger.debug(f"Error parsing metric line: {e}")
+                continue
+        
+        # Build response data
+        for service, data in service_requests.items():
+            total = data['total']
+            errors = sum(count for code, count in data['codes'].items() if code.startswith(('4', '5')))
+            
+            # Clean service name for display
+            service_name = service.replace('@file', '').replace('@docker', '')
+            
+            requests_by_route.append({
+                "route": service_name,
+                "count": total
+            })
+            
+            response_times.append({
+                "route": service_name,
+                "avg_ms": service_durations.get(service, 0.0)
+            })
+            
+            error_rates.append({
+                "route": service_name,
+                "error_rate": (errors / total * 100) if total > 0 else 0.0
+            })
+        
         metrics_data = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "metrics": [
-                {"name": "routes_total", "value": len(routes), "unit": "count"},
-                {"name": "certificates_total", "value": len(certificates), "unit": "count"},
-                {"name": "services_total", "value": len(services), "unit": "count"},
-                {"name": "middlewares_total", "value": len(middleware), "unit": "count"},
-                {"name": "routes_with_tls", "value": sum(1 for r in routes if r.get('tls_enabled')), "unit": "count"},
-                {"name": "certificates_active", "value": sum(1 for c in certificates if c.get('status') == 'active'), "unit": "count"},
-                {"name": "certificates_expired", "value": sum(1 for c in certificates if c.get('status') == 'expired'), "unit": "count"}
-            ]
+            "requestsByRoute": requests_by_route,
+            "responseTimes": response_times,
+            "errorRates": error_rates,
+            "statusCodes": status_codes
         }
 
         # Return CSV if requested
@@ -755,17 +808,16 @@ async def get_traefik_metrics(format: str = Query(default="json", regex="^(json|
             writer = csv.writer(output)
 
             # Write header
-            writer.writerow(["timestamp", "metric_name", "value", "unit"])
+            writer.writerow(["route", "requests", "avg_response_ms", "error_rate_pct"])
 
             # Write metrics
-            timestamp = metrics_data["timestamp"]
-            for metric in metrics_data["metrics"]:
-                writer.writerow([
-                    timestamp,
-                    metric["name"],
-                    metric["value"],
-                    metric["unit"]
-                ])
+            for i, route_data in enumerate(requests_by_route):
+                route = route_data["route"]
+                count = route_data["count"]
+                avg_ms = response_times[i]["avg_ms"] if i < len(response_times) else 0
+                error_rate = error_rates[i]["error_rate"] if i < len(error_rates) else 0
+                
+                writer.writerow([route, count, avg_ms, error_rate])
 
             # Return CSV response
             output.seek(0)
@@ -778,6 +830,15 @@ async def get_traefik_metrics(format: str = Query(default="json", regex="^(json|
         # Return JSON by default
         return metrics_data
 
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to fetch Traefik metrics: {e}")
+        # Return empty data instead of error
+        return {
+            "requestsByRoute": [],
+            "responseTimes": [],
+            "errorRates": [],
+            "statusCodes": {}
+        }
     except Exception as e:
         logger.error(f"Failed to get metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))

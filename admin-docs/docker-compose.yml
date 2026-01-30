@@ -4,12 +4,23 @@ services:
   admin-docs:
     build: .
     container_name: uc1-admin-docs
+    restart: unless-stopped
     ports:
-      - "8086:8086"
+      - "8087:8086"
+    networks:
+      - unicorn-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.docs.rule=Host(`${APP_DOMAIN:-kubeworkz.io}`) && PathPrefix(`/user-guide`)"
+      - "traefik.http.routers.docs.entrypoints=websecure"
+      - "traefik.http.routers.docs.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.docs.priority=1000"
+      - "traefik.http.services.docs.loadbalancer.server.port=8086"
+      - "traefik.http.middlewares.docs-stripprefix.stripprefix.prefixes=/user-guide"
+      - "traefik.http.routers.docs.middlewares=docs-stripprefix"
     volumes:
       - ./docs:/docs/docs:ro
       - ./mkdocs.yml:/docs/mkdocs.yml:ro
-    restart: unless-stopped
     environment:
       - MKDOCS_DEV_ADDR=0.0.0.0:8086
     healthcheck:
@@ -17,3 +28,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+networks:
+  unicorn-network:
+    name: ops-center-oss_unicorn-network
+    external: true

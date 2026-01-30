@@ -13,10 +13,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-import subprocess
 import json
 import logging
 import re
+import docker
 
 logger = logging.getLogger(__name__)
 
@@ -205,29 +205,17 @@ def get_docker_containers_with_traefik() -> List[Dict[str, Any]]:
         List of containers with their Traefik configurations
     """
     try:
+        # Initialize Docker client
+        client = docker.from_env()
+        
         # Get all running containers
-        result = subprocess.run(
-            ["docker", "ps", "--format", "{{.Names}}"],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-
-        container_names = [name.strip() for name in result.stdout.split("\n") if name.strip()]
-
+        containers = client.containers.list()
         containers_data = []
 
-        for container_name in container_names:
+        for container in containers:
             try:
-                # Get container labels
-                result = subprocess.run(
-                    ["docker", "inspect", container_name, "--format", "{{json .Config.Labels}}"],
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-
-                labels = json.loads(result.stdout.strip())
+                container_name = container.name
+                labels = container.labels
 
                 # Check if container has Traefik labels
                 has_traefik = any(key.startswith("traefik") for key in labels.keys())
@@ -240,17 +228,17 @@ def get_docker_containers_with_traefik() -> List[Dict[str, Any]]:
                             "labels": labels,
                             "parsed": parsed
                         })
-            except subprocess.CalledProcessError as e:
-                logger.warning(f"Failed to inspect container {container_name}: {e}")
-                continue
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse labels for {container_name}: {e}")
+            except Exception as e:
+                logger.warning(f"Failed to inspect container {container.name}: {e}")
                 continue
 
         return containers_data
 
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to list Docker containers: {e}")
+    except docker.errors.DockerException as e:
+        logger.error(f"Failed to connect to Docker: {e}")
+        raise HTTPException(status_code=500, detail="Failed to query Docker containers")
+    except Exception as e:
+        logger.error(f"Unexpected error querying Docker: {e}")
         raise HTTPException(status_code=500, detail="Failed to query Docker containers")
 
 

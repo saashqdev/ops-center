@@ -85,6 +85,24 @@ const TraefikMetrics = () => {
       }
 
       const data = await response.json();
+      
+      // Calculate summary statistics
+      const totalRequests = data.requestsByRoute?.reduce((sum, r) => sum + r.count, 0) || 0;
+      const avgResponseTime = data.responseTimes?.length > 0
+        ? (data.responseTimes.reduce((sum, r) => sum + r.avg_ms, 0) / data.responseTimes.length).toFixed(2)
+        : 0;
+      const totalErrors = Object.entries(data.statusCodes || {})
+        .filter(([code]) => code.startsWith('4') || code.startsWith('5'))
+        .reduce((sum, [, count]) => sum + count, 0);
+      const errorRate = totalRequests > 0 ? ((totalErrors / totalRequests) * 100).toFixed(2) : 0;
+      const activeRoutes = data.requestsByRoute?.length || 0;
+      
+      // Add computed fields to data
+      data.totalRequests = totalRequests;
+      data.avgResponseTime = avgResponseTime;
+      data.errorRate = errorRate;
+      data.activeRoutes = activeRoutes;
+      
       setMetricsData(data);
       setError(null);
       setRetryCount(0);
@@ -150,11 +168,11 @@ const TraefikMetrics = () => {
   };
 
   const responseTimesData = {
-    labels: metricsData.responseTimes?.map((r) => r.timestamp) || [],
+    labels: metricsData.responseTimes?.map((r) => r.route) || [],
     datasets: [
       {
         label: 'Response Time (ms)',
-        data: metricsData.responseTimes?.map((r) => r.avgTime) || [],
+        data: metricsData.responseTimes?.map((r) => r.avg_ms) || [],
         borderColor: 'rgba(34, 197, 94, 1)',
         backgroundColor: 'rgba(34, 197, 94, 0.2)',
         tension: 0.4,
@@ -164,11 +182,11 @@ const TraefikMetrics = () => {
   };
 
   const errorRatesData = {
-    labels: metricsData.errorRates?.map((r) => r.timestamp) || [],
+    labels: metricsData.errorRates?.map((r) => r.route) || [],
     datasets: [
       {
         label: 'Error Rate (%)',
-        data: metricsData.errorRates?.map((r) => r.rate) || [],
+        data: metricsData.errorRates?.map((r) => r.error_rate) || [],
         borderColor: 'rgba(239, 68, 68, 1)',
         backgroundColor: 'rgba(239, 68, 68, 0.2)',
         tension: 0.4,
@@ -217,11 +235,26 @@ const TraefikMetrics = () => {
         </Box>
         <Box display="flex" gap={2}>
           <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>Time Range</InputLabel>
+            <InputLabel sx={{ color: 'white' }}>Time Range</InputLabel>
             <Select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
               label="Time Range"
+              sx={{
+                color: 'white',
+                '.MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'white'
+                },
+                '.MuiSvgIcon-root': {
+                  color: 'white'
+                }
+              }}
             >
               <MenuItem value="hour">Last Hour</MenuItem>
               <MenuItem value="day">Last 24 Hours</MenuItem>

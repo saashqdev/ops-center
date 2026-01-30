@@ -93,7 +93,7 @@ export default function HelpPanel({ isOpen, onClose, currentPage = 'dashboard' }
   const pageHelp = helpContent[currentPage] || helpContent.dashboard;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-white dark:bg-gray-800 shadow-2xl z-50 flex flex-col">
+    <div className="fixed top-20 bottom-0 right-0 w-96 bg-white dark:bg-gray-800 shadow-2xl z-50 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b dark:border-gray-700">
         <div className="flex justify-between items-center">
@@ -219,7 +219,9 @@ export default function HelpPanel({ isOpen, onClose, currentPage = 'dashboard' }
             </h3>
             <div className="space-y-2">
               <a 
-                href="http://localhost:8081" 
+                href={window.location.hostname.includes('localhost') 
+                  ? `http://${window.location.hostname}:8087` 
+                  : `https://docs.${window.location.hostname.replace(/^(www\.|app\.)/, '')}`}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="block p-3 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600"

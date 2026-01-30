@@ -8,6 +8,7 @@ Includes Docker container discovery and health monitoring.
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field, validator
 from typing import Dict, List, Optional, Any
+from pathlib import Path
 import logging
 import docker
 from datetime import datetime
@@ -351,17 +352,24 @@ async def delete_service(service_id: str, admin: Dict = Depends(require_admin)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/discover/containers", response_model=List[DiscoveredContainer])
-async def discover_containers(admin: Dict = Depends(require_admin)):
+@router.post("/discover")
+@router.get("/discover")
+async def discover_services(auto_create: bool = True, admin: Dict = Depends(require_admin)):
     """
     Discover running Docker containers for service creation.
+    Supports both GET and POST methods for compatibility.
+    
+    Args:
+        auto_create: Automatically create Traefik services for discovered containers (default: True)
 
     Returns:
         List of discovered containers
     """
     try:
+        import yaml
         client = docker.from_env()
         containers = []
+        created_services = []
 
         for container in client.containers.list():
             # Get container info
@@ -390,7 +398,7 @@ async def discover_containers(admin: Dict = Depends(require_admin)):
                 # Use internal Docker network URL
                 suggested_url = f"http://{container_name}:{first_port}"
 
-            containers.append(DiscoveredContainer(
+            discovered = DiscoveredContainer(
                 container_id=container.id[:12],
                 container_name=container.name,
                 image=container_info['Config']['Image'],
@@ -398,9 +406,57 @@ async def discover_containers(admin: Dict = Depends(require_admin)):
                 ports=ports,
                 networks=networks,
                 suggested_url=suggested_url
-            ))
+            )
+            containers.append(discovered)
+            
+            # Auto-create service if requested and has suggested URL
+            if auto_create and suggested_url:
+                try:
+                    import yaml
+                    import os
+                    service_name = container.name.replace('-', '_')
+                    
+                    # Use environment variable or default to host path
+                    traefik_dynamic_dir = os.getenv('TRAEFIK_DYNAMIC_DIR', '/home/ubuntu/Ops-Center-OSS/traefik/dynamic')
+                    services_file = Path(traefik_dynamic_dir) / "discovered_services.yml"
+                    
+                    # Ensure directory exists
+                    services_file.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    if services_file.exists():
+                        with open(services_file, 'r') as f:
+                            config = yaml.safe_load(f) or {}
+                    else:
+                        config = {}
+                    
+                    # Initialize structure
+                    if 'http' not in config:
+                        config['http'] = {}
+                    if 'services' not in config['http']:
+                        config['http']['services'] = {}
+                    
+                    # Add service if not already exists
+                    if service_name not in config['http']['services']:
+                        config['http']['services'][service_name] = {
+                            'loadBalancer': {
+                                'servers': [{'url': suggested_url}],
+                                'passHostHeader': True
+                            }
+                        }
+                        
+                        # Write back to file
+                        with open(services_file, 'w') as f:
+                            yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+                        
+                        created_services.append(service_name)
+                        logger.info(f"Auto-created service '{service_name}' for container {container.name}")
+                    else:
+                        logger.debug(f"Service '{service_name}' already exists, skipping")
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to auto-create service for {container.name}: {e}")
 
-        logger.info(f"Discovered {len(containers)} containers")
+        logger.info(f"Discovered {len(containers)} containers, created {len(created_services)} services")
         return containers
 
     except docker.errors.DockerException as e:
@@ -409,3 +465,15 @@ async def discover_containers(admin: Dict = Depends(require_admin)):
     except Exception as e:
         logger.error(f"Error discovering containers: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/discover/containers", response_model=List[DiscoveredContainer])
+async def discover_containers(admin: Dict = Depends(require_admin)):
+    """
+    Discover running Docker containers for service creation.
+    Legacy endpoint - redirects to /discover
+
+    Returns:
+        List of discovered containers
+    """
+    return await discover_services(admin)

@@ -1,7 +1,6 @@
 site_name: UC-1 Pro Admin Dashboard Documentation
 site_description: Complete guide to managing your UC-1 Pro AI infrastructure
 site_author: Magic Unicorn Unconventional Technology & Stuff Inc
-site_url: http://localhost:8086
 
 # Repository
 repo_name: UC-1-Pro/admin-dashboard

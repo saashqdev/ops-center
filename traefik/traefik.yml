@@ -31,16 +31,20 @@ entryPoints:
         certResolver: letsencrypt
         domains:
           # Main domain and wildcard
-          - main: ${APP_DOMAIN:-ops-center.com}
+          - main: kubeworkz.io
             sans:
-              - "*.${APP_DOMAIN:-ops-center.com}"
+              - "*.kubeworkz.io"
+  
+  # Metrics endpoint
+  metrics:
+    address: ":8082"
 
 # Certificate Resolvers
 certificatesResolvers:
   # Let's Encrypt with DNS-01 challenge (supports wildcards)
   letsencrypt:
     acme:
-      email: ${ACME_EMAIL:-admin@ops-center.com}
+      email: support@kubeworkz.io
       storage: /letsencrypt/acme.json
       
       # DNS Challenge for wildcard certificates
@@ -87,10 +91,9 @@ providers:
 
 # Logging
 log:
-  level: INFO
+  level: DEBUG
   # Available levels: DEBUG, INFO, WARN, ERROR, FATAL, PANIC
-  filePath: /var/log/traefik/traefik.log
-  format: json
+  format: common
 
 # Access logs
 accessLog:
@@ -107,8 +110,3 @@ metrics:
     addEntryPointsLabels: true
     addServicesLabels: true
     entryPoint: metrics
-
-# Additional entry point for metrics
-entryPoints:
-  metrics:
-    address: ":8082"

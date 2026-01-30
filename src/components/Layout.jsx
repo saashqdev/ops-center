@@ -76,6 +76,7 @@ import MobileNavigation from './MobileNavigation';
 import MobileBreadcrumbs from './MobileBreadcrumbs';
 import BottomNavBar from './BottomNavBar';
 import { useOrganization } from '../contexts/OrganizationContext';
+import HelpPanel from './HelpPanel';
 
 // Icon mapping for dynamic icon resolution from route configuration
 const iconMap = {
@@ -172,6 +173,7 @@ export default function Layout({ children }) {
   };
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(loadSidebarCollapsed);
+  const [helpPanelOpen, setHelpPanelOpen] = useState(false);
 
   // Toggle sidebar collapsed state
   const toggleSidebar = () => {
@@ -1004,10 +1006,7 @@ export default function Layout({ children }) {
               {/* Help Button */}
               <div className="px-2 mb-4">
                 <button
-                  onClick={() => {
-                    const currentHost = window.location.hostname;
-                    window.open(`http://${currentHost}:8086`, '_blank');
-                  }}
+                  onClick={() => setHelpPanelOpen(true)}
                   className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                     currentTheme === 'unicorn'
                       ? 'text-purple-200 hover:bg-white/10 hover:text-white'
@@ -1207,6 +1206,13 @@ export default function Layout({ children }) {
 
       {/* Bottom Navigation Bar - Mobile Only */}
       <BottomNavBar currentPath={location.pathname} userRole={userInfo.role} />
+
+      {/* Help Panel */}
+      <HelpPanel 
+        isOpen={helpPanelOpen} 
+        onClose={() => setHelpPanelOpen(false)} 
+        currentPage={location.pathname.split('/').pop() || 'dashboard'} 
+      />
     </div>
   );
 }

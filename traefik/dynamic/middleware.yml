@@ -4,9 +4,39 @@
 http:
   # Routers
   routers:
+    # Main application
+    ops-center-main:
+      rule: "Host(`kubeworkz.io`)"
+      priority: 100
+      entryPoints:
+        - websecure
+      service: ops-center-service
+      tls:
+        certResolver: letsencrypt
+    
+    # Keycloak authentication
+    keycloak:
+      rule: "Host(`auth.kubeworkz.io`)"
+      priority: 100
+      entryPoints:
+        - websecure
+      service: keycloak-service
+      tls:
+        certResolver: letsencrypt
+    
+    # Documentation
+    docs:
+      rule: "Host(`docs.kubeworkz.io`)"
+      priority: 100
+      entryPoints:
+        - websecure
+      service: docs-service
+      tls:
+        certResolver: letsencrypt
+    
     # Catch-all router for undefined subdomains
     catch-all:
-      rule: "HostRegexp(`{subdomain:[a-z0-9-]+}.${APP_DOMAIN}`)"
+      rule: "HostRegexp(`{subdomain:[a-z0-9-]+}.kubeworkz.io`)"
       priority: 1
       entryPoints:
         - websecure
@@ -16,11 +46,29 @@ http:
   
   # Services
   services:
+    # Main Ops Center application
+    ops-center-service:
+      loadBalancer:
+        servers:
+          - url: "http://ops-center-app:8084"
+    
+    # Keycloak service
+    keycloak-service:
+      loadBalancer:
+        servers:
+          - url: "http://uchub-keycloak:8080"
+    
+    # Documentation service
+    docs-service:
+      loadBalancer:
+        servers:
+          - url: "http://uc1-admin-docs:8086"
+    
     # Default backend for undefined routes
     default-backend:
       loadBalancer:
         servers:
-          - url: "http://ops-center-direct:8084"
+          - url: "http://ops-center-app:8084"
   
   # Middlewares
   middlewares:

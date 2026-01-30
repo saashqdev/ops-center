@@ -1,0 +1,212 @@
+version: '3.8'
+
+# Traefik-Integrated Ops Center Stack
+# This compose file sets up the complete system with Traefik reverse proxy
+
+services:
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v2.10
+    container_name: ops-center-traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      - APP_DOMAIN=${APP_DOMAIN:-kubeworkz.io}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@kubeworkz.io}
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+      - ./traefik/letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+      - unicorn-network
+    labels:
+      - "traefik.enable=true"
+      # Traefik Dashboard
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${APP_DOMAIN:-kubeworkz.io}`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
+      # Dashboard auth (change password: htpasswd -nb admin yourpassword)
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$8EVjn/nj$$GiLUZqcbueTFeD23SuB6x0"
+
+  # PostgreSQL Database
+  postgresql:
+    image: postgres:16-alpine
+    container_name: ops-center-postgresql
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-unicorn}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me}
+      - POSTGRES_DB=${POSTGRES_DB:-unicorn_db}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - unicorn-network
+      - uchub-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-unicorn}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for session management
+  unicorn-lago-redis:
+    image: redis:7-alpine
+    container_name: unicorn-lago-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - unicorn-network
+    command: redis-server --appendonly yes
+
+  # Keycloak (via Traefik)
+  uchub-keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    container_name: uchub-keycloak
+    restart: unless-stopped
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-vz9cA8-kuX-oso3DC-w7}
+      - KEYCLOAK_FRONTEND_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
+      - KC_PROXY=edge
+      - KC_HOSTNAME=auth.${APP_DOMAIN:-kubeworkz.io}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_HTTP_RESPONSE_HEADER__CONTENT_SECURITY_POLICY=frame-ancestors 'self' https://auth.${APP_DOMAIN:-kubeworkz.io} https://${APP_DOMAIN:-kubeworkz.io}
+    command: start-dev
+    volumes:
+      - ./keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro      
+    networks:
+      - web
+      - uchub-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`auth.${APP_DOMAIN:-kubeworkz.io}`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+
+  # Ops Center Main Application (via Traefik)
+  ops-center:
+    image: kubeworkz/ops_center:latest
+    container_name: ops-center-app
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./backend:/app
+      - ./public:/app/public
+      - ./dist:/app/dist
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - ./avatars:/app/avatars
+      - ./traefik/dynamic:/home/ubuntu/Ops-Center-OSS/traefik/dynamic
+    env_file:
+      - .env.auth
+    environment:
+      - EXTERNAL_HOST=${APP_DOMAIN:-kubeworkz.io}
+      - EXTERNAL_PROTOCOL=https
+      - OAUTH_CLIENT_ID=ops-center
+      - OPS_CENTER_OAUTH_CLIENT_SECRET=vz9cA8-kuX-oso3DC-w7
+      - KEYCLOAK_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
+      - KEYCLOAK_PUBLIC_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
+      - KEYCLOAK_REALM=uchub
+      - KEYCLOAK_LOGOUT_REDIRECT=https://${APP_DOMAIN:-kubeworkz.io}/auth/logged-out
+      - KEYCLOAK_ADMIN_USER=admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-vz9cA8-kuX-oso3DC-w7}
+      - SESSION_SECRET_KEY=${SESSION_SECRET_KEY:-generate-with-openssl-rand-hex-32}
+      # Stripe Configuration
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_API_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - STRIPE_SUCCESS_URL=https://${APP_DOMAIN:-kubeworkz.io}/checkout/success
+      - STRIPE_CANCEL_URL=https://${APP_DOMAIN:-kubeworkz.io}/checkout/cancelled
+      # Lago Configuration
+      - LAGO_API_URL=http://unicorn-lago-api:3000
+      - LAGO_PUBLIC_URL=https://billing-api.${APP_DOMAIN:-kubeworkz.io}
+      - LAGO_API_KEY=${LAGO_API_KEY}
+      # Redis for sessions
+      - REDIS_HOST=unicorn-lago-redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_URL=redis://unicorn-lago-redis:6379/0
+      # PostgreSQL Database
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-unicorn}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me}
+      - POSTGRES_DB=${POSTGRES_DB:-unicorn_db}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-unicorn}:${POSTGRES_PASSWORD:-change-me}@postgresql:5432/${POSTGRES_DB:-unicorn_db}
+      # Credential Encryption Key (Fernet)
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-IbK1FMAifmKLomWWd4qRNdfg8P6ZOJFhdMwuHXtjFoc=}
+      # BYOK Encryption Key (for user API keys)
+      - BYOK_ENCRYPTION_KEY=${BYOK_ENCRYPTION_KEY:-979uZTWNhpbrBcruHNRkply7Bh9oPXXYBvo0OJVd9vQ=}
+    networks:
+      - web
+      - unicorn-network
+      - uchub-network
+    depends_on:
+      - postgresql
+      - unicorn-lago-redis
+      - uchub-keycloak
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      # Main application
+      - "traefik.http.routers.ops-center.rule=Host(`${APP_DOMAIN:-kubeworkz.io}`)"
+      - "traefik.http.routers.ops-center.entrypoints=websecure"
+      - "traefik.http.routers.ops-center.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.ops-center.priority=1"
+      - "traefik.http.services.ops-center.loadbalancer.server.port=8084"
+
+  # Documentation (via Traefik with subdomain)
+  admin-docs:
+    build: ./admin-docs
+    container_name: uc1-admin-docs
+    restart: unless-stopped
+    volumes:
+      - ./admin-docs/docs:/docs/docs:ro
+      - ./admin-docs/mkdocs.yml:/docs/mkdocs.yml:ro
+    environment:
+      - MKDOCS_DEV_ADDR=0.0.0.0:8086
+    networks:
+      - web
+    depends_on:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.docs.rule=Host(`docs.${APP_DOMAIN:-kubeworkz.io}`)"
+      - "traefik.http.routers.docs.entrypoints=websecure"
+      - "traefik.http.routers.docs.tls.certresolver=letsencrypt"
+      - "traefik.http.services.docs.loadbalancer.server.port=8086"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8086/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  web:
+    name: web
+    driver: bridge
+  unicorn-network:
+    name: ops-center-oss_unicorn-network
+    driver: bridge
+  uchub-network:
+    name: ops-center-oss_uchub-network
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:

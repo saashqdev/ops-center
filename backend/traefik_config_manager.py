@@ -19,8 +19,8 @@ from pydantic import BaseModel, Field, validator
 logger = logging.getLogger(__name__)
 
 # Configuration paths
-TRAEFIK_DYNAMIC_DIR = Path("/home/ubuntu/Infrastructure/traefik/dynamic")
-TRAEFIK_BACKUP_DIR = Path("/home/ubuntu/Infrastructure/traefik/backups")
+TRAEFIK_DYNAMIC_DIR = Path(os.getenv('TRAEFIK_DYNAMIC_DIR', '/home/ubuntu/Ops-Center-OSS/traefik/dynamic'))
+TRAEFIK_BACKUP_DIR = Path(os.getenv('TRAEFIK_BACKUP_DIR', '/home/ubuntu/Ops-Center-OSS/traefik/backups'))
 TRAEFIK_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 

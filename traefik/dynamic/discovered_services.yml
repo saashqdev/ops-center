@@ -1,0 +1,22 @@
+http:
+  services:
+    ops_center_traefik:
+      loadBalancer:
+        servers:
+        - url: http://ops-center-traefik:443
+        passHostHeader: true
+    lago_front:
+      loadBalancer:
+        servers:
+        - url: http://lago-front:82
+        passHostHeader: true
+    lago_api:
+      loadBalancer:
+        servers:
+        - url: http://lago-api:3000
+        passHostHeader: true
+    lago_db:
+      loadBalancer:
+        servers:
+        - url: http://lago-db:5432
+        passHostHeader: true

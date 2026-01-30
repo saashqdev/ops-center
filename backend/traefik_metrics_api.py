@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/traefik/metrics", tags=["Traefik Metrics"])
 
 # Traefik Prometheus metrics endpoint
-TRAEFIK_METRICS_URL = "http://traefik:8082/metrics"
+TRAEFIK_METRICS_URL = "http://ops-center-traefik:8082/metrics"
 
 
 class RouteMetrics(BaseModel):
@@ -157,6 +157,66 @@ def parse_prometheus_metrics(metrics_text: str) -> Dict[str, Any]:
             continue
 
     return parsed
+
+
+@router.get("")
+async def get_aggregated_metrics(range: str = "24h", admin: Dict = Depends(require_admin)):
+    """
+    Get aggregated metrics for traffic dashboard.
+    
+    Args:
+        range: Time range (not currently used, returns current metrics)
+    
+    Returns:
+        Aggregated metrics for frontend dashboard
+    """
+    try:
+        # Get route metrics
+        route_metrics = await get_route_metrics(admin)
+        
+        # Transform to frontend format
+        requests_by_route = [
+            {
+                "route": m.route_name,
+                "count": m.request_count
+            }
+            for m in route_metrics
+        ]
+        
+        response_times = [
+            {
+                "route": m.route_name,
+                "avg_ms": m.avg_response_time_ms
+            }
+            for m in route_metrics
+        ]
+        
+        error_rates = [
+            {
+                "route": m.route_name,
+                "error_rate": m.error_rate
+            }
+            for m in route_metrics
+        ]
+        
+        # Aggregate status codes
+        status_codes = {}
+        for m in route_metrics:
+            for code, count in m.status_codes.items():
+                status_codes[code] = status_codes.get(code, 0) + count
+        
+        return {
+            "requestsByRoute": requests_by_route,
+            "responseTimes": response_times,
+            "errorRates": error_rates,
+            "statusCodes": status_codes
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting aggregated metrics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/overview", response_model=TraefikStats)
