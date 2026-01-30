@@ -104,7 +104,7 @@ export default function ProviderList({ providers, onEdit, onDelete, onAdd }) {
               <td className={`py-4 px-4 ${
                 currentTheme === 'unicorn' ? 'text-purple-200' : currentTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
               }`}>
-                {provider.from_email}
+                {provider.smtp_from || <span className="italic text-gray-400">Not configured</span>}
               </td>
               <td className="py-4 px-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${

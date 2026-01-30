@@ -4079,15 +4079,18 @@ async def logout(request: Request, current_user: dict = Depends(get_current_user
         # Encode redirect URI
         try:
             import urllib.parse
-            encoded_redirect = urllib.parse.quote_plus(logout_confirmation_url)
+            encoded_redirect = urllib.parse.quote(logout_confirmation_url, safe='')
         except Exception:
             encoded_redirect = logout_confirmation_url
 
         # Prefer id_token_hint to bypass the Keycloak confirmation page and keep styles on our site
         if id_token:
+            # URL encode the id_token as well
+            import urllib.parse
+            encoded_id_token = urllib.parse.quote(id_token, safe='')
             keycloak_logout_url = (
                 f"{keycloak_external_url}/realms/{keycloak_realm}/protocol/openid-connect/logout"
-                f"?id_token_hint={id_token}"
+                f"?id_token_hint={encoded_id_token}"
                 f"&post_logout_redirect_uri={encoded_redirect}"
             )
         else:

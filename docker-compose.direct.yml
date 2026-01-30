@@ -41,10 +41,14 @@ services:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-vz9cA8-kuX-oso3DC-w7}
       - KEYCLOAK_FRONTEND_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
+      - KC_PROXY=edge
+      - KC_HOSTNAME=auth.${APP_DOMAIN:-kubeworkz.io}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT_HTTPS=false
       # Allow framing from our domain; tighten as needed
       - KC_HTTP_RESPONSE_HEADER__CONTENT_SECURITY_POLICY=frame-ancestors 'self' https://auth.${APP_DOMAIN:-kubeworkz.io} https://${APP_DOMAIN:-kubeworkz.io}
-    command: >-
-      start-dev --proxy edge --hostname auth.${APP_DOMAIN:-kubeworkz.io} --hostname-strict=true --hostname-strict-https=true
+    command: start-dev
     volumes:
       # Mount custom UC-1 Pro theme
       - ./keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro      

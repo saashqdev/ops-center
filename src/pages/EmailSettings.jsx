@@ -20,6 +20,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
+console.log('EmailSettings.jsx module loaded - BUILD TIME: 2026-01-29 22:40');
+
 // Email Provider API helper
 const emailProviderAPI = {
   async listProviders() {
@@ -84,17 +86,22 @@ const emailProviderAPI = {
       credentials: 'include'
     });
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({ detail: 'Failed to delete provider' }));
       throw new Error(error.detail || 'Failed to delete provider');
     }
-    return response.json();
+    // 204 No Content - no response body
+    return response.status === 204 ? null : response.json();
   },
 
   async sendTestEmail(recipient, providerId = null) {
+    const payload = { recipient_email: recipient };
+    if (providerId) {
+      payload.provider_id = providerId;
+    }
     const response = await fetch('/api/v1/email-provider/test-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recipient, provider_id: providerId }),
+      body: JSON.stringify(payload),
       credentials: 'include'
     });
     if (!response.ok) {
@@ -235,13 +242,16 @@ const copyToClipboard = (text) => {
 };
 
 // Main EmailSettings component
-export default function EmailSettings() {
+export default function EmailSettingsV2() {
+  console.log('🔥 EmailSettings component rendered - VERSION: 2026-01-29-23:55-V2');
   const { currentTheme } = useTheme();
   const toast = useToast();
   const [providers, setProviders] = useState([]);
+  console.log('📧 Current providers state:', providers);
   const [activeProvider, setActiveProvider] = useState(null);
   const [emailHistory, setEmailHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);  // Add refresh key to force re-render
   const [showProviderDialog, setShowProviderDialog] = useState(false);
   const [showTestDialog, setShowTestDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
@@ -290,9 +300,12 @@ export default function EmailSettings() {
         emailProviderAPI.getEmailHistory(1, 50)
       ]);
       // Extract arrays from response objects (backend returns { success: true, providers: [...] })
+      console.log('loadData received providers:', providersData.providers);
       setProviders(providersData.providers || []);
       setActiveProvider(activeData?.provider || null);
       setEmailHistory(historyData.history || []);
+      setRefreshKey(prev => prev + 1);  // Force re-render
+      console.log('loadData completed, refreshKey incremented');
     } catch (error) {
       console.error('Failed to load email settings:', error);
       toast.error('Failed to load email settings: ' + error.message);
@@ -308,18 +321,18 @@ export default function EmailSettings() {
       setFormData({
         provider_type: provider.provider_type,
         name: provider.name,
-        from_email: provider.from_email,
-        client_id: provider.client_id || '',
-        client_secret: '***HIDDEN***',
-        tenant_id: provider.tenant_id || '',
+        from_email: provider.smtp_from || '',  // Backend uses smtp_from
+        client_id: provider.oauth2_client_id || '',  // Backend uses oauth2_client_id
+        client_secret: provider.oauth2_client_secret ? '***HIDDEN***' : '',
+        tenant_id: provider.oauth2_tenant_id || '',
         smtp_host: provider.smtp_host || '',
         smtp_port: provider.smtp_port || '587',
-        smtp_username: provider.smtp_username || '',
-        smtp_password: '***HIDDEN***',
-        api_key: '***HIDDEN***',
-        aws_region: provider.aws_region || 'us-east-1',
+        smtp_username: provider.smtp_user || '',  // Backend uses smtp_user
+        smtp_password: provider.smtp_password ? '***HIDDEN***' : '',
+        api_key: provider.api_key ? '***HIDDEN***' : '',
+        aws_region: provider.provider_config?.aws_region || 'us-east-1',  // Backend uses provider_config.aws_region
         enabled: provider.enabled,
-        config: JSON.stringify(provider.config || {}, null, 2)
+        config: JSON.stringify(provider.provider_config || {}, null, 2)  // Backend uses provider_config
       });
     } else {
       setEditingProvider(null);
@@ -361,6 +374,7 @@ export default function EmailSettings() {
   };
 
   const handleSaveProvider = async () => {
+    console.log('handleSaveProvider called');
     try {
       // Validate required fields
       const selectedType = PROVIDER_TYPES.find(p => p.id === formData.provider_type);
@@ -398,8 +412,8 @@ export default function EmailSettings() {
         if (formData.api_key && formData.api_key !== '***HIDDEN***') {
           providerData.api_key = formData.api_key;
         }
-        // AWS region goes in provider_config
-        if (formData.aws_region) {
+        // AWS region goes in provider_config ONLY for AWS SES
+        if (formData.provider_type === 'aws_ses' && formData.aws_region) {
           providerData.provider_config.aws_region = formData.aws_region;
         }
       }
@@ -416,15 +430,24 @@ export default function EmailSettings() {
       }
 
       // Create or update
+      console.log('Saving provider:', { editingProvider, providerData });
       if (editingProvider) {
+        console.log('Calling updateProvider...');
         await emailProviderAPI.updateProvider(editingProvider.id, providerData);
+        console.log('updateProvider completed');
       } else {
+        console.log('Calling createProvider...');
         await emailProviderAPI.createProvider(providerData);
+        console.log('createProvider completed');
       }
 
       toast.success(editingProvider ? 'Provider updated successfully' : 'Provider created successfully');
+      
+      // Reload data first, then close dialog
+      console.log('Calling loadData...');
+      await loadData();
+      console.log('loadData completed, closing dialog');
       closeProviderDialog();
-      loadData();
     } catch (error) {
       console.error('Failed to save provider:', error);
       // Better error display
@@ -438,7 +461,7 @@ export default function EmailSettings() {
       await emailProviderAPI.deleteProvider(providerId);
       toast.success('Provider deleted successfully');
       setShowDeleteConfirm(null);
-      loadData();
+      await loadData();
     } catch (error) {
       console.error('Failed to delete provider:', error);
       toast.error('Failed to delete provider: ' + error.message);
@@ -969,12 +992,12 @@ export default function EmailSettings() {
           <h1 className={`text-3xl font-bold ${
             currentTheme === 'unicorn' ? 'text-white' : currentTheme === 'light' ? 'text-gray-900' : 'text-white'
           }`}>
-            Email Settings
+            Email Settings <span className="text-xs bg-green-500 text-white px-2 py-1 rounded ml-2">v23:55</span>
           </h1>
           <p className={`mt-1 ${
             currentTheme === 'unicorn' ? 'text-purple-200' : currentTheme === 'light' ? 'text-gray-600' : 'text-gray-400'
           }`}>
-            Configure email providers for sending notifications
+            Configure email providers for sending notifications [BUILD: 00:07]
           </p>
         </div>
         <div className="flex gap-3">
@@ -1128,7 +1151,7 @@ export default function EmailSettings() {
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody key={refreshKey}>
                   {providers.map((provider) => (
                     <tr
                       key={provider.id}
@@ -1153,7 +1176,7 @@ export default function EmailSettings() {
                       <td className={`py-4 px-4 ${
                         currentTheme === 'unicorn' ? 'text-purple-200' : currentTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
                       }`}>
-                        {provider.from_email || <span className="italic text-gray-400">Not configured</span>}
+                        {provider.smtp_from || <span className="italic text-gray-400">Not configured</span>}
                       </td>
                       <td className="py-4 px-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${

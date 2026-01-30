@@ -23,7 +23,8 @@ import { PROVIDER_TYPES } from './ProviderForms/ProviderTypeTab';
 const emailProviderAPI = {
   async listProviders() {
     const response = await fetch('/api/v1/email-provider/providers', {
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!response.ok) throw new Error('Failed to fetch providers');
     return response.json();
@@ -31,7 +32,8 @@ const emailProviderAPI = {
 
   async getActiveProvider() {
     const response = await fetch('/api/v1/email-provider/providers/active', {
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('Failed to fetch active provider');
@@ -85,14 +87,15 @@ const emailProviderAPI = {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to delete provider');
     }
-    return response.json();
+    // 204 No Content - no response body
+    return { success: true };
   },
 
   async sendTestEmail(recipient, providerId = null) {
     const response = await fetch('/api/v1/email-provider/test-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recipient, provider_id: providerId }),
+      body: JSON.stringify({ recipient_email: recipient, provider_id: providerId }),
       credentials: 'include'
     });
     if (!response.ok) {
@@ -117,7 +120,8 @@ const emailProviderAPI = {
       ...filters
     });
     const response = await fetch(`/api/v1/email-provider/history?${params}`, {
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!response.ok) throw new Error('Failed to fetch email history');
     return response.json();
@@ -208,7 +212,7 @@ export default function EmailSettings() {
       setFormData({
         provider_type: provider.provider_type,
         name: provider.name,
-        from_email: provider.from_email,
+        from_email: provider.smtp_from || '',  // Backend uses smtp_from
         client_id: provider.client_id || '',
         client_secret: '***HIDDEN***',
         tenant_id: provider.tenant_id || '',
@@ -271,6 +275,7 @@ export default function EmailSettings() {
 
       // Build provider data - MATCH BACKEND API SCHEMA
       const providerData = {
+        name: formData.name || null,
         provider_type: formData.provider_type,
         auth_method: selectedType.authType,
         enabled: formData.enabled,
@@ -316,14 +321,16 @@ export default function EmailSettings() {
 
       // Create or update
       if (editingProvider) {
+        console.log('Updating provider with data:', providerData);
         await emailProviderAPI.updateProvider(editingProvider.id, providerData);
       } else {
+        console.log('Creating provider with data:', providerData);
         await emailProviderAPI.createProvider(providerData);
       }
 
       toast.success(editingProvider ? 'Provider updated successfully' : 'Provider created successfully');
       closeProviderDialog();
-      loadData();
+      await loadData();  // Wait for data refresh before continuing
     } catch (error) {
       console.error('Failed to save provider:', error);
       const errorMsg = error.message || String(error) || 'Unknown error';
@@ -336,7 +343,7 @@ export default function EmailSettings() {
       await emailProviderAPI.deleteProvider(providerId);
       toast.success('Provider deleted successfully');
       setShowDeleteConfirm(null);
-      loadData();
+      await loadData();  // Wait for data refresh
     } catch (error) {
       console.error('Failed to delete provider:', error);
       toast.error('Failed to delete provider: ' + error.message);
@@ -353,7 +360,7 @@ export default function EmailSettings() {
       await emailProviderAPI.sendTestEmail(recipient);
       toast.success('Test email sent successfully! Check your inbox.');
       setShowTestDialog(false);
-      loadData(); // Refresh history
+      await loadData(); // Wait for history refresh
     } catch (error) {
       console.error('Failed to send test email:', error);
       toast.error('Failed to send test email: ' + error.message);

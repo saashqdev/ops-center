@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // VERSION CHECK - Immediate execution
-const BUILD_VERSION = '2026-01-26-03:00-PWA-DISABLED-FIXED';
+const BUILD_VERSION = '2026-01-29-22:50-EMAIL-SETTINGS-FIX';
 console.log(`%c🔧 APP VERSION: ${BUILD_VERSION}`, 'background: #7c3aed; color: white; padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 16px;');
 console.log('%c✅ App.jsx loaded - React is working!', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
 console.log('%c✅ credentials: include IS PRESENT IN CODE', 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');

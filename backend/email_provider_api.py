@@ -27,6 +27,7 @@ router = APIRouter(prefix="/api/v1/email-provider", tags=["Email Providers"])
 class EmailProvider(BaseModel):
     """Email provider configuration"""
     id: Optional[int] = None
+    name: Optional[str] = None
     provider_type: str = Field(..., description="Provider type: microsoft365, google, sendgrid, postmark, aws_ses, custom_smtp")
     auth_method: str = Field(..., description="Auth method: oauth2, api_key, app_password")
     enabled: bool = Field(default=False)
@@ -48,6 +49,7 @@ class EmailProvider(BaseModel):
 
 class ProviderCreate(BaseModel):
     """Create email provider"""
+    name: Optional[str] = None
     provider_type: str
     auth_method: str
     enabled: bool = False
@@ -66,6 +68,7 @@ class ProviderCreate(BaseModel):
 
 class ProviderUpdate(BaseModel):
     """Update email provider"""
+    name: Optional[str] = None
     provider_type: Optional[str] = None
     auth_method: Optional[str] = None
     enabled: Optional[bool] = None
@@ -84,7 +87,7 @@ class ProviderUpdate(BaseModel):
 
 class TestEmailRequest(BaseModel):
     """Test email request"""
-    provider_id: int
+    provider_id: Optional[int] = None
     recipient_email: str
 
 
@@ -207,13 +210,13 @@ async def create_provider(provider: ProviderCreate):
 
         cursor.execute("""
             INSERT INTO email_providers (
-                provider_type, auth_method, enabled,
+                name, provider_type, auth_method, enabled,
                 smtp_host, smtp_port, smtp_user, smtp_from,
                 smtp_password, api_key,
                 oauth2_client_id, oauth2_client_secret, oauth2_tenant_id, oauth2_refresh_token,
                 provider_config, created_at, updated_at
             ) VALUES (
-                %s, %s, %s,
+                %s, %s, %s, %s,
                 %s, %s, %s, %s,
                 %s, %s,
                 %s, %s, %s, %s,
@@ -221,7 +224,7 @@ async def create_provider(provider: ProviderCreate):
             )
             RETURNING *
         """, (
-            provider.provider_type, provider.auth_method, provider.enabled,
+            provider.name, provider.provider_type, provider.auth_method, provider.enabled,
             provider.smtp_host, provider.smtp_port, provider.smtp_user, provider.smtp_from,
             provider.smtp_password, provider.api_key,
             provider.oauth2_client_id, provider.oauth2_client_secret, provider.oauth2_tenant_id, provider.oauth2_refresh_token,
@@ -254,6 +257,8 @@ async def update_provider(provider_id: int, update: ProviderUpdate):
     **Important**: If enabled=true, all other providers will be disabled
     """
     try:
+        update_dict = update.dict(exclude_unset=True)
+        logger.info(f"Updating provider {provider_id} with data: {update_dict}")
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -261,7 +266,7 @@ async def update_provider(provider_id: int, update: ProviderUpdate):
         update_fields = []
         update_values = []
 
-        for field, value in update.dict(exclude_unset=True).items():
+        for field, value in update_dict.items():
             if field == "provider_config" and value is not None:
                 update_fields.append(f"{field} = %s::jsonb")
                 update_values.append(json.dumps(value))
@@ -352,7 +357,7 @@ async def delete_provider(provider_id: int):
 @router.post("/test-email", summary="Send test email")
 async def send_test_email(request: TestEmailRequest):
     """
-    Send a test email using specified provider
+    Send a test email using specified provider or active provider
 
     **Note**: This is a placeholder. Actual email sending needs to be implemented.
     """
@@ -360,23 +365,104 @@ async def send_test_email(request: TestEmailRequest):
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        cursor.execute("SELECT * FROM email_providers WHERE id = %s", (request.provider_id,))
+        # If no provider_id specified, use the active provider
+        if request.provider_id:
+            cursor.execute("SELECT * FROM email_providers WHERE id = %s", (request.provider_id,))
+        else:
+            cursor.execute("SELECT * FROM email_providers WHERE enabled = true LIMIT 1")
+        
         provider = cursor.fetchone()
 
-        cursor.close()
-        conn.close()
-
         if not provider:
-            raise HTTPException(status_code=404, detail="Provider not found")
+            cursor.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail="No active provider found")
 
-        # TODO: Implement actual email sending based on provider type
-        logger.info(f"Test email would be sent to {request.recipient_email} via provider {provider['provider_type']}")
-
-        return {
-            "success": True,
-            "message": f"Test email sent to {request.recipient_email}",
-            "provider_type": provider['provider_type']
-        }
+        # Send actual email based on provider type
+        if provider['provider_type'] == 'postmark':
+            # Send via Postmark API
+            import requests
+            
+            if not provider.get('api_key'):
+                cursor.close()
+                conn.close()
+                raise HTTPException(status_code=400, detail="Postmark API key not configured")
+            
+            postmark_url = "https://api.postmarkapp.com/email"
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "X-Postmark-Server-Token": provider['api_key']
+            }
+            
+            subject = "Test Email from Ops Center"
+            email_data = {
+                "From": provider.get('smtp_from', 'noreply@example.com'),
+                "To": request.recipient_email,
+                "Subject": subject,
+                "HtmlBody": "<h2>Test Email</h2><p>This is a test email from Ops Center Email Provider.</p><p>If you're seeing this, your email provider is configured correctly!</p>",
+                "MessageStream": "outbound"
+            }
+            
+            logger.info(f"Sending test email to {request.recipient_email} via Postmark")
+            
+            try:
+                response = requests.post(postmark_url, json=email_data, headers=headers, timeout=10)
+                
+                if response.status_code != 200:
+                    logger.error(f"Postmark API error: {response.text}")
+                    # Log failed email
+                    cursor.execute("""
+                        INSERT INTO email_history (provider_id, recipient, subject, status, error_message)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (provider['id'], request.recipient_email, subject, 'failed', response.text))
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    raise HTTPException(status_code=500, detail=f"Postmark error: {response.text}")
+                
+                postmark_response = response.json()
+                message_id = postmark_response.get('MessageID')
+                
+                # Log successful email
+                cursor.execute("""
+                    INSERT INTO email_history (provider_id, recipient, subject, status, message_id)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (provider['id'], request.recipient_email, subject, 'sent', message_id))
+                conn.commit()
+                
+                logger.info(f"Test email sent successfully via Postmark: {message_id}")
+                
+                cursor.close()
+                conn.close()
+                
+                return {
+                    "success": True,
+                    "message": f"Test email sent to {request.recipient_email}",
+                    "provider_type": provider['provider_type'],
+                    "postmark_message_id": message_id
+                }
+            except requests.RequestException as e:
+                logger.error(f"Request failed: {e}")
+                # Log failed email
+                cursor.execute("""
+                    INSERT INTO email_history (provider_id, recipient, subject, status, error_message)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (provider['id'], request.recipient_email, subject, 'failed', str(e)))
+                conn.commit()
+                cursor.close()
+                conn.close()
+                raise HTTPException(status_code=500, detail=f"Request failed: {e}")
+        else:
+            # TODO: Implement other provider types
+            logger.info(f"Test email would be sent to {request.recipient_email} via provider {provider['provider_type']}")
+            cursor.close()
+            conn.close()
+            return {
+                "success": True,
+                "message": f"Test email placeholder for {request.recipient_email} (provider type '{provider['provider_type']}' not yet implemented)",
+                "provider_type": provider['provider_type']
+            }
 
     except HTTPException:
         raise
@@ -451,24 +537,63 @@ async def get_microsoft_oauth_instructions():
 
 @router.get("/history", summary="Get email sending history")
 async def get_email_history(
-    limit: int = 50,
-    offset: int = 0,
-    status: Optional[str] = None
+    page: int = 1,
+    per_page: int = 50,
+    status: Optional[str] = None,
+    provider_id: Optional[int] = None
 ):
     """
-    Get email sending history
-
-    **Note**: This is a placeholder. Email history tracking needs to be implemented.
+    Get email sending history with pagination
     """
-    # TODO: Implement email history table and tracking
-    logger.info(f"Email history requested: limit={limit}, offset={offset}, status={status}")
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    return {
-        "success": True,
-        "history": [],
-        "total": 0,
-        "message": "Email history tracking not yet implemented"
-    }
+        # Build WHERE clause
+        where_clauses = []
+        params = []
+
+        if status:
+            where_clauses.append("status = %s")
+            params.append(status)
+
+        if provider_id:
+            where_clauses.append("provider_id = %s")
+            params.append(provider_id)
+
+        where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+        # Get total count
+        cursor.execute(f"SELECT COUNT(*) as count FROM email_history {where_sql}", params)
+        total = cursor.fetchone()['count']
+
+        # Get paginated results
+        offset = (page - 1) * per_page
+        params.extend([per_page, offset])
+        
+        cursor.execute(f"""
+            SELECT id, provider_id, recipient, subject, status, message_id, error_message, sent_at
+            FROM email_history
+            {where_sql}
+            ORDER BY sent_at DESC
+            LIMIT %s OFFSET %s
+        """, params)
+        
+        history = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return {
+            "success": True,
+            "history": [dict(h) for h in history],
+            "total": total,
+            "page": page,
+            "per_page": per_page
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to get email history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ===== Health Check =====

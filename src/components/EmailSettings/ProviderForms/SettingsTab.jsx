@@ -17,6 +17,12 @@ import { useTheme } from '../../../contexts/ThemeContext';
 export default function SettingsTab({ formData, setFormData }) {
   const { currentTheme } = useTheme();
 
+  const handleFromEmailChange = (e) => {
+    console.log('From Email changing to:', e.target.value);
+    console.log('Current formData:', formData);
+    setFormData({ ...formData, from_email: e.target.value });
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -27,8 +33,8 @@ export default function SettingsTab({ formData, setFormData }) {
         </label>
         <input
           type="email"
-          value={formData.from_email}
-          onChange={(e) => setFormData({ ...formData, from_email: e.target.value })}
+          value={formData.from_email || ''}
+          onChange={handleFromEmailChange}
           placeholder="notifications@yourdomain.com"
           className={`w-full px-4 py-2 rounded-lg border ${
             currentTheme === 'unicorn'

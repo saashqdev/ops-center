@@ -78,7 +78,7 @@ export default function EmailHistoryTable({ emailHistory }) {
               <td className={`py-4 px-4 text-sm ${
                 currentTheme === 'unicorn' ? 'text-purple-200' : currentTheme === 'light' ? 'text-gray-600' : 'text-gray-400'
               }`}>
-                {new Date(email.created_at).toLocaleString()}
+                {new Date(email.sent_at).toLocaleString()}
               </td>
               <td className={`py-4 px-4 ${
                 currentTheme === 'unicorn' ? 'text-white' : currentTheme === 'light' ? 'text-gray-900' : 'text-white'
