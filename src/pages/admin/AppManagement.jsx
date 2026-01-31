@@ -180,7 +180,7 @@ const AppManagement = () => {
       setSuccess('App deleted successfully');
       setDeleteDialogOpen(false);
       fetchApps();
-      setSelectedFeature(null);
+      setSelectedApp(null);
     } catch (err) {
       setError(err.message);
       console.error('Error deleting app:', err);
@@ -222,7 +222,7 @@ const AppManagement = () => {
   };
 
   const handleEditApp = (feature) => {
-    setSelectedFeature(feature);
+    setSelectedApp(feature);
     setFormData({
       app_key: feature.app_key,
       app_name: feature.app_name,
@@ -235,7 +235,7 @@ const AppManagement = () => {
   };
 
   const handleDeleteApp = (feature) => {
-    setSelectedFeature(feature);
+    setSelectedApp(feature);
     setDeleteDialogOpen(true);
   };
 
@@ -342,7 +342,7 @@ const AppManagement = () => {
           <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 0.5 }}>
             App Management
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
             Define available apps for subscription tiers
           </Typography>
         </Box>

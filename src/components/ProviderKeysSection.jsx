@@ -227,7 +227,12 @@ export default function ProviderKeysSection({
         }
       });
 
-      const configuredKeys = keysResponse.ok ? await keysResponse.json() : [];
+      const keysData = keysResponse.ok ? await keysResponse.json() : [];
+      // Handle both direct array and wrapped {providers: []} formats
+      const configuredKeys = Array.isArray(keysData) ? keysData : (keysData.providers || []);
+
+      console.log('DEBUG allProviders from /byok/providers:', JSON.stringify(allProviders.slice(0, 2), null, 2));
+      console.log('DEBUG configuredKeys from /byok/keys:', JSON.stringify(configuredKeys.slice(0, 2), null, 2));
 
       // Merge providers with key details
       const providersWithStatus = allProviders.map(provider => {
@@ -235,16 +240,28 @@ export default function ProviderKeysSection({
           ? configuredKeys.find(k => k.provider === provider.id)
           : null;
 
-        return {
+        // Determine if configured - check both backend flag AND if we have key details
+        const isConfigured = provider.configured || (keyDetails && keyDetails.id);
+        
+        if (provider.id === 'openrouter') {
+          console.log('DEBUG OpenRouter merge:', {
+            'provider.configured': provider.configured,
+            'keyDetails': keyDetails,
+            'isConfigured': isConfigured
+          });
+        }
+
+        const merged = {
           id: provider.id,
           provider_type: provider.id,
           name: provider.name,
-          key_source: provider.configured ? 'database' : 'not_set',
-          key_preview: keyDetails?.key_preview || null,
+          key_source: isConfigured ? 'database' : 'not_set',
+          key_preview: keyDetails?.masked_key || keyDetails?.key_preview || null,
           last_tested: keyDetails?.last_tested || null,
           test_status: keyDetails?.test_status || null,
-          configured: provider.configured
+          configured: isConfigured
         };
+        return merged;
       });
 
       setProviders(providersWithStatus);

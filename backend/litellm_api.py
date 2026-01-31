@@ -2480,37 +2480,74 @@ async def list_models_categorized(
         # Get OpenRouter API key for pricing data
         openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
 
+        models_data = {'data': []}  # Default empty response
+        
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                # Fetch base model list from LiteLLM
+                response = await client.get(
+                    f"{litellm_url}/v1/models",
+                    headers={"Authorization": f"Bearer {litellm_key}"}
+                )
+                response.raise_for_status()
+                models_data = response.json()
+        except (httpx.ConnectError, httpx.TimeoutException) as e:
+            logger.warning(f"LiteLLM proxy not available at {litellm_url}: {e}")
+            # Return empty model list if LiteLLM is not running
+            return {
+                'byok_models': [],
+                'platform_models': [],
+                'summary': {
+                    'total_models': 0,
+                    'byok_count': 0,
+                    'platform_count': 0,
+                    'has_byok_keys': len(byok_provider_names) > 0,
+                    'byok_providers': list(byok_provider_names),
+                    'error': 'LiteLLM service not available'
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error fetching models from LiteLLM: {e}")
+            return {
+                'byok_models': [],
+                'platform_models': [],
+                'summary': {
+                    'total_models': 0,
+                    'byok_count': 0,
+                    'platform_count': 0,
+                    'has_byok_keys': len(byok_provider_names) > 0,
+                    'byok_providers': list(byok_provider_names),
+                    'error': str(e)
+                }
+            }
+        
         async with httpx.AsyncClient(timeout=15.0) as client:
-            # Fetch base model list from LiteLLM
-            response = await client.get(
-                f"{litellm_url}/v1/models",
-                headers={"Authorization": f"Bearer {litellm_key}"}
-            )
-            response.raise_for_status()
-            models_data = response.json()
 
             # Fetch detailed model info from OpenRouter (pricing, context, descriptions)
             openrouter_models = {}
-            try:
-                or_response = await client.get(
-                    "https://openrouter.ai/api/v1/models",
-                    headers={"Authorization": f"Bearer {openrouter_key}"},  # FIXED: Use correct OpenRouter key
-                    timeout=10.0
-                )
-                if or_response.status_code == 200:
-                    or_data = or_response.json()
-                    for model in or_data.get('data', []):
-                        model_id = model.get('id', '')
-                        openrouter_models[model_id] = {
-                            'context_length': model.get('context_length', 0),
-                            'pricing': model.get('pricing', {}),
-                            'description': model.get('description', ''),
-                            'architecture': model.get('architecture', {}),
-                            'top_provider': model.get('top_provider', {}),
-                        }
-                    logger.info(f"Fetched metadata for {len(openrouter_models)} OpenRouter models")
-            except Exception as e:
-                logger.warning(f"Failed to fetch OpenRouter model metadata: {e}")
+            if openrouter_key:  # Only try if key is configured
+                try:
+                    or_response = await client.get(
+                        "https://openrouter.ai/api/v1/models",
+                        headers={"Authorization": f"Bearer {openrouter_key}"},
+                        timeout=10.0
+                    )
+                    if or_response.status_code == 200:
+                        or_data = or_response.json()
+                        for model in or_data.get('data', []):
+                            model_id = model.get('id', '')
+                            openrouter_models[model_id] = {
+                                'context_length': model.get('context_length', 0),
+                                'pricing': model.get('pricing', {}),
+                                'description': model.get('description', ''),
+                                'architecture': model.get('architecture', {}),
+                                'top_provider': model.get('top_provider', {}),
+                            }
+                        logger.info(f"Fetched metadata for {len(openrouter_models)} OpenRouter models")
+                except Exception as e:
+                    logger.warning(f"Failed to fetch OpenRouter model metadata: {e}")
+            else:
+                logger.info("OpenRouter API key not configured, skipping metadata fetch")
 
         # Process models
         all_models = models_data.get('data', [])
@@ -3099,89 +3136,134 @@ async def get_byok_usage(
 
 
 @router.get("/byok/providers")
-async def list_supported_providers():
+async def list_supported_providers(
+    user_id: str = Depends(get_user_id),
+    byok_manager: BYOKManager = Depends(get_byok_manager)
+):
     """
-    List all supported BYOK providers
+    List all supported BYOK providers with configuration status
 
     Returns:
-        List of provider configurations with details
+        List of provider configurations with details and configured status
     """
-    return {
-        'providers': [
-            {
-                'name': 'openrouter',
-                'display_name': 'OpenRouter',
-                'description': 'Universal LLM proxy - 200+ models including GPT-4o, Claude 3.5 Sonnet, Gemini 2.0',
-                'key_format': 'sk-or-v1-...',
-                'signup_url': 'https://openrouter.ai',
-                'docs_url': 'https://openrouter.ai/docs',
-                'supports_test': True
-            },
-            {
-                'name': 'openai',
-                'display_name': 'OpenAI',
-                'description': 'GPT-4o, GPT-4o-mini, GPT-4-turbo, o1-preview, o1-mini, DALL-E 3',
-                'key_format': 'sk-proj-...',
-                'signup_url': 'https://platform.openai.com',
-                'docs_url': 'https://platform.openai.com/docs',
-                'supports_test': True
-            },
-            {
-                'name': 'anthropic',
-                'display_name': 'Anthropic',
-                'description': 'Claude 3.5 Sonnet (latest), Claude 3 Opus/Sonnet/Haiku',
-                'key_format': 'sk-ant-...',
-                'signup_url': 'https://console.anthropic.com',
-                'docs_url': 'https://docs.anthropic.com',
-                'supports_test': True
-            },
-            {
-                'name': 'google',
-                'display_name': 'Google AI',
-                'description': 'Gemini 2.0 Flash, Gemini 1.5 Pro/Flash (up to 2M context)',
-                'key_format': 'AIza...',
-                'signup_url': 'https://aistudio.google.com/apikey',
-                'docs_url': 'https://ai.google.dev/docs',
-                'supports_test': True
-            },
-            {
-                'name': 'ollama-cloud',
-                'display_name': 'Ollama Cloud',
-                'description': 'Self-hosted and managed Ollama models with cloud API',
-                'key_format': 'xxx.yyy',
-                'signup_url': 'https://ollama.ai/cloud',
-                'docs_url': 'https://docs.ollama.ai/cloud',
-                'supports_test': False
-            },
-            {
-                'name': 'huggingface',
-                'display_name': 'HuggingFace',
-                'description': 'Access 350,000+ models via HuggingFace Inference API',
-                'key_format': 'hf_...',
-                'signup_url': 'https://huggingface.co/settings/tokens',
-                'docs_url': 'https://huggingface.co/docs/api-inference',
-                'supports_test': False
-            },
-            {
-                'name': 'ops-center',
-                'display_name': 'Ops Center',
-                'description': 'This platform - local vLLM models (Qwen 2.5 32B, etc.)',
-                'key_format': 'internal',
-                'signup_url': os.getenv('APP_URL', 'http://localhost:8084'),
-                'docs_url': os.getenv('DOCS_URL', 'http://localhost:8084/docs'),
-                'supports_test': True
-            },
-            {
-                'name': 'custom',
-                'display_name': 'Custom Provider',
-                'description': 'Any OpenAI-compatible endpoint (LM Studio, vLLM, LocalAI, etc.)',
-                'key_format': 'varies',
-                'signup_url': '',
-                'docs_url': '',
-                'supports_test': False
-            }
-        ]
-    }
+    # Get user's configured providers
+    try:
+        configured_providers = await byok_manager.list_user_providers(user_id)
+        configured_map = {p['provider']: p for p in configured_providers}
+        logger.info(f"User {user_id} has {len(configured_map)} configured BYOK providers: {list(configured_map.keys())}")
+    except Exception as e:
+        logger.error(f"Error checking configured providers: {e}")
+        configured_map = {}
+    
+    providers_list = [
+        {
+            'id': 'openrouter',
+            'name': 'openrouter',
+            'display_name': 'OpenRouter',
+            'description': 'Universal LLM proxy - 200+ models including GPT-4o, Claude 3.5 Sonnet, Gemini 2.0',
+            'key_format': 'sk-or-v1-...',
+            'signup_url': 'https://openrouter.ai',
+            'docs_url': 'https://openrouter.ai/docs',
+            'supports_test': True,
+            'configured': 'openrouter' in configured_map,
+            'key_preview': configured_map.get('openrouter', {}).get('masked_key'),
+            'enabled': configured_map.get('openrouter', {}).get('enabled', False)
+        },
+        {
+            'id': 'openai',
+            'name': 'openai',
+            'display_name': 'OpenAI',
+            'description': 'GPT-4o, GPT-4o-mini, GPT-4-turbo, o1-preview, o1-mini, DALL-E 3',
+            'key_format': 'sk-proj-...',
+            'signup_url': 'https://platform.openai.com',
+            'docs_url': 'https://platform.openai.com/docs',
+            'supports_test': True,
+            'configured': 'openai' in configured_map,
+            'key_preview': configured_map.get('openai', {}).get('masked_key'),
+            'enabled': configured_map.get('openai', {}).get('enabled', False)
+        },
+        {
+            'id': 'anthropic',
+            'name': 'anthropic',
+            'display_name': 'Anthropic',
+            'description': 'Claude 3.5 Sonnet (latest), Claude 3 Opus/Sonnet/Haiku',
+            'key_format': 'sk-ant-...',
+            'signup_url': 'https://console.anthropic.com',
+            'docs_url': 'https://docs.anthropic.com',
+            'supports_test': True,
+            'configured': 'anthropic' in configured_map,
+            'key_preview': configured_map.get('anthropic', {}).get('masked_key'),
+            'enabled': configured_map.get('anthropic', {}).get('enabled', False)
+        },
+        {
+            'id': 'google',
+            'name': 'google',
+            'display_name': 'Google AI',
+            'description': 'Gemini 2.0 Flash, Gemini 1.5 Pro/Flash (up to 2M context)',
+            'key_format': 'AIza...',
+            'signup_url': 'https://aistudio.google.com/apikey',
+            'docs_url': 'https://ai.google.dev/docs',
+            'supports_test': True,
+            'configured': 'google' in configured_map,
+            'key_preview': configured_map.get('google', {}).get('masked_key'),
+            'enabled': configured_map.get('google', {}).get('enabled', False)
+        },
+        {
+            'id': 'ollama-cloud',
+            'name': 'ollama-cloud',
+            'display_name': 'Ollama Cloud',
+            'description': 'Self-hosted and managed Ollama models with cloud API',
+            'key_format': 'xxx.yyy',
+            'signup_url': 'https://ollama.ai/cloud',
+            'docs_url': 'https://docs.ollama.ai/cloud',
+            'supports_test': False,
+            'configured': 'ollama-cloud' in configured_map,
+            'key_preview': configured_map.get('ollama-cloud', {}).get('masked_key'),
+            'enabled': configured_map.get('ollama-cloud', {}).get('enabled', False)
+        },
+        {
+            'id': 'huggingface',
+            'name': 'huggingface',
+            'display_name': 'HuggingFace',
+            'description': 'Access 350,000+ models via HuggingFace Inference API',
+            'key_format': 'hf_...',
+            'signup_url': 'https://huggingface.co/settings/tokens',
+            'docs_url': 'https://huggingface.co/docs/api-inference',
+            'supports_test': False,
+            'configured': 'huggingface' in configured_map,
+            'key_preview': configured_map.get('huggingface', {}).get('masked_key'),
+            'enabled': configured_map.get('huggingface', {}).get('enabled', False)
+        },
+        {
+            'id': 'ops-center',
+            'name': 'ops-center',
+            'display_name': 'Ops Center',
+            'description': 'This platform - local vLLM models (Qwen 2.5 32B, etc.)',
+            'key_format': 'internal',
+            'signup_url': os.getenv('APP_URL', 'http://localhost:8084'),
+            'docs_url': os.getenv('DOCS_URL', 'http://localhost:8084/docs'),
+            'supports_test': True,
+            'configured': 'ops-center' in configured_map,
+            'key_preview': configured_map.get('ops-center', {}).get('masked_key'),
+            'enabled': configured_map.get('ops-center', {}).get('enabled', False)
+        },
+        {
+            'id': 'custom',
+            'name': 'custom',
+            'display_name': 'Custom Provider',
+            'description': 'Any OpenAI-compatible endpoint (LM Studio, vLLM, LocalAI, etc.)',
+            'key_format': 'varies',
+            'signup_url': '',
+            'docs_url': '',
+            'supports_test': False,
+            'configured': 'custom' in configured_map,
+            'key_preview': configured_map.get('custom', {}).get('masked_key'),
+            'enabled': configured_map.get('custom', {}).get('enabled', False)
+        }
+    ]
+    
+    logger.info(f"Returning {len(providers_list)} providers, openrouter configured: {providers_list[0]['configured'] if providers_list else False}")
+    return providers_list
 
 
 # ============================================================================

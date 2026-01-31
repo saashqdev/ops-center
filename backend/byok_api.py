@@ -285,17 +285,27 @@ async def list_providers(request: Request):
     try:
         user_email = await get_user_email(request)
         
-        # Try to get user from Keycloak (optional for provider list)
-        user = await get_user_from_keycloak(user_email)
+        # Get database pool from app state
+        db_pool = request.app.state.db_pool
+        configured_providers = set()
         
-        # Get attributes if available, otherwise use empty dict
-        attributes = user.get("attributes", {}) if user else {}
+        if db_pool:
+            try:
+                # Query database for user's configured providers
+                async with db_pool.acquire() as conn:
+                    db_providers = await conn.fetch("""
+                        SELECT DISTINCT provider 
+                        FROM user_provider_keys 
+                        WHERE user_id = $1 AND enabled = true
+                    """, user_email)
+                    configured_providers = {row['provider'] for row in db_providers}
+            except Exception as e:
+                logger.error(f"Error querying database for configured providers: {e}")
 
         providers = []
         for provider_id, config in SUPPORTED_PROVIDERS.items():
-            # Keycloak stores attributes as arrays
-            attr_key = f"byok_{provider_id}_key"
-            configured = attr_key in attributes and len(attributes.get(attr_key, [])) > 0
+            # Check if provider is configured in database
+            configured = provider_id in configured_providers
 
             providers.append(ProviderInfo(
                 id=provider_id,
@@ -344,12 +354,12 @@ async def list_keys(request: Request):
         try:
             # Get connection from pool
             async with db_pool.acquire() as conn:
-                # Fetch user provider keys from database
+                # Fetch user provider keys from database - check both user_id and email
                 db_keys = await conn.fetch("""
                     SELECT provider, api_key_encrypted, metadata, enabled, created_at, updated_at
                     FROM user_provider_keys
-                    WHERE user_id = $1 AND enabled = true
-                """, user_id)
+                    WHERE (user_id = $1 OR user_id = $2) AND enabled = true
+                """, user_id, user_email)
 
             # Process database keys
             for row in db_keys:

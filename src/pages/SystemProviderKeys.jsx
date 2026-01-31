@@ -151,8 +151,13 @@ export default function SystemProviderKeys() {
   const loadProviders = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/llm/admin/system-keys', {
-        credentials: 'include'
+      const response = await fetch(`/api/v1/llm/admin/system-keys?_t=${Date.now()}`, {
+        credentials: 'include',
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
 
       if (response.ok) {

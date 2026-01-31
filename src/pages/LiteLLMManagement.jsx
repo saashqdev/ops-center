@@ -254,7 +254,7 @@ const AddProviderModal = ({ isOpen, onClose, onAdd, theme }) => {
               className={`w-full px-4 py-2 rounded-lg ${theme.input} ${theme.text.primary}`}
             >
               {providerTypes.map(type => (
-                <option key={type.value} value={type.value}>{type.label}</option>
+                <option key={type.value} value={type.value} style={{ color: 'black' }}>{type.label}</option>
               ))}
             </select>
           </div>
