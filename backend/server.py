@@ -4070,10 +4070,10 @@ async def logout(request: Request, current_user: dict = Depends(get_current_user
         external_protocol = os.getenv("EXTERNAL_PROTOCOL", "https")
 
         # Our logout confirmation URL must match an allowed redirect URI in the Keycloak client
-        # Use callback (known-allowed) by default; override via KEYCLOAK_LOGOUT_REDIRECT if needed
+        # Use logged-out page by default; override via KEYCLOAK_LOGOUT_REDIRECT if needed
         logout_confirmation_url = os.getenv(
             "KEYCLOAK_LOGOUT_REDIRECT",
-            f"{external_protocol}://{external_host}/auth/callback"
+            f"{external_protocol}://{external_host}/auth/logged-out"
         )
 
         # Encode redirect URI

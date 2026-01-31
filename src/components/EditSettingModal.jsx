@@ -76,8 +76,9 @@ const EditSettingModal = ({ open, onClose, setting, onSave }) => {
 
     // Real-time validation
     if (field === 'key') {
-      // Key must be UPPERCASE_WITH_UNDERSCORES
-      const isValid = /^[A-Z][A-Z0-9_]*$/.test(value);
+      // Key validation - allow alphanumeric, underscores, dots, hyphens, and @ symbols
+      // Should start with a letter or number
+      const isValid = /^[A-Z0-9][A-Z0-9_@.\-]*$/.test(value);
       setValidation((prev) => ({ ...prev, key: isValid || value === '' }));
     }
     if (field === 'value') {
@@ -93,7 +94,7 @@ const EditSettingModal = ({ open, onClose, setting, onSave }) => {
     }
 
     if (!validation.key) {
-      setError('Key must be uppercase with underscores (e.g., MY_API_KEY)');
+      setError('Key must start with a letter/number and contain only uppercase letters, numbers, underscores, dots, hyphens, or @ symbols');
       return;
     }
 
@@ -213,7 +214,7 @@ const EditSettingModal = ({ open, onClose, setting, onSave }) => {
           placeholder="MY_API_KEY"
           disabled={isEdit} // Can't change key on edit
           error={!validation.key}
-          helperText={!validation.key ? 'Use UPPERCASE_WITH_UNDERSCORES format' : 'Environment variable name'}
+          helperText={!validation.key ? 'Must be uppercase, can include letters, numbers, _, @, ., -' : 'Setting key/identifier'}
           sx={{ mb: 2 }}
           InputProps={{
             endAdornment: validation.key && formData.key ? (

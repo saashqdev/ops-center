@@ -106,13 +106,13 @@ const UserAnalytics = () => {
         growthRes,
         behaviorRes,
       ] = await Promise.all([
-        fetch('/api/v1/analytics/users/overview'),
-        fetch('/api/v1/analytics/users/cohorts?months=6'),
-        fetch('/api/v1/analytics/users/engagement'),
-        fetch('/api/v1/analytics/users/churn/prediction?limit=50'),
-        fetch('/api/v1/analytics/users/segments'),
-        fetch('/api/v1/analytics/users/growth?months=6'),
-        fetch('/api/v1/analytics/users/behavior/patterns'),
+        fetch('/api/v1/analytics/users/overview', { credentials: 'include' }),
+        fetch('/api/v1/analytics/users/cohorts?months=6', { credentials: 'include' }),
+        fetch('/api/v1/analytics/users/engagement', { credentials: 'include' }),
+        fetch('/api/v1/analytics/users/churn/prediction?limit=50', { credentials: 'include' }),
+        fetch('/api/v1/analytics/users/segments', { credentials: 'include' }),
+        fetch('/api/v1/analytics/users/growth?months=6', { credentials: 'include' }),
+        fetch('/api/v1/analytics/users/behavior/patterns', { credentials: 'include' }),
       ]);
 
       // Check for errors
@@ -133,13 +133,13 @@ const UserAnalytics = () => {
       const growthDataRes = await growthRes.json();
       const behaviorData = await behaviorRes.json();
 
-      // Update state
+      // Update state - handle both array and wrapped responses
       setOverview(overviewData);
-      setCohorts(cohortsData);
+      setCohorts(Array.isArray(cohortsData) ? cohortsData : (cohortsData.cohorts || []));
       setEngagement(engagementData);
-      setChurnPredictions(churnData);
+      setChurnPredictions(Array.isArray(churnData) ? churnData : (churnData.predictions || churnData));
       setSegments(segmentsData);
-      setGrowthData(growthDataRes);
+      setGrowthData(Array.isArray(growthDataRes) ? growthDataRes : (growthDataRes.growth_data || growthDataRes));
       setBehaviorPatterns(behaviorData);
     } catch (err) {
       console.error('Analytics fetch error:', err);

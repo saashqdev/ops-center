@@ -327,14 +327,14 @@ const PlatformSettings = () => {
             key={category}
             defaultExpanded={category === 'stripe'}
             className={theme.card}
-            sx={{ mb: 2 }}
+            sx={{ mb: 3, '&:not(:first-of-type)': { mt: 3 } }}
           >
             <AccordionSummary expandIcon={<ExpandMore />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
                 <Box sx={{ color: config.color }}>
                   {config.icon}
                 </Box>
-                <Typography variant="h6" className={theme.text.primary}>
+                <Typography variant="h6" sx={{ color: '#000', fontWeight: 600 }}>
                   {config.label}
                 </Typography>
                 <Chip
@@ -358,7 +358,7 @@ const PlatformSettings = () => {
                 )}
               </Box>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={{ pt: 3 }}>
               <Grid container spacing={3}>
                 {categorySettings.map(setting => {
                   const currentValue = editedSettings[setting.key] ?? setting.value ?? '';
@@ -375,6 +375,17 @@ const PlatformSettings = () => {
                         type={showValue ? 'text' : 'password'}
                         helperText={setting.description}
                         required={setting.required}
+                        InputLabelProps={{
+                          sx: { 
+                            color: 'rgba(0, 0, 0, 0.87)',
+                            '&.Mui-focused': {
+                              color: 'rgba(0, 0, 0, 0.87)'
+                            },
+                            '&.MuiFormLabel-filled': {
+                              color: 'rgba(0, 0, 0, 0.87)'
+                            }
+                          }
+                        }}
                         InputProps={{
                           endAdornment: isSecret && (
                             <InputAdornment position="end">
@@ -409,10 +420,10 @@ const PlatformSettings = () => {
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box>
-              <Typography variant="h6" className={theme.text.primary}>
+              <Typography variant="h6" sx={{ color: '#000', fontWeight: 600 }}>
                 Container Restart
               </Typography>
-              <Typography variant="body2" className={theme.text.secondary}>
+              <Typography variant="body2" sx={{ color: '#666' }}>
                 Restart the ops-center container to apply settings changes
               </Typography>
             </Box>

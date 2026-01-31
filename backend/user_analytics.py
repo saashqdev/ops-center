@@ -15,6 +15,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
+from keycloak_integration import get_all_users as keycloak_get_all_users
 
 logger = logging.getLogger(__name__)
 
@@ -163,51 +164,46 @@ async def get_cached_or_compute(
     return data
 
 
-async def query_keycloak_users(db: Session) -> List[Dict]:
+async def query_keycloak_users(db: Session = None) -> List[Dict]:
     """
-    Query all users from Keycloak database.
+    Query all users from Keycloak via API.
 
     Returns:
         List of user dictionaries
     """
-    query = text(
-        """
-        SELECT
-            u.id as user_id,
-            u.username,
-            u.email,
-            u.created_timestamp,
-            u.enabled,
-            COUNT(DISTINCT s.id) as session_count,
-            MAX(s.last_session_refresh) as last_login
-        FROM user_entity u
-        LEFT JOIN user_session s ON u.id = s.user_id
-        WHERE u.realm_id = (SELECT id FROM realm WHERE name = 'uchub')
-        GROUP BY u.id, u.username, u.email, u.created_timestamp, u.enabled
-        """
-    )
-
-    result = await db.execute(query)
-    users = []
-
-    for row in result:
-        users.append(
-            {
-                "user_id": row.user_id,
-                "username": row.username or row.email,
-                "email": row.email,
-                "created_at": datetime.fromtimestamp(row.created_timestamp / 1000)
-                if row.created_timestamp
-                else None,
-                "enabled": row.enabled,
-                "login_count": row.session_count or 0,
-                "last_login": datetime.fromtimestamp(row.last_login / 1000)
-                if row.last_login
-                else None,
-            }
-        )
-
-    return users
+    try:
+        # Get users from Keycloak API
+        keycloak_users = await keycloak_get_all_users()
+        
+        users = []
+        for user in keycloak_users:
+            # Extract user data
+            created_timestamp = user.get('createdTimestamp', 0)
+            
+            # Get last login from user attributes if available
+            last_login_timestamp = None
+            attributes = user.get('attributes', {})
+            if 'lastLogin' in attributes:
+                try:
+                    last_login_str = attributes['lastLogin'][0] if isinstance(attributes['lastLogin'], list) else attributes['lastLogin']
+                    last_login_timestamp = int(last_login_str)
+                except:
+                    pass
+            
+            users.append({
+                "user_id": user.get('id'),
+                "username": user.get('username') or user.get('email'),
+                "email": user.get('email'),
+                "created_at": datetime.fromtimestamp(created_timestamp / 1000) if created_timestamp else None,
+                "enabled": user.get('enabled', True),
+                "login_count": 0,  # Not available from Keycloak API directly
+                "last_login": datetime.fromtimestamp(last_login_timestamp / 1000) if last_login_timestamp else None,
+            })
+        
+        return users
+    except Exception as e:
+        logger.error(f"Error querying Keycloak users: {e}")
+        return []
 
 
 async def get_user_feature_usage(db: Session, user_id: str) -> Dict:
@@ -302,7 +298,6 @@ async def enrich_user_data(
 
 @router.get("/overview", response_model=UserOverview)
 async def get_user_overview(
-    keycloak_db: Session = Depends(get_keycloak_db),
     ops_db: Session = Depends(get_db),
 ):
     """
@@ -312,8 +307,8 @@ async def get_user_overview(
     """
 
     async def compute_overview():
-        # Query users from Keycloak
-        users = await query_keycloak_users(keycloak_db)
+        # Query users from Keycloak API
+        users = await query_keycloak_users()
 
         now = datetime.now()
         thirty_days_ago = now - timedelta(days=30)
@@ -378,7 +373,6 @@ async def get_user_overview(
 @router.get("/cohorts", response_model=List[CohortRetention])
 async def get_cohort_analysis(
     months: int = Query(6, description="Number of months to analyze"),
-    keycloak_db: Session = Depends(get_keycloak_db),
 ):
     """
     Get cohort retention analysis.
@@ -388,7 +382,7 @@ async def get_cohort_analysis(
 
     async def compute_cohorts():
         try:
-            users = await query_keycloak_users(keycloak_db)
+            users = await query_keycloak_users()
 
             # Group users by signup month
             cohorts = {}
@@ -456,7 +450,7 @@ async def get_cohort_analysis(
 
 @router.get("/retention")
 async def get_retention_curves(
-    keycloak_db: Session = Depends(get_keycloak_db),
+    
 ):
     """
     Get retention curves for visualization.
@@ -482,7 +476,7 @@ async def get_retention_curves(
 
 @router.get("/engagement", response_model=EngagementMetrics)
 async def get_engagement_metrics(
-    keycloak_db: Session = Depends(get_keycloak_db),
+    
 ):
     """
     Get user engagement metrics (DAU, WAU, MAU).
@@ -492,7 +486,7 @@ async def get_engagement_metrics(
 
     async def compute_engagement():
         try:
-            users = await query_keycloak_users(keycloak_db)
+            users = await query_keycloak_users()
 
             now = datetime.now()
 
@@ -553,24 +547,50 @@ async def get_engagement_metrics(
 async def get_churn_predictions(
     risk_level: Optional[str] = Query(None, description="Filter by risk level: low, medium, high"),
     limit: int = Query(100, description="Maximum number of predictions"),
-    keycloak_db: Session = Depends(get_keycloak_db),
+    
     ops_db: Session = Depends(get_db),
 ):
     """
-    Get ML-based churn predictions for users.
+    Get heuristic-based churn predictions for users.
 
-    Returns churn probability and risk level for each user.
+    Returns churn probability and risk level for each user based on login patterns.
     """
 
     async def compute_predictions():
         # Get users
-        users = await query_keycloak_users(keycloak_db)
+        users = await query_keycloak_users()
 
-        # Enrich with feature data
-        enriched_users = await enrich_user_data(users, ops_db)
-
-        # Predict churn
-        predictions = churn_predictor.predict(enriched_users)
+        predictions = []
+        now = datetime.now()
+        
+        for user in users:
+            if not user.get('created_at'):
+                continue
+                
+            days_since_signup = (now - user['created_at']).days
+            last_login = user.get('last_login')
+            last_login_days_ago = (now - last_login).days if last_login else days_since_signup
+            
+            # Simple heuristic: users who haven't logged in for a while are more likely to churn
+            if last_login_days_ago > 60:
+                churn_prob = min(95.0, 50.0 + (last_login_days_ago - 60) * 0.5)
+                risk = 'high'
+            elif last_login_days_ago > 30:
+                churn_prob = 30.0 + (last_login_days_ago - 30)
+                risk = 'medium'
+            else:
+                churn_prob = last_login_days_ago * 0.5
+                risk = 'low'
+            
+            predictions.append({
+                "user_id": user['user_id'],
+                "username": user['username'],
+                "churn_probability": round(churn_prob, 2),
+                "risk_level": risk,
+                "days_since_signup": days_since_signup,
+                "last_login_days_ago": last_login_days_ago,
+                "login_count": user.get('login_count', 0)
+            })
 
         # Filter by risk level if specified
         if risk_level:
@@ -589,7 +609,7 @@ async def get_churn_predictions(
 
 @router.get("/behavior/patterns")
 async def get_behavior_patterns(
-    keycloak_db: Session = Depends(get_keycloak_db),
+    
 ):
     """
     Get user behavior patterns.
@@ -598,7 +618,7 @@ async def get_behavior_patterns(
     """
 
     async def compute_patterns():
-        users = await query_keycloak_users(keycloak_db)
+        users = await query_keycloak_users()
 
         # Login frequency distribution
         login_freq = {"daily": 0, "weekly": 0, "monthly": 0, "inactive": 0}
@@ -642,7 +662,7 @@ async def get_behavior_patterns(
 
 @router.get("/segments", response_model=UserSegments)
 async def get_user_segments(
-    keycloak_db: Session = Depends(get_keycloak_db),
+    
     ops_db: Session = Depends(get_db),
 ):
     """
@@ -652,7 +672,7 @@ async def get_user_segments(
     """
 
     async def compute_segments():
-        users = await query_keycloak_users(keycloak_db)
+        users = await query_keycloak_users()
         enriched_users = await enrich_user_data(users, ops_db)
 
         # Segment criteria
@@ -694,7 +714,7 @@ async def get_user_segments(
 @router.get("/growth")
 async def get_growth_metrics(
     months: int = Query(6, description="Number of months to analyze"),
-    keycloak_db: Session = Depends(get_keycloak_db),
+    
 ):
     """
     Get user growth metrics over time.
@@ -703,7 +723,7 @@ async def get_growth_metrics(
     """
 
     async def compute_growth():
-        users = await query_keycloak_users(keycloak_db)
+        users = await query_keycloak_users()
 
         # Group by month
         growth_by_month = {}
@@ -750,7 +770,7 @@ async def get_growth_metrics(
 
 @router.post("/churn/train")
 async def train_churn_model(
-    keycloak_db: Session = Depends(get_keycloak_db),
+    
     ops_db: Session = Depends(get_db),
 ):
     """
@@ -763,7 +783,7 @@ async def train_churn_model(
         logger.info("Starting churn model training...")
 
         # Get historical user data (last 6 months)
-        users = await query_keycloak_users(keycloak_db)
+        users = await query_keycloak_users()
         enriched_users = await enrich_user_data(users, ops_db)
 
         # Train model

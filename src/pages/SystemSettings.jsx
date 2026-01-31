@@ -224,7 +224,7 @@ const SystemSettings = () => {
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
           System Settings
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: '#e9d5ff' }}>
           Manage environment variables and system configuration through the GUI
         </Typography>
       </Box>
@@ -247,11 +247,32 @@ const SystemSettings = () => {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <SearchIcon sx={{ color: '#90caf9' }} />
               </InputAdornment>
             ),
+            sx: {
+              color: '#ffffff',
+              backgroundColor: '#1e3a5f',
+              '& input::placeholder': {
+                color: '#90caf9',
+                opacity: 0.7
+              }
+            }
           }}
-          sx={{ width: 300 }}
+          sx={{ 
+            width: 300,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#1976d2',
+              },
+              '&:hover fieldset': {
+                borderColor: '#42a5f5',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#90caf9',
+              },
+            },
+          }}
         />
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
