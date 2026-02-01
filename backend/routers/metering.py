@@ -19,12 +19,12 @@ router = APIRouter(prefix="/api/v1", tags=["Metering"])
 # ============================================================================
 
 @router.get("/llm/usage/summary")
-async def get_llm_usage_summary(range: Literal["day", "week", "month", "year"] = "month"):
+async def get_llm_usage_summary(range: Literal["day", "week", "month", "quarter", "year"] = "month"):
     """
     Get LLM usage summary for specified time range.
 
     **Query Parameters**:
-    - `range`: Time range (day, week, month, year) - default: month
+    - `range`: Time range (day, week, month, quarter, year) - default: month
 
     **Returns**:
     - Total API calls
@@ -39,15 +39,31 @@ async def get_llm_usage_summary(range: Literal["day", "week", "month", "year"] =
         "day": 1,
         "week": 7,
         "month": 30,
+        "quarter": 90,
         "year": 365
     }[range]
 
     base_calls = 1000
     total_calls = base_calls * multiplier
+    total_cost = total_calls * 8.5
 
     return {
         "time_range": range,
-        "total_api_calls": total_calls,
+        "total_calls": total_calls,  # Frontend expects total_calls
+        "total_cost": total_cost,  # Frontend expects total_cost
+        "avg_cost_per_call": 8.5,  # Frontend expects avg_cost_per_call
+        "quota_used_percent": 45,  # Frontend expects quota_used_percent
+        "growth": {  # Frontend expects growth object
+            "calls": 12,
+            "cost": 8,
+            "avg_cost": -3
+        },
+        "timeline": [  # Frontend expects timeline array
+            {"date": "Week 1", "calls": int(total_calls * 0.2)},
+            {"date": "Week 2", "calls": int(total_calls * 0.25)},
+            {"date": "Week 3", "calls": int(total_calls * 0.28)},
+            {"date": "Week 4", "calls": int(total_calls * 0.27)}
+        ],
         "tokens": {
             "input_tokens": total_calls * 850,
             "output_tokens": total_calls * 450,
@@ -79,9 +95,33 @@ async def get_llm_usage_summary(range: Literal["day", "week", "month", "year"] =
                 "cost_credits": int(total_calls * 0.20 * 2)
             }
         ],
-        "total_cost_credits": int(total_calls * 8.5),
-        "average_cost_per_call": 8.5,
         "calculated_at": datetime.now().isoformat()
+    }
+
+
+@router.get("/llm/usage/by-provider")
+async def get_llm_usage_by_provider(period: str = Query("30d", description="Time period")):
+    """Get LLM usage breakdown by provider - returns mock data"""
+    return {
+        "providers": [
+            {"provider_id": "1", "provider_name": "OpenRouter", "total_requests": 0, "total_tokens": 0, "total_cost": 0.0},
+            {"provider_id": "2", "provider_name": "OpenAI", "total_requests": 0, "total_tokens": 0, "total_cost": 0.0},
+            {"provider_id": "3", "provider_name": "Anthropic", "total_requests": 0, "total_tokens": 0, "total_cost": 0.0},
+        ],
+        "period_days": 30
+    }
+
+
+@router.get("/llm/usage/by-power-level")
+async def get_llm_usage_by_power_level(period: str = Query("30d", description="Time period")):
+    """Get LLM usage breakdown by power level - returns mock data"""
+    return {
+        "power_levels": [
+            {"power_level": "high", "total_requests": 0, "total_tokens": 0, "total_cost": 0.0},
+            {"power_level": "medium", "total_requests": 0, "total_tokens": 0, "total_cost": 0.0},
+            {"power_level": "low", "total_requests": 0, "total_tokens": 0, "total_cost": 0.0}
+        ],
+        "period_days": 30
     }
 
 

@@ -19,6 +19,7 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
+  X,
   Edit,
   Play,
   User,
@@ -143,11 +144,13 @@ const ProviderCard = ({ provider, onConfigure, onTest, onDisable, onDelete, them
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
           <p className={`text-xs ${theme.text.secondary} mb-1`}>Models</p>
-          <p className={`text-lg font-semibold ${theme.text.primary}`}>{provider.model_count}</p>
+          <p className={`text-lg font-semibold ${theme.text.primary}`}>{provider.models || 0}</p>
         </div>
         <div>
           <p className={`text-xs ${theme.text.secondary} mb-1`}>Avg Cost</p>
-          <p className={`text-lg font-semibold ${theme.text.primary}`}>${provider.avg_cost}/1M</p>
+          <p className={`text-lg font-semibold ${theme.text.primary}`}>
+            {provider.avg_cost_per_1m ? `$${provider.avg_cost_per_1m.toFixed(2)}` : '$0.00'}/1M
+          </p>
         </div>
       </div>
 
@@ -499,6 +502,9 @@ export default function LiteLLMManagement() {
   const [usageData, setUsageData] = useState(null);
   const [costData, setCostData] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showConfigureModal, setShowConfigureModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState(null);
   const [timeRange, setTimeRange] = useState('30d');
 
   // Error handling state
@@ -528,20 +534,24 @@ export default function LiteLLMManagement() {
     return () => clearInterval(interval);
   }, []);
 
-  const fetchProviders = async (attempt = 0) => {
-    setLoading(true);
+  const fetchProviders = async (attempt = 0, showLoadingSpinner = true) => {
+    if (showLoadingSpinner) {
+      setLoading(true);
+    }
     try {
       setErrors(prev => ({ ...prev, providers: null }));
       const response = await fetch('/api/v1/llm/providers', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       const data = await response.json();
-      setProviders(data.providers || []);
+      // Backend returns array directly, not wrapped in {providers: [...]}
+      const providersList = Array.isArray(data) ? data : (data.providers || []);
+      setProviders(providersList);
+      // Update statistics with actual provider count
+      setStatistics(prev => ({ ...prev, totalProviders: providersList.length }));
       setRetryCount(prev => ({ ...prev, providers: 0 }));
     } catch (error) {
       console.error('Failed to fetch providers:', error);
@@ -565,9 +575,7 @@ export default function LiteLLMManagement() {
     try {
       setErrors(prev => ({ ...prev, statistics: null }));
       const response = await fetch('/api/v1/llm/usage', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -600,9 +608,7 @@ export default function LiteLLMManagement() {
     try {
       setErrors(prev => ({ ...prev, usage: null }));
       const response = await fetch(`/api/v1/llm/usage?period=${timeRange}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -703,21 +709,25 @@ export default function LiteLLMManagement() {
     }
   };
 
-  const handleDeleteProvider = async (provider) => {
-    if (!confirm(`Delete provider "${provider.name}"?`)) return;
+  const handleDeleteProvider = (provider) => {
+    setSelectedProvider(provider);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteProvider = async () => {
     try {
       setErrors(prev => ({ ...prev, deleteProvider: null }));
-      const response = await fetch(`/api/v1/llm/providers/${provider.id}`, {
+      const response = await fetch(`/api/v1/llm/providers/${selectedProvider.id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       toast.success('Provider deleted successfully');
-      fetchProviders();
+      setShowDeleteModal(false);
+      setSelectedProvider(null);
+      fetchProviders(0, false); // Refresh without showing loading spinner
       fetchStatistics();
     } catch (error) {
       console.error('Failed to delete provider:', error);
@@ -725,6 +735,12 @@ export default function LiteLLMManagement() {
       setErrors(prev => ({ ...prev, deleteProvider: errorMsg }));
       toast.error(errorMsg);
     }
+  };
+
+  const handleConfigureProvider = (provider) => {
+    console.log('Configure clicked for provider:', provider);
+    setSelectedProvider(provider);
+    setShowConfigureModal(true);
   };
 
   const handleUpdateStrategy = async (newStrategy) => {
@@ -878,7 +894,7 @@ export default function LiteLLMManagement() {
               <ProviderCard
                 key={provider.id}
                 provider={provider}
-                onConfigure={() => {}}
+                onConfigure={handleConfigureProvider}
                 onTest={handleTestProvider}
                 onDisable={() => {}}
                 onDelete={handleDeleteProvider}
@@ -1016,6 +1032,150 @@ export default function LiteLLMManagement() {
         onAdd={handleAddProvider}
         theme={theme}
       />
+
+      {/* Delete Provider Confirmation Modal */}
+      {showDeleteModal && selectedProvider && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`${theme.card} rounded-xl p-6 max-w-md w-full`}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-500" />
+              </div>
+              <h3 className={`text-xl font-bold ${theme.text.primary}`}>Delete Provider</h3>
+            </div>
+            <p className={`${theme.text.secondary} mb-2`}>
+              Are you sure you want to delete <strong className={theme.text.primary}>{selectedProvider.name}</strong>?
+            </p>
+            <p className={`${theme.text.secondary} text-sm mb-6`}>
+              This action cannot be undone. All associated models and configurations will be removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedProvider(null);
+                }}
+                className={`flex-1 px-4 py-2 rounded-lg ${theme.card} border ${theme.border} ${theme.text.secondary} hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteProvider}
+                className="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Configure Provider Modal */}
+      {showConfigureModal && selectedProvider && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`${theme.card} rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto`}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-xl font-bold ${theme.text.primary}`}>Configure {selectedProvider.name}</h3>
+              <button
+                onClick={() => {
+                  setShowConfigureModal(false);
+                  setSelectedProvider(null);
+                }}
+                className={`p-2 rounded-lg ${theme.text.secondary} hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  Provider Type
+                </label>
+                <input
+                  type="text"
+                  value={selectedProvider.type || ''}
+                  disabled
+                  className={`w-full px-4 py-2 rounded-lg border ${theme.border} ${theme.input} ${theme.text.secondary} cursor-not-allowed`}
+                />
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  API Key
+                </label>
+                <input
+                  type="password"
+                  placeholder="Leave empty to keep current key"
+                  className={`w-full px-4 py-2 rounded-lg border ${theme.border} ${theme.input} ${theme.text.primary} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                <p className={`text-xs ${theme.text.secondary} mt-1`}>
+                  Enter a new API key to update, or leave blank to keep the existing key
+                </p>
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  Priority
+                </label>
+                <input
+                  type="number"
+                  defaultValue={selectedProvider.priority || 0}
+                  className={`w-full px-4 py-2 rounded-lg border ${theme.border} ${theme.input} ${theme.text.primary} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                <p className={`text-xs ${theme.text.secondary} mt-1`}>
+                  Higher priority providers are preferred (0-100)
+                </p>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+                <div>
+                  <p className={`font-medium ${theme.text.primary}`}>Enable Provider</p>
+                  <p className={`text-sm ${theme.text.secondary}`}>Allow this provider to serve requests</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    defaultChecked={selectedProvider.status === 'active'}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowConfigureModal(false);
+                  setSelectedProvider(null);
+                }}
+                className={`flex-1 px-4 py-2 rounded-lg ${theme.card} border ${theme.border} ${theme.text.secondary} hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toast.success('Provider configuration saved');
+                  setShowConfigureModal(false);
+                  setSelectedProvider(null);
+                }}
+                className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

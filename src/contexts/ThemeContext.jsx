@@ -22,6 +22,8 @@ const themes = {
     sidebar: 'bg-slate-800/95 backdrop-blur-lg border-r border-slate-700/50 shadow-2xl',
     card: 'bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 shadow-xl',
     button: 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg',
+    border: 'border-slate-700/50',
+    input: 'bg-slate-900/50 text-slate-100',
     text: {
       primary: 'text-white',           // 17.85:1 on background ✅ AAA
       secondary: 'text-slate-300',     // 12.02:1 on background ✅ AAA
@@ -44,6 +46,8 @@ const themes = {
     sidebar: 'bg-white/95 backdrop-blur-lg border-r border-gray-200 shadow-xl',
     card: 'bg-white border border-gray-200 shadow-lg',
     button: 'bg-blue-600 hover:bg-blue-700 text-white shadow-md',
+    border: 'border-gray-200',
+    input: 'bg-white text-gray-900',
     text: {
       primary: 'text-gray-900',        // 17.74:1 on background ✅ AAA
       secondary: 'text-gray-600',      // 7.56:1 on background ✅ AAA
@@ -64,6 +68,8 @@ const themes = {
     accent: 'violet-400',
     background: 'bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900',
     sidebar: 'bg-slate-900/95 backdrop-blur-xl border-r border-purple-500/10',
+    border: 'border-purple-500/20',
+    input: 'bg-slate-900/50 text-gray-100',
     card: 'bg-slate-800/80 backdrop-blur-md border border-purple-500/10 shadow-lg hover:shadow-purple-500/5', // Increased opacity from 50% to 80%
     button: 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white shadow-lg shadow-purple-500/20',
     text: {
@@ -86,6 +92,8 @@ const themes = {
     accent: 'yellow-400',
     background: 'galaxy-bg', // Custom CSS class for animated gradient
     sidebar: 'glass-card backdrop-blur-xl border-r border-white/10',
+    border: 'border-white/10',
+    input: 'bg-white/5 text-white',
     card: 'glass-card backdrop-blur-md border border-white/10 shadow-2xl card-glow',
     button: 'bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 hover:from-purple-700 hover:via-violet-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/30',
     text: {
