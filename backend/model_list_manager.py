@@ -123,7 +123,7 @@ class ModelListManager:
                     l.updated_at,
                     COUNT(m.id) as model_count
                 FROM app_model_lists l
-                LEFT JOIN app_model_list_items m ON l.id = m.list_id AND m.is_active = TRUE
+                LEFT JOIN app_model_list_items m ON l.id = m.list_id
                 WHERE 1=1
             """
             params = []
@@ -190,7 +190,7 @@ class ModelListManager:
                     l.updated_at,
                     COUNT(m.id) as model_count
                 FROM app_model_lists l
-                LEFT JOIN app_model_list_items m ON l.id = m.list_id AND m.is_active = TRUE
+                LEFT JOIN app_model_list_items m ON l.id = m.list_id
                 WHERE l.id = $1
                 GROUP BY l.id
                 """,
@@ -501,10 +501,10 @@ class ModelListManager:
                     category,
                     sort_order,
                     is_featured,
-                    tier_trial_access,
-                    tier_starter_access,
-                    tier_professional_access,
-                    tier_enterprise_access,
+                    tier_trial,
+                    tier_starter,
+                    tier_professional,
+                    tier_enterprise,
                     is_active,
                     metadata,
                     created_at,
@@ -537,10 +537,10 @@ class ModelListManager:
                     "sort_order": row["sort_order"],
                     "is_featured": row["is_featured"],
                     "tier_access": {
-                        "trial": row["tier_trial_access"],
-                        "starter": row["tier_starter_access"],
-                        "professional": row["tier_professional_access"],
-                        "enterprise": row["tier_enterprise_access"]
+                        "trial": row["tier_trial"],
+                        "starter": row["tier_starter"],
+                        "professional": row["tier_professional"],
+                        "enterprise": row["tier_enterprise"]
                     },
                     "is_active": row["is_active"],
                     "metadata": row["metadata"] if row["metadata"] else {},
@@ -560,10 +560,10 @@ class ModelListManager:
         category: str = "general",
         sort_order: int = 0,
         is_featured: bool = False,
-        tier_trial_access: bool = False,
-        tier_starter_access: bool = True,
-        tier_professional_access: bool = True,
-        tier_enterprise_access: bool = True,
+        tier_trial: bool = False,
+        tier_starter: bool = True,
+        tier_professional: bool = True,
+        tier_enterprise: bool = True,
         metadata: Optional[Dict[str, Any]] = None,
         admin_user_id: Optional[str] = None
     ) -> Dict[str, Any]:
@@ -617,14 +617,14 @@ class ModelListManager:
                 """
                 INSERT INTO app_model_list_items (
                     list_id, model_id, display_name, category, sort_order, is_featured,
-                    tier_trial_access, tier_starter_access, tier_professional_access, tier_enterprise_access,
+                    tier_trial, tier_starter, tier_professional, tier_enterprise,
                     is_active, metadata
                 )
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE, $11)
                 RETURNING *
                 """,
                 list_id, model_id, display_name, category, sort_order, is_featured,
-                tier_trial_access, tier_starter_access, tier_professional_access, tier_enterprise_access,
+                tier_trial, tier_starter, tier_professional, tier_enterprise,
                 json.dumps(metadata) if metadata else None
             )
 
@@ -647,10 +647,10 @@ class ModelListManager:
                 "sort_order": row["sort_order"],
                 "is_featured": row["is_featured"],
                 "tier_access": {
-                    "trial": row["tier_trial_access"],
-                    "starter": row["tier_starter_access"],
-                    "professional": row["tier_professional_access"],
-                    "enterprise": row["tier_enterprise_access"]
+                    "trial": row["tier_trial"],
+                    "starter": row["tier_starter"],
+                    "professional": row["tier_professional"],
+                    "enterprise": row["tier_enterprise"]
                 },
                 "is_active": row["is_active"],
                 "metadata": json.loads(row["metadata"]) if row["metadata"] else {},
@@ -668,10 +668,10 @@ class ModelListManager:
         category: Optional[str] = None,
         sort_order: Optional[int] = None,
         is_featured: Optional[bool] = None,
-        tier_trial_access: Optional[bool] = None,
-        tier_starter_access: Optional[bool] = None,
-        tier_professional_access: Optional[bool] = None,
-        tier_enterprise_access: Optional[bool] = None,
+        tier_trial: Optional[bool] = None,
+        tier_starter: Optional[bool] = None,
+        tier_professional: Optional[bool] = None,
+        tier_enterprise: Optional[bool] = None,
         is_active: Optional[bool] = None,
         metadata: Optional[Dict[str, Any]] = None,
         admin_user_id: Optional[str] = None
@@ -712,10 +712,10 @@ class ModelListManager:
                 ("category", category),
                 ("sort_order", sort_order),
                 ("is_featured", is_featured),
-                ("tier_trial_access", tier_trial_access),
-                ("tier_starter_access", tier_starter_access),
-                ("tier_professional_access", tier_professional_access),
-                ("tier_enterprise_access", tier_enterprise_access),
+                ("tier_trial", tier_trial),
+                ("tier_starter", tier_starter),
+                ("tier_professional", tier_professional),
+                ("tier_enterprise", tier_enterprise),
                 ("is_active", is_active),
             ]
 
@@ -768,10 +768,10 @@ class ModelListManager:
                 "sort_order": row["sort_order"],
                 "is_featured": row["is_featured"],
                 "tier_access": {
-                    "trial": row["tier_trial_access"],
-                    "starter": row["tier_starter_access"],
-                    "professional": row["tier_professional_access"],
-                    "enterprise": row["tier_enterprise_access"]
+                    "trial": row["tier_trial"],
+                    "starter": row["tier_starter"],
+                    "professional": row["tier_professional"],
+                    "enterprise": row["tier_enterprise"]
                 },
                 "is_active": row["is_active"],
                 "metadata": json.loads(row["metadata"]) if row["metadata"] else {},
