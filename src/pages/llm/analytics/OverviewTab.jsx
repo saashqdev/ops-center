@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   UsersIcon,
   CurrencyDollarIcon,
@@ -20,6 +21,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 
 const OverviewTab = ({ dateRange, setDateRange }) => {
   const { currentTheme } = useTheme();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState(null);
   const [services, setServices] = useState([]);
@@ -204,13 +206,22 @@ const OverviewTab = ({ dateRange, setDateRange }) => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <button className="p-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors">
+        <button 
+          onClick={() => navigate('/admin/system/users')}
+          className="p-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+        >
           View All Users
         </button>
-        <button className="p-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition-colors">
+        <button 
+          onClick={() => navigate('/admin/system/billing')}
+          className="p-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition-colors"
+        >
           Billing Dashboard
         </button>
-        <button className="p-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">
+        <button 
+          onClick={() => navigate('/admin/system/services')}
+          className="p-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+        >
           Service Management
         </button>
       </div>
