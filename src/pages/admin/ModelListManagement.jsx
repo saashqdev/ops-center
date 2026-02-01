@@ -610,7 +610,7 @@ const ModelListManagement = () => {
           <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 0.5 }}>
             Model List Management
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'rgba(168, 85, 247, 1)' }}>
             Create and manage app-specific curated model lists
           </Typography>
         </Box>
