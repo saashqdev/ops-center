@@ -65,13 +65,25 @@ class BYOKManager:
             raise HTTPException(status_code=500, detail="Failed to encrypt API key")
 
     def _decrypt_key(self, encrypted_key: str) -> str:
-        """Decrypt API key"""
+        """Decrypt API key - tries BYOK_ENCRYPTION_KEY first, falls back to ENCRYPTION_KEY"""
         try:
             decrypted = self.cipher.decrypt(encrypted_key.encode())
             return decrypted.decode()
         except Exception as e:
-            logger.error(f"Decryption failed: {e}")
-            raise HTTPException(status_code=500, detail="Failed to decrypt API key")
+            logger.warning(f"Decryption with BYOK_ENCRYPTION_KEY failed, trying ENCRYPTION_KEY fallback: {e}")
+            # Try fallback to ENCRYPTION_KEY for keys encrypted before BYOK_ENCRYPTION_KEY was set
+            try:
+                fallback_key = os.getenv('ENCRYPTION_KEY')
+                if fallback_key:
+                    fallback_cipher = Fernet(fallback_key.encode())
+                    decrypted = fallback_cipher.decrypt(encrypted_key.encode())
+                    logger.info("Successfully decrypted with ENCRYPTION_KEY fallback")
+                    return decrypted.decode()
+                else:
+                    raise Exception("No fallback encryption key available")
+            except Exception as e2:
+                logger.error(f"Decryption failed with both keys: {e2}")
+                raise HTTPException(status_code=500, detail="Failed to decrypt API key")
 
     async def store_user_api_key(
         self,

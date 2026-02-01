@@ -179,7 +179,18 @@ export default function ModelRegistry({ showSnackbar }) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
-          sx={{ minWidth: 250 }}
+          variant="outlined"
+          sx={{ 
+            minWidth: 250,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: 'rgba(139, 92, 246, 0.5)' },
+              '&:hover fieldset': { borderColor: 'rgb(139, 92, 246)' },
+              '&.Mui-focused fieldset': { borderColor: 'rgb(139, 92, 246)' }
+            },
+            '& .MuiOutlinedInput-input': { color: 'rgb(243, 244, 246)' },
+            '& .MuiInputLabel-root': { color: 'rgb(243, 232, 255)' },
+            '& .MuiInputLabel-root.Mui-focused': { color: 'rgb(139, 92, 246)' }
+          }}
         />
 
         <TextField
@@ -188,7 +199,19 @@ export default function ModelRegistry({ showSnackbar }) {
           value={filterProvider}
           onChange={(e) => setFilterProvider(e.target.value)}
           size="small"
-          sx={{ minWidth: 150 }}
+          variant="outlined"
+          sx={{ 
+            minWidth: 150,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: 'rgba(139, 92, 246, 0.5)' },
+              '&:hover fieldset': { borderColor: 'rgb(139, 92, 246)' },
+              '&.Mui-focused fieldset': { borderColor: 'rgb(139, 92, 246)' }
+            },
+            '& .MuiOutlinedInput-input': { color: 'rgb(243, 244, 246)' },
+            '& .MuiSvgIcon-root': { color: 'rgba(139, 92, 246, 0.5)' },
+            '& .MuiInputLabel-root': { color: 'rgb(243, 232, 255)' },
+            '& .MuiInputLabel-root.Mui-focused': { color: 'rgb(139, 92, 246)' }
+          }}
         >
           {providers.map((p) => (
             <MenuItem key={p} value={p}>
@@ -203,7 +226,19 @@ export default function ModelRegistry({ showSnackbar }) {
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
           size="small"
-          sx={{ minWidth: 150 }}
+          variant="outlined"
+          sx={{ 
+            minWidth: 150,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: 'rgba(139, 92, 246, 0.5)' },
+              '&:hover fieldset': { borderColor: 'rgb(139, 92, 246)' },
+              '&.Mui-focused fieldset': { borderColor: 'rgb(139, 92, 246)' }
+            },
+            '& .MuiOutlinedInput-input': { color: 'rgb(243, 244, 246)' },
+            '& .MuiSvgIcon-root': { color: 'rgba(139, 92, 246, 0.5)' },
+            '& .MuiInputLabel-root': { color: 'rgb(243, 232, 255)' },
+            '& .MuiInputLabel-root.Mui-focused': { color: 'rgb(139, 92, 246)' }
+          }}
         >
           {statuses.map((s) => (
             <MenuItem key={s} value={s}>

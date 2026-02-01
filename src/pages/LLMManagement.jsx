@@ -14,7 +14,15 @@ import {
   CardContent,
   Alert,
   CircularProgress,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControlLabel,
+  Switch,
+  Snackbar
 } from '@mui/material';
 import {
   Memory,
@@ -40,13 +48,21 @@ import CacheStatsCard from '../components/llm/CacheStatsCard';
  * - Tab 4: Analytics - Usage and cost analytics
  * - Tab 5: Settings - Rate limits and cache configuration
  */
-export default function LLMManagement({ showSnackbar }) {
+export default function LLMManagement() {
   const [tabValue, setTabValue] = useState(0);
   const [providers, setProviders] = useState([]);
   const [usage, setUsage] = useState({});
   const [costs, setCosts] = useState({});
   const [cacheStats, setCacheStats] = useState({});
   const [loading, setLoading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+
+  const showSnackbar = (message, severity = 'info') => {
+    setSnackbar({ open: true, message, severity });
+  };
 
   useEffect(() => {
     if (tabValue === 1) fetchProviders();
@@ -58,11 +74,12 @@ export default function LLMManagement({ showSnackbar }) {
     setLoading(true);
     try {
       const response = await fetch('/api/v1/llm/providers', {
-        headers: { 'X-Admin-Token': localStorage.getItem('adminToken') || '' }
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch providers');
       const data = await response.json();
-      setProviders(data.providers || []);
+      // Backend returns array directly, not wrapped in {providers: [...]}
+      setProviders(Array.isArray(data) ? data : (data.providers || []));
     } catch (err) {
       showSnackbar(err.message, 'error');
     } finally {
@@ -129,18 +146,71 @@ export default function LLMManagement({ showSnackbar }) {
 
   const handleTestProvider = async (provider) => {
     try {
-      showSnackbar('Testing provider...', 'info');
-      const response = await fetch(`/api/v1/llm/providers/${provider.provider_id}/test`, {
+      showSnackbar('Testing provider connection...', 'info');
+      const response = await fetch(`/api/v1/llm/test`, {
         method: 'POST',
-        headers: { 'X-Admin-Token': localStorage.getItem('adminToken') || '' }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ provider_id: provider.id })
       });
+      
+      if (!response.ok) throw new Error('Test request failed');
+      
       const result = await response.json();
-      if (result.success) {
-        // REFACTORED: Using safeToFixed for latency formatting
-        showSnackbar(`Provider is online (${safeToFixed(result.latency_ms, 0)}ms)`, 'success');
+      
+      if (result.status === 'success') {
+        showSnackbar(`${result.provider_name} is online (${result.latency_ms}ms)`, 'success');
       } else {
-        showSnackbar(`Provider test failed: ${result.error}`, 'error');
+        showSnackbar(`Test failed: ${result.error || result.message}`, 'error');
       }
+    } catch (err) {
+      showSnackbar(`Test failed: ${err.message}`, 'error');
+    }
+  };
+
+  const handleEditProvider = (provider) => {
+    setSelectedProvider(provider);
+    setEditDialogOpen(true);
+  };
+
+  const handleDeleteProvider = async (provider) => {
+    setSelectedProvider(provider);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteProvider = async () => {
+    try {
+      const response = await fetch(`/api/v1/llm/providers/${selectedProvider.id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete provider');
+      
+      showSnackbar('Provider deleted successfully', 'success');
+      setDeleteDialogOpen(false);
+      setSelectedProvider(null);
+      fetchProviders();
+    } catch (err) {
+      showSnackbar(err.message, 'error');
+    }
+  };
+
+  const handleUpdateProvider = async (updates) => {
+    try {
+      const response = await fetch(`/api/v1/llm/providers/${selectedProvider.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) throw new Error('Failed to update provider');
+
+      showSnackbar('Provider updated successfully', 'success');
+      setEditDialogOpen(false);
+      setSelectedProvider(null);
+      fetchProviders();
     } catch (err) {
       showSnackbar(err.message, 'error');
     }
@@ -152,7 +222,7 @@ export default function LLMManagement({ showSnackbar }) {
         <Typography variant="h4" gutterBottom>
           LiteLLM Management
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: 'rgb(243, 232, 255)' }}>
           Manage models, providers, routing, and analytics for your LLM infrastructure
         </Typography>
       </Box>
@@ -198,11 +268,11 @@ export default function LLMManagement({ showSnackbar }) {
               <Grid container spacing={3}>
                 {/* REFACTORED: Using safeMap for provider list */}
                 {safeMap(providers, (provider) => (
-                  <Grid item xs={12} sm={6} md={4} key={provider.provider_id}>
+                  <Grid item xs={12} sm={6} md={4} key={provider.id}>
                     <ProviderCard
                       provider={provider}
-                      onEdit={() => {}}
-                      onDelete={() => {}}
+                      onEdit={handleEditProvider}
+                      onDelete={handleDeleteProvider}
                       onTest={handleTestProvider}
                     />
                   </Grid>
@@ -368,6 +438,90 @@ export default function LLMManagement({ showSnackbar }) {
           </Box>
         )}
       </Box>
+
+      {/* Edit Provider Dialog */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Provider: {selectedProvider?.name}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <TextField
+              label="API Key"
+              type="password"
+              placeholder="Leave empty to keep current key"
+              fullWidth
+              onChange={(e) => setSelectedProvider({...selectedProvider, api_key: e.target.value})}
+            />
+            <TextField
+              label="API Base URL"
+              defaultValue={selectedProvider?.api_base_url || ''}
+              fullWidth
+              onChange={(e) => setSelectedProvider({...selectedProvider, api_base_url: e.target.value})}
+            />
+            <TextField
+              label="Priority"
+              type="number"
+              defaultValue={selectedProvider?.priority || 0}
+              fullWidth
+              helperText="Higher priority providers are preferred"
+              onChange={(e) => setSelectedProvider({...selectedProvider, priority: parseInt(e.target.value)})}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={selectedProvider?.status === 'active'}
+                  onChange={(e) => setSelectedProvider({...selectedProvider, enabled: e.target.checked})}
+                />
+              }
+              label="Enabled"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={() => handleUpdateProvider({
+              api_key: selectedProvider?.api_key,
+              api_base_url: selectedProvider?.api_base_url,
+              priority: selectedProvider?.priority,
+              enabled: selectedProvider?.enabled ?? selectedProvider?.status === 'active'
+            })} 
+            variant="contained"
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Provider Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Delete Provider</DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This action cannot be undone!
+          </Alert>
+          <Typography>
+            Are you sure you want to delete provider <strong>{selectedProvider?.name}</strong>?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            This will also permanently delete all associated models.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={confirmDeleteProvider} variant="contained" color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Container>
   );
 }

@@ -399,7 +399,7 @@ export default function TestingLab() {
         </div>
 
         {/* Middle Section: Model Selector & Parameters */}
-        <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 rounded-lg p-4">
+        <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 rounded-lg p-4 relative z-50">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
             {/* Model Selector */}
@@ -431,7 +431,7 @@ export default function TestingLab() {
                 </button>
 
                 {showModelDropdown && !loadingModels && (
-                  <div className="absolute z-50 mt-2 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-80 overflow-hidden">
+                  <div className="absolute z-[100] mt-2 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-80 overflow-hidden">
                     {/* Search */}
                     <div className="p-2 border-b border-slate-700">
                       <div className="relative">

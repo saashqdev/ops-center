@@ -401,6 +401,18 @@ export default function ModelCatalog() {
   // Initial load (fetch once, filter client-side)
   useEffect(() => {
     fetchModels();
+
+    // Listen for provider key changes to auto-refresh
+    const handleProviderKeysChanged = () => {
+      console.log('Provider keys changed, refreshing model catalog...');
+      fetchModels();
+    };
+
+    window.addEventListener('providerKeysChanged', handleProviderKeysChanged);
+
+    return () => {
+      window.removeEventListener('providerKeysChanged', handleProviderKeysChanged);
+    };
   }, []); // Only fetch on mount, not on filter changes
 
   // Apply client filters when any filter changes

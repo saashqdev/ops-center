@@ -16,10 +16,10 @@ export default function ProviderCard({ provider, onEdit, onDelete, onTest }) {
           <Chip label={provider.status} color={getStatusColor(provider.status)} size="small" />
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Models: {provider.models?.length || 0}
+          Models: {typeof provider.models === 'number' ? provider.models : (provider.models?.length || 0)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Usage: {provider.usage_count.toLocaleString()} requests
+          Usage: {(provider.usage_count || 0).toLocaleString()} requests
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
           <Tooltip title="Test Connection"><IconButton size="small" onClick={() => onTest(provider)}><PlayArrow /></IconButton></Tooltip>

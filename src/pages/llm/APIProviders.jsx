@@ -23,7 +23,11 @@ export default function APIProviders() {
     // Invalidate model catalog cache to refresh available models
     queryClient.invalidateQueries(['models']);
     queryClient.invalidateQueries(['modelCatalog']);
-    console.log('Provider keys updated, model catalog cache invalidated');
+    
+    // Emit custom event to trigger Model Catalog refresh
+    window.dispatchEvent(new CustomEvent('providerKeysChanged'));
+    
+    console.log('Provider keys updated, model catalog refresh triggered');
   };
 
   return (

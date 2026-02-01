@@ -85,3 +85,9 @@ body {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+/* Position all MUI Dialogs below the top navigation bar */
+.MuiDialog-container {
+  align-items: flex-start !important;
+  padding-top: 80px !important;
+}

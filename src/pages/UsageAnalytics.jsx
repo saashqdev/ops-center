@@ -236,7 +236,7 @@ const UsageAnalytics = () => {
         danger: 'rgb(239, 68, 68)',
         info: 'rgb(59, 130, 246)',
         grid: 'rgba(255, 255, 255, 0.1)',
-        text: 'rgba(255, 255, 255, 0.7)'
+        text: 'rgb(243, 232, 255)' // purple-100
       }
     : {
         primary: 'rgb(124, 58, 237)',

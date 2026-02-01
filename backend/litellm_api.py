@@ -2472,60 +2472,29 @@ async def list_models_categorized(
         byok_providers_list = await byok_manager.list_user_providers(user_id)
         byok_provider_names = {p['provider'].lower() for p in byok_providers_list if p.get('enabled')}
 
-        # Fetch models from LiteLLM proxy
+        # Fetch models directly from providers using user's BYOK keys
         import httpx
-        litellm_url = os.getenv("LITELLM_PROXY_URL", "http://uchub-litellm:4000")
-        litellm_key = os.getenv("LITELLM_MASTER_KEY", "sk-e75f71c1d931d183e216c9ed6580e56a7be04533fe0729faccc7bcb8fec80375")
-
-        # Get OpenRouter API key for pricing data
-        openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
-
-        models_data = {'data': []}  # Default empty response
         
-        try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                # Fetch base model list from LiteLLM
-                response = await client.get(
-                    f"{litellm_url}/v1/models",
-                    headers={"Authorization": f"Bearer {litellm_key}"}
-                )
-                response.raise_for_status()
-                models_data = response.json()
-        except (httpx.ConnectError, httpx.TimeoutException) as e:
-            logger.warning(f"LiteLLM proxy not available at {litellm_url}: {e}")
-            # Return empty model list if LiteLLM is not running
-            return {
-                'byok_models': [],
-                'platform_models': [],
-                'summary': {
-                    'total_models': 0,
-                    'byok_count': 0,
-                    'platform_count': 0,
-                    'has_byok_keys': len(byok_provider_names) > 0,
-                    'byok_providers': list(byok_provider_names),
-                    'error': 'LiteLLM service not available'
-                }
-            }
-        except Exception as e:
-            logger.error(f"Error fetching models from LiteLLM: {e}")
-            return {
-                'byok_models': [],
-                'platform_models': [],
-                'summary': {
-                    'total_models': 0,
-                    'byok_count': 0,
-                    'platform_count': 0,
-                    'has_byok_keys': len(byok_provider_names) > 0,
-                    'byok_providers': list(byok_provider_names),
-                    'error': str(e)
-                }
-            }
+        # Get user's OpenRouter BYOK key if available
+        openrouter_key = None
+        if 'openrouter' in byok_provider_names:
+            try:
+                openrouter_key = await byok_manager.get_user_api_key(user_id, 'openrouter')
+                logger.info(f"Using user's OpenRouter BYOK key for model fetching")
+            except Exception as e:
+                logger.warning(f"Failed to get user's OpenRouter key: {e}")
+        
+        # Fallback to system OpenRouter key if no BYOK
+        if not openrouter_key:
+            openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
+        
+        models_data = {'data': []}  # Default empty response
         
         async with httpx.AsyncClient(timeout=15.0) as client:
 
-            # Fetch detailed model info from OpenRouter (pricing, context, descriptions)
+            # Fetch detailed model info from OpenRouter
             openrouter_models = {}
-            if openrouter_key:  # Only try if key is configured
+            if openrouter_key:  # Use BYOK key or system key
                 try:
                     or_response = await client.get(
                         "https://openrouter.ai/api/v1/models",
@@ -2534,6 +2503,7 @@ async def list_models_categorized(
                     )
                     if or_response.status_code == 200:
                         or_data = or_response.json()
+                        # Convert OpenRouter models to standard format
                         for model in or_data.get('data', []):
                             model_id = model.get('id', '')
                             openrouter_models[model_id] = {
@@ -2543,11 +2513,17 @@ async def list_models_categorized(
                                 'architecture': model.get('architecture', {}),
                                 'top_provider': model.get('top_provider', {}),
                             }
-                        logger.info(f"Fetched metadata for {len(openrouter_models)} OpenRouter models")
+                            # Add to models_data for processing
+                            models_data['data'].append({
+                                'id': model_id,
+                                'object': 'model',
+                                'created': 0
+                            })
+                        logger.info(f"Fetched {len(openrouter_models)} models from OpenRouter")
                 except Exception as e:
-                    logger.warning(f"Failed to fetch OpenRouter model metadata: {e}")
+                    logger.warning(f"Failed to fetch OpenRouter models: {e}")
             else:
-                logger.info("OpenRouter API key not configured, skipping metadata fetch")
+                logger.info("No OpenRouter API key available, skipping model fetch")
 
         # Process models
         all_models = models_data.get('data', [])
