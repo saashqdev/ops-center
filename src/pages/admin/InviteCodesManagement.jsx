@@ -47,7 +47,9 @@ const InviteCodesManagement = () => {
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedCode, setSelectedCode] = useState(null);
+  const [codeToDelete, setCodeToDelete] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Form state for creating new code
@@ -74,8 +76,9 @@ const InviteCodesManagement = () => {
   const loadCodes = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/admin/invite-codes/', {
-        credentials: 'include'
+      const response = await fetch(`/api/v1/admin/invite-codes/?_=${Date.now()}`, {
+        credentials: 'include',
+        cache: 'no-store'
       });
 
       if (!response.ok) {
@@ -166,12 +169,15 @@ const InviteCodesManagement = () => {
   };
 
   const handleDeleteCode = async (codeId, codeName) => {
-    if (!window.confirm(`Are you sure you want to delete invite code ${codeName}?`)) {
-      return;
-    }
+    setCodeToDelete({ id: codeId, code: codeName });
+    setOpenDeleteDialog(true);
+  };
+
+  const confirmDeleteCode = async () => {
+    if (!codeToDelete) return;
 
     try {
-      const response = await fetch(`/api/v1/admin/invite-codes/${codeId}`, {
+      const response = await fetch(`/api/v1/admin/invite-codes/${codeToDelete.id}`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -181,6 +187,8 @@ const InviteCodesManagement = () => {
       }
 
       showSnackbar('Invite code deleted successfully', 'success');
+      setOpenDeleteDialog(false);
+      setCodeToDelete(null);
       loadCodes();
     } catch (error) {
       console.error('Error deleting code:', error);
@@ -499,6 +507,30 @@ const InviteCodesManagement = () => {
           <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
           <Button onClick={handleUpdateCode} variant="contained">
             Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete Invite Code</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete invite code <strong>{codeToDelete?.code}</strong>?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            This action cannot be undone. All redemption history will be preserved.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={confirmDeleteCode} variant="contained" color="error">
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

@@ -1056,16 +1056,16 @@ async def get_system_admin_billing_screen(request: Request):
                     os.subscription_plan,
                     os.monthly_price,
                     os.status as subscription_status,
-                    COALESCE(SUM(uca.allocated_credits), 0) as total_credits,
-                    COALESCE(SUM(uca.used_credits), 0) as used_credits,
+                    COALESCE(ocp.total_credits, 0) as total_credits,
+                    COALESCE(ocp.used_credits, 0) as used_credits,
                     COUNT(DISTINCT om.user_id) as member_count,
                     0 as lifetime_spent_amount
                 FROM organizations o
                 LEFT JOIN organization_subscriptions os ON os.org_id = o.id
-                LEFT JOIN user_credit_allocations uca ON uca.org_id = o.id
+                LEFT JOIN organization_credit_pools ocp ON ocp.org_id = o.id
                 LEFT JOIN organization_members om ON om.organization_id = o.id
                 WHERE o.is_active = TRUE
-                GROUP BY o.id, o.name, os.subscription_plan, os.monthly_price, os.status
+                GROUP BY o.id, o.name, os.subscription_plan, os.monthly_price, os.status, ocp.total_credits, ocp.used_credits
                 ORDER BY used_credits DESC
                 """
             )
@@ -1086,6 +1086,15 @@ async def get_system_admin_billing_screen(request: Request):
             # Calculate total MRR and ARR
             total_mrr = sum(float(d["total_mrr"] or 0) for d in sub_distribution)
             total_arr = total_mrr * 12
+
+            # Calculate total credits across all organizations
+            total_credits_result = await conn.fetchrow(
+                """
+                SELECT COALESCE(SUM(total_credits), 0) as total_credits
+                FROM organization_credit_pools
+                """
+            )
+            total_credits = float(total_credits_result["total_credits"]) if total_credits_result else 0
 
             # Get top credit users across all orgs
             top_orgs = await conn.fetch(
@@ -1122,7 +1131,8 @@ async def get_system_admin_billing_screen(request: Request):
                 "revenue_metrics": {
                     "total_mrr": total_mrr,
                     "total_arr": total_arr,
-                    "active_subscriptions": sum(d["count"] for d in sub_distribution)
+                    "active_subscriptions": sum(d["count"] for d in sub_distribution),
+                    "total_credits": total_credits
                 },
                 "subscription_distribution": [
                     {
