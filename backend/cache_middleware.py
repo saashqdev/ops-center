@@ -112,6 +112,10 @@ class CacheHeaderMiddleware(BaseHTTPMiddleware):
         if path.startswith('/api/v1/admin/') or path.startswith('/api/v1/account/'):
             return 'private, max-age=60, must-revalidate'  # 1 minute
 
+        # API - Billing data (no cache - always fresh)
+        if path.startswith('/api/v1/org-billing/'):
+            return 'no-cache, no-store, must-revalidate'
+
         # API - General endpoints (short cache)
         if path.startswith('/api/'):
             return 'public, max-age=60, must-revalidate'  # 1 minute

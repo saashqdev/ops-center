@@ -54,22 +54,23 @@ export default function SystemBillingOverview() {
       setError(null);
 
       // Load system-wide billing data
-      const [systemRes, orgsRes] = await Promise.all([
-        fetch('/api/v1/org-billing/billing/system', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-        }),
-        fetch('/api/v1/organizations', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-        })
-      ]);
+      const systemRes = await fetch(`/api/v1/org-billing/billing/system?_=${Date.now()}`, {
+        credentials: 'include',
+        cache: 'no-store'
+      });
 
-      if (!systemRes.ok) throw new Error('Failed to load system billing data');
+      if (!systemRes.ok) {
+        const errorText = await systemRes.text();
+        console.error('System billing error:', errorText);
+        throw new Error(`Failed to load system billing data: ${systemRes.status}`);
+      }
 
       const systemBilling = await systemRes.json();
-      const orgsData = orgsRes.ok ? await orgsRes.json() : [];
+      console.log('System billing data received:', systemBilling);
 
+      // The API returns organizations in the same response
       setSystemData(systemBilling);
-      setOrganizations(orgsData);
+      setOrganizations(systemBilling.organizations || []);
     } catch (err) {
       console.error('Failed to load system billing:', err);
       setError(err.message);
@@ -110,7 +111,7 @@ export default function SystemBillingOverview() {
   };
 
   const getSubscriptionDistribution = () => {
-    if (!organizations) return {};
+    if (!organizations || organizations.length === 0) return { platform: 0, byok: 0, hybrid: 0 };
 
     const dist = {
       platform: 0,
@@ -128,7 +129,7 @@ export default function SystemBillingOverview() {
 
   const filteredOrgs = organizations.filter(org => {
     const matchesSearch = !searchTerm ||
-      org.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.org_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       org.display_name?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesPlan = filterPlan === 'all' || org.subscription_plan === filterPlan;
@@ -140,12 +141,12 @@ export default function SystemBillingOverview() {
     // Create CSV export
     const headers = ['Organization', 'Plan', 'Credits', 'MRR', 'Members', 'Status'];
     const rows = filteredOrgs.map(org => [
-      org.display_name || org.name,
+      org.display_name || org.org_name,
       org.subscription_plan || 'platform',
       org.total_credits || 0,
       formatCurrency(org.monthly_price || 0),
       org.member_count || 0,
-      org.status || 'active'
+      org.subscription_status || 'active'
     ]);
 
     const csv = [
@@ -234,11 +235,11 @@ export default function SystemBillingOverview() {
             <CurrencyDollarIcon className="h-5 w-5 text-green-500" />
           </div>
           <div className={`text-3xl font-bold ${theme.text.primary}`}>
-            {formatCurrency(systemData?.mrr || calculateMRR())}
+            {formatCurrency(systemData?.revenue_metrics?.total_mrr || calculateMRR())}
           </div>
           <div className="flex items-center gap-1 mt-2 text-green-400 text-sm">
             <ArrowTrendingUpIcon className="h-4 w-4" />
-            {systemData?.mrr_growth || '+15'}%
+            {systemData?.revenue_metrics?.mrr_growth || '+0'}%
           </div>
         </div>
 
@@ -248,11 +249,11 @@ export default function SystemBillingOverview() {
             <CurrencyDollarIcon className="h-5 w-5 text-blue-500" />
           </div>
           <div className={`text-3xl font-bold ${theme.text.primary}`}>
-            {formatCurrency(systemData?.arr || calculateARR())}
+            {formatCurrency(systemData?.revenue_metrics?.total_arr || calculateARR())}
           </div>
           <div className="flex items-center gap-1 mt-2 text-blue-400 text-sm">
             <ArrowTrendingUpIcon className="h-4 w-4" />
-            {systemData?.arr_growth || '+15'}%
+            {systemData?.revenue_metrics?.arr_growth || '+0'}%
           </div>
         </div>
 
@@ -262,11 +263,11 @@ export default function SystemBillingOverview() {
             <BuildingOfficeIcon className="h-5 w-5 text-purple-500" />
           </div>
           <div className={`text-3xl font-bold ${theme.text.primary}`}>
-            {systemData?.active_orgs || organizations.length}
+            {systemData?.revenue_metrics?.active_subscriptions || organizations.length}
           </div>
           <div className="flex items-center gap-1 mt-2 text-purple-400 text-sm">
             <ArrowTrendingUpIcon className="h-4 w-4" />
-            {systemData?.org_growth || '+3'} this month
+            {systemData?.revenue_metrics?.org_growth || '+0'} this month
           </div>
         </div>
 
@@ -276,7 +277,7 @@ export default function SystemBillingOverview() {
             <BanknotesIcon className="h-5 w-5 text-yellow-500" />
           </div>
           <div className={`text-3xl font-bold ${theme.text.primary}`}>
-            {formatLargeNumber(systemData?.total_credits || 2300000)}
+            {formatLargeNumber(systemData?.revenue_metrics?.total_credits || 0)}
           </div>
           <div className="flex items-center gap-1 mt-2 text-yellow-400 text-sm">
             outstanding
@@ -358,6 +359,7 @@ export default function SystemBillingOverview() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`pl-10 pr-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-800 text-white'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                style={{ paddingLeft: '40px' }}
               />
             </div>
             <select
@@ -396,16 +398,16 @@ export default function SystemBillingOverview() {
               <tbody>
                 {filteredOrgs.map((org) => (
                   <tr
-                    key={org.id}
+                    key={org.org_id}
                     className={`border-b ${currentTheme === 'light' ? 'border-gray-200' : 'border-gray-800'} hover:bg-gray-800/30 transition-colors cursor-pointer`}
-                    onClick={() => navigate(`/admin/organization/${org.id}/billing`)}
+                    onClick={() => navigate(`/admin/organization/${org.org_id}/billing`)}
                   >
                     <td className="py-3 px-4">
                       <div className={`font-medium ${theme.text.primary}`}>
-                        {org.display_name || org.name}
+                        {org.display_name || org.org_name}
                       </div>
                       <div className={`text-xs ${theme.text.secondary}`}>
-                        {org.name}
+                        {org.org_name}
                       </div>
                     </td>
                     <td className="text-center py-3 px-4">
@@ -435,7 +437,7 @@ export default function SystemBillingOverview() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/admin/organization/${org.id}/billing`);
+                          navigate(`/admin/organization/${org.org_id}/billing`);
                         }}
                         className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
                       >

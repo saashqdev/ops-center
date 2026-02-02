@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import {
@@ -39,6 +40,7 @@ const itemVariants = {
 export default function OrganizationBillingPro() {
   const { theme, currentTheme } = useTheme();
   const { currentOrg } = useOrganization();
+  const { orgId } = useParams();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [billingData, setBillingData] = useState(null);
@@ -47,7 +49,11 @@ export default function OrganizationBillingPro() {
   const [error, setError] = useState(null);
   const [showAddCreditsModal, setShowAddCreditsModal] = useState(false);
   const [showAllocateModal, setShowAllocateModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // Use orgId from URL if available, otherwise fall back to currentOrg
+  const effectiveOrgId = orgId || currentOrg?.id;
 
   // Toast notification
   const [toast, setToast] = useState({
@@ -57,13 +63,13 @@ export default function OrganizationBillingPro() {
   });
 
   useEffect(() => {
-    if (currentOrg) {
+    if (effectiveOrgId) {
       loadBillingData();
     }
-  }, [currentOrg]);
+  }, [effectiveOrgId]);
 
   const loadBillingData = async () => {
-    if (!currentOrg) return;
+    if (!effectiveOrgId) return;
 
     try {
       setLoading(true);
@@ -71,14 +77,17 @@ export default function OrganizationBillingPro() {
 
       // Load all data in parallel
       const [billingRes, allocationsRes, usageRes] = await Promise.all([
-        fetch(`/api/v1/org-billing/billing/org/${currentOrg.id}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        fetch(`/api/v1/org-billing/billing/org/${effectiveOrgId}`, {
+          credentials: 'include',
+          cache: 'no-store'
         }),
-        fetch(`/api/v1/org-billing/credits/${currentOrg.id}/allocations`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        fetch(`/api/v1/org-billing/credits/${effectiveOrgId}/allocations`, {
+          credentials: 'include',
+          cache: 'no-store'
         }),
-        fetch(`/api/v1/org-billing/credits/${currentOrg.id}/usage`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        fetch(`/api/v1/org-billing/credits/${effectiveOrgId}/usage`, {
+          credentials: 'include',
+          cache: 'no-store'
         })
       ]);
 
@@ -139,9 +148,9 @@ export default function OrganizationBillingPro() {
 
   const handleAddCredits = async (amount, purchaseAmount) => {
     try {
-      const response = await fetch(`/api/v1/org-billing/credits/${currentOrg.id}/add?credits=${amount}&purchase_amount=${purchaseAmount}`, {
+      const response = await fetch(`/api/v1/org-billing/credits/${effectiveOrgId}/add?credits=${amount}&purchase_amount=${purchaseAmount}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error('Failed to add credits');
@@ -156,11 +165,11 @@ export default function OrganizationBillingPro() {
 
   const handleAllocateCredits = async (userId, credits, resetPeriod, notes) => {
     try {
-      const response = await fetch(`/api/v1/org-billing/credits/${currentOrg.id}/allocate`, {
+      const response = await fetch(`/api/v1/org-billing/credits/${effectiveOrgId}/allocate`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           user_id: userId,
@@ -178,6 +187,98 @@ export default function OrganizationBillingPro() {
       await loadBillingData();
     } catch (err) {
       showToast(`Failed to allocate credits: ${err.message}`, 'error');
+    }
+  };
+
+  const handleUpgradeSubscription = async (newPlan) => {
+    try {
+      const response = await fetch(`/api/v1/org-billing/subscriptions/${effectiveOrgId}/upgrade?new_plan=${newPlan}`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Failed to upgrade subscription');
+
+      const result = await response.json();
+      showToast(`Successfully upgraded from ${result.old_plan.toUpperCase()} to ${result.new_plan.toUpperCase()} plan`, 'success');
+      setShowUpgradeModal(false);
+      await loadBillingData();
+    } catch (err) {
+      showToast(`Failed to upgrade subscription: ${err.message}`, 'error');
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    try {
+      const response = await fetch(`/api/v1/org-billing/billing/org/${effectiveOrgId}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch billing data');
+
+      const data = await response.json();
+      
+      // Generate CSV content
+      let csv = 'Organization Billing Report\n\n';
+      
+      // Organization Info
+      csv += 'Organization Information\n';
+      csv += `Name,${data.organization?.name || 'N/A'}\n`;
+      csv += `ID,${data.organization?.id || 'N/A'}\n`;
+      csv += `Status,${data.organization?.status || 'N/A'}\n\n`;
+      
+      // Subscription Info
+      csv += 'Subscription Details\n';
+      csv += `Plan,${data.subscription?.subscription_plan?.toUpperCase() || 'N/A'}\n`;
+      csv += `Monthly Cost,${data.subscription?.monthly_price || 0}\n`;
+      csv += `Status,${data.subscription?.status?.toUpperCase() || 'N/A'}\n\n`;
+      
+      // Credit Pool
+      csv += 'Credit Pool\n';
+      csv += `Total Credits,${data.credit_pool?.total_credits || 0}\n`;
+      csv += `Allocated Credits,${data.credit_pool?.allocated_credits || 0}\n`;
+      csv += `Used Credits,${data.credit_pool?.used_credits || 0}\n`;
+      csv += `Available Credits,${data.credit_pool?.available_credits || 0}\n\n`;
+      
+      // User Allocations
+      if (allocations && allocations.length > 0) {
+        csv += 'User Credit Allocations\n';
+        csv += 'User ID,Allocated Credits,Used Credits,Remaining Credits,Reset Period,Active\n';
+        allocations.forEach(alloc => {
+          csv += `${alloc.user_id},${alloc.allocated_credits},${alloc.used_credits},${alloc.remaining_credits},${alloc.reset_period},${alloc.is_active}\n`;
+        });
+        csv += '\n';
+      }
+      
+      // Usage Stats
+      if (usage) {
+        csv += 'Usage Statistics\n';
+        csv += `Total Credits Used,${usage.total_credits_used || 0}\n`;
+        csv += `Active Users,${usage.active_users || 0}\n`;
+        csv += `Total Requests,${usage.total_requests || 0}\n`;
+        if (usage.by_service && usage.by_service.length > 0) {
+          csv += '\nUsage by Service\n';
+          csv += 'Service Type,Credits Used,Request Count\n';
+          usage.by_service.forEach(service => {
+            csv += `${service.service_type},${service.credits_used},${service.request_count}\n`;
+          });
+        }
+      }
+      
+      // Create download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `billing-report-${effectiveOrgId}-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      showToast('Billing report downloaded successfully', 'success');
+    } catch (err) {
+      showToast(`Failed to download report: ${err.message}`, 'error');
     }
   };
 
@@ -248,7 +349,10 @@ export default function OrganizationBillingPro() {
       <motion.div variants={itemVariants} className={`${theme.card} rounded-xl p-6 border border-blue-500/20`}>
         <div className="flex items-center justify-between mb-4">
           <h2 className={`text-xl font-semibold ${theme.text.primary}`}>Subscription Plan</h2>
-          <button className={`px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm`}>
+          <button 
+            onClick={() => setShowUpgradeModal(true)}
+            className={`px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm`}
+          >
             Upgrade to Hybrid
           </button>
         </div>
@@ -480,7 +584,10 @@ export default function OrganizationBillingPro() {
             <DocumentTextIcon className="h-6 w-6 text-green-500" />
             <h2 className={`text-xl font-semibold ${theme.text.primary}`}>Billing History</h2>
           </div>
-          <button className="text-blue-400 hover:text-blue-300 text-sm transition-colors">
+          <button 
+            onClick={handleDownloadReport}
+            className="text-blue-400 hover:text-blue-300 text-sm transition-colors"
+          >
             Download Report
           </button>
         </div>
@@ -512,6 +619,231 @@ export default function OrganizationBillingPro() {
             <span>{toast.message}</span>
           </div>
         </motion.div>
+      )}
+
+      {/* Add Credits Modal */}
+      {showAddCreditsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`${theme.card} rounded-xl p-6 max-w-md w-full`}
+          >
+            <h3 className={`text-xl font-bold ${theme.text.primary} mb-4`}>Add Credits</h3>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const credits = parseInt(formData.get('credits'));
+              const amount = parseFloat(formData.get('amount') || '0');
+              handleAddCredits(credits, amount);
+            }}>
+              <div className="mb-4">
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  Credits Amount
+                </label>
+                <input
+                  type="number"
+                  name="credits"
+                  required
+                  min="1"
+                  className={`w-full px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  placeholder="Enter credits amount"
+                />
+              </div>
+              <div className="mb-6">
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  Purchase Amount (optional)
+                </label>
+                <input
+                  type="number"
+                  name="amount"
+                  step="0.01"
+                  min="0"
+                  className={`w-full px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  placeholder="Enter purchase amount"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAddCreditsModal(false)}
+                  className={`flex-1 px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-700 text-white'} transition-colors`}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                >
+                  Add Credits
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Allocate Credits Modal */}
+      {showAllocateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`${theme.card} rounded-xl p-6 max-w-md w-full`}
+          >
+            <h3 className={`text-xl font-bold ${theme.text.primary} mb-4`}>Allocate Credits</h3>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const userId = formData.get('userId');
+              const credits = parseInt(formData.get('credits'));
+              const resetPeriod = formData.get('resetPeriod');
+              const notes = formData.get('notes');
+              handleAllocateCredits(userId, credits, resetPeriod, notes);
+            }}>
+              <div className="mb-4">
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  User ID
+                </label>
+                <input
+                  type="text"
+                  name="userId"
+                  required
+                  className={`w-full px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  placeholder="Enter user ID"
+                />
+              </div>
+              <div className="mb-4">
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  Credits Amount
+                </label>
+                <input
+                  type="number"
+                  name="credits"
+                  required
+                  min="1"
+                  className={`w-full px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  placeholder="Enter credits amount"
+                />
+              </div>
+              <div className="mb-4">
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  Reset Period
+                </label>
+                <select
+                  name="resetPeriod"
+                  className={`w-full px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                >
+                  <option value="none">No Reset</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div className="mb-6">
+                <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+                  Notes (optional)
+                </label>
+                <textarea
+                  name="notes"
+                  rows="3"
+                  className={`w-full px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  placeholder="Enter any notes"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAllocateModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className={`flex-1 px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-700 text-white'} transition-colors`}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                >
+                  Allocate Credits
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Upgrade Subscription Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`${theme.card} rounded-xl p-6 max-w-md w-full`}
+          >
+            <h3 className={`text-xl font-bold ${theme.text.primary} mb-4 flex items-center gap-2`}>
+              <ArrowTrendingUpIcon className="h-6 w-6 text-blue-400" />
+              Upgrade to Hybrid Plan
+            </h3>
+            
+            <div className="mb-6 space-y-4">
+              <div className={`p-4 rounded-lg ${currentTheme === 'light' ? 'bg-blue-50' : 'bg-blue-900/20'} border border-blue-500/30`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-sm ${theme.text.secondary}`}>Current Plan</span>
+                  <span className={`font-semibold ${theme.text.primary}`}>
+                    {billingData?.subscription?.subscription_plan?.toUpperCase() || 'PLATFORM'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-sm ${theme.text.secondary}`}>Current Monthly Cost</span>
+                  <span className={`font-semibold ${theme.text.primary}`}>
+                    ${billingData?.subscription?.monthly_price?.toFixed(2) || '50.00'}
+                  </span>
+                </div>
+                <div className="border-t border-blue-500/20 my-2"></div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-sm ${theme.text.secondary}`}>New Plan</span>
+                  <span className={`font-bold text-blue-400`}>HYBRID</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${theme.text.secondary}`}>New Monthly Cost</span>
+                  <span className={`font-bold text-blue-400`}>$99.00</span>
+                </div>
+              </div>
+
+              <div className={`p-4 rounded-lg ${currentTheme === 'light' ? 'bg-green-50' : 'bg-green-900/20'} border border-green-500/30`}>
+                <h4 className={`font-semibold ${theme.text.primary} mb-2 flex items-center gap-2`}>
+                  <CheckCircleIcon className="h-5 w-5 text-green-400" />
+                  What's Included:
+                </h4>
+                <ul className={`text-sm ${theme.text.secondary} space-y-1 ml-7`}>
+                  <li>• Access to all platform models</li>
+                  <li>• BYOK (Bring Your Own Keys) support</li>
+                  <li>• Priority support</li>
+                  <li>• Advanced analytics</li>
+                  <li>• Custom integrations</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(false)}
+                className={`flex-1 px-4 py-2 rounded-lg ${currentTheme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-700 text-white'} transition-colors`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleUpgradeSubscription('hybrid')}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
+              >
+                Confirm Upgrade
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </motion.div>
   );

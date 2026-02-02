@@ -13,7 +13,7 @@ Author: Ops-Center Team
 Created: 2025-11-12
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Request, Query
+from fastapi import APIRouter, HTTPException, Depends, Request, Query, Response
 from typing import List, Dict, Optional, Tuple, Any
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -184,7 +184,12 @@ async def get_current_user(request: Request) -> Dict:
 async def check_org_admin(conn: asyncpg.Connection, org_id: str, user_id: str) -> bool:
     """Check if user is org admin"""
     result = await conn.fetchval(
-        "SELECT is_org_admin($1, $2)",
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM organization_members 
+            WHERE organization_id = $1 AND user_id = $2 AND role IN ('ADMIN', 'OWNER')
+        )
+        """,
         org_id, user_id
     )
     return result
@@ -276,12 +281,12 @@ async def create_organization_subscription(
         # Record billing history
         await conn.execute(
             """
-            INSERT INTO org_billing_history (org_id, subscription_id, event_type, amount, currency)
-            VALUES ($1, $2, 'subscription_created', $3, 'USD')
+            INSERT INTO org_billing_history (org_id, event_type, amount, currency, description)
+            VALUES ($1, 'subscription_created', $2, 'USD', $3)
             """,
             subscription.org_id,
-            sub["id"],
-            subscription.monthly_price
+            subscription.monthly_price,
+            f"Created {subscription.subscription_plan} subscription"
         )
 
         logger.info(f"Created subscription {sub['id']} for org {org['name']}")
@@ -375,8 +380,7 @@ async def upgrade_organization_subscription(
     """
     user = await get_current_user(request)
 
-    conn = await get_db_connection()
-    try:
+    async with await get_db_connection() as conn:
         # Check permissions
         is_admin = await check_system_admin(user)
         is_org_admin = await check_org_admin(conn, org_id, user["user_id"])
@@ -423,12 +427,12 @@ async def upgrade_organization_subscription(
         # Record billing history
         await conn.execute(
             """
-            INSERT INTO org_billing_history (org_id, subscription_id, event_type, amount, currency)
-            VALUES ($1, $2, 'subscription_upgraded', $3, 'USD')
+            INSERT INTO org_billing_history (org_id, event_type, amount, currency, description)
+            VALUES ($1, 'subscription_upgraded', $2, 'USD', $3)
             """,
             org_id,
-            updated_sub["id"],
-            new_price
+            new_price,
+            f"Upgraded from {current_sub['subscription_plan']} to {new_plan}"
         )
 
         logger.info(f"Upgraded org {org_id} subscription from {current_sub['subscription_plan']} to {new_plan}")
@@ -441,9 +445,6 @@ async def upgrade_organization_subscription(
             "old_price": float(current_sub['monthly_price']),
             "new_price": float(new_price)
         }
-
-    finally:
-        await conn.close()
 
 
 # ==================== Credit Pool Management Endpoints ====================
@@ -534,8 +535,7 @@ async def add_credits_to_pool(
     """
     # User is already authenticated via dependency
 
-    conn = await get_db_connection()
-    try:
+    async with await get_db_connection() as conn:
         # Check permissions
         is_admin = await check_system_admin(user)
         is_org_admin = await check_org_admin(conn, org_id, user["user_id"])
@@ -543,20 +543,26 @@ async def add_credits_to_pool(
         if not is_admin and not is_org_admin:
             raise HTTPException(status_code=403, detail="Not authorized to add credits")
 
-        # Add credits using stored function
+        # Update credit pool directly (no stored function)
         await conn.execute(
-            "SELECT add_credits_to_pool($1, $2, $3)",
-            org_id, credits, purchase_amount
+            """
+            INSERT INTO organization_credit_pools (org_id, total_credits)
+            VALUES ($1, $2)
+            ON CONFLICT (org_id) DO UPDATE
+            SET total_credits = organization_credit_pools.total_credits + $2,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            org_id, credits
         )
 
         # Record billing history if purchase
         if purchase_amount > 0:
             await conn.execute(
                 """
-                INSERT INTO org_billing_history (org_id, event_type, amount, currency)
-                VALUES ($1, 'credit_purchase', $2, 'USD')
+                INSERT INTO org_billing_history (org_id, event_type, amount, currency, description)
+                VALUES ($1, 'credit_purchase', $2, 'USD', $3)
                 """,
-                org_id, purchase_amount
+                org_id, purchase_amount, f"Purchased {credits} credits"
             )
 
         logger.info(f"Added {credits} credits to org {org_id} (purchase: ${purchase_amount})")
@@ -570,16 +576,9 @@ async def add_credits_to_pool(
         return {
             "success": True,
             "message": f"Added {credits} credits to pool",
-            "total_credits": pool["total_credits"],
-            "available_credits": pool["available_credits"]
+            "total_credits": float(pool["total_credits"]) if pool else 0,
+            "available_credits": float(pool["available_credits"]) if pool else 0
         }
-
-    except Exception as e:
-        logger.error(f"Error adding credits: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-    finally:
-        await conn.close()
 
 
 @router.post("/credits/{org_id}/allocate", response_model=UserCreditAllocationResponse)
@@ -604,8 +603,7 @@ async def allocate_credits_to_user(
     """
     # User is already authenticated via dependency
 
-    conn = await get_db_connection()
-    try:
+    async with await get_db_connection() as conn:
         # Check permissions
         is_admin = await check_system_admin(user)
         is_org_admin = await check_org_admin(conn, org_id, user["user_id"])
@@ -615,26 +613,19 @@ async def allocate_credits_to_user(
 
         # Check if target user is org member
         member = await conn.fetchval(
-            "SELECT 1 FROM organization_members WHERE org_id = $1 AND user_id = $2",
+            "SELECT 1 FROM organization_members WHERE organization_id = $1 AND user_id = $2",
             org_id, allocation.user_id
         )
         if not member:
             raise HTTPException(status_code=400, detail="User is not a member of this organization")
 
-        # Allocate credits using stored function
-        try:
-            await conn.execute(
-                "SELECT allocate_credits_to_user($1, $2, $3, $4)",
-                org_id,
-                allocation.user_id,
-                allocation.allocated_credits,
-                user["user_id"]
-            )
-        except asyncpg.exceptions.RaiseException as e:
-            # Handle insufficient credits error
-            if "Insufficient credits" in str(e):
-                raise HTTPException(status_code=400, detail=str(e))
-            raise
+        # Check available credits in pool
+        pool = await conn.fetchrow(
+            "SELECT * FROM organization_credit_pools WHERE org_id = $1",
+            org_id
+        )
+        if not pool or pool["available_credits"] < allocation.allocated_credits:
+            raise HTTPException(status_code=400, detail="Insufficient credits in organization pool")
 
         # Calculate next reset date
         next_reset = None
@@ -645,19 +636,36 @@ async def allocate_credits_to_user(
         elif allocation.reset_period == 'monthly':
             next_reset = datetime.utcnow() + timedelta(days=30)
 
-        # Update reset date and notes if provided
-        if next_reset or allocation.notes:
-            await conn.execute(
-                """
-                UPDATE user_credit_allocations
-                SET next_reset_date = COALESCE($1, next_reset_date),
-                    notes = COALESCE($2, notes),
-                    reset_period = $3
-                WHERE org_id = $4 AND user_id = $5
-                """,
-                next_reset, allocation.notes, allocation.reset_period,
-                org_id, allocation.user_id
+        # Create or update allocation
+        await conn.execute(
+            """
+            INSERT INTO user_credit_allocations (
+                org_id, user_id, allocated_credits, remaining_credits,
+                reset_period, next_reset_date, notes
             )
+            VALUES ($1, $2, $3, $3, $4, $5, $6)
+            ON CONFLICT (org_id, user_id) DO UPDATE
+            SET allocated_credits = user_credit_allocations.allocated_credits + $3,
+                remaining_credits = user_credit_allocations.remaining_credits + $3,
+                reset_period = $4,
+                next_reset_date = COALESCE($5, user_credit_allocations.next_reset_date),
+                notes = COALESCE($6, user_credit_allocations.notes),
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            org_id, allocation.user_id, allocation.allocated_credits,
+            allocation.reset_period, next_reset, allocation.notes
+        )
+
+        # Update pool allocated credits
+        await conn.execute(
+            """
+            UPDATE organization_credit_pools
+            SET allocated_credits = allocated_credits + $1,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE org_id = $2
+            """,
+            allocation.allocated_credits, org_id
+        )
 
         logger.info(f"Allocated {allocation.allocated_credits} credits to user {allocation.user_id} in org {org_id}")
 
@@ -686,9 +694,6 @@ async def allocate_credits_to_user(
             created_at=alloc["created_at"]
         )
 
-    finally:
-        await conn.close()
-
 
 @router.get("/credits/{org_id}/allocations", response_model=List[UserCreditAllocationResponse])
 async def get_organization_credit_allocations(org_id: str, request: Request):
@@ -701,8 +706,7 @@ async def get_organization_credit_allocations(org_id: str, request: Request):
     """
     user = await get_current_user(request)
 
-    conn = await get_db_connection()
-    try:
+    async with await get_db_connection() as conn:
         # Check permissions
         is_admin = await check_system_admin(user)
         is_org_admin = await check_org_admin(conn, org_id, user["user_id"])
@@ -715,7 +719,7 @@ async def get_organization_credit_allocations(org_id: str, request: Request):
             """
             SELECT * FROM user_credit_allocations
             WHERE org_id = $1 AND is_active = TRUE
-            ORDER BY created_at DESC
+            ORDER BY updated_at DESC
             """,
             org_id
         )
@@ -734,13 +738,10 @@ async def get_organization_credit_allocations(org_id: str, request: Request):
                 last_reset_date=a["last_reset_date"],
                 next_reset_date=a["next_reset_date"],
                 is_active=a["is_active"],
-                created_at=a["created_at"]
+                created_at=a["updated_at"]
             )
             for a in allocations
         ]
-
-    finally:
-        await conn.close()
 
 
 @router.get("/credits/{org_id}/usage", response_model=CreditUsageStatsResponse)
@@ -762,8 +763,7 @@ async def get_organization_credit_usage(
     """
     user = await get_current_user(request)
 
-    conn = await get_db_connection()
-    try:
+    async with await get_db_connection() as conn:
         # Check membership
         is_admin = await check_system_admin(user)
         if not is_admin:
@@ -838,9 +838,6 @@ async def get_organization_credit_usage(
             date_range_start=start_date,
             date_range_end=end_date
         )
-
-    finally:
-        await conn.close()
 
 
 # ==================== Billing Screen Endpoints ====================
@@ -937,8 +934,7 @@ async def get_org_admin_billing_screen(org_id: str, request: Request):
     """
     user = await get_current_user(request)
 
-    conn = await get_db_connection()
-    try:
+    async with await get_db_connection() as conn:
         # Check permissions
         is_admin = await check_system_admin(user)
         is_org_admin = await check_org_admin(conn, org_id, user["user_id"])
@@ -993,15 +989,15 @@ async def get_org_admin_billing_screen(org_id: str, request: Request):
             "organization": {
                 "id": str(org["id"]),
                 "name": org["name"],
-                "display_name": org["display_name"],
-                "max_seats": org["max_seats"],
-                "status": org["status"]
+                "display_name": org.get("display_name") or org["name"],
+                "max_seats": org.get("max_users") or 0,
+                "status": "active" if org.get("is_active", True) else "inactive"
             },
             "subscription": {
-                "plan": subscription["subscription_plan"] if subscription else None,
+                "subscription_plan": subscription["subscription_plan"] if subscription else None,
                 "monthly_price": float(subscription["monthly_price"]) if subscription else 0,
                 "status": subscription["status"] if subscription else None,
-                "current_period_end": subscription["current_period_end"] if subscription else None
+                "end_date": subscription["end_date"] if subscription else None
             } if subscription else None,
             "credit_pool": {
                 "total_credits": credit_pool["total_credits"] if credit_pool else 0,
@@ -1027,9 +1023,6 @@ async def get_org_admin_billing_screen(org_id: str, request: Request):
             }
         }
 
-    finally:
-        await conn.close()
-
 
 @router.get("/billing/system", response_model=Dict)
 async def get_system_admin_billing_screen(request: Request):
@@ -1045,95 +1038,114 @@ async def get_system_admin_billing_screen(request: Request):
     - Top organizations by usage
     - Credit pool summaries
     """
-    user = await get_current_user(request)
-
-    # Check system admin
-    is_admin = await check_system_admin(user)
-    if not is_admin:
-        raise HTTPException(status_code=403, detail="System admin access required")
-
-    conn = await get_db_connection()
     try:
-        # Get all organizations with billing data
-        orgs = await conn.fetch(
-            """
-            SELECT * FROM org_billing_summary
-            ORDER BY lifetime_spent_amount DESC
-            """
-        )
+        user = await get_current_user(request)
 
-        # Get subscription distribution
-        sub_distribution = await conn.fetch(
-            """
-            SELECT
-                subscription_plan,
-                COUNT(*) as count,
-                SUM(monthly_price) as total_mrr
-            FROM organization_subscriptions
-            WHERE status = 'active'
-            GROUP BY subscription_plan
-            """
-        )
+        # Check system admin
+        is_admin = await check_system_admin(user)
+        if not is_admin:
+            raise HTTPException(status_code=403, detail="System admin access required")
 
-        # Calculate total MRR and ARR
-        total_mrr = sum(float(d["total_mrr"]) for d in sub_distribution)
-        total_arr = total_mrr * 12
+        async with await get_db_connection() as conn:
+            # Get all organizations with billing data
+            orgs = await conn.fetch(
+                """
+                SELECT
+                    o.id as org_id,
+                    o.name as org_name,
+                    os.subscription_plan,
+                    os.monthly_price,
+                    os.status as subscription_status,
+                    COALESCE(SUM(uca.allocated_credits), 0) as total_credits,
+                    COALESCE(SUM(uca.used_credits), 0) as used_credits,
+                    COUNT(DISTINCT om.user_id) as member_count,
+                    0 as lifetime_spent_amount
+                FROM organizations o
+                LEFT JOIN organization_subscriptions os ON os.org_id = o.id
+                LEFT JOIN user_credit_allocations uca ON uca.org_id = o.id
+                LEFT JOIN organization_members om ON om.organization_id = o.id
+                WHERE o.is_active = TRUE
+                GROUP BY o.id, o.name, os.subscription_plan, os.monthly_price, os.status
+                ORDER BY used_credits DESC
+                """
+            )
 
-        # Get top credit users across all orgs
-        top_orgs = await conn.fetch(
-            """
-            SELECT
-                org_id,
-                SUM(credits_used) as total_credits,
-                COUNT(DISTINCT user_id) as user_count
-            FROM credit_usage_attribution
-            WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '30 days'
-            GROUP BY org_id
-            ORDER BY total_credits DESC
-            LIMIT 10
-            """
-        )
+            # Get subscription distribution
+            sub_distribution = await conn.fetch(
+                """
+                SELECT
+                    subscription_plan,
+                    COUNT(*) as count,
+                    SUM(monthly_price) as total_mrr
+                FROM organization_subscriptions
+                WHERE status = 'active'
+                GROUP BY subscription_plan
+                """
+            )
 
-        return {
-            "organizations": [
-                {
-                    "org_id": str(org["org_id"]),
-                    "org_name": org["org_name"],
-                    "subscription_plan": org["subscription_plan"],
-                    "monthly_price": float(org["monthly_price"]) if org["monthly_price"] else 0,
-                    "subscription_status": org["subscription_status"],
-                    "total_credits": org["total_credits"],
-                    "used_credits": org["used_credits"],
-                    "member_count": org["member_count"],
-                    "lifetime_spent": float(org["lifetime_spent_amount"])
-                }
-                for org in orgs
-            ],
-            "revenue_metrics": {
-                "total_mrr": total_mrr,
-                "total_arr": total_arr,
-                "active_subscriptions": sum(d["count"] for d in sub_distribution)
-            },
-            "subscription_distribution": [
-                {
-                    "plan": d["subscription_plan"],
-                    "count": d["count"],
-                    "mrr": float(d["total_mrr"])
-                }
-                for d in sub_distribution
-            ],
-            "top_organizations_by_usage": [
-                {
-                    "org_id": str(org["org_id"]),
-                    "total_credits_30_days": org["total_credits"],
-                    "user_count": org["user_count"]
-                }
-                for org in top_orgs
-            ]
-        }
+            # Calculate total MRR and ARR
+            total_mrr = sum(float(d["total_mrr"] or 0) for d in sub_distribution)
+            total_arr = total_mrr * 12
 
-    finally:
-        await conn.close()
+            # Get top credit users across all orgs
+            top_orgs = await conn.fetch(
+                """
+                SELECT
+                    org_id,
+                    SUM(credits_used) as total_credits,
+                    COUNT(DISTINCT user_id) as user_count
+                FROM credit_usage_attribution
+                WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+                GROUP BY org_id
+                ORDER BY total_credits DESC
+                LIMIT 10
+                """
+            )
+
+            return {
+                "_debug_endpoint": "org_billing_system_v2",
+                "_timestamp": str(__import__('datetime').datetime.now()),
+                "organizations": [
+                    {
+                        "org_id": str(org["org_id"]),
+                        "org_name": org["org_name"],
+                        "subscription_plan": org["subscription_plan"],
+                        "monthly_price": float(org["monthly_price"]) if org["monthly_price"] else 0,
+                        "subscription_status": org["subscription_status"],
+                        "total_credits": org["total_credits"],
+                        "used_credits": org["used_credits"],
+                        "member_count": org["member_count"],
+                        "lifetime_spent": float(org["lifetime_spent_amount"])
+                    }
+                    for org in orgs
+                ],
+                "revenue_metrics": {
+                    "total_mrr": total_mrr,
+                    "total_arr": total_arr,
+                    "active_subscriptions": sum(d["count"] for d in sub_distribution)
+                },
+                "subscription_distribution": [
+                    {
+                        "plan": d["subscription_plan"],
+                        "count": d["count"],
+                        "mrr": float(d["total_mrr"]) if d["total_mrr"] else 0
+                    }
+                    for d in sub_distribution
+                ],
+                "top_organizations_by_usage": [
+                    {
+                        "org_id": str(org["org_id"]),
+                        "total_credits_30_days": float(org["total_credits"]) if org["total_credits"] else 0,
+                        "user_count": org["user_count"]
+                    }
+                    for org in top_orgs
+                ]
+            }
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions without wrapping
+    except Exception as e:
+        logger.error(f"Error in get_system_admin_billing_screen: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ==================== Billing History Endpoints ====================

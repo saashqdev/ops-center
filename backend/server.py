@@ -5862,7 +5862,9 @@ async def serve_spa(full_path: str, request: Request):
     """Serve the React app for all routes (excluding API paths)"""
     # CRITICAL FIX: Skip API routes BEFORE processing anything else
     # This allows FastAPI routers to handle API requests naturally
-    if full_path.startswith("api/"):
+    if full_path.startswith("api/") or request.url.path.startswith("/api/"):
+        # Log this so we can see if catch-all is being hit for API routes
+        logger.warning(f"⚠️ Catch-all route hit for API path: {request.url.path} (full_path={full_path})")
         # Don't handle API routes here - let them fall through to 404
         # which will be caught by the registered routers
         from fastapi import status
