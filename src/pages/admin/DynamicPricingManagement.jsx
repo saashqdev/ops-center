@@ -142,6 +142,7 @@ const DynamicPricingManagement = () => {
     } catch (err) {
       setError(`BYOK Rules: ${err.message}`);
       console.error('Error fetching BYOK rules:', err);
+      setByokRules([]); // Set empty array to prevent UI issues
     }
   };
 
@@ -156,6 +157,7 @@ const DynamicPricingManagement = () => {
     } catch (err) {
       setError(`Platform Rules: ${err.message}`);
       console.error('Error fetching Platform rules:', err);
+      setPlatformRules([]); // Set empty array to prevent UI issues
     }
   };
 
@@ -170,6 +172,7 @@ const DynamicPricingManagement = () => {
     } catch (err) {
       setError(`Credit Packages: ${err.message}`);
       console.error('Error fetching credit packages:', err);
+      setCreditPackages([]); // Set empty array to prevent UI issues
     }
   };
 
@@ -184,6 +187,12 @@ const DynamicPricingManagement = () => {
     } catch (err) {
       setError(`Analytics: ${err.message}`);
       console.error('Error fetching analytics:', err);
+      // Set empty state so it doesn't spin forever
+      setAnalyticsData({
+        revenue: { total: 0, byok: 0, platform: 0 },
+        users: { total: 0, byok: 0, platform: 0 },
+        savings: { average_percentage: 0 }
+      });
     }
   };
 
@@ -946,7 +955,7 @@ const DynamicPricingManagement = () => {
       anchor="right"
       open={calculatorOpen}
       onClose={() => setCalculatorOpen(false)}
-      PaperProps={{ sx: { width: 400, p: 3 } }}
+      PaperProps={{ sx: { width: 400, p: 3, mt: '64px', height: 'calc(100% - 64px)' } }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h6">Cost Calculator</Typography>
@@ -1409,7 +1418,7 @@ const DynamicPricingManagement = () => {
           <Typography variant="h4" gutterBottom>
             Dynamic Pricing Management
           </Typography>
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body2" sx={{ color: 'rgb(243, 232, 255)' }}>
             Configure BYOK markups, platform pricing tiers, and credit packages
           </Typography>
         </Box>

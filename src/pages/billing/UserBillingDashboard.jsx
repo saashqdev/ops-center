@@ -49,9 +49,7 @@ export default function UserBillingDashboard() {
       setError(null);
 
       const response = await fetch('/api/v1/org-billing/billing/user', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
+        credentials: 'include'
       });
 
       if (!response.ok) {

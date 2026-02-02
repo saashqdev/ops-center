@@ -14,6 +14,10 @@ from typing import Optional
 import asyncpg
 import sys
 import os
+import logging
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 # ============================================================================
@@ -70,9 +74,18 @@ async def require_admin(request: Request) -> bool:
     if not user_data:
         raise HTTPException(status_code=401, detail="Invalid session")
 
-    # Check if user has admin role
-    user_roles = user_data.get("roles", [])
-    if "admin" not in user_roles:
+    # Extract user info from nested structure (session stores it under "user" key)
+    user_info = user_data.get("user", {})
+    
+    # Check if user has admin role (support both 'role' and 'roles' formats)
+    user_roles = user_info.get("roles", [])
+    user_role = user_info.get("role", "")
+    is_admin = user_info.get("is_admin", False)
+    
+    # Debug logging
+    logger.info(f"[ADMIN CHECK] email={user_info.get('email', 'N/A')}, is_admin={is_admin}, role={user_role}, roles={user_roles}")
+    
+    if not (is_admin or user_role == "admin" or "admin" in user_roles):
         raise HTTPException(status_code=403, detail="Admin access required")
 
     return True

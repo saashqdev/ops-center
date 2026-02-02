@@ -861,8 +861,7 @@ async def get_user_billing_dashboard(request: Request):
     """
     user = await get_current_user(request)
 
-    conn = await get_db_connection()
-    try:
+    async with await get_db_connection() as conn:
         # Get all organizations user belongs to
         orgs = await conn.fetch(
             """
@@ -876,10 +875,10 @@ async def get_user_billing_dashboard(request: Request):
                 os.subscription_plan,
                 os.monthly_price
             FROM organization_members om
-            JOIN organizations o ON om.org_id = o.id
+            JOIN organizations o ON om.organization_id = o.id
             LEFT JOIN user_credit_allocations uca ON uca.org_id = o.id AND uca.user_id = om.user_id AND uca.is_active = TRUE
             LEFT JOIN organization_subscriptions os ON os.org_id = o.id AND os.status = 'active'
-            WHERE om.user_id = $1 AND o.status = 'active'
+            WHERE om.user_id = $1 AND o.is_active = TRUE
             ORDER BY o.name
             """,
             user["user_id"]
@@ -920,9 +919,6 @@ async def get_user_billing_dashboard(request: Request):
                 "request_count": total_usage["request_count"] or 0
             }
         }
-
-    finally:
-        await conn.close()
 
 
 @router.get("/billing/org/{org_id}", response_model=Dict)

@@ -379,7 +379,7 @@ class PricingEngine:
         # Try to get model-specific pricing
         cost_per_1k = MODEL_PRICING_DEFAULTS.get(model, MODEL_PRICING_DEFAULTS["default"])
 
-        base_cost = Decimal(str(cost_per_1k)) * (tokens_used / 1000)
+        base_cost = Decimal(str(cost_per_1k)) * Decimal(str(tokens_used / 1000))
         return base_cost
 
     async def get_byok_balance(self, user_id: str, tier_code: str) -> Dict[str, Any]:

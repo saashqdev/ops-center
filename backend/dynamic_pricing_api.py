@@ -118,6 +118,7 @@ async def list_byok_rules(
     admin: bool = Depends(require_admin)
 ):
     """List all BYOK pricing rules."""
+    logger.info(f"[BYOK RULES] Function called! admin={admin}")
     async with db_pool.acquire() as conn:
         query = """
             SELECT * FROM pricing_rules
