@@ -133,7 +133,10 @@ export default function SubscriptionUpgrade() {
 
       if (plansRes.ok) {
         const plansData = await plansRes.json();
-        setPlans(plansData);
+        setPlans(Array.isArray(plansData) ? plansData : (plansData.plans || []));
+      } else {
+        console.error('Failed to load plans:', plansRes.status);
+        setPlans([]);
       }
 
       // Load tier features
@@ -146,7 +149,10 @@ export default function SubscriptionUpgrade() {
 
       if (featuresRes.ok) {
         const featuresData = await featuresRes.json();
-        setTierFeatures(featuresData);
+        setTierFeatures(Array.isArray(featuresData) ? featuresData : (featuresData.features || []));
+      } else {
+        console.error('Failed to load features:', featuresRes.status);
+        setTierFeatures([]);
       }
 
     } catch (error) {
@@ -171,30 +177,78 @@ export default function SubscriptionUpgrade() {
   const handlePreviewUpgrade = async (plan) => {
     if (!plan) return;
 
+    // Determine the plan identifier - try multiple possible fields
+    const planCode = plan.id || plan.code || plan.tier_code || plan.tier || plan.plan_code;
+    
+    if (!planCode) {
+      console.error('No plan identifier found:', plan);
+      toast.error('Invalid plan selected');
+      return;
+    }
+
     try {
-      const res = await fetch(`/api/v1/subscriptions/preview-change?new_plan_code=${plan.id}`, {
+      console.log('Fetching preview for plan:', planCode);
+      const res = await fetch(`/api/v1/subscriptions/preview-change?target_tier=${planCode}`, {
         credentials: 'include',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
         }
       });
 
+      console.log('Preview response status:', res.status);
+
       if (res.ok) {
         const preview = await res.json();
-        setPreviewData(preview);
+        console.log('Preview data received:', preview);
+        
+        // Transform API response to match component expectations
+        const transformedPreview = {
+          current_plan: preview.old_tier || 'Unknown',
+          current_price: preview.old_price || 0,
+          target_plan: preview.new_tier || planCode,
+          target_price: preview.new_price || 0,
+          price_difference: (preview.new_price || 0) - (preview.old_price || 0),
+          proration_amount: preview.proration_amount || 0,
+          proration_credit: preview.proration_credit || 0,
+          effective_date: preview.effective_date || new Date().toISOString(),
+          is_upgrade: preview.is_upgrade !== undefined ? preview.is_upgrade : true,
+          features_added: preview.features_added || [],
+          features_removed: preview.features_removed || []
+        };
+        
+        console.log('Transformed preview:', transformedPreview);
+        setPreviewData(transformedPreview);
         setSelectedPlan(plan);
         setShowPreview(true);
       } else {
-        throw new Error('Failed to load preview');
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Preview failed:', res.status, errorData);
+        
+        // If no subscription found, skip preview and go straight to upgrade
+        if (res.status === 404 || (errorData.detail && errorData.detail.includes('No active subscription'))) {
+          toast.info('Starting new subscription...');
+          handleUpgrade(plan);
+        } else {
+          throw new Error(errorData.detail || 'Failed to load preview');
+        }
       }
     } catch (error) {
       console.error('Error previewing upgrade:', error);
-      toast.error('Could not preview upgrade. Please try again.');
+      toast.error(error.message || 'Could not preview upgrade. Please try again.');
     }
   };
 
   const handleUpgrade = async (plan) => {
     if (!plan) return;
+
+    // Determine the plan identifier - try multiple possible fields
+    const planCode = plan.id || plan.code || plan.tier_code || plan.tier || plan.plan_code;
+    
+    if (!planCode) {
+      console.error('No plan identifier found:', plan);
+      toast.error('Invalid plan selected');
+      return;
+    }
 
     setCheckoutLoading(true);
 
@@ -207,26 +261,32 @@ export default function SubscriptionUpgrade() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          plan_code: plan.id,
-          effective_date: 'immediate'
+          target_tier: planCode
         })
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
+        console.error('Upgrade failed:', errorData);
         throw new Error(errorData.detail || 'Failed to initiate upgrade');
       }
 
       const data = await res.json();
 
-      // Redirect to Stripe Checkout
+      // Check if we got a checkout URL (Stripe flow) or direct subscription (Lago flow)
       if (data.checkout_url) {
         toast.info('Redirecting to secure payment page...');
         setTimeout(() => {
           window.location.href = data.checkout_url;
         }, 500);
+      } else if (data.success && data.subscription) {
+        // Direct subscription created (Lago flow)
+        toast.success(data.message || 'Subscription updated successfully!');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
-        throw new Error('No checkout URL returned');
+        throw new Error('No checkout URL or subscription returned');
       }
 
     } catch (error) {
@@ -458,8 +518,8 @@ export default function SubscriptionUpgrade() {
         animate="visible"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        {plans.map((plan, index) => {
-          const features = getFeaturesForTier(plan.id);
+        {Array.isArray(plans) && plans.map((plan, index) => {
+          const features = getFeaturesForTier(plan.id) || [];
           const isCurrentPlan = currentSubscription && currentSubscription.tier === plan.id;
           const isPopular = plan.id === 'professional' || plan.id === 'founders-friend';
           const price = billingCycle === 'annual' && plan.price_yearly ? plan.price_yearly : plan.price_monthly;

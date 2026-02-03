@@ -6,6 +6,7 @@ Integrates with Lago for billing and subscription management
 from fastapi import APIRouter, HTTPException, Depends, Request
 from typing import List, Dict, Optional
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 import httpx
 import logging
 import os
@@ -298,13 +299,14 @@ async def upgrade_subscription(request: Request):
         if not target_plan:
             raise HTTPException(status_code=404, detail=f"Plan {target_tier} not found")
 
-        # Check if user is actually upgrading (not downgrading)
+        # Check current subscription to determine if upgrade or downgrade
         current_subscription = await get_subscription(org_id)
+        is_upgrade = True
         if current_subscription:
             current_tier = current_subscription.get("plan_code", "").split("_")[0]
             from subscription_api import getTierLevel
-            if getTierLevel(target_tier) <= getTierLevel(current_tier):
-                raise HTTPException(status_code=400, detail="Use /change endpoint for downgrades")
+            is_upgrade = getTierLevel(target_tier) > getTierLevel(current_tier)
+            logger.info(f"Plan change: {current_tier} -> {target_tier} (is_upgrade={is_upgrade})")
 
         # Create Stripe checkout session - read credentials from database first, then environment
         stripe_key = get_credential("STRIPE_SECRET_KEY")
@@ -313,7 +315,8 @@ async def upgrade_subscription(request: Request):
 
         # TODO: Create Stripe checkout session
         # For now, create subscription directly in Lago
-        lago_plan_code = f"{target_tier}_monthly"
+        # Use plan code as-is (e.g., "professional", not "professional_monthly")
+        lago_plan_code = target_tier
 
         # Ensure customer exists in Lago
         await get_or_create_customer(
@@ -717,7 +720,9 @@ async def preview_subscription_change(
 
         # Assume 30-day billing cycle
         days_in_period = 30
-        days_elapsed = (datetime.now() - current_period_start).days
+        # Use timezone-aware datetime for comparison
+        now = datetime.now(current_period_start.tzinfo)
+        days_elapsed = (now - current_period_start).days
         days_remaining = max(0, days_in_period - days_elapsed)
 
         # Calculate proration amounts

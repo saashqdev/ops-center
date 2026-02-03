@@ -16,7 +16,7 @@ from get_credential import get_credential
 logger = logging.getLogger(__name__)
 
 # Lago Configuration - read credentials from database first, then environment
-LAGO_API_URL = os.getenv("LAGO_API_URL", "http://unicorn-lago-api:3000")
+LAGO_API_URL = os.getenv("LAGO_API_URL", "http://lago-api:3000")
 LAGO_API_KEY = get_credential("LAGO_API_KEY")
 
 # Timeout for API calls
@@ -278,6 +278,8 @@ async def create_subscription(
     if subscription_at:
         subscription_data["subscription"]["subscription_at"] = subscription_at
 
+    logger.info(f"Creating Lago subscription with plan_code: {plan_code} for org: {org_id}")
+    
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(

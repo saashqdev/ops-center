@@ -57,8 +57,9 @@ export default function SubscriptionDowngrade() {
         }
       });
 
+      let subData = null;
       if (subRes.ok) {
-        const subData = await subRes.json();
+        subData = await subRes.json();
         setCurrentSubscription(subData);
       }
 
@@ -71,10 +72,14 @@ export default function SubscriptionDowngrade() {
 
       if (plansRes.ok) {
         const plansData = await plansRes.json();
+        const allPlans = Array.isArray(plansData) ? plansData : (plansData.plans || []);
+        
         // Only show plans cheaper than current
-        if (subData) {
-          const lowerPlans = plansData.filter(p => p.price_monthly < subData.price);
+        if (subData && subData.price) {
+          const lowerPlans = allPlans.filter(p => p.price_monthly < subData.price);
           setPlans(lowerPlans);
+        } else {
+          setPlans([]);
         }
       }
 
