@@ -661,11 +661,24 @@ function UsageMetrics() {
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Period</InputLabel>
+            <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Period</InputLabel>
             <Select
               value={selectedPeriod}
               label="Period"
               onChange={(e) => setSelectedPeriod(e.target.value)}
+              variant="outlined"
+              sx={{ 
+                color: 'rgba(255, 255, 255, 0.9)',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(139, 92, 246, 0.5)'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(139, 92, 246, 0.8)'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgb(139, 92, 246)'
+                }
+              }}
             >
               <MenuItem value="this_month">This Month</MenuItem>
               <MenuItem value="last_month">Last Month</MenuItem>
@@ -677,8 +690,16 @@ function UsageMetrics() {
             variant="outlined"
             startIcon={<Refresh />}
             onClick={fetchData}
+            sx={{ 
+              color: 'rgba(255, 255, 255, 0.9)',
+              borderColor: 'rgba(139, 92, 246, 0.5)',
+              '&:hover': {
+                borderColor: 'rgba(139, 92, 246, 0.8)',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)'
+              }
+            }}
           >
-            Refresh
+            REFRESH
           </Button>
         </Box>
       </Box>

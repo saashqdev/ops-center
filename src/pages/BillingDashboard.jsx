@@ -205,7 +205,7 @@ const Toast = ({ message, type = 'success', onClose }) => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className={`fixed top-4 right-4 z-50 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 max-w-md`}
+      className={`fixed top-20 right-4 z-50 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 max-w-md`}
     >
       <Icon className="w-6 h-6 flex-shrink-0" />
       <p className="flex-1">{message}</p>
@@ -914,6 +914,11 @@ const AdminView = ({ theme }) => {
   };
 
   const handleBulkExport = () => {
+    if (filteredPayments.length === 0) {
+      showToast('No data to export', 'info');
+      return;
+    }
+
     const csvData = filteredPayments.map(payment => ({
       Date: formatDate(payment.date),
       Customer: payment.customer_email,
