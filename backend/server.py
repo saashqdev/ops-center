@@ -79,6 +79,7 @@ from billing_api import router as billing_router
 from payment_methods_api import router as payment_methods_router
 from credit_api import router as credit_router
 from credit_purchase_api import router as credit_purchase_router
+from cost_optimization_api import router as cost_optimization_router
 from local_user_api import router as local_user_router
 from org_api import router as org_router
 from org_manager import org_manager
@@ -940,9 +941,13 @@ logger.info("Database Backup API endpoints registered at /api/backups")
 app.include_router(credit_router)
 logger.info("Credit & Usage Metering API endpoints registered at /api/v1/credits")
 
-# Credit Purchase System (One-time purchases via Stripe)
+## Credit Purchase System (One-time purchases via Stripe)
 app.include_router(credit_purchase_router)
 logger.info("Credit Purchase API endpoints registered at /api/v1/billing/credits")
+
+# Cost Optimization Dashboard
+app.include_router(cost_optimization_router)
+logger.info("Cost Optimization API endpoints registered at /api/v1/costs")
 
 # Register Local User Management endpoints
 app.include_router(local_user_router)

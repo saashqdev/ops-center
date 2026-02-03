@@ -22,7 +22,7 @@ from enum import Enum
 import asyncpg
 
 # Import our engines
-from backend.cost_analysis_engine import (
+from cost_analysis_engine import (
     get_cost_analysis_engine,
     CostAnalysisEngine,
     PeriodType,
@@ -32,7 +32,7 @@ from backend.cost_analysis_engine import (
     CostAnomaly,
     ModelPricing
 )
-from backend.budget_manager import (
+from budget_manager import (
     get_budget_manager,
     BudgetManager,
     BudgetConfig,
@@ -41,7 +41,7 @@ from backend.budget_manager import (
     BudgetType,
     AlertLevel
 )
-from backend.cost_recommendation_engine import (
+from cost_recommendation_engine import (
     get_recommendation_engine,
     CostRecommendationEngine,
     RecommendationType,
@@ -50,9 +50,21 @@ from backend.cost_recommendation_engine import (
     QualityImpact
 )
 
-# Assuming these exist from previous epics
-from backend.auth_dependencies import get_current_user, require_role
-from backend.database import get_db_pool
+# Auth dependencies
+from auth_dependencies import require_authenticated_user, require_admin_user
+try:
+    from database import get_db_pool
+except ImportError:
+    # Database might not be set up the same way
+    import os
+    async def get_db_pool():
+        return await asyncpg.create_pool(
+            host=os.getenv("POSTGRES_HOST", "localhost"),
+            port=int(os.getenv("POSTGRES_PORT", 5432)),
+            user=os.getenv("POSTGRES_USER", "unicorn"),
+            password=os.getenv("POSTGRES_PASSWORD", "change-me"),
+            database=os.getenv("POSTGRES_DB", "unicorn_db")
+        )
 
 import logging
 
@@ -230,6 +242,17 @@ class ModelPricingResponse(BaseModel):
     is_active: bool
 
 
+class ModelPricingCreateRequest(BaseModel):
+    """Request to add model pricing"""
+    provider: str = Field(..., min_length=1, max_length=100)
+    model_name: str = Field(..., min_length=1, max_length=255)
+    input_price_per_million: float = Field(..., gt=0, description="Price per million input tokens in USD")
+    output_price_per_million: float = Field(..., gt=0, description="Price per million output tokens in USD")
+    model_tier: Optional[str] = Field(None, description="free, basic, advanced, premium")
+    quality_score: Optional[float] = Field(None, ge=0.0, le=10.0, description="Quality score 0-10")
+    is_active: bool = True
+
+
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
@@ -266,11 +289,11 @@ async def get_cost_analysis(
     end_date: Optional[datetime] = None,
     time_range: Optional[TimeRangeQuery] = None,
     group_by: Optional[str] = Query(None, regex="^(model|user|day|hour)$"),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """
-    Get cost analysis for organization.
+    Get cost analysis for organization or user.
     
     Query params:
     - start_date, end_date: Custom date range
@@ -278,7 +301,9 @@ async def get_cost_analysis(
     - group_by: Grouping dimension (model, user, day, hour)
     """
     engine = await get_cost_analysis_engine(db)
-    organization_id = current_user.get("organization_id")
+    
+    # Use organization_id if available, otherwise use user_id
+    organization_id = current_user.get("organization_id") or current_user.get("user_id") or "default"
     
     # Determine date range
     if time_range:
@@ -294,20 +319,20 @@ async def get_cost_analysis(
     )
     
     return CostAnalysisResponse(
-        organization_id=result["organization_id"],
-        period_start=result["period_start"],
-        period_end=result["period_end"],
-        total_cost=float(result["total_cost"]),
-        total_requests=result["total_requests"],
-        total_tokens=result["total_tokens"],
-        breakdowns=result["breakdowns"]
+        organization_id=organization_id,
+        period_start=result.get("period_start", start_date),
+        period_end=result.get("period_end", end_date),
+        total_cost=float(result.get("total_cost", 0)),
+        total_requests=result.get("total_requests", 0),
+        total_tokens=result.get("total_tokens", 0),
+        breakdowns=result.get("breakdowns", [])
     )
 
 
 @router.get("/breakdown/models", response_model=List[ModelCostResponse])
 async def get_model_breakdown(
     days: int = Query(30, ge=1, le=365),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Get cost breakdown by model"""
@@ -343,7 +368,7 @@ async def get_cost_trends(
     metric: str = Query("total_cost", regex="^(total_cost|total_requests|total_tokens)$"),
     days: int = Query(30, ge=1, le=365),
     period_type: PeriodType = PeriodType.DAILY,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Get cost trends over time"""
@@ -378,7 +403,7 @@ async def get_cost_trends(
 @router.get("/anomalies", response_model=List[AnomalyResponse])
 async def get_cost_anomalies(
     days: int = Query(7, ge=1, le=30),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Get detected cost anomalies"""
@@ -408,7 +433,7 @@ async def get_cost_anomalies(
 @router.post("/budgets", response_model=BudgetResponse, status_code=201)
 async def create_budget(
     request: BudgetCreateRequest,
-    current_user: dict = Depends(require_role(["admin", "org_admin"])),
+    current_user: dict = Depends(require_admin_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Create a new budget (admin/org_admin only)"""
@@ -438,7 +463,7 @@ async def create_budget(
 async def list_budgets(
     is_active: Optional[bool] = None,
     budget_type: Optional[BudgetType] = None,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """List budgets for organization"""
@@ -453,7 +478,7 @@ async def list_budgets(
 @router.get("/budgets/{budget_id}", response_model=BudgetResponse)
 async def get_budget(
     budget_id: str = Path(...),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Get budget details"""
@@ -475,7 +500,7 @@ async def get_budget(
 async def update_budget(
     request: BudgetUpdateRequest,
     budget_id: str = Path(...),
-    current_user: dict = Depends(require_role(["admin", "org_admin"])),
+    current_user: dict = Depends(require_admin_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Update budget (admin/org_admin only)"""
@@ -502,7 +527,7 @@ async def update_budget(
 @router.delete("/budgets/{budget_id}", status_code=204)
 async def delete_budget(
     budget_id: str = Path(...),
-    current_user: dict = Depends(require_role(["admin", "org_admin"])),
+    current_user: dict = Depends(require_admin_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Delete budget (admin/org_admin only)"""
@@ -519,7 +544,7 @@ async def delete_budget(
 @router.get("/budgets/{budget_id}/status", response_model=BudgetStatusResponse)
 async def get_budget_status(
     budget_id: str = Path(...),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Get detailed budget status"""
@@ -554,7 +579,7 @@ async def list_recommendations(
     status: Optional[RecommendationStatus] = None,
     min_savings: Optional[float] = None,
     limit: int = Query(50, ge=1, le=200),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """List cost optimization recommendations"""
@@ -576,7 +601,7 @@ async def list_recommendations(
 @router.post("/recommendations/generate", response_model=List[RecommendationResponse])
 async def generate_recommendations(
     days: int = Query(30, ge=7, le=90),
-    current_user: dict = Depends(require_role(["admin", "org_admin"])),
+    current_user: dict = Depends(require_admin_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Generate new recommendations (admin/org_admin only)"""
@@ -595,7 +620,7 @@ async def generate_recommendations(
 @router.get("/recommendations/{recommendation_id}", response_model=RecommendationResponse)
 async def get_recommendation(
     recommendation_id: str = Path(...),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Get recommendation details"""
@@ -616,7 +641,7 @@ async def get_recommendation(
 @router.post("/recommendations/{recommendation_id}/accept", response_model=RecommendationResponse)
 async def accept_recommendation(
     recommendation_id: str = Path(...),
-    current_user: dict = Depends(require_role(["admin", "org_admin"])),
+    current_user: dict = Depends(require_admin_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Accept a recommendation"""
@@ -636,7 +661,7 @@ async def accept_recommendation(
 async def reject_recommendation(
     recommendation_id: str = Path(...),
     reason: str = Body(..., embed=True),
-    current_user: dict = Depends(require_role(["admin", "org_admin"])),
+    current_user: dict = Depends(require_admin_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """Reject a recommendation"""
@@ -660,7 +685,7 @@ async def reject_recommendation(
 async def list_model_pricing(
     provider: Optional[str] = None,
     active_only: bool = True,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_authenticated_user),
     db: asyncpg.Pool = Depends(get_db_pool)
 ):
     """List model pricing information"""
@@ -680,6 +705,85 @@ async def list_model_pricing(
         )
         for p in pricing_list
     ]
+
+
+@router.post("/pricing/models", response_model=ModelPricingResponse, status_code=201)
+async def create_model_pricing(
+    pricing_data: ModelPricingCreateRequest,
+    current_user: dict = Depends(require_admin_user),
+    db: asyncpg.Pool = Depends(get_db_pool)
+):
+    """
+    Add or update model pricing information (Admin only)
+    
+    This endpoint allows administrators to configure pricing for LLM models.
+    """
+    try:
+        async with db.acquire() as conn:
+            # Check if pricing already exists for this model
+            existing = await conn.fetchrow(
+                """
+                SELECT id FROM model_pricing 
+                WHERE provider = $1 AND model_name = $2
+                """,
+                pricing_data.provider,
+                pricing_data.model_name
+            )
+            
+            if existing:
+                # Update existing pricing
+                await conn.execute(
+                    """
+                    UPDATE model_pricing 
+                    SET input_price_per_million = $1,
+                        output_price_per_million = $2,
+                        model_tier = $3,
+                        quality_score = $4,
+                        is_active = $5,
+                        updated_at = NOW()
+                    WHERE provider = $6 AND model_name = $7
+                    """,
+                    pricing_data.input_price_per_million,
+                    pricing_data.output_price_per_million,
+                    pricing_data.model_tier,
+                    pricing_data.quality_score,
+                    pricing_data.is_active,
+                    pricing_data.provider,
+                    pricing_data.model_name
+                )
+                logger.info(f"Updated pricing for {pricing_data.provider}/{pricing_data.model_name}")
+            else:
+                # Insert new pricing
+                await conn.execute(
+                    """
+                    INSERT INTO model_pricing 
+                    (provider, model_name, input_price_per_million, output_price_per_million, 
+                     model_tier, quality_score, is_active, created_at, updated_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+                    """,
+                    pricing_data.provider,
+                    pricing_data.model_name,
+                    pricing_data.input_price_per_million,
+                    pricing_data.output_price_per_million,
+                    pricing_data.model_tier,
+                    pricing_data.quality_score,
+                    pricing_data.is_active
+                )
+                logger.info(f"Created pricing for {pricing_data.provider}/{pricing_data.model_name}")
+            
+            return ModelPricingResponse(
+                provider=pricing_data.provider,
+                model_name=pricing_data.model_name,
+                input_price_per_million=pricing_data.input_price_per_million,
+                output_price_per_million=pricing_data.output_price_per_million,
+                model_tier=pricing_data.model_tier,
+                quality_score=pricing_data.quality_score,
+                is_active=pricing_data.is_active
+            )
+            
+    except Exception as e:
+        logger.error(f"Failed to create/update model pricing: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create/update model pricing: {str(e)}")
 
 
 # ============================================================================

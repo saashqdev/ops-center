@@ -20,6 +20,7 @@ import logging
 import os
 import stripe
 import asyncpg
+import json
 
 # Import credit system components
 from credit_system import credit_manager, CreditError
@@ -186,9 +187,11 @@ async def create_purchase_checkout(
                 raise HTTPException(status_code=404, detail=f"Package '{request.package_code}' not found or inactive")
 
             # Determine URLs
-            base_url = os.getenv("EXTERNAL_URL", "https://your-domain.com")
-            success_url = request.success_url or f"{base_url}/admin/credits?purchase=success"
-            cancel_url = request.cancel_url or f"{base_url}/admin/credits?purchase=cancelled"
+            external_protocol = os.getenv("EXTERNAL_PROTOCOL", "https")
+            external_host = os.getenv("EXTERNAL_HOST", os.getenv("APP_DOMAIN", "kubeworkz.io"))
+            base_url = f"{external_protocol}://{external_host}"
+            success_url = request.success_url or f"{base_url}/admin/credits/purchase?purchase=success"
+            cancel_url = request.cancel_url or f"{base_url}/admin/credits/purchase?purchase=cancelled"
 
             # Create or get Stripe customer
             stripe_customer = None
@@ -261,19 +264,17 @@ async def create_purchase_checkout(
                 package["price_usd"],
                 checkout_session.id,
                 "pending",
-                {
+                json.dumps({
                     "package_code": package["package_code"],
                     "discount_percentage": package["discount_percentage"]
-                }
+                })
             )
 
             # Audit log
-            await audit_logger.log_credit_purchase_initiated(
-                user_id=user_id,
-                purchase_id=str(purchase_id),
-                package_name=package["package_name"],
-                amount=float(package["price_usd"]),
-                credits=package["credits"]
+            logger.info(
+                f"Credit purchase initiated - User: {user_id}, "
+                f"Purchase ID: {purchase_id}, Package: {package['package_name']}, "
+                f"Amount: ${package['price_usd']}, Credits: {package['credits']}"
             )
 
         await pool.close()
@@ -434,10 +435,9 @@ async def handle_stripe_webhook(request: Request):
             )
 
             # Audit log
-            await audit_logger.log_credit_purchase_completed(
-                user_id=user_id,
-                purchase_id=str(purchase["id"]),
-                credits_added=credits
+            logger.info(
+                f"Credit purchase completed - User: {user_id}, "
+                f"Purchase ID: {purchase['id']}, Credits added: {credits}"
             )
 
             # Send confirmation email

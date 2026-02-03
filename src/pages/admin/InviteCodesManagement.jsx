@@ -177,9 +177,18 @@ const InviteCodesManagement = () => {
     if (!codeToDelete) return;
 
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch(`/api/v1/admin/invite-codes/${codeToDelete.id}`, {
         method: 'DELETE',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'X-CSRF-Token': csrfData.csrf_token
+        }
       });
 
       if (!response.ok) {

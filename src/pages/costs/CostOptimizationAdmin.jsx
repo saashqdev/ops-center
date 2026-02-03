@@ -40,6 +40,18 @@ export default function CostOptimizationAdmin() {
   const [timeRange, setTimeRange] = useState('30d');
   const [loading, setLoading] = useState(true);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showRecommendationsModal, setShowRecommendationsModal] = useState(false);
+  const [generatedRecommendations, setGeneratedRecommendations] = useState([]);
+  const [pricingForm, setPricingForm] = useState({
+    provider: '',
+    model_name: '',
+    input_price_per_million: '',
+    output_price_per_million: '',
+    model_tier: 'basic',
+    quality_score: '',
+    is_active: true
+  });
+  const [savingPricing, setSavingPricing] = useState(false);
 
   const API_BASE = '/api/v1/costs';
 
@@ -102,10 +114,10 @@ export default function CostOptimizationAdmin() {
       const response = await fetch(`${API_BASE}/pricing/models`, {
         credentials: 'include'
       });
-      const data = await response.json();
       
-      if (data.success) {
-        setModelPricing(data.pricing || []);
+      if (response.ok) {
+        const data = await response.json();
+        setModelPricing(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Failed to load model pricing:', error);
@@ -114,13 +126,13 @@ export default function CostOptimizationAdmin() {
 
   const loadRecommendations = async () => {
     try {
-      const response = await fetch(`${API_BASE}/recommendations?scope=platform`, {
+      const response = await fetch(`${API_BASE}/recommendations`, {
         credentials: 'include'
       });
-      const data = await response.json();
       
-      if (data.success) {
-        setRecommendations(data.recommendations || []);
+      if (response.ok) {
+        const data = await response.json();
+        setRecommendations(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Failed to load recommendations:', error);
@@ -131,15 +143,72 @@ export default function CostOptimizationAdmin() {
     try {
       const response = await fetch(`${API_BASE}/recommendations/generate`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      const data = await response.json();
       
-      if (data.success) {
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratedRecommendations(Array.isArray(data) ? data : []);
+        setShowRecommendationsModal(true);
+        // Also update the main recommendations list
         loadRecommendations();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to generate recommendations');
       }
     } catch (error) {
       console.error('Failed to generate recommendations:', error);
+      alert('Failed to generate recommendations');
+    }
+  };
+
+  const handleAddModelPricing = async (e) => {
+    e.preventDefault();
+    setSavingPricing(true);
+    
+    try {
+      const response = await fetch(`${API_BASE}/pricing/models`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          provider: pricingForm.provider,
+          model_name: pricingForm.model_name,
+          input_price_per_million: parseFloat(pricingForm.input_price_per_million),
+          output_price_per_million: parseFloat(pricingForm.output_price_per_million),
+          model_tier: pricingForm.model_tier,
+          quality_score: pricingForm.quality_score ? parseFloat(pricingForm.quality_score) : null,
+          is_active: pricingForm.is_active
+        })
+      });
+      
+      if (response.ok) {
+        setShowPricingModal(false);
+        setPricingForm({
+          provider: '',
+          model_name: '',
+          input_price_per_million: '',
+          output_price_per_million: '',
+          model_tier: 'basic',
+          quality_score: '',
+          is_active: true
+        });
+        loadModelPricing();
+        alert('Model pricing added successfully');
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to add model pricing');
+      }
+    } catch (error) {
+      console.error('Failed to add model pricing:', error);
+      alert('Failed to add model pricing');
+    } finally {
+      setSavingPricing(false);
     }
   };
 
@@ -414,6 +483,320 @@ export default function CostOptimizationAdmin() {
           </div>
         )}
       </div>
+
+      {/* Generated Recommendations Modal */}
+      <AnimatePresence>
+        {showRecommendationsModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowRecommendationsModal(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className={`${cardBg} border rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <LightBulbIcon className="w-6 h-6 text-yellow-400" />
+                    <h3 className={`text-xl font-bold ${textClass}`}>
+                      Generated Recommendations ({generatedRecommendations.length})
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setShowRecommendationsModal(false)}
+                    className={`p-1 rounded-lg ${
+                      currentTheme === 'light' ? 'hover:bg-gray-200' : 'hover:bg-gray-700'
+                    }`}
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {generatedRecommendations.length === 0 ? (
+                  <div className="text-center py-12">
+                    <LightBulbIcon className={`w-16 h-16 mx-auto mb-4 ${subtextClass}`} />
+                    <p className={`text-lg ${textClass} mb-2`}>No Recommendations Generated</p>
+                    <p className={subtextClass}>
+                      Recommendations require cost analysis data. Start using LLM models to generate insights.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {generatedRecommendations.map((rec, idx) => (
+                      <motion.div
+                        key={rec.id || idx}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className={`p-4 rounded-lg border ${
+                          currentTheme === 'light' 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : 'bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-green-500/30'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className={`font-semibold text-lg ${textClass}`}>{rec.title}</h4>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                rec.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                rec.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
+                                rec.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                                'bg-gray-500/20 text-gray-400'
+                              }`}>
+                                {rec.status || 'pending'}
+                              </span>
+                            </div>
+                            <p className={`text-sm ${subtextClass} mb-2`}>{rec.description}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                          <div className={`p-2 rounded ${currentTheme === 'light' ? 'bg-white/50' : 'bg-black/20'}`}>
+                            <div className="text-xs text-green-400 mb-1">Potential Savings</div>
+                            <div className={`font-bold ${textClass}`}>{formatCurrency(rec.estimated_savings || 0)}/mo</div>
+                          </div>
+                          <div className={`p-2 rounded ${currentTheme === 'light' ? 'bg-white/50' : 'bg-black/20'}`}>
+                            <div className="text-xs text-blue-400 mb-1">Savings %</div>
+                            <div className={`font-bold ${textClass}`}>{(rec.savings_percentage || 0).toFixed(1)}%</div>
+                          </div>
+                          <div className={`p-2 rounded ${currentTheme === 'light' ? 'bg-white/50' : 'bg-black/20'}`}>
+                            <div className="text-xs text-purple-400 mb-1">Priority</div>
+                            <div className={`font-bold ${textClass}`}>{rec.priority_score || 0}/100</div>
+                          </div>
+                          <div className={`p-2 rounded ${currentTheme === 'light' ? 'bg-white/50' : 'bg-black/20'}`}>
+                            <div className="text-xs text-orange-400 mb-1">Confidence</div>
+                            <div className={`font-bold ${textClass}`}>{((rec.confidence_score || 0) * 100).toFixed(0)}%</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-3 border-t border-green-500/20">
+                          <div className="flex gap-3 text-xs">
+                            <span className={`${subtextClass}`}>
+                              Type: <span className={textClass}>{rec.recommendation_type}</span>
+                            </span>
+                            <span className={`${subtextClass}`}>
+                              Difficulty: <span className={textClass}>{rec.implementation_difficulty}</span>
+                            </span>
+                            <span className={`${subtextClass}`}>
+                              Quality Impact: <span className={textClass}>{rec.quality_impact}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                  <button
+                    onClick={() => setShowRecommendationsModal(false)}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Add Model Pricing Modal */}
+      <AnimatePresence>
+        {showPricingModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPricingModal(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className={`${cardBg} border rounded-lg p-6 max-w-md w-full`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className={`text-xl font-bold ${textClass}`}>Add Model Pricing</h3>
+                  <button
+                    onClick={() => setShowPricingModal(false)}
+                    className={`p-1 rounded-lg ${
+                      currentTheme === 'light' ? 'hover:bg-gray-200' : 'hover:bg-gray-700'
+                    }`}
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddModelPricing} className="space-y-4">
+                  <div>
+                    <label className={`block text-sm font-medium ${textClass} mb-1`}>
+                      Provider
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={pricingForm.provider}
+                      onChange={(e) => setPricingForm({ ...pricingForm, provider: e.target.value })}
+                      placeholder="e.g., OpenAI, Anthropic"
+                      className={`w-full px-3 py-2 rounded-lg border ${
+                        currentTheme === 'light'
+                          ? 'bg-white border-gray-300 text-gray-900'
+                          : 'bg-gray-700 border-gray-600 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium ${textClass} mb-1`}>
+                      Model Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={pricingForm.model_name}
+                      onChange={(e) => setPricingForm({ ...pricingForm, model_name: e.target.value })}
+                      placeholder="e.g., gpt-4, claude-3-opus"
+                      className={`w-full px-3 py-2 rounded-lg border ${
+                        currentTheme === 'light'
+                          ? 'bg-white border-gray-300 text-gray-900'
+                          : 'bg-gray-700 border-gray-600 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block text-sm font-medium ${textClass} mb-1`}>
+                        Input Price/Million
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        required
+                        value={pricingForm.input_price_per_million}
+                        onChange={(e) => setPricingForm({ ...pricingForm, input_price_per_million: e.target.value })}
+                        placeholder="$"
+                        className={`w-full px-3 py-2 rounded-lg border ${
+                          currentTheme === 'light'
+                            ? 'bg-white border-gray-300 text-gray-900'
+                            : 'bg-gray-700 border-gray-600 text-white'
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block text-sm font-medium ${textClass} mb-1`}>
+                        Output Price/Million
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        required
+                        value={pricingForm.output_price_per_million}
+                        onChange={(e) => setPricingForm({ ...pricingForm, output_price_per_million: e.target.value })}
+                        placeholder="$"
+                        className={`w-full px-3 py-2 rounded-lg border ${
+                          currentTheme === 'light'
+                            ? 'bg-white border-gray-300 text-gray-900'
+                            : 'bg-gray-700 border-gray-600 text-white'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block text-sm font-medium ${textClass} mb-1`}>
+                        Model Tier
+                      </label>
+                      <select
+                        value={pricingForm.model_tier}
+                        onChange={(e) => setPricingForm({ ...pricingForm, model_tier: e.target.value })}
+                        className={`w-full px-3 py-2 rounded-lg border ${
+                          currentTheme === 'light'
+                            ? 'bg-white border-gray-300 text-gray-900'
+                            : 'bg-gray-700 border-gray-600 text-white'
+                        }`}
+                      >
+                        <option value="free">Free</option>
+                        <option value="basic">Basic</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="premium">Premium</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={`block text-sm font-medium ${textClass} mb-1`}>
+                        Quality Score (0-10)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="10"
+                        value={pricingForm.quality_score}
+                        onChange={(e) => setPricingForm({ ...pricingForm, quality_score: e.target.value })}
+                        placeholder="Optional"
+                        className={`w-full px-3 py-2 rounded-lg border ${
+                          currentTheme === 'light'
+                            ? 'bg-white border-gray-300 text-gray-900'
+                            : 'bg-gray-700 border-gray-600 text-white'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="is_active"
+                      checked={pricingForm.is_active}
+                      onChange={(e) => setPricingForm({ ...pricingForm, is_active: e.target.checked })}
+                      className="w-4 h-4 text-purple-600 rounded"
+                    />
+                    <label htmlFor="is_active" className={`text-sm ${textClass}`}>
+                      Active
+                    </label>
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowPricingModal(false)}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium ${
+                        currentTheme === 'light'
+                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={savingPricing}
+                      className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium disabled:opacity-50"
+                    >
+                      {savingPricing ? 'Saving...' : 'Add Model'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
