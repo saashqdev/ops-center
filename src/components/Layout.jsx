@@ -885,7 +885,7 @@ export default function Layout({ children }) {
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
                         name="Invoices"
-                        href="/admin/system/billing#invoices"
+                        href="/admin/settings/billing"
                         icon={iconMap.DocumentDuplicateIcon}
                         indent={true}
                       />

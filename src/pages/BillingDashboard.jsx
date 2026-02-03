@@ -31,6 +31,8 @@ import {
   TagIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../contexts/ThemeContext';
+import { StripeProvider } from '../components/StripeProvider';
+import { AddPaymentMethodDialog } from '../components/AddPaymentMethodDialog';
 import {
   PieChart,
   Pie,
@@ -257,6 +259,7 @@ const UserView = ({ theme }) => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [usage, setUsage] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [addPaymentDialogOpen, setAddPaymentDialogOpen] = useState(false);
 
   useEffect(() => {
     loadUserBillingData();
@@ -371,7 +374,10 @@ const UserView = ({ theme }) => {
             title="No Active Subscription"
             description="Start your subscription to access premium features"
             action={
-              <button className={`${theme.button} rounded-lg py-2 px-6 text-sm font-medium`}>
+              <button 
+                onClick={() => window.location.href = '/admin/subscription/plan'}
+                className={`${theme.button} rounded-lg py-2 px-6 text-sm font-medium`}
+              >
                 View Plans
               </button>
             }
@@ -492,7 +498,10 @@ const UserView = ({ theme }) => {
             <CreditCardIcon className="w-5 h-5 text-green-400" />
             Payment Methods
           </h3>
-          <button className="flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors">
+          <button 
+            onClick={() => setAddPaymentDialogOpen(true)}
+            className="flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors"
+          >
             <PlusCircleIcon className="w-5 h-5" />
             Add Payment Method
           </button>
@@ -533,7 +542,10 @@ const UserView = ({ theme }) => {
             title="No Payment Methods"
             description="Add a payment method to manage your subscription"
             action={
-              <button className={`${theme.button} rounded-lg py-2 px-6 text-sm font-medium`}>
+              <button 
+                onClick={() => setAddPaymentDialogOpen(true)}
+                className={`${theme.button} rounded-lg py-2 px-6 text-sm font-medium`}
+              >
                 <PlusCircleIcon className="w-4 h-4 inline mr-2" />
                 Add Card
               </button>
@@ -542,6 +554,16 @@ const UserView = ({ theme }) => {
           />
         )}
       </motion.div>
+
+      {/* Add Payment Method Dialog */}
+      <AddPaymentMethodDialog
+        open={addPaymentDialogOpen}
+        onClose={() => setAddPaymentDialogOpen(false)}
+        onSuccess={() => {
+          setAddPaymentDialogOpen(false);
+          loadData();
+        }}
+      />
     </motion.div>
   );
 };
@@ -1041,7 +1063,7 @@ const AdminView = ({ theme }) => {
           <FunnelIcon className="w-5 h-5 text-purple-400" />
           <h3 className={`text-lg font-semibold ${theme.text.primary}`}>Filters & Search</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Search */}
           <div>
             <label className={`block text-sm ${theme.text.secondary} mb-2`}>Search</label>
@@ -1053,6 +1075,7 @@ const AdminView = ({ theme }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-400 focus:outline-none focus:border-purple-500"
+                style={{ paddingLeft: '40px' }}
               />
             </div>
           </div>
@@ -1090,7 +1113,7 @@ const AdminView = ({ theme }) => {
           </div>
 
           {/* Date Range */}
-          <div>
+          <div className="lg:col-span-2">
             <label className={`block text-sm ${theme.text.secondary} mb-2`}>Date Range</label>
             <div className="flex gap-2">
               <input
@@ -1098,12 +1121,14 @@ const AdminView = ({ theme }) => {
                 value={dateRange.start}
                 onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                 className="flex-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                style={{ minWidth: '140px' }}
               />
               <input
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                 className="flex-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                style={{ minWidth: '140px' }}
               />
             </div>
           </div>
@@ -1595,8 +1620,10 @@ export default function BillingDashboard() {
   }
 
   return (
-    <div className="p-6">
-      {isAdmin ? <AdminView theme={theme} /> : <UserView theme={theme} />}
-    </div>
+    <StripeProvider>
+      <div className="p-6">
+        {isAdmin ? <AdminView theme={theme} /> : <UserView theme={theme} />}
+      </div>
+    </StripeProvider>
   );
 }

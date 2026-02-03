@@ -458,6 +458,11 @@ function AppRoutes() {
                   <Route path="account/api-usage" element={<APIUsageDashboard />} /> {/* Epic 7.0 */}
 
                   {/* ============================================================ */}
+                  {/* SETTINGS SECTION - User settings */}
+                  {/* ============================================================ */}
+                  <Route path="settings/billing" element={<BillingSettings />} />
+
+                  {/* ============================================================ */}
                   {/* SUBSCRIPTION SECTION - Personal billing & usage */}
                   {/* ============================================================ */}
                   <Route path="subscription/plan" element={<SubscriptionPlan />} />

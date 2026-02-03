@@ -4122,11 +4122,25 @@ async def logout(request: Request, current_user: dict = Depends(get_current_user
 async def get_me(current_user: dict = Depends(get_current_user)):
     """Get current user info"""
     try:
-        user = auth_manager.get_user(current_user["user_id"])
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
+        # Return user data from session directly
+        # The current_user already contains all the user information we need
+        user_info = {
+            "user_id": current_user.get("sub") or current_user.get("user_id"),
+            "email": current_user.get("email"),
+            "username": current_user.get("preferred_username") or current_user.get("username"),
+            "name": current_user.get("name"),
+            "role": current_user.get("role", "viewer"),
+            "is_admin": current_user.get("role") == "admin",
+            "org_id": current_user.get("org_id"),
+            "email_verified": current_user.get("email_verified", False),
+        }
+        
+        # Remove None values
+        user_info = {k: v for k, v in user_info.items() if v is not None}
+        
+        return user_info
     except Exception as e:
+        logger.error(f"Error in /api/v1/auth/me: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/v1/auth/profile")

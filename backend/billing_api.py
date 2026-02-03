@@ -72,7 +72,7 @@ SUBSCRIPTION_PLANS = [
 ]
 
 
-async def get_user_org_id(request: Request) -> str:
+async def get_user_org_id(request: Request) -> Optional[str]:
     """Get organization ID from user session"""
     session_token = request.cookies.get("session_token")
     if not session_token:
@@ -86,10 +86,8 @@ async def get_user_org_id(request: Request) -> str:
     user = session_data.get("user", {})
     org_id = user.get("org_id")
 
-    if not org_id:
-        # No fallback generation - user must be assigned to organization
-        raise HTTPException(status_code=400, detail="User not assigned to organization. Please contact support.")
-
+    # Return None if no org_id instead of raising an error
+    # Individual endpoints can decide how to handle missing org_id
     return org_id
 
 
@@ -157,6 +155,11 @@ async def get_invoices_list(request: Request, limit: int = 50):
         List of invoices with status, amount, and dates
     """
     org_id = await get_user_org_id(request)
+    
+    # If user has no org_id, return empty invoices list
+    if not org_id:
+        logger.info("User has no organization assigned, returning empty invoices list")
+        return []
 
     logger.info(f"Fetching invoices for org {org_id}, limit={limit}")
 
@@ -173,10 +176,14 @@ async def get_invoices_list(request: Request, limit: int = 50):
                 "amount": invoice.get("total_amount_cents", 0) / 100,  # Convert cents to dollars
                 "currency": invoice.get("currency", "USD"),
                 "status": invoice.get("status", "draft"),
+                "issued_at": invoice.get("issuing_date"),
                 "issued_date": invoice.get("issuing_date"),
                 "due_date": invoice.get("payment_due_date"),
                 "paid_date": invoice.get("payment_at") if invoice.get("status") == "paid" else None,
+                "invoice_url": invoice.get("file_url"),
                 "pdf_url": invoice.get("file_url"),
+                "tier_name": "Standard",  # TODO: Get from subscription
+                "billing_cycle": "monthly",  # TODO: Get from subscription
                 "period_start": invoice.get("from_date"),
                 "period_end": invoice.get("to_date"),
                 "description": f"Invoice for {invoice.get('from_date', '')} - {invoice.get('to_date', '')}"
@@ -203,6 +210,14 @@ async def get_billing_cycle(request: Request):
         Billing cycle dates and status
     """
     org_id = await get_user_org_id(request)
+    
+    # If user has no org_id, return no active cycle
+    if not org_id:
+        logger.info("User has no organization assigned, returning no billing cycle")
+        return {
+            "has_cycle": False,
+            "message": "No organization assigned"
+        }
 
     logger.info(f"Fetching billing cycle for org {org_id}")
 
@@ -255,6 +270,15 @@ async def get_payment_methods(request: Request):
         List of payment methods
     """
     org_id = await get_user_org_id(request)
+    
+    # If user has no org_id, return empty payment methods
+    if not org_id:
+        logger.info("User has no organization assigned, returning empty payment methods")
+        return {
+            "payment_methods": [],
+            "default_method": None,
+            "message": "No organization assigned"
+        }
 
     logger.info(f"Fetching payment methods for org {org_id}")
 
@@ -321,6 +345,25 @@ async def get_billing_summary(request: Request):
         Billing summary statistics
     """
     org_id = await get_user_org_id(request)
+    
+    # If user has no org_id, return empty summary
+    if not org_id:
+        logger.info("User has no organization assigned, returning empty billing summary")
+        return {
+            "total_revenue": 0,
+            "mrr": 0,
+            "arr": 0,
+            "active_subscriptions": 0,
+            "revenue_growth": 0,
+            "trial_users": 0,
+            "user_growth": 0,
+            "churn_rate": 0,
+            "total_paid": 0,
+            "total_pending": 0,
+            "failed_payments": 0,
+            "invoice_count": 0,
+            "currency": "USD"
+        }
 
     logger.info(f"Fetching billing summary for org {org_id}")
 
@@ -344,7 +387,19 @@ async def get_billing_summary(request: Request):
             elif status == "failed":
                 failed_count += 1
 
+        # Calculate MRR and ARR (simple estimation based on paid invoices)
+        mrr = total_paid / 12 if len(invoices) > 0 else 0
+        arr = mrr * 12
+
         return {
+            "total_revenue": total_paid,
+            "mrr": mrr,
+            "arr": arr,
+            "active_subscriptions": 1 if total_paid > 0 else 0,  # Simplified
+            "revenue_growth": 0,  # TODO: Calculate growth
+            "trial_users": 0,  # TODO: Get from user management
+            "user_growth": 0,  # TODO: Calculate growth
+            "churn_rate": 0,  # TODO: Calculate churn
             "total_paid": total_paid,
             "total_pending": total_pending,
             "failed_payments": failed_count,

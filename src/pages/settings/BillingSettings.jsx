@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, CreditCard, Settings, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import InvoiceHistory from '../../components/InvoiceHistory';
 import PaymentMethods from '../../components/PaymentMethods';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function BillingSettings() {
+  const { theme } = useTheme();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('invoices');
 
   const tabs = [
@@ -13,26 +17,26 @@ export default function BillingSettings() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen p-6" style={{ backgroundColor: theme.background }}>
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => window.history.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            onClick={() => navigate('/admin/system/billing')}
+            className={`flex items-center space-x-2 ${theme.text.secondary} hover:${theme.text.primary} mb-4 transition-colors`}
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
           </button>
           
-          <h1 className="text-3xl font-bold text-gray-900">Billing & Invoices</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className={`text-3xl font-bold ${theme.text.primary}`}>Billing & Invoices</h1>
+          <p className={`${theme.text.secondary} mt-2`}>
             Manage your payment methods and view billing history
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
+        <div className={`border-b ${theme.border} mb-6`}>
           <nav className="-mb-px flex space-x-8">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -44,8 +48,8 @@ export default function BillingSettings() {
                     flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm
                     transition-colors
                     ${activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-purple-500 text-purple-400'
+                      : `border-transparent ${theme.text.secondary} hover:${theme.text.primary} hover:border-gray-500`
                     }
                   `}
                 >

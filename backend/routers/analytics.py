@@ -284,6 +284,25 @@ async def get_revenue_churn(months: int = Query(12, ge=1, le=24)):
 # USER ANALYTICS (3 endpoints)
 # ============================================================================
 
+@users_router.get("/segments")
+async def get_user_segments():
+    """
+    Get user segmentation by subscription tier (for Billing Dashboard tier distribution chart).
+    """
+    # Mock tier distribution data
+    # TODO: Get actual data from database
+    return {
+        "distribution": [
+            {"tier": "trial", "user_count": 150, "percentage": 45.5, "mrr_contribution": 0},
+            {"tier": "starter", "user_count": 120, "percentage": 36.4, "mrr_contribution": 1200},
+            {"tier": "professional", "user_count": 50, "percentage": 15.2, "mrr_contribution": 2500},
+            {"tier": "enterprise", "user_count": 10, "percentage": 3.0, "mrr_contribution": 5000}
+        ],
+        "total_users": 330,
+        "total_mrr": 8700,
+        "calculated_at": datetime.now().isoformat()
+    }
+
 @users_router.get("/ltv")
 async def get_lifetime_value():
     """
