@@ -110,8 +110,7 @@ class WebhookManager:
         Returns:
             Webhook data
         """
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             webhook_id = await conn.fetchval(
                 """
                 INSERT INTO webhooks (
@@ -143,9 +142,6 @@ class WebhookManager:
                 "description": description,
                 "created_at": datetime.utcnow().isoformat()
             }
-            
-        finally:
-            await conn.close()
     
     async def update_webhook(
         self,
@@ -157,8 +153,7 @@ class WebhookManager:
         enabled: Optional[bool] = None
     ) -> Dict[str, Any]:
         """Update webhook configuration"""
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             updates = []
             params = []
             param_idx = 1
@@ -217,13 +212,10 @@ class WebhookManager:
                 "updated_at": result['updated_at'].isoformat()
             }
             
-        finally:
-            await conn.close()
     
     async def delete_webhook(self, webhook_id: UUID) -> bool:
         """Delete a webhook"""
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             result = await conn.execute(
                 "DELETE FROM webhooks WHERE id = $1",
                 webhook_id
@@ -236,8 +228,6 @@ class WebhookManager:
             
             return deleted
             
-        finally:
-            await conn.close()
     
     async def list_webhooks(
         self,
@@ -245,8 +235,7 @@ class WebhookManager:
         enabled_only: bool = False
     ) -> List[Dict[str, Any]]:
         """List webhooks"""
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             filters = []
             params = []
             param_idx = 1
@@ -292,9 +281,6 @@ class WebhookManager:
                 }
                 for row in rows
             ]
-            
-        finally:
-            await conn.close()
     
     async def trigger_event(
         self,
@@ -313,8 +299,7 @@ class WebhookManager:
             organization_id: Organization ID
             payload: Event data to send
         """
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             # Find all webhooks subscribed to this event
             webhooks = await conn.fetch(
                 """
@@ -354,8 +339,6 @@ class WebhookManager:
             # Fire and forget - don't wait for delivery
             asyncio.create_task(asyncio.gather(*tasks, return_exceptions=True))
             
-        finally:
-            await conn.close()
     
     async def _deliver_webhook(
         self,
@@ -389,8 +372,7 @@ class WebhookManager:
         signature = self._generate_signature(payload_json, secret)
         
         # Log the delivery attempt
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             delivery_id = await conn.fetchval(
                 """
                 INSERT INTO webhook_deliveries (
@@ -404,8 +386,6 @@ class WebhookManager:
                 webhook_payload,
                 attempt
             )
-        finally:
-            await conn.close()
         
         # Attempt delivery
         start_time = time.time()
@@ -515,8 +495,7 @@ class WebhookManager:
         duration_ms: int
     ):
         """Log successful webhook delivery"""
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             await conn.execute(
                 """
                 UPDATE webhook_deliveries
@@ -541,8 +520,6 @@ class WebhookManager:
                 """,
                 webhook_id
             )
-        finally:
-            await conn.close()
     
     async def _log_delivery_failure(
         self,
@@ -553,8 +530,7 @@ class WebhookManager:
         duration_ms: int
     ):
         """Log failed webhook delivery"""
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             await conn.execute(
                 """
                 UPDATE webhook_deliveries
@@ -581,8 +557,6 @@ class WebhookManager:
                 """,
                 webhook_id
             )
-        finally:
-            await conn.close()
     
     def _generate_signature(self, payload: str, secret: str) -> str:
         """Generate HMAC-SHA256 signature for webhook payload"""
@@ -606,8 +580,7 @@ class WebhookManager:
         status: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get delivery logs for a webhook"""
-        conn = await get_db_connection()
-        try:
+        async with await get_db_connection() as conn:
             filters = ["webhook_id = $1"]
             params = [webhook_id]
             param_idx = 2
@@ -649,8 +622,6 @@ class WebhookManager:
                 for row in rows
             ]
             
-        finally:
-            await conn.close()
 
 
 # Global webhook manager instance

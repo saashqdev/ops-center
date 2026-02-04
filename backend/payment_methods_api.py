@@ -99,6 +99,41 @@ def get_payment_methods_manager() -> PaymentMethodsManager:
     return payment_methods_manager
 
 
+def get_user_email(user: Dict) -> str:
+    """
+    Extract user email from user dict, trying multiple possible fields.
+    
+    Args:
+        user: User dictionary from session
+        
+    Returns:
+        str: User email
+        
+    Raises:
+        HTTPException: If email not found
+    """
+    # Check if user info is nested under "user" key (OAuth login)
+    user_info = user.get("user", user)
+    
+    # Try multiple fields
+    user_email = (
+        user_info.get("email") or 
+        user_info.get("username") or 
+        user_info.get("sub") or 
+        user_info.get("preferred_username") or
+        user.get("email") or  # Fallback to top-level for local login
+        user.get("username")
+    )
+    
+    if not user_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User email not found"
+        )
+    
+    return user_email
+
+
 @router.get(
     "",
     response_model=PaymentMethodsListResponse,
@@ -116,20 +151,15 @@ async def list_payment_methods(
         PaymentMethodsListResponse with all cards and default
     """
     try:
-        # Get user's email
-        user_email = user.get("email")
-        if not user_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User email not found"
-            )
+        # Get user's email using helper
+        user_email = get_user_email(user)
 
         # Get Stripe customer ID from Lago
         stripe_customer_id = await pm_manager.get_stripe_customer_id(user_email)
         if not stripe_customer_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in billing system"
+                detail="Customer not found in Lago billing system. Please create an account in Lago."
             )
 
         # Fetch payment methods from Stripe
@@ -187,7 +217,7 @@ async def create_setup_intent(
         if not stripe_customer_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in billing system"
+                detail="Customer not found in Lago billing system. Please create an account in Lago."
             )
 
         # Create SetupIntent
@@ -247,7 +277,7 @@ async def set_default_payment_method(
         if not stripe_customer_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in billing system"
+                detail="Customer not found in Lago billing system. Please create an account in Lago."
             )
 
         # Set as default
@@ -312,7 +342,7 @@ async def remove_payment_method(
         if not stripe_customer_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in billing system"
+                detail="Customer not found in Lago billing system. Please create an account in Lago."
             )
 
         # Remove payment method
@@ -382,7 +412,7 @@ async def update_billing_address(
         if not stripe_customer_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in billing system"
+                detail="Customer not found in Lago billing system. Please create an account in Lago."
             )
 
         # Update billing address
@@ -432,20 +462,15 @@ async def get_upcoming_invoice(
         UpcomingInvoiceResponse with invoice details
     """
     try:
-        # Get user's email
-        user_email = user.get("email")
-        if not user_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User email not found"
-            )
+        # Get user's email using helper
+        user_email = get_user_email(user)
 
         # Get Stripe customer ID from Lago
         stripe_customer_id = await pm_manager.get_stripe_customer_id(user_email)
         if not stripe_customer_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in billing system"
+                detail="Customer not found in Lago billing system. Please create an account in Lago."
             )
 
         # Get upcoming invoice
@@ -502,7 +527,7 @@ async def get_payment_method_details(
         if not stripe_customer_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in billing system"
+                detail="Customer not found in Lago billing system. Please create an account in Lago."
             )
 
         # Get payment method details

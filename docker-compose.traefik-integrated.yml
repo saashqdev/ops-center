@@ -19,6 +19,7 @@ services:
       - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
       - APP_DOMAIN=${APP_DOMAIN:-kubeworkz.io}
       - ACME_EMAIL=${ACME_EMAIL:-admin@kubeworkz.io}
+      - DOCKER_API_VERSION=1.44
     volumes:
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic:/etc/traefik/dynamic:ro

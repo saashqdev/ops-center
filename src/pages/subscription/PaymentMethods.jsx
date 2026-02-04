@@ -186,29 +186,33 @@ const PaymentMethods = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs
-        separator={<NavigateNextIcon fontSize="small" />}
-        sx={{ mb: 2 }}
-      >
-        <MuiLink
-          component={RouterLink}
-          to="/admin"
-          underline="hover"
-          color="inherit"
+    <StripeProvider>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          separator={<NavigateNextIcon fontSize="small" />}
+          sx={{ 
+            mb: 2, 
+            '& .MuiLink-root': { color: 'rgb(209, 213, 219)' }, 
+            '& .MuiTypography-root': { color: 'rgb(209, 213, 219)' },
+            '& .MuiBreadcrumbs-separator': { color: 'rgb(209, 213, 219)' }
+          }}
         >
+          <MuiLink
+            component={RouterLink}
+            to="/admin"
+            underline="hover"
+          >
           Dashboard
         </MuiLink>
         <MuiLink
           component={RouterLink}
           to="/admin/subscription"
           underline="hover"
-          color="inherit"
         >
           Subscription
         </MuiLink>
-        <Typography color="text.primary">Payment Methods</Typography>
+        <Typography>Payment Methods</Typography>
       </Breadcrumbs>
 
       {/* Header */}
@@ -217,7 +221,7 @@ const PaymentMethods = () => {
           <CreditCardIcon sx={{ mr: 1, verticalAlign: 'middle', fontSize: '2rem' }} />
           Payment Methods
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: 'rgb(243, 232, 255)' }}>
           Manage your saved payment methods and billing information
         </Typography>
       </Box>
@@ -225,7 +229,22 @@ const PaymentMethods = () => {
       {/* Error Alert */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
+          {error.includes('Please create an account in Lago') ? (
+            <>
+              Customer not found in Lago billing system.{' '}
+              <MuiLink
+                href="https://billing.kubeworkz.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'inherit', fontWeight: 600, textDecoration: 'underline' }}
+              >
+                Please create an account in Lago
+              </MuiLink>
+              .
+            </>
+          ) : (
+            error
+          )}
         </Alert>
       )}
 
@@ -292,15 +311,14 @@ const PaymentMethods = () => {
         </Grid>
       </Grid>
 
-      {/* Add Payment Method Dialog (wrapped in Stripe provider) */}
-      <StripeProvider>
-        <AddPaymentMethodDialog
-          open={addDialogOpen}
-          onClose={() => setAddDialogOpen(false)}
-          onSuccess={handleAddSuccess}
-        />
-      </StripeProvider>
+      {/* Add Payment Method Dialog */}
+      <AddPaymentMethodDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onSuccess={handleAddSuccess}
+      />
     </Container>
+    </StripeProvider>
   );
 };
 

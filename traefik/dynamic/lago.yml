@@ -1,0 +1,29 @@
+# Lago Billing System Routes
+http:
+  routers:
+    lago-front:
+      rule: "Host(`billing.kubeworkz.io`)"
+      entryPoints:
+        - websecure
+      service: lago-front-service
+      tls:
+        certResolver: letsencrypt
+    
+    lago-api:
+      rule: "Host(`billing-api.kubeworkz.io`)"
+      entryPoints:
+        - websecure
+      service: lago-api-service
+      tls:
+        certResolver: letsencrypt
+  
+  services:
+    lago-front-service:
+      loadBalancer:
+        servers:
+          - url: "http://lago-front:80"
+    
+    lago-api-service:
+      loadBalancer:
+        servers:
+          - url: "http://lago-api:3000"

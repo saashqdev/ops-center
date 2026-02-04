@@ -125,14 +125,18 @@ async def create_webhook(
         # Generate secret key
         secret = secrets.token_urlsafe(32)
         
+        # Use organization_id if available, otherwise use user_id as organization
+        user_id = user.get('user_id') or user.get('sub') or user.get('id')
+        org_id = user.get('organization_id') or user_id
+        
         result = await webhook_manager.create_webhook(
-            organization_id=UUID(user['organization_id']),
+            organization_id=UUID(org_id),
             url=request.url,
             events=request.events,
             secret=secret,
             description=request.description,
             enabled=request.enabled,
-            created_by=UUID(user['user_id'])
+            created_by=UUID(user_id)
         )
         
         # Include secret in response (only time it's shown)
@@ -158,8 +162,12 @@ async def list_webhooks(
     Returns webhook configuration and statistics (success/failure counts).
     """
     try:
+        # Use organization_id if available, otherwise use user_id
+        user_id = user.get('user_id') or user.get('sub') or user.get('id')
+        org_id = user.get('organization_id') or user_id
+        
         webhooks = await webhook_manager.list_webhooks(
-            organization_id=UUID(user['organization_id']),
+            organization_id=UUID(org_id),
             enabled_only=enabled_only
         )
         
@@ -177,8 +185,12 @@ async def get_webhook(
 ) -> WebhookResponse:
     """Get details of a specific webhook"""
     try:
+        # Use organization_id if available, otherwise use user_id
+        user_id = user.get('user_id') or user.get('sub') or user.get('id')
+        org_id = user.get('organization_id') or user_id
+        
         webhooks = await webhook_manager.list_webhooks(
-            organization_id=UUID(user['organization_id'])
+            organization_id=UUID(org_id)
         )
         
         webhook = next((w for w in webhooks if w['webhook_id'] == webhook_id), None)
@@ -207,9 +219,13 @@ async def update_webhook(
     Can update URL, events, secret, description, or enabled status.
     """
     try:
+        # Use organization_id if available, otherwise use user_id
+        user_id = user.get('user_id') or user.get('sub') or user.get('id')
+        org_id = user.get('organization_id') or user_id
+        
         # Verify ownership
         webhooks = await webhook_manager.list_webhooks(
-            organization_id=UUID(user['organization_id'])
+            organization_id=UUID(org_id)
         )
         
         webhook = next((w for w in webhooks if w['webhook_id'] == webhook_id), None)
@@ -229,7 +245,7 @@ async def update_webhook(
         
         # Fetch updated webhook data
         updated_webhooks = await webhook_manager.list_webhooks(
-            organization_id=UUID(user['organization_id'])
+            organization_id=UUID(org_id)
         )
         updated_webhook = next((w for w in updated_webhooks if w['webhook_id'] == webhook_id), None)
         
@@ -251,9 +267,13 @@ async def delete_webhook(
 ) -> dict:
     """Delete a webhook"""
     try:
+        # Use organization_id if available, otherwise use user_id
+        user_id = user.get('user_id') or user.get('sub') or user.get('id')
+        org_id = user.get('organization_id') or user_id
+        
         # Verify ownership
         webhooks = await webhook_manager.list_webhooks(
-            organization_id=UUID(user['organization_id'])
+            organization_id=UUID(org_id)
         )
         
         webhook = next((w for w in webhooks if w['webhook_id'] == webhook_id), None)
@@ -291,9 +311,13 @@ async def get_webhook_deliveries(
     Shows delivery attempts with status, timing, and error information.
     """
     try:
+        # Use organization_id if available, otherwise use user_id
+        user_id = user.get('user_id') or user.get('sub') or user.get('id')
+        org_id = user.get('organization_id') or user_id
+        
         # Verify ownership
         webhooks = await webhook_manager.list_webhooks(
-            organization_id=UUID(user['organization_id'])
+            organization_id=UUID(org_id)
         )
         
         webhook = next((w for w in webhooks if w['webhook_id'] == webhook_id), None)
@@ -331,9 +355,13 @@ async def test_webhook(
     Sends a test payload to the webhook endpoint to verify configuration.
     """
     try:
+        # Use organization_id if available, otherwise use user_id
+        user_id = user.get('user_id') or user.get('sub') or user.get('id')
+        org_id = user.get('organization_id') or user_id
+        
         # Verify ownership
         webhooks = await webhook_manager.list_webhooks(
-            organization_id=UUID(user['organization_id'])
+            organization_id=UUID(org_id)
         )
         
         webhook = next((w for w in webhooks if w['webhook_id'] == webhook_id), None)
@@ -345,13 +373,13 @@ async def test_webhook(
         test_payload = {
             "test": True,
             "webhook_id": webhook_id,
-            "user_id": user['user_id'],
+            "user_id": user_id,
             **request.test_data
         }
         
         await webhook_manager.trigger_event(
             event_type=request.event_type,
-            organization_id=UUID(user['organization_id']),
+            organization_id=UUID(org_id),
             payload=test_payload
         )
         
