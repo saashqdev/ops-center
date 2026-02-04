@@ -210,7 +210,7 @@ const TraefikDashboard = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Traefik Dashboard
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'rgb(243, 232, 255)' }}>
             Reverse proxy configuration and monitoring
           </Typography>
         </Box>

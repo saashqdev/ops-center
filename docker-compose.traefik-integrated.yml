@@ -112,6 +112,7 @@ services:
       - /etc/group:/host/etc/group:ro
       - ./avatars:/app/avatars
       - ./traefik/dynamic:/home/ubuntu/Ops-Center-OSS/traefik/dynamic
+      - ./traefik/letsencrypt:/home/ubuntu/Ops-Center-OSS/traefik/letsencrypt:ro
     env_file:
       - .env.auth
     environment:

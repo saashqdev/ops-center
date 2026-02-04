@@ -274,7 +274,7 @@ const TraefikSSL = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             SSL Certificates
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'rgb(209, 213, 219)' }}>
             Manage SSL/TLS certificates
           </Typography>
         </Box>

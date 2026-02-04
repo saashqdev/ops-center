@@ -488,7 +488,7 @@ class TraefikManager:
         self.config_file = self.traefik_dir / "traefik.yml"
         self.dynamic_dir = self.traefik_dir / "dynamic"
         self.backup_dir = self.traefik_dir / "backups"
-        self.acme_dir = self.traefik_dir / "acme"
+        self.acme_dir = self.traefik_dir / "letsencrypt"
         self.acme_file = self.acme_dir / "acme.json"
         self.docker_container = docker_container
 

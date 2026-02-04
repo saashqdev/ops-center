@@ -151,7 +151,7 @@ const LocalUserManagement = lazy(() => import('./pages/LocalUserManagement'));
 const UsageMetrics = lazy(() => import('./pages/UsageMetrics'));
 const Network = lazy(() => import('./pages/NetworkTabbed'));
 const StorageBackup = lazy(() => import('./pages/StorageBackup'));
-const BackupDashboard = lazy(() => import('../frontend/src/components/BackupDashboard.jsx'));
+const BackupDashboard = lazy(() => import('./components/BackupDashboard'));
 const Security = lazy(() => import('./pages/Security'));
 const Authentication = lazy(() => import('./pages/Authentication'));
 const Extensions = lazy(() => import('./pages/Extensions'));
