@@ -719,49 +719,59 @@ const DynamicPricingManagement = () => {
         </Stack>
       </Box>
 
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         {creditPackages.map((pkg) => (
-          <Grid item xs={12} sm={6} md={3} key={pkg.id}>
-            <Card sx={{ height: '100%', position: 'relative' }}>
-              {pkg.is_featured && (
-                <Chip
-                  label="Featured"
-                  color="secondary"
-                  size="small"
-                  sx={{ position: 'absolute', top: 8, right: 8 }}
-                />
-              )}
-              {pkg.badge_text && (
-                <Chip
-                  label={pkg.badge_text}
-                  color="warning"
-                  size="small"
-                  sx={{ position: 'absolute', top: 8, left: 8 }}
-                />
-              )}
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+          <Box key={pkg.id} sx={{ flex: '0 1 calc(25% - 18px)', minWidth: '250px', maxWidth: 'calc(25% - 18px)' }}>
+            <Card sx={{ height: '100%', position: 'relative', pt: 5, display: 'flex', flexDirection: 'column' }}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 8,
+                  right: 8,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  zIndex: 1
+                }}
+              >
+                {pkg.badge_text && !pkg.badge_text.startsWith('SAVE') && (
+                  <Chip
+                    label={pkg.badge_text}
+                    color="warning"
+                    size="small"
+                  />
+                )}
+                {pkg.discount_percentage > 0 && (
+                  <Chip
+                    label={`SAVE ${pkg.discount_percentage}%`}
+                    color="warning"
+                    size="small"
+                  />
+                )}
+                {pkg.is_featured && (
+                  <Chip
+                    label="Featured"
+                    color="secondary"
+                    size="small"
+                  />
+                )}
+              </Box>
+              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   {pkg.package_name}
                 </Typography>
-                <Typography variant="h3" color="primary" gutterBottom>
+                <Typography variant="h3" color="primary" gutterBottom sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                   {pkg.credits.toLocaleString()}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                  credits
+                  <Typography component="span" variant="body2" color="textSecondary">
+                    credits
+                  </Typography>
                 </Typography>
                 <Divider sx={{ my: 2 }} />
                 <Box display="flex" alignItems="baseline" mb={1}>
                   <Typography variant="h5" color="primary">
                     ${parseFloat(pkg.price_usd).toFixed(2)}
                   </Typography>
-                  {pkg.discount_percentage > 0 && (
-                    <Chip
-                      label={`-${pkg.discount_percentage}%`}
-                      color="success"
-                      size="small"
-                      sx={{ ml: 1 }}
-                    />
-                  )}
                 </Box>
                 {pkg.promo_active && (
                   <Alert severity="success" sx={{ mb: 2 }}>
@@ -773,13 +783,14 @@ const DynamicPricingManagement = () => {
                   </Alert>
                 )}
                 <Typography variant="caption" color="textSecondary" paragraph>
-                  ${(parseFloat(pkg.price_usd) / pkg.credits * 1000).toFixed(2)} per 1000 credits
+                  ${parseFloat(pkg.price_usd).toFixed(2)} per {pkg.credits} credits
                 </Typography>
                 {pkg.description && (
                   <Typography variant="body2" color="textSecondary" paragraph>
                     {pkg.description}
                   </Typography>
                 )}
+                <Box sx={{ flexGrow: 1 }} />
                 <Stack spacing={1}>
                   <Button
                     size="small"
@@ -803,9 +814,9 @@ const DynamicPricingManagement = () => {
                 </Stack>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 
