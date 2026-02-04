@@ -189,8 +189,6 @@ async def register_cluster(
     """
     try:
         org_id = user.get('organization_id')
-        if not org_id:
-            raise HTTPException(status_code=400, detail="User must belong to an organization")
         
         db_pool = await get_db_pool()
         manager = KubernetesClusterManager(db_pool)
@@ -230,8 +228,6 @@ async def list_clusters(
     """
     try:
         org_id = user.get('organization_id')
-        if not org_id:
-            raise HTTPException(status_code=400, detail="User must belong to an organization")
         
         db_pool = await get_db_pool()
         manager = KubernetesClusterManager(db_pool)
@@ -247,6 +243,8 @@ async def list_clusters(
         
         return clusters
     
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to list clusters: {e}")
         raise HTTPException(status_code=500, detail="Failed to list clusters")

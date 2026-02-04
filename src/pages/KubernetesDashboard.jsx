@@ -54,7 +54,8 @@ export default function KubernetesDashboard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch clusters');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to fetch clusters');
       }
 
       const data = await response.json();
@@ -75,7 +76,8 @@ export default function KubernetesDashboard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch stats');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to fetch stats');
       }
 
       const clusters = await response.json();
