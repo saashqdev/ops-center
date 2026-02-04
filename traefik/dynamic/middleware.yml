@@ -11,6 +11,8 @@ http:
       entryPoints:
         - websecure
       service: ops-center-service
+      middlewares:
+        - no-cache-headers
       tls:
         certResolver: letsencrypt
     
@@ -50,7 +52,7 @@ http:
     ops-center-service:
       loadBalancer:
         servers:
-          - url: "http://ops-center-app:8084"
+          - url: "http://ops-center-direct:8084"
     
     # Keycloak service
     keycloak-service:
@@ -68,10 +70,18 @@ http:
     default-backend:
       loadBalancer:
         servers:
-          - url: "http://ops-center-app:8084"
+          - url: "http://ops-center-direct:8084"
   
   # Middlewares
   middlewares:
+    # No-cache headers for HTML files
+    no-cache-headers:
+      headers:
+        customResponseHeaders:
+          Cache-Control: "no-cache, no-store, must-revalidate"
+          Pragma: "no-cache"
+          Expires: "0"
+    
     # Rate limiting (global)
     rate-limit:
       rateLimit:

@@ -79,7 +79,7 @@ export default function BackupManager() {
 
   const fetchBackupStatus = async () => {
     try {
-      const response = await fetch('/api/backups/status/');
+      const response = await fetch('/api/backups/status');
       if (!response.ok) throw new Error('Failed to fetch status');
       const data = await response.json();
       setBackupStatus(data);
@@ -90,10 +90,10 @@ export default function BackupManager() {
 
   const fetchRcloneRemotes = async () => {
     try {
-      const response = await fetch('/api/v1/storage/rclone/remotes');
+      const response = await fetch('/api/v1/backups/rclone/remotes');
       if (response.ok) {
         const data = await response.json();
-        setRcloneRemotes(data.remotes || []);
+        setRcloneRemotes(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Rclone remotes fetch error:', error);
@@ -148,7 +148,7 @@ export default function BackupManager() {
     
     try {
       setLoading(true);
-      const response = await fetch('/api/backups/restore/', {
+      const response = await fetch('/api/backups/restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ backup_filename: selectedBackup.filename })
@@ -200,7 +200,7 @@ export default function BackupManager() {
     
     try {
       setLoading(true);
-      const response = await fetch('/api/backups/cleanup/', {
+      const response = await fetch('/api/backups/cleanup', {
         method: 'POST'
       });
       

@@ -51,7 +51,17 @@ class BackupStatusResponse(BaseModel):
     retention_days: int
     max_backups: int
     interval_hours: int
+    auto_backup_enabled: bool
     total_backups: int
+    total_size_mb: float
+
+
+class UpdateBackupSettingsRequest(BaseModel):
+    """Request to update backup settings"""
+    retention_days: Optional[int] = None
+    max_backups: Optional[int] = None
+    interval_hours: Optional[int] = None
+    auto_backup_enabled: Optional[bool] = None
 
 
 @router.post("/")
@@ -166,13 +176,19 @@ async def get_backup_status():
         service = get_backup_service()
         backups = service.list_backups()
         
+        # Calculate total size of all backups
+        total_size_bytes = sum(backup.get('size_bytes', 0) for backup in backups)
+        total_size_mb = round(total_size_bytes / (1024 * 1024), 2)
+        
         return {
             'enabled': True,
             'backup_directory': str(service.backup_dir),
             'retention_days': service.retention_days,
             'max_backups': service.max_backups,
             'interval_hours': service.auto_backup_interval_hours,
-            'total_backups': len(backups)
+            'auto_backup_enabled': service.auto_backup_enabled,
+            'total_backups': len(backups),
+            'total_size_mb': total_size_mb
         }
         
     except Exception as e:
@@ -199,6 +215,42 @@ async def cleanup_old_backups():
         
     except Exception as e:
         logger.error(f"Cleanup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/settings")
+async def update_backup_settings(request: UpdateBackupSettingsRequest):
+    """
+    Update backup configuration settings.
+    
+    Args:
+        request: Settings to update (only provided fields will be updated)
+    """
+    try:
+        service = get_backup_service()
+        
+        # Update settings if provided
+        if request.retention_days is not None:
+            service.retention_days = request.retention_days
+        if request.max_backups is not None:
+            service.max_backups = request.max_backups
+        if request.interval_hours is not None:
+            service.auto_backup_interval_hours = request.interval_hours
+        if request.auto_backup_enabled is not None:
+            service.auto_backup_enabled = request.auto_backup_enabled
+        
+        logger.info(f"Backup settings updated: retention={service.retention_days}d, max={service.max_backups}, interval={service.auto_backup_interval_hours}h, auto_enabled={service.auto_backup_enabled}")
+        
+        return {
+            'success': True,
+            'retention_days': service.retention_days,
+            'max_backups': service.max_backups,
+            'interval_hours': service.auto_backup_interval_hours,
+            'auto_backup_enabled': service.auto_backup_enabled
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to update settings: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

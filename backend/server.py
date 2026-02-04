@@ -517,7 +517,9 @@ csrf_protect, csrf_middleware_factory = create_csrf_protection(
         "/api/v1/org/",  # Organization management API - CRUD operations
         "/api/v1/org",    # Organization management API (without trailing slash)
         "/api/v1/alerts/",  # Email alert system - REST API operations
-        "/api/v1/logs/"  # Log search system - REST API operations
+        "/api/v1/logs/",  # Log search system - REST API operations
+        "/api/backups/",  # Database backup API - backup management endpoints
+        "/api/v1/backups/rclone/"  # Rclone cloud storage API - cloud backup endpoints
     },
     sessions_store=sessions,
     cookie_secure=COOKIE_SECURE

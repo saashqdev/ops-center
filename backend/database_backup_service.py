@@ -31,7 +31,8 @@ class DatabaseBackupService:
         backup_dir: str = "/app/backups/database",
         retention_days: int = 7,
         max_backups: int = 30,
-        auto_backup_interval_hours: int = 24
+        auto_backup_interval_hours: int = 24,
+        auto_backup_enabled: bool = True
     ):
         """
         Initialize the database backup service.
@@ -41,11 +42,13 @@ class DatabaseBackupService:
             retention_days: Number of days to keep backups
             max_backups: Maximum number of backups to keep
             auto_backup_interval_hours: Hours between automatic backups
+            auto_backup_enabled: Whether automatic backups are enabled
         """
         self.backup_dir = Path(backup_dir)
         self.retention_days = retention_days
         self.max_backups = max_backups
         self.auto_backup_interval_hours = auto_backup_interval_hours
+        self.auto_backup_enabled = auto_backup_enabled
         
         # Ensure backup directory exists
         self.backup_dir.mkdir(parents=True, exist_ok=True)
@@ -370,12 +373,14 @@ def get_backup_service() -> DatabaseBackupService:
         retention_days = int(os.getenv('BACKUP_RETENTION_DAYS', '7'))
         max_backups = int(os.getenv('BACKUP_MAX_COUNT', '30'))
         interval_hours = int(os.getenv('BACKUP_INTERVAL_HOURS', '24'))
+        auto_enabled = os.getenv('BACKUP_AUTO_ENABLED', 'true').lower() == 'true'
         
         backup_service = DatabaseBackupService(
             backup_dir=backup_dir,
             retention_days=retention_days,
             max_backups=max_backups,
-            auto_backup_interval_hours=interval_hours
+            auto_backup_interval_hours=interval_hours,
+            auto_backup_enabled=auto_enabled
         )
     
     return backup_service

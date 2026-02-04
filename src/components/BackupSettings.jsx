@@ -19,6 +19,8 @@ export default function BackupSettings({ onSave }) {
   const [status, setStatus] = useState(null);
   const [rcloneRemotes, setRcloneRemotes] = useState([]);
   const [addRemoteDialog, setAddRemoteDialog] = useState(false);
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   
   // Backup settings
   const [retentionDays, setRetentionDays] = useState(7);
@@ -38,14 +40,22 @@ export default function BackupSettings({ onSave }) {
 
   const fetchBackupStatus = async () => {
     try {
+      console.log('Fetching backup status...');
       const response = await fetch('/api/backups/status');
       if (!response.ok) throw new Error('Failed to fetch status');
       const data = await response.json();
+      console.log('Received status data:', data);
       setStatus(data);
       setRetentionDays(data.retention_days || 7);
       setMaxBackups(data.max_backups || 30);
       setIntervalHours(data.interval_hours || 24);
-      setAutoBackupEnabled(data.enabled || true);
+      setAutoBackupEnabled(data.auto_backup_enabled !== undefined ? data.auto_backup_enabled : true);
+      console.log('State updated to:', {
+        retentionDays: data.retention_days,
+        maxBackups: data.max_backups,
+        intervalHours: data.interval_hours,
+        autoBackupEnabled: data.auto_backup_enabled
+      });
     } catch (error) {
       console.error('Status fetch error:', error);
     }
@@ -53,10 +63,10 @@ export default function BackupSettings({ onSave }) {
 
   const fetchRcloneRemotes = async () => {
     try {
-      const response = await fetch('/api/v1/storage/rclone/remotes');
+      const response = await fetch('/api/v1/backups/rclone/remotes');
       if (response.ok) {
         const data = await response.json();
-        setRcloneRemotes(data.remotes || []);
+        setRcloneRemotes(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Rclone remotes fetch error:', error);
@@ -66,8 +76,29 @@ export default function BackupSettings({ onSave }) {
   const saveSettings = async () => {
     setLoading(true);
     try {
-      // Here you would save the settings to your backend
-      // For now, just notify parent component
+      console.log('Saving settings:', { retentionDays, maxBackups, intervalHours, autoBackupEnabled });
+      
+      const response = await fetch('/api/backups/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          retention_days: retentionDays,
+          max_backups: maxBackups,
+          interval_hours: intervalHours,
+          auto_backup_enabled: autoBackupEnabled
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to save settings');
+
+      const data = await response.json();
+      console.log('Save response:', data);
+      
+      // Refresh status to show updated values BEFORE showing success dialog
+      await fetchBackupStatus();
+      console.log('Status refreshed, new values:', { retentionDays, maxBackups, intervalHours, autoBackupEnabled });
+      
+      // Notify parent component
       if (onSave) {
         onSave({
           retentionDays,
@@ -76,9 +107,13 @@ export default function BackupSettings({ onSave }) {
           autoBackupEnabled
         });
       }
-      alert('Settings saved successfully!');
+      
+      setSuccessMessage('Settings saved successfully!');
+      setSuccessDialog(true);
     } catch (error) {
-      alert('Failed to save settings: ' + error.message);
+      console.error('Save error:', error);
+      setSuccessMessage('Failed to save settings: ' + error.message);
+      setSuccessDialog(true);
     } finally {
       setLoading(false);
     }
@@ -87,7 +122,7 @@ export default function BackupSettings({ onSave }) {
   const configureRcloneRemote = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/storage/rclone/configure', {
+      const response = await fetch('/api/v1/backups/rclone/configure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -99,13 +134,15 @@ export default function BackupSettings({ onSave }) {
       
       if (!response.ok) throw new Error('Failed to configure remote');
       
-      alert('Remote configured successfully!');
+      setSuccessMessage('Remote configured successfully!');
+      setSuccessDialog(true);
       setAddRemoteDialog(false);
       setRemoteName('');
       setRemoteConfig({});
       fetchRcloneRemotes();
     } catch (error) {
-      alert('Configuration failed: ' + error.message);
+      setSuccessMessage('Configuration failed: ' + error.message);
+      setSuccessDialog(true);
     } finally {
       setLoading(false);
     }
@@ -115,7 +152,7 @@ export default function BackupSettings({ onSave }) {
     if (!window.confirm(`Delete remote ${remoteName}?`)) return;
     
     try {
-      const response = await fetch(`/api/v1/storage/rclone/remote/${remoteName}`, {
+      const response = await fetch(`/api/v1/backups/rclone/remote/${remoteName}`, {
         method: 'DELETE'
       });
       
@@ -199,7 +236,7 @@ export default function BackupSettings({ onSave }) {
           <Grid item xs={12}>
             <Alert severity="info">
               Current Status: <strong>{status?.total_backups || 0}</strong> backups using approximately{' '}
-              <strong>{status?.backup_directory || '/app/backups/database'}</strong>
+              <strong>{status?.total_size_mb?.toFixed(2) || '0.00'} MB</strong>
             </Alert>
           </Grid>
         </Grid>
@@ -329,6 +366,21 @@ export default function BackupSettings({ onSave }) {
             disabled={!remoteName || loading}
           >
             {loading ? <CircularProgress size={24} /> : 'Add Remote'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Dialog */}
+      <Dialog open={successDialog} onClose={() => setSuccessDialog(false)}>
+        <DialogTitle>
+          {successMessage.includes('success') ? 'Success' : 'Error'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>{successMessage}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSuccessDialog(false)} variant="contained">
+            OK
           </Button>
         </DialogActions>
       </Dialog>
