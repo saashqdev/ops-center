@@ -171,7 +171,7 @@ export default function SystemHealthScore({ score, details, isLoading = false })
               animate={{ rotate: expanded ? 180 : 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ChevronDownIcon className={`h-5 w-5 ${theme.text.secondary}`} />
+              <ChevronDownIcon className={`h-5 w-5 ml-2 ${theme.text.secondary}`} />
             </motion.div>
           </Box>
 

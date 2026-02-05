@@ -291,7 +291,7 @@ export default function RecentActivityWidget({ activities, limit = 10, autoRefre
                               animate={{ rotate: expanded[activity.id] ? 180 : 0 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <ChevronDownIcon className={`h-4 w-4 ${theme.text.secondary}`} />
+                              <ChevronDownIcon className={`h-4 w-4 ml-1 ${theme.text.secondary}`} />
                             </motion.div>
                           </Box>
                         </Box>

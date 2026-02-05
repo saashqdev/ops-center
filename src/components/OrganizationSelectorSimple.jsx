@@ -160,7 +160,7 @@ export default function OrganizationSelector({ onOrgCreated }) {
 
         {/* Dropdown Arrow */}
         <ChevronDownIcon
-          className={`h-5 w-5 transition-transform duration-200 ${
+          className={`h-5 w-5 ml-2 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />

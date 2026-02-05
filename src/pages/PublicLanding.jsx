@@ -533,7 +533,7 @@ export default function PublicLanding() {
                   title="User Profile"
                 >
                   <UserCircleIcon className="h-6 w-6" />
-                  <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDownIcon className={`h-4 w-4 ml-2 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Dropdown Menu */}

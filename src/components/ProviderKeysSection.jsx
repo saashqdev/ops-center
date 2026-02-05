@@ -472,9 +472,9 @@ export default function ProviderKeysSection({
             </div>
           </div>
           {expanded ? (
-            <ChevronUpIcon className={`h-5 w-5 ${themeClasses.subtext}`} />
+            <ChevronUpIcon className={`h-5 w-5 ml-2 ${themeClasses.subtext}`} />
           ) : (
-            <ChevronDownIcon className={`h-5 w-5 ${themeClasses.subtext}`} />
+            <ChevronDownIcon className={`h-5 w-5 ml-2 ${themeClasses.subtext}`} />
           )}
         </div>
       ) : (
