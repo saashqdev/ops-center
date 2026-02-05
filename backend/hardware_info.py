@@ -197,9 +197,14 @@ class HardwareDetector:
         }
     
     def get_memory_info(self) -> Dict[str, Any]:
-        """Get memory configuration information"""
+        """Get memory configuration and usage information"""
         try:
-            # Get total memory from /proc/meminfo
+            import psutil
+            
+            # Get real-time memory usage
+            mem = psutil.virtual_memory()
+            
+            # Get total memory from /proc/meminfo for hardware specs
             with open('/proc/meminfo', 'r') as f:
                 meminfo = f.read()
             
@@ -237,13 +242,23 @@ class HardwareDetector:
                 slots = "Unknown configuration"
             
             return {
-                "total": f"{total_gb:.0f} GB",
+                "total": mem.total,  # Bytes for frontend calculations
+                "used": mem.used,    # Bytes
+                "free": mem.free,    # Bytes
+                "available": mem.available,  # Bytes
+                "percentage": mem.percent,   # Percentage used
+                "total_gb": f"{total_gb:.0f} GB",  # Human readable
                 "type": f"{mem_type}{speed}",
                 "slots": slots
             }
         except:
             return {
-                "total": "Unknown",
+                "total": 0,
+                "used": 0,
+                "free": 0,
+                "available": 0,
+                "percentage": 0,
+                "total_gb": "Unknown",
                 "type": "Unknown",
                 "slots": "Unknown configuration"
             }

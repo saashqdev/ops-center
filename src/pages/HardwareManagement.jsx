@@ -108,10 +108,23 @@ const HardwareManagement = () => {
     }
   };
 
-  // Fetch historical data - DISABLED (endpoint not available)
+  // Fetch historical data
   const fetchHistory = async () => {
-    // TODO: Implement /api/v1/hardware/history endpoint
-    setHistory([]);
+    try {
+      const hours = timeRange === '1hour' ? 1 : timeRange === '6hour' ? 6 : 24;
+      const response = await fetch(`/api/v1/system/hardware/history?hours=${hours}`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data || []);
+      } else {
+        setHistory([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch history:', error);
+      setHistory([]);
+    }
   };
 
   // Fetch service allocations

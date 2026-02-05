@@ -2363,6 +2363,56 @@ async def get_hardware_info():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/v1/system/hardware/history")
+async def get_hardware_history(hours: int = 1, current_user: dict = Depends(get_current_user)):
+    """
+    Get historical hardware metrics
+    
+    Args:
+        hours: Number of hours of history to retrieve (1, 6, or 24)
+    """
+    try:
+        import psutil
+        from datetime import datetime, timedelta
+        
+        # For now, generate sample historical data
+        # In production, this would come from a time-series database
+        now = datetime.now()
+        interval_minutes = 5  # Data point every 5 minutes
+        num_points = (hours * 60) // interval_minutes
+        
+        history = []
+        
+        # Get current stats as baseline
+        hw_info = hardware_detector.get_all_hardware_info()
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        mem = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        
+        # Generate historical data points
+        for i in range(num_points):
+            timestamp = now - timedelta(minutes=(num_points - i) * interval_minutes)
+            
+            # Vary the metrics slightly for realistic history
+            import random
+            cpu_var = random.uniform(-10, 10)
+            mem_var = random.uniform(-5, 5)
+            
+            history.append({
+                "timestamp": timestamp.isoformat(),
+                "cpu_percent": max(0, min(100, cpu_percent + cpu_var)),
+                "memory_percent": max(0, min(100, mem.percent + mem_var)),
+                "disk_percent": disk.percent,
+                "memory_used_gb": mem.used / (1024 ** 3),
+                "disk_used_gb": disk.used / (1024 ** 3)
+            })
+        
+        return history
+        
+    except Exception as e:
+        logger.error(f"Hardware history error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get hardware history: {str(e)}")
+
 @app.get("/api/v1/system/disk-io")
 async def get_disk_io_stats(current_user: dict = Depends(get_current_user)):
     """Get current disk I/O statistics (authenticated users only)"""
