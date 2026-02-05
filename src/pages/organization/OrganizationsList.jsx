@@ -43,6 +43,7 @@ import {
   Delete as DeleteIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
+  ArrowDropDown as ArrowDropDownIcon,
 } from '@mui/icons-material';
 import CreateOrganizationModal from '../../components/CreateOrganizationModal';
 import { useOrganization } from '../../contexts/OrganizationContext';
@@ -393,7 +394,7 @@ const OrganizationsList = () => {
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth>
+            <FormControl fullWidth sx={{ minWidth: 180 }}>
               <InputLabel>Status</InputLabel>
               <Select
                 value={statusFilter}
@@ -402,6 +403,15 @@ const OrganizationsList = () => {
                   setPage(0);
                 }}
                 label="Status"
+                IconComponent={(props) => {
+                  const { style, ...otherProps } = props;
+                  return (
+                    <ArrowDropDownIcon 
+                      {...otherProps} 
+                      style={{ ...style, marginRight: '4px' }} 
+                    />
+                  );
+                }}
               >
                 <MenuItem value="all">All Statuses</MenuItem>
                 <MenuItem value="active">Active</MenuItem>
@@ -411,7 +421,7 @@ const OrganizationsList = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
+            <FormControl fullWidth sx={{ minWidth: 160 }}>
               <InputLabel>Tier</InputLabel>
               <Select
                 value={tierFilter}
@@ -420,6 +430,15 @@ const OrganizationsList = () => {
                   setPage(0);
                 }}
                 label="Tier"
+                IconComponent={(props) => {
+                  const { style, ...otherProps } = props;
+                  return (
+                    <ArrowDropDownIcon 
+                      {...otherProps} 
+                      style={{ ...style, marginRight: '4px' }} 
+                    />
+                  );
+                }}
               >
                 <MenuItem value="all">All Tiers</MenuItem>
                 <MenuItem value="trial">Trial</MenuItem>

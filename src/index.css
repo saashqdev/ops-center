@@ -91,3 +91,12 @@ body {
   align-items: flex-start !important;
   padding-top: 80px !important;
 }
+
+/* Add spacing between dropdown text and arrow icon */
+.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input {
+  padding-right: 56px !important;
+}
+
+.MuiSelect-icon.MuiSelect-iconOutlined {
+  right: 16px !important;
+}
