@@ -29,6 +29,17 @@ export default function FleetDashboard() {
   const [filterHealth, setFilterHealth] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedServer, setSelectedServer] = useState(null);
+  const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+  const [registerForm, setRegisterForm] = useState({
+    hostname: '',
+    ip_address: '',
+    port: '22',
+    username: 'root',
+    auth_method: 'key',
+    ssh_key: '',
+    password: '',
+    tags: ''
+  });
 
   const fetchFleetData = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) setRefreshing(true);
@@ -158,6 +169,54 @@ export default function FleetDashboard() {
     return date.toLocaleDateString();
   };
 
+  const handleRegisterServer = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        hostname: registerForm.hostname,
+        ip_address: registerForm.ip_address,
+        port: parseInt(registerForm.port),
+        ssh_username: registerForm.username,
+        auth_method: registerForm.auth_method,
+        tags: registerForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+      };
+
+      if (registerForm.auth_method === 'key') {
+        payload.ssh_key = registerForm.ssh_key;
+      } else {
+        payload.ssh_password = registerForm.password;
+      }
+
+      const response = await fetch('/api/v1/fleet/servers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to register server');
+      }
+
+      setShowRegisterDialog(false);
+      setRegisterForm({
+        hostname: '',
+        ip_address: '',
+        port: '22',
+        username: 'root',
+        auth_method: 'key',
+        ssh_key: '',
+        password: '',
+        tags: ''
+      });
+      fetchFleetData(true);
+    } catch (error) {
+      console.error('Failed to register server:', error);
+      alert('Failed to register server: ' + error.message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -187,7 +246,7 @@ export default function FleetDashboard() {
             <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700" onClick={() => setShowRegisterDialog(true)}>
             <PlusIcon className="w-4 h-4" />
             Register Server
           </button>
@@ -329,7 +388,8 @@ export default function FleetDashboard() {
               placeholder="Search servers..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
+              style={{ paddingLeft: '40px' }}
+              className="w-full pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -577,6 +637,129 @@ export default function FleetDashboard() {
             </div>
           </motion.div>
         </motion.div>
+      )}
+
+      {/* Register Server Dialog */}
+      {showRegisterDialog && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" onClick={() => setShowRegisterDialog(false)}>
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-black opacity-50"></div>
+            <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Register New Server</h2>
+              <form onSubmit={handleRegisterServer} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hostname *</label>
+                    <input
+                      type="text"
+                      required
+                      value={registerForm.hostname}
+                      onChange={(e) => setRegisterForm({...registerForm, hostname: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder="server-01"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IP Address *</label>
+                    <input
+                      type="text"
+                      required
+                      value={registerForm.ip_address}
+                      onChange={(e) => setRegisterForm({...registerForm, ip_address: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder="192.168.1.100"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SSH Port</label>
+                    <input
+                      type="number"
+                      value={registerForm.port}
+                      onChange={(e) => setRegisterForm({...registerForm, port: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SSH Username</label>
+                    <input
+                      type="text"
+                      value={registerForm.username}
+                      onChange={(e) => setRegisterForm({...registerForm, username: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Authentication Method</label>
+                  <select
+                    value={registerForm.auth_method}
+                    onChange={(e) => setRegisterForm({...registerForm, auth_method: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="key">SSH Key</option>
+                    <option value="password">Password</option>
+                  </select>
+                </div>
+
+                {registerForm.auth_method === 'key' ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SSH Private Key *</label>
+                    <textarea
+                      required
+                      value={registerForm.ssh_key}
+                      onChange={(e) => setRegisterForm({...registerForm, ssh_key: e.target.value})}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+                      placeholder="-----BEGIN RSA PRIVATE KEY-----&#10;..."
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SSH Password *</label>
+                    <input
+                      type="password"
+                      required
+                      value={registerForm.password}
+                      onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={registerForm.tags}
+                    onChange={(e) => setRegisterForm({...registerForm, tags: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="production, web-server, us-east"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterDialog(false)}
+                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    Register Server
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

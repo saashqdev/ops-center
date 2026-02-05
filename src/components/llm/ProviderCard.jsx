@@ -8,12 +8,17 @@ export default function ProviderCard({ provider, onEdit, onDelete, onTest }) {
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
-            <Typography variant="h6">{provider.name}</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h6" sx={{ wordBreak: 'break-word' }}>{provider.name}</Typography>
             <Typography variant="body2" color="text.secondary">{provider.type}</Typography>
           </Box>
-          <Chip label={provider.status} color={getStatusColor(provider.status)} size="small" />
+          <Chip 
+            label={provider.status} 
+            color={getStatusColor(provider.status)} 
+            size="small" 
+            sx={{ ml: 1, flexShrink: 0 }}
+          />
         </Box>
         <Typography variant="body2" color="text.secondary">
           Models: {typeof provider.models === 'number' ? provider.models : (provider.models?.length || 0)}
