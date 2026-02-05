@@ -396,8 +396,28 @@ class HardwareDetector:
             "igpu": self.get_igpu_info(),
             "memory": self.get_memory_info(),
             "storage": self.get_storage_info(),
+            "disk": self.get_disk_usage(),
             "os": self.get_os_info()
         }
+    
+    def get_disk_usage(self) -> Dict[str, Any]:
+        """Get disk usage statistics"""
+        try:
+            import psutil
+            disk = psutil.disk_usage('/')
+            return {
+                "total": disk.total,
+                "used": disk.used,
+                "free": disk.free,
+                "percentage": disk.percent
+            }
+        except Exception as e:
+            return {
+                "total": 0,
+                "used": 0,
+                "free": 0,
+                "percentage": 0
+            }
 
 # Global instance
 hardware_detector = HardwareDetector()
