@@ -320,39 +320,43 @@ export default function SubscriptionBilling() {
       </div>
 
       {/* Billing Cycle Info */}
-      {billingCycle && (
-        <motion.div variants={itemVariants} className={`${theme.card} rounded-xl p-6`}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <CalendarIcon className="w-5 h-5 text-purple-400" />
-                <p className={`text-sm ${theme.text.secondary}`}>Current Billing Period</p>
-              </div>
-              <p className={`text-lg font-semibold ${theme.text.primary}`}>
-                {formatDate(billingCycle.period_start)} - {formatDate(billingCycle.period_end)}
-              </p>
+      <motion.div variants={itemVariants} className={`${theme.card} rounded-xl p-6`}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <CalendarIcon className="w-5 h-5 text-purple-400" />
+              <p className={`text-sm ${theme.text.secondary}`}>Current Billing Period</p>
             </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <CreditCardIcon className="w-5 h-5 text-green-400" />
-                <p className={`text-sm ${theme.text.secondary}`}>Next Billing Date</p>
-              </div>
-              <p className={`text-lg font-semibold ${theme.text.primary}`}>
-                {formatDate(billingCycle.next_billing_date)}
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <DocumentArrowDownIcon className="w-5 h-5 text-blue-400" />
-                <p className={`text-sm ${theme.text.secondary}`}>Current Period Amount</p>
-              </div>
-              <p className={`text-lg font-semibold ${theme.text.primary}`}>
-                {formatCurrency(billingCycle.current_amount)}
-              </p>
-            </div>
+            <p className={`text-lg font-semibold ${theme.text.primary}`}>
+              {billingCycle && billingCycle.period_start && billingCycle.period_end
+                ? `${formatDate(billingCycle.period_start)} - ${formatDate(billingCycle.period_end)}`
+                : 'No active subscription'}
+            </p>
           </div>
-        </motion.div>
-      )}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <CreditCardIcon className="w-5 h-5 text-green-400" />
+              <p className={`text-sm ${theme.text.secondary}`}>Next Billing Date</p>
+            </div>
+            <p className={`text-lg font-semibold ${theme.text.primary}`}>
+              {billingCycle && billingCycle.next_billing_date
+                ? formatDate(billingCycle.next_billing_date)
+                : 'N/A'}
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <DocumentArrowDownIcon className="w-5 h-5 text-blue-400" />
+              <p className={`text-sm ${theme.text.secondary}`}>Current Period Amount</p>
+            </div>
+            <p className={`text-lg font-semibold ${theme.text.primary}`}>
+              {billingCycle && billingCycle.current_amount !== undefined
+                ? formatCurrency(billingCycle.current_amount)
+                : '$0.00'}
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
