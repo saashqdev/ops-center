@@ -100,3 +100,26 @@ body {
 .MuiSelect-icon.MuiSelect-iconOutlined {
   right: 16px !important;
 }
+
+/* Credit packages grid - force equal card widths using CSS Grid */
+.credit-packages-grid.MuiGrid-root {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  gap: 24px !important;
+}
+
+@media (min-width: 900px) {
+  .credit-packages-grid.MuiGrid-root {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+.credit-packages-grid.MuiGrid-root > .MuiGrid-item {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+.credit-packages-grid.MuiGrid-root .MuiCard-root {
+  width: 100% !important;
+  height: 500px !important;
+}

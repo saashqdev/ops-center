@@ -722,7 +722,7 @@ const DynamicPricingManagement = () => {
       <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         {creditPackages.map((pkg) => (
           <Box key={pkg.id} sx={{ flex: '0 1 calc(25% - 18px)', minWidth: '250px', maxWidth: 'calc(25% - 18px)' }}>
-            <Card sx={{ height: '100%', position: 'relative', pt: 5, display: 'flex', flexDirection: 'column' }}>
+            <Card sx={{ height: 550, position: 'relative', pt: 5, display: 'flex', flexDirection: 'column' }}>
               <Box
                 sx={{
                   position: 'absolute',

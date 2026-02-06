@@ -46,6 +46,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
 COPY backend/*.py ./
+COPY backend/routers ./routers
+COPY backend/middleware ./middleware
+COPY backend/atlas ./atlas
 COPY backend/models ./models
 COPY backend/database ./database
 COPY backend/services ./services

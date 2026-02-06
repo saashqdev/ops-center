@@ -1,0 +1,15 @@
+http:
+  routers:
+    billing-api:
+      rule: "Host(`billing-api.kubeworkz.io`)"
+      entryPoints:
+        - websecure
+      service: billing-api-service
+      tls:
+        certResolver: letsencrypt
+  
+  services:
+    billing-api-service:
+      loadBalancer:
+        servers:
+          - url: "http://172.19.0.7:3000"

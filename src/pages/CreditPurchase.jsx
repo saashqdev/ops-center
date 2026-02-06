@@ -239,19 +239,22 @@ const CreditPurchase = () => {
         Available Packages
       </Typography>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={3} className="credit-packages-grid" sx={{ mb: 4 }}>
         {packages.map((pkg) => {
           const isPurchasing = purchasing === pkg.package_code;
           const discount = pkg.discount_percentage;
 
           return (
-            <Grid item xs={12} sm={6} md={3} key={pkg.id}>
+            <Grid item xs={12} sm={6} md={4} key={pkg.id}>
               <Card
                 sx={{
-                  height: '100%',
+                  height: '500px',
+                  width: '100%',
+                  maxWidth: '100%',
                   display: 'flex',
                   flexDirection: 'column',
                   position: 'relative',
+                  overflow: 'visible',
                   '&:hover': {
                     boxShadow: 6,
                     transform: 'translateY(-4px)',
@@ -291,29 +294,34 @@ const CreditPurchase = () => {
                   />
                 )}
 
-                <CardContent sx={{ flexGrow: 1, pt: 5 }}>
-                  <Typography variant="h6" component="div" gutterBottom>
-                    {pkg.package_name}
-                  </Typography>
-
-                  <Typography variant="h4" component="div" sx={{ my: 2, fontWeight: 'bold' }}>
-                    {formatCurrency(pkg.price_usd)}
-                  </Typography>
-
-                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                <CardContent sx={{ pt: 5, pb: 2, flex: '1 0 auto', display: 'flex', flexDirection: 'column', height: '350px' }}>
+                  <Typography variant="h5" component="div" gutterBottom sx={{ minHeight: '40px', fontWeight: 'bold' }}>
                     {pkg.credits.toLocaleString()} credits
                   </Typography>
 
-                  {pkg.description && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                      {pkg.description}
-                    </Typography>
-                  )}
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    sx={{ 
+                      mt: 2,
+                      minHeight: '60px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical'
+                    }}
+                  >
+                    {pkg.description || '\u00A0'}
+                  </Typography>
 
-                  {/* Value calculation */}
-                  <Box sx={{ mt: 2, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
-                    <Typography variant="caption" display="block">
-                      ${(pkg.price_usd / pkg.credits * 1000).toFixed(2)} per 1,000 credits
+                  {/* Spacer */}
+                  <Box sx={{ flexGrow: 1 }} />
+
+                  {/* Price information */}
+                  <Box sx={{ mt: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+                    <Typography variant="body2" display="block" sx={{ fontWeight: 'bold' }}>
+                      {formatCurrency(pkg.price_usd)} per {pkg.credits.toLocaleString()} credits
                     </Typography>
                   </Box>
                 </CardContent>

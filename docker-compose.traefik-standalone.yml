@@ -11,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
       # Traefik dashboard (optional, comment out in production)
-      - "8080:8080"
+      - "8081:8080"
     environment:
       # Cloudflare DNS API credentials (for wildcard SSL certificates)
       - CF_API_EMAIL=${CF_API_EMAIL}

@@ -48,13 +48,21 @@ services:
       - KC_HOSTNAME_STRICT_HTTPS=false
       # Allow framing from our domain; tighten as needed
       - KC_HTTP_RESPONSE_HEADER__CONTENT_SECURITY_POLICY=frame-ancestors 'self' https://auth.${APP_DOMAIN:-kubeworkz.io} https://${APP_DOMAIN:-kubeworkz.io}
+      # Use external PostgreSQL database for persistence
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgresql:5432/keycloak
+      - KC_DB_USERNAME=unicorn
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD:-change-me}
     command: start-dev
     volumes:
       # Mount custom UC-1 Pro theme
-      - ./keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro      
+      - ./keycloak-theme/uc1-pro:/opt/keycloak/themes/uc1-pro:ro
+    depends_on:
+      - postgresql
     networks:
       - web
       - uchub-network
+      - unicorn-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=Host(`auth.${APP_DOMAIN:-kubeworkz.io}`)"
@@ -71,9 +79,6 @@ services:
       - "8084:8084"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./backend:/app
-      - ./public:/app/public
-      - ./dist:/app/dist
       # Mount host user/group files as read-only for Local Users feature
       - /etc/passwd:/host/etc/passwd:ro
       - /etc/group:/host/etc/group:ro
@@ -137,28 +142,28 @@ services:
       # Admin routes (highest priority for authenticated routes)
       - "traefik.http.routers.ops-center-admin.rule=Host(`${APP_DOMAIN:-localhost}`) && PathPrefix(`/admin`)"
       - "traefik.http.routers.ops-center-admin.priority=100"
-      - "traefik.http.routers.ops-center-admin.entrypoints=http,https"
+      - "traefik.http.routers.ops-center-admin.entrypoints=websecure"
       - "traefik.http.routers.ops-center-admin.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-admin.service=ops-center-svc"
 
       # API routes
       - "traefik.http.routers.ops-center-api-path.rule=Host(`${APP_DOMAIN:-localhost}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.ops-center-api-path.priority=90"
-      - "traefik.http.routers.ops-center-api-path.entrypoints=http,https"
+      - "traefik.http.routers.ops-center-api-path.entrypoints=websecure"
       - "traefik.http.routers.ops-center-api-path.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-api-path.service=ops-center-svc"
 
       # Auth routes
       - "traefik.http.routers.ops-center-auth.rule=Host(`${APP_DOMAIN:-localhost}`) && PathPrefix(`/auth`)"
       - "traefik.http.routers.ops-center-auth.priority=80"
-      - "traefik.http.routers.ops-center-auth.entrypoints=http,https"
+      - "traefik.http.routers.ops-center-auth.entrypoints=websecure"
       - "traefik.http.routers.ops-center-auth.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-auth.service=ops-center-svc"
 
       # Root route (lowest priority, catches landing page)
       - "traefik.http.routers.ops-center-root.rule=Host(`${APP_DOMAIN:-localhost}`)"
       - "traefik.http.routers.ops-center-root.priority=1"
-      - "traefik.http.routers.ops-center-root.entrypoints=http,https"
+      - "traefik.http.routers.ops-center-root.entrypoints=websecure"
       - "traefik.http.routers.ops-center-root.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-root.service=ops-center-svc"
 
@@ -170,7 +175,7 @@ services:
 
       # API subdomain HTTP route
       - "traefik.http.routers.ops-center-api-http.rule=Host(`api.${APP_DOMAIN:-localhost}`)"
-      - "traefik.http.routers.ops-center-api-http.entrypoints=http"
+      - "traefik.http.routers.ops-center-api-http.entrypoints=web"
       - "traefik.http.routers.ops-center-api-http.service=ops-center-svc"
       # Note: No redirect middleware - Cloudflare handles HTTP→HTTPS redirect
 
@@ -194,4 +199,5 @@ networks:
 
 volumes:
   redis-data:
+  keycloak-data:
   postgres-data:
