@@ -84,6 +84,8 @@ services:
       - /etc/group:/host/etc/group:ro
       # Avatar storage (November 2025 - CORS fix)
       - ./avatars:/app/avatars
+      # Mount Traefik directory for SSL management
+      - ./traefik:/traefik
     env_file:
       - .env.auth
     environment:
@@ -98,6 +100,8 @@ services:
       - KEYCLOAK_ADMIN_USER=admin
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-vz9cA8-kuX-oso3DC-w7}
       - SESSION_SECRET_KEY=${SESSION_SECRET_KEY:-generate-with-openssl-rand-hex-32}
+      # Traefik Configuration
+      - TRAEFIK_DIR=/traefik
       # Stripe Configuration
       - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}

@@ -290,7 +290,7 @@ const EdgeDeviceManagement = () => {
             <ComputerIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
             Edge Device Management
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" className="text-gray-300">
             Manage and monitor distributed edge computing devices
           </Typography>
         </Box>
@@ -392,6 +392,12 @@ const EdgeDeviceManagement = () => {
                   value={filters.status}
                   label="Status"
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                  sx={{ minWidth: 150 }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: { minWidth: 150 }
+                    }
+                  }}
                 >
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="online">Online</MenuItem>
@@ -408,6 +414,12 @@ const EdgeDeviceManagement = () => {
                   value={filters.device_type}
                   label="Device Type"
                   onChange={(e) => setFilters({ ...filters, device_type: e.target.value })}
+                  sx={{ minWidth: 150 }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: { minWidth: 150 }
+                    }
+                  }}
                 >
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="uc1-pro">UC-1 Pro</MenuItem>
