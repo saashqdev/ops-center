@@ -19,6 +19,10 @@ COPY vite.config.js ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
+# Build arguments for Vite environment variables
+ARG VITE_STRIPE_PUBLISHABLE_KEY
+ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
+
 # Build the React app (skip prebuild verification in Docker)
 RUN npm run build:skip-verify
 

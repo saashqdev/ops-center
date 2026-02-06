@@ -154,12 +154,26 @@ async def list_payment_methods(
         # Get user's email using helper
         user_email = get_user_email(user)
 
-        # Get Stripe customer ID from Lago
-        stripe_customer_id = await pm_manager.get_stripe_customer_id(user_email)
-        if not stripe_customer_id:
+        # Try to get or create Stripe customer directly
+        # First, try to find existing customer by email
+        import stripe
+        try:
+            customers = stripe.Customer.list(email=user_email, limit=1)
+            if customers.data:
+                stripe_customer_id = customers.data[0].id
+            else:
+                # Create new Stripe customer
+                customer = stripe.Customer.create(
+                    email=user_email,
+                    metadata={"created_via": "ops-center-payment-methods"}
+                )
+                stripe_customer_id = customer.id
+                logger.info(f"Created new Stripe customer {stripe_customer_id} for {user_email}")
+        except Exception as stripe_err:
+            logger.error(f"Error with Stripe customer lookup/creation: {stripe_err}")
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in Lago billing system. Please create an account in Lago."
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to access payment system: {str(stripe_err)}"
             )
 
         # Fetch payment methods from Stripe
@@ -205,19 +219,27 @@ async def create_setup_intent(
     """
     try:
         # Get user's email
-        user_email = user.get("email")
-        if not user_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User email not found"
-            )
+        user_email = get_user_email(user)
 
-        # Get Stripe customer ID from Lago
-        stripe_customer_id = await pm_manager.get_stripe_customer_id(user_email)
-        if not stripe_customer_id:
+        # Try to get or create Stripe customer directly
+        import stripe
+        try:
+            customers = stripe.Customer.list(email=user_email, limit=1)
+            if customers.data:
+                stripe_customer_id = customers.data[0].id
+            else:
+                # Create new Stripe customer
+                customer = stripe.Customer.create(
+                    email=user_email,
+                    metadata={"created_via": "ops-center-payment-methods"}
+                )
+                stripe_customer_id = customer.id
+                logger.info(f"Created new Stripe customer {stripe_customer_id} for {user_email}")
+        except Exception as stripe_err:
+            logger.error(f"Error with Stripe customer lookup/creation: {stripe_err}")
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Customer not found in Lago billing system. Please create an account in Lago."
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to access payment system: {str(stripe_err)}"
             )
 
         # Create SetupIntent
