@@ -122,7 +122,7 @@ async def verify_org_access(request: Request, org_id: str, required_role: Option
     Args:
         request: FastAPI request object
         org_id: Organization ID to check access for
-        required_role: Optional role requirement (owner, billing_admin, member)
+        required_role: Optional role requirement (owner, admin, member)
 
     Raises:
         HTTPException: If user lacks access
@@ -134,16 +134,27 @@ async def verify_org_access(request: Request, org_id: str, required_role: Option
     if user.get("is_admin") or user.get("role") == "admin":
         return
 
-    # Check if user is member of organization
-    user_role = org_manager.get_user_role_in_org(org_id, user_id)
+    # Check if user is member of organization (database check)
+    from database.connection import get_db_pool
+    pool = await get_db_pool()
+    
+    async with pool.acquire() as conn:
+        user_role = await conn.fetchval(
+            "SELECT role FROM organization_members WHERE organization_id = $1 AND user_id = $2",
+            org_id, user_id
+        )
+    
     if not user_role:
         raise HTTPException(status_code=403, detail="You are not a member of this organization")
 
+    # Convert database role (uppercase) to lowercase for comparison
+    user_role = user_role.lower()
+
     # Check required role if specified
     if required_role:
-        role_hierarchy = ["member", "billing_admin", "owner"]
-        user_role_level = role_hierarchy.index(user_role) if user_role in role_hierarchy else -1
-        required_role_level = role_hierarchy.index(required_role) if required_role in role_hierarchy else 99
+        role_hierarchy = {"member": 1, "admin": 2, "owner": 3}
+        user_role_level = role_hierarchy.get(user_role, 0)
+        required_role_level = role_hierarchy.get(required_role.lower(), 99)
 
         if user_role_level < required_role_level:
             raise HTTPException(
@@ -594,64 +605,81 @@ async def list_organization_members(
     # Verify user has access to this organization
     await verify_org_access(request, org_id)
 
-    # Get organization to verify it exists
-    org = org_manager.get_org(org_id)
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
+    # Get database connection
+    from database.connection import get_db_pool
+    pool = await get_db_pool()
 
-    # Get all members
-    members = org_manager.get_org_users(org_id)
+    async with pool.acquire() as conn:
+        # Verify organization exists
+        org_exists = await conn.fetchval(
+            "SELECT EXISTS(SELECT 1 FROM organizations WHERE id = $1)",
+            org_id
+        )
+        
+        if not org_exists:
+            raise HTTPException(status_code=404, detail="Organization not found")
+
+        # Get all members from database
+        rows = await conn.fetch(
+            """
+            SELECT user_id, role, joined_at
+            FROM organization_members
+            WHERE organization_id = $1
+            ORDER BY joined_at DESC
+            """,
+            org_id
+        )
 
     # Enrich members with Keycloak user data
     enriched_members = []
-    for member in members:
+    for row in rows:
         try:
             # Fetch user details from Keycloak
-            user_data = await get_user_by_id(member.user_id)
+            user_data = await get_user_by_id(row['user_id'])
 
             if user_data:
                 enriched_member = {
-                    "id": member.user_id,
-                    "user_id": member.user_id,
+                    "id": row['user_id'],
+                    "user_id": row['user_id'],
                     "email": user_data.get("email", ""),
                     "username": user_data.get("username", ""),
                     "firstName": user_data.get("firstName", ""),
                     "lastName": user_data.get("lastName", ""),
-                    "org_role": member.role,
+                    "org_role": row['role'].lower(),
                     "enabled": user_data.get("enabled", False),
                     "emailVerified": user_data.get("emailVerified", False),
-                    "createdAt": member.joined_at.isoformat() if member.joined_at else None
+                    "createdAt": row['joined_at'].isoformat() if row['joined_at'] else None
                 }
                 enriched_members.append(enriched_member)
             else:
                 # Fallback if Keycloak lookup fails
-                logger.warning(f"Could not fetch Keycloak data for user {member.user_id}")
+                logger.warning(f"Could not fetch Keycloak data for user {row['user_id']}")
                 enriched_members.append({
-                    "id": member.user_id,
-                    "user_id": member.user_id,
-                    "email": member.user_id,  # Fallback to user_id
-                    "username": member.user_id,
+                    "id": row['user_id'],
+                    "user_id": row['user_id'],
+                    "email": row['user_id'],  # Fallback to user_id
+                    "username": row['user_id'],
                     "firstName": "",
                     "lastName": "",
-                    "org_role": member.role,
+                    "org_role": row['role'].lower(),
                     "enabled": True,
                     "emailVerified": False,
-                    "createdAt": member.joined_at.isoformat() if member.joined_at else None
+                    "createdAt": row['joined_at'].isoformat() if row['joined_at'] else None
                 })
         except Exception as e:
-            logger.error(f"Error enriching member {member.user_id}: {e}")
+            logger.error(f"Error enriching member {row['user_id']}: {e}")
             # Include basic data even if enrichment fails
             enriched_members.append({
-                "id": member.user_id,
-                "user_id": member.user_id,
-                "email": member.user_id,
-                "username": member.user_id,
+                "id": row['user_id'],
+                "user_id": row['user_id'],
+                "email": row['user_id'],
+                "username": row['user_id'],
                 "firstName": "",
                 "lastName": "",
-                "org_role": member.role,
+                "org_role": row['role'].lower(),
                 "enabled": True,
                 "emailVerified": False,
-                "createdAt": member.joined_at.isoformat() if member.joined_at else None
+                "createdAt": row['joined_at'].isoformat() if row['joined_at'] else None
             })
 
     # Apply search filter if provided
@@ -713,13 +741,15 @@ async def add_organization_member(
     try:
         # Determine user_id - either provided directly or use email
         user_id = member_data.user_id or member_data.email
+        existing_user = None  # Track if user already existed
         
         if not user_id:
             raise HTTPException(status_code=400, detail="Either user_id or email must be provided")
 
         # If email provided (new invitation), create user in Keycloak if they don't exist
         if member_data.email and not member_data.user_id:
-            from keycloak_integration import get_user_by_email, create_user
+            from keycloak_integration import get_user_by_email, create_user, set_user_password
+            import secrets
             
             # Check if user exists
             existing_user = await get_user_by_email(member_data.email)
@@ -740,22 +770,27 @@ async def add_organization_member(
                 if not user_id:
                     raise HTTPException(status_code=500, detail="Failed to create user in Keycloak")
                 
+                # Set a temporary random password that user must change on first login
+                temp_password = secrets.token_urlsafe(16)
+                await set_user_password(user_id, temp_password, temporary=True)
+                
                 logger.info(f"Created new user in Keycloak: {member_data.email} with ID {user_id}")
-                # TODO: Send email invitation with password reset link
 
         # Get database connection
         from database.connection import get_db_pool
         pool = await get_db_pool()
 
-        # Check if organization exists in database
+        # Check if organization exists in database and get its name
         async with pool.acquire() as conn:
-            org_exists = await conn.fetchval(
-                "SELECT EXISTS(SELECT 1 FROM organizations WHERE id = $1)",
+            org_row = await conn.fetchrow(
+                "SELECT id, name FROM organizations WHERE id = $1",
                 org_id
             )
             
-            if not org_exists:
+            if not org_row:
                 raise HTTPException(status_code=404, detail="Organization not found")
+            
+            org_name = org_row['name']
 
             # Check if user is already a member
             existing_member = await conn.fetchval(
@@ -778,6 +813,42 @@ async def add_organization_member(
             )
 
         logger.info(f"Added user {user_id} to org {org_id} with role {member_data.role}")
+
+        # Send invitation email
+        try:
+            from email_service import email_service
+            
+            # Get current user info for "invited by" name
+            current_user_info = getattr(request.state, 'user_info', {})
+            inviter_name = current_user_info.get("name") or current_user_info.get("email", "Team Admin")
+            
+            # Determine if this is a new user (we created them)
+            is_new_user = member_data.email and not member_data.user_id and not existing_user
+            
+            # Generate login/setup URL
+            app_url = os.getenv("APP_URL", "https://kubeworkz.io")
+            keycloak_url = os.getenv("KEYCLOAK_URL", "https://auth.kubeworkz.io")
+            
+            # For new users, they need to login and will be prompted to change password
+            # because we set temporary=True on their password
+            # Just send them to the regular login page
+            if is_new_user:
+                reset_password_url = f"{app_url}/auth/login?email={member_data.email}"
+            else:
+                reset_password_url = f"{app_url}/auth/login"
+            
+            await email_service.send_organization_invitation(
+                to=member_data.email,
+                organization_name=org_name,
+                inviter_name=inviter_name,
+                role=member_data.role,
+                is_new_user=is_new_user,
+                reset_password_url=reset_password_url
+            )
+            logger.info(f"Sent invitation email to {member_data.email}")
+        except Exception as e:
+            logger.error(f"Failed to send invitation email to {member_data.email}: {e}")
+            # Don't fail the whole operation if email fails
 
         return {
             "success": True,
@@ -936,50 +1007,68 @@ async def get_organization_stats(org_id: str, request: Request):
     # Verify user has access to this organization
     await verify_org_access(request, org_id)
 
-    # Get organization
-    org = org_manager.get_org(org_id)
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
+    # Get database connection
+    from database.connection import get_db_pool
+    pool = await get_db_pool()
 
-    # Get members
-    members = org_manager.get_org_users(org_id)
+    async with pool.acquire() as conn:
+        # Get organization from database
+        org_row = await conn.fetchrow(
+            "SELECT * FROM organizations WHERE id = $1",
+            org_id
+        )
+        
+        if not org_row:
+            raise HTTPException(status_code=404, detail="Organization not found")
+
+        # Get members from database
+        member_rows = await conn.fetch(
+            "SELECT user_id, role FROM organization_members WHERE organization_id = $1",
+            org_id
+        )
 
     # Count members by role
     members_by_role = {}
     active_members = 0
     admins = 0
 
-    for member in members:
-        members_by_role[member.role] = members_by_role.get(member.role, 0) + 1
+    for member in member_rows:
+        role = member['role'].lower()
+        members_by_role[role] = members_by_role.get(role, 0) + 1
 
         # Count admins and owners
-        if member.role in ["owner", "admin"]:
+        if role in ["owner", "admin"]:
             admins += 1
 
         # Check if user is enabled in Keycloak
         try:
-            user_data = await get_user_by_id(member.user_id)
-            if user_data and user_data.get("enabled", False):
+            user_data = await get_user_by_id(member['user_id'])
+            if user_data:
+                # User found, check enabled status
+                if user_data.get("enabled", True):
+                    active_members += 1
+            else:
+                # User not found in Keycloak, assume active
                 active_members += 1
         except Exception as e:
-            logger.warning(f"Could not check user status for {member.user_id}: {e}")
+            logger.warning(f"Could not check user status for {member['user_id']}: {e}")
             # Assume active if we can't check
             active_members += 1
 
     stats = {
         # Frontend expected fields
-        "totalMembers": len(members),
+        "totalMembers": len(member_rows),
         "activeMembers": active_members,
         "admins": admins,
         "pendingInvites": 0,  # TODO: Implement invitation system
 
         # Additional legacy fields
-        "total_members": len(members),
+        "total_members": len(member_rows),
         "members_by_role": members_by_role,
-        "created_at": org.created_at.isoformat(),
-        "plan_tier": org.plan_tier,
-        "status": org.status,
-        "organization_name": org.name
+        "created_at": org_row['created_at'].isoformat(),
+        "plan_tier": org_row.get('plan_tier', 'starter'),
+        "status": org_row.get('status', 'active'),
+        "organization_name": org_row['name']
     }
 
     logger.info(f"Retrieved stats for org {org_id}: {stats['totalMembers']} total, {stats['activeMembers']} active, {stats['admins']} admins")

@@ -67,7 +67,15 @@ class EmailService:
             success = True
         else:
             try:
-                if self.provider == "console":
+                # First, try to get active provider from database
+                db_provider = await self._get_active_db_provider()
+                
+                if db_provider and db_provider['provider_type'] == 'postmark':
+                    success = await self._send_via_postmark(
+                        to, subject, html_content, text_content,
+                        db_provider['api_key'], db_provider['smtp_from']
+                    )
+                elif self.provider == "console":
                     # Console logger for development
                     logger.info(f"[EMAIL] To: {to}")
                     logger.info(f"[EMAIL] Subject: {subject}")
@@ -127,6 +135,67 @@ class EmailService:
                 logger.debug(f"Logged email to {to_email}: success={success}")
         except Exception as e:
             logger.error(f"Error logging email: {e}")
+
+    async def _get_active_db_provider(self) -> Optional[Dict[str, Any]]:
+        """Get active email provider from database"""
+        try:
+            pool = await get_db_pool()
+            async with pool.acquire() as conn:
+                row = await conn.fetchrow("""
+                    SELECT * FROM email_providers 
+                    WHERE enabled = true 
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """)
+                if row:
+                    return dict(row)
+                return None
+        except Exception as e:
+            logger.error(f"Error fetching active email provider: {e}")
+            return None
+
+    async def _send_via_postmark(
+        self, to: str, subject: str, html_content: str, 
+        text_content: Optional[str], api_key: str, from_email: str
+    ) -> bool:
+        """Send email via Postmark API"""
+        if not api_key:
+            logger.error("Postmark API key not configured")
+            return False
+
+        url = "https://api.postmarkapp.com/email"
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Postmark-Server-Token": api_key
+        }
+
+        payload = {
+            "From": from_email,
+            "To": to,
+            "Subject": subject,
+            "HtmlBody": html_content,
+            "MessageStream": "outbound"
+        }
+
+        if text_content:
+            payload["TextBody"] = text_content
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payload, headers=headers, timeout=10.0)
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    message_id = result.get("MessageID")
+                    logger.info(f"Email sent successfully via Postmark to {to} (MessageID: {message_id})")
+                    return True
+                else:
+                    logger.error(f"Postmark API error ({response.status_code}): {response.text}")
+                    return False
+        except Exception as e:
+            logger.error(f"Postmark send error: {type(e).__name__}: {e}")
+            return False
 
     async def send_email_old(
         self,
@@ -1064,6 +1133,87 @@ class EmailService:
         return await self.send_email(
             to, subject, html_content,
             metadata={"type": "subscription_suspended", "amount_due": amount_due}
+        )
+
+    async def send_organization_invitation(
+        self,
+        to: str,
+        organization_name: str,
+        inviter_name: str,
+        role: str,
+        is_new_user: bool = False,
+        reset_password_url: Optional[str] = None
+    ) -> bool:
+        """
+        Send organization invitation email
+
+        Args:
+            to: Recipient email address
+            organization_name: Name of the organization they're invited to
+            inviter_name: Name of person who sent the invitation
+            role: Role in the organization (admin, member, etc.)
+            is_new_user: Whether this is a new user account
+            reset_password_url: URL for password reset (for new users)
+
+        Returns:
+            True if sent successfully
+        """
+        subject = f"You've been invited to join {organization_name}"
+
+        # Determine login URL based on environment
+        login_url = os.getenv("APP_URL", "https://kubeworkz.io") + "/auth/login"
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0; font-size: 28px;">Team Invitation</h1>
+            </div>
+
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+                <p style="font-size: 16px;">Hello,</p>
+
+                <p style="font-size: 16px;">
+                    <strong>{inviter_name}</strong> has invited you to join <strong>{organization_name}</strong> on Ops Center.
+                </p>
+
+                <div style="background: white; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #666;">
+                        <strong>Your Role:</strong> {role.title()}
+                    </p>
+                </div>
+
+                {"<p style='font-size: 16px;'>An account has been created for you. When you login for the first time, you'll be prompted to create your password.</p>" if is_new_user else "<p style='font-size: 16px;'>You can now access this organization using your existing account.</p>"}
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{reset_password_url if is_new_user and reset_password_url else login_url}" 
+                       style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                              color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; 
+                              font-weight: bold; font-size: 16px;">
+                        {"Get Started" if is_new_user else "Login to Ops Center"}
+                    </a>
+                </div>
+
+                <p style="color: #666; font-size: 14px;">
+                    If you have any questions or didn't expect this invitation, please contact {inviter_name} or our support team.
+                </p>
+
+                <p style="color: #999; font-size: 14px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+                    Need help? Contact us: <a href="mailto:support@kubeworkz.io">support@kubeworkz.io</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return await self.send_email(
+            to, subject, html_content,
+            metadata={"type": "organization_invitation", "organization": organization_name, "role": role}
         )
 
 

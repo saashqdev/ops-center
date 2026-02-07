@@ -129,6 +129,9 @@ services:
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-IbK1FMAifmKLomWWd4qRNdfg8P6ZOJFhdMwuHXtjFoc=}
       # BYOK Encryption Key (for user API keys)
       - BYOK_ENCRYPTION_KEY=${BYOK_ENCRYPTION_KEY:-979uZTWNhpbrBcruHNRkply7Bh9oPXXYBvo0OJVd9vQ=}
+      # Email Service Configuration
+      - EMAIL_ENABLED=${EMAIL_ENABLED:-false}
+      - APP_URL=https://${APP_DOMAIN:-kubeworkz.io}
     depends_on:
       postgresql:
         condition: service_healthy

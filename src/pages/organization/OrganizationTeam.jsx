@@ -41,7 +41,8 @@ export default function OrganizationTeam() {
   // Fallback: Get org from URL if context doesn't have it
   const urlParams = new URLSearchParams(window.location.search);
   const orgIdFromUrl = urlParams.get('org');
-  const [orgId, setOrgId] = useState(currentOrg?.id || orgIdFromUrl);
+  const effectiveOrgId = currentOrg?.id || orgIdFromUrl;
+  const [orgData, setOrgData] = useState(currentOrg || null);
   
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,18 +88,45 @@ export default function OrganizationTeam() {
       return;
     }
 
+    // Use currentOrg from context or fetch by URL parameter
     if (currentOrg) {
-      console.log('[OrganizationTeam] Loading members for org:', currentOrg.id);
+      setOrgData(currentOrg);
+    } else if (effectiveOrgId) {
+      // Fetch org data from URL parameter (for admins viewing orgs they're not members of)
+      console.log('[OrganizationTeam] Fetching org data for:', effectiveOrgId);
+      fetchOrgData(effectiveOrgId);
+    }
+  }, [currentOrg, orgLoading, effectiveOrgId]);
+
+  useEffect(() => {
+    // Fetch members when orgData or pagination changes
+    if (orgData || effectiveOrgId) {
+      console.log('[OrganizationTeam] Loading members for org:', orgData?.id || effectiveOrgId);
       fetchMembers();
       fetchStats();
     } else {
-      console.log('[OrganizationTeam] No current organization set');
+      console.log('[OrganizationTeam] No organization available');
       setLoading(false);
     }
-  }, [currentOrg, orgLoading, page, rowsPerPage, searchQuery]);
+  }, [orgData, effectiveOrgId, page, rowsPerPage, searchQuery]);
+
+  const fetchOrgData = async (orgId) => {
+    try {
+      const response = await fetch(`/api/v1/org/${orgId}`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setOrgData(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch org data:', error);
+    }
+  };
 
   const fetchMembers = async () => {
-    if (!currentOrg) return;
+    const orgId = orgData?.id || effectiveOrgId;
+    if (!orgId) return;
 
     setLoading(true);
     try {
@@ -109,7 +137,7 @@ export default function OrganizationTeam() {
         search: searchQuery
       });
 
-      const response = await fetch(`/api/v1/org/${currentOrg.id}/members?${params}`, {
+      const response = await fetch(`/api/v1/org/${orgId}/members?${params}`, {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch team members');
@@ -125,10 +153,11 @@ export default function OrganizationTeam() {
   };
 
   const fetchStats = async () => {
-    if (!currentOrg) return;
+    const orgId = orgData?.id || effectiveOrgId;
+    if (!orgId) return;
 
     try {
-      const response = await fetch(`/api/v1/org/${currentOrg.id}/stats`, {
+      const response = await fetch(`/api/v1/org/${orgId}/stats`, {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -159,19 +188,12 @@ export default function OrganizationTeam() {
   };
 
   const handleInviteMember = async () => {
-    alert('handleInviteMember called!');
-    console.log('[OrganizationTeam] Function called');
-    
     const effectiveOrgId = currentOrg?.id || orgId;
     
     if (!effectiveOrgId) {
-      alert('No current org! orgId=' + orgId + ', currentOrg=' + JSON.stringify(currentOrg));
-      console.log('[OrganizationTeam] No current org, returning');
+      showToast('No organization selected', 'error');
       return;
     }
-
-    console.log('[OrganizationTeam] Inviting member:', inviteData);
-    console.log('[OrganizationTeam] Using org ID:', effectiveOrgId);
 
     try {
       const response = await fetch(`/api/v1/org/${effectiveOrgId}/members`, {
@@ -181,16 +203,13 @@ export default function OrganizationTeam() {
         body: JSON.stringify(inviteData)
       });
 
-      console.log('[OrganizationTeam] Response status:', response.status);
-
       if (!response.ok) {
         const error = await response.json();
-        console.error('[OrganizationTeam] Error response:', error);
-        throw new Error(error.message || 'Failed to invite member');
+        // Use detail from backend error response
+        throw new Error(error.detail || error.message || 'Failed to invite member');
       }
 
       const result = await response.json();
-      console.log('[OrganizationTeam] Success:', result);
 
       showToast('Invitation sent successfully');
       setInviteModalOpen(false);
@@ -198,16 +217,16 @@ export default function OrganizationTeam() {
       fetchMembers();
       fetchStats();
     } catch (error) {
-      console.error('[OrganizationTeam] Error inviting member:', error);
       showToast(error.message, 'error');
     }
   };
 
   const handleUpdateRole = async (memberId, newRole) => {
-    if (!currentOrg) return;
+    const orgId = orgData?.id || effectiveOrgId;
+    if (!orgId) return;
 
     try {
-      const response = await fetch(`/api/v1/org/${currentOrg.id}/members/${memberId}/role`, {
+      const response = await fetch(`/api/v1/org/${orgId}/members/${memberId}/role`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -225,10 +244,11 @@ export default function OrganizationTeam() {
   };
 
   const handleRemoveMember = async () => {
-    if (!currentOrg || !selectedMember) return;
+    const orgId = orgData?.id || effectiveOrgId;
+    if (!orgId || !selectedMember) return;
 
     try {
-      const response = await fetch(`/api/v1/org/${currentOrg.id}/members/${selectedMember.id}`, {
+      const response = await fetch(`/api/v1/org/${orgId}/members/${selectedMember.id}`, {
         method: 'DELETE',
         credentials: 'include'
       });
