@@ -5602,6 +5602,7 @@ async def oauth_callback(request: Request, code: str, state: str = None):
                 if user_response.status_code == 200:
                     user_info = user_response.json()
                     print(f"User info retrieved: {user_info.get('username', 'unknown')}")
+                    print(f"DEBUG: Full user_info = {user_info}")
 
                     # Map Keycloak/Authentik role to ops-center role
                     user_info = add_role_to_user_info(user_info)

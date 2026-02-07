@@ -32,7 +32,10 @@ ROLE_MAPPINGS = {
         "power_user",       # Keycloak role
         "powerusers",       # Alternative spelling
         "ops-center-poweruser",  # Application-specific group
-        "uc1-power-users"   # UC-1 Pro power user group
+        "uc1-power-users",  # UC-1 Pro power user group
+        "developer",        # Developer role from Keycloak
+        "developers",       # Developer group from Keycloak
+        "org-admin"         # Organization admin - needs power user platform access
     ],
     "user": [
         "users",            # Keycloak group
@@ -67,6 +70,14 @@ def extract_groups_from_user_info(user_info: Dict) -> List[str]:
         List of group names (normalized to lowercase)
     """
     groups = []
+
+    # Check for top-level 'roles' claim (Keycloak userinfo endpoint)
+    if "roles" in user_info:
+        raw_roles = user_info["roles"]
+        if isinstance(raw_roles, list):
+            for role in raw_roles:
+                if isinstance(role, str):
+                    groups.append(role.lower())
 
     # Check for standard 'groups' claim
     if "groups" in user_info:
@@ -142,7 +153,11 @@ def map_keycloak_role(user_info: Dict) -> str:
     user_groups = extract_groups_from_user_info(user_info)
 
     logger.info(f"Mapping role for user '{username}'")
-    logger.debug(f"User groups/roles found: {user_groups}")
+    logger.info(f"DEBUG: User groups/roles found: {user_groups}")
+    logger.info(f"DEBUG: Raw user_info keys: {list(user_info.keys())}")
+    logger.info(f"DEBUG: user_info['groups'] = {user_info.get('groups', 'NOT PRESENT')}")
+    logger.info(f"DEBUG: user_info['realm_access'] = {user_info.get('realm_access', 'NOT PRESENT')}")
+    logger.info(f"DEBUG: user_info['resource_access'] = {user_info.get('resource_access', 'NOT PRESENT')}")
 
     # If user_info already has a 'role' field from previous mapping, log it
     if "role" in user_info:

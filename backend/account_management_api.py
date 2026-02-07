@@ -457,25 +457,78 @@ async def get_user_profile(
         if not user_data:
             raise HTTPException(status_code=404, detail="User not found")
 
-        # Construct profile
+        # Construct profile with defaults for all fields and nested objects
+        first_name = user_data.get("firstName", "")
+        last_name = user_data.get("lastName", "")
+        full_name = f"{first_name} {last_name}".strip() if first_name or last_name else user_data.get("username", "")
+        
+        # Get attributes safely
+        attrs = user_data.get("attributes", {})
+        subscription_tier = attrs.get("subscription_tier", ["trial"])[0] if attrs.get("subscription_tier") else "trial"
+        subscription_status = attrs.get("subscription_status", ["active"])[0] if attrs.get("subscription_status") else "active"
+        api_calls_limit = attrs.get("api_calls_limit", ["100"])[0] if attrs.get("api_calls_limit") else "100"
+        api_calls_used = attrs.get("api_calls_used", ["0"])[0] if attrs.get("api_calls_used") else "0"
+        
+        # Convert timestamp to ISO format
+        created_timestamp = user_data.get("createdTimestamp")
+        created_at_iso = None
+        if created_timestamp:
+            from datetime import datetime
+            created_at_iso = datetime.fromtimestamp(created_timestamp / 1000).isoformat()
+        
+        # Get user sessions (stub for now - would need Keycloak session query)
+        # For now, return empty sessions to prevent frontend errors
+        sessions_data = {
+            "active_count": 0,
+            "sessions": []
+        }
+        
         profile = {
             "user_id": user_id,
-            "email": user_data.get("email"),
-            "username": user_data.get("username"),
-            "first_name": user_data.get("firstName"),
-            "last_name": user_data.get("lastName"),
+            "email": user_data.get("email", ""),
+            "username": user_data.get("username", ""),
+            "first_name": first_name,
+            "last_name": last_name,
+            "full_name": full_name,
             "email_verified": user_data.get("emailVerified", False),
             "enabled": user_data.get("enabled", True),
-            "created_timestamp": user_data.get("createdTimestamp"),
-            "attributes": user_data.get("attributes", {}),
-            "subscription_tier": user_data.get("attributes", {}).get("subscription_tier", ["trial"])[0],
-            "subscription_status": user_data.get("attributes", {}).get("subscription_status", ["active"])[0],
-            "api_calls_limit": user_data.get("attributes", {}).get("api_calls_limit", ["100"])[0],
-            "api_calls_used": user_data.get("attributes", {}).get("api_calls_used", ["0"])[0],
+            "created_timestamp": created_timestamp,
+            "created_at": created_timestamp,
+            "created_at_iso": created_at_iso,
+            "attributes": attrs,
+            # Nested subscription object
+            "subscription": {
+                "tier": subscription_tier,
+                "status": subscription_status
+            },
+            # Nested api_usage object
+            "api_usage": {
+                "calls_used": int(api_calls_used),
+                "calls_limit": int(api_calls_limit),
+                "usage_percentage": round((int(api_calls_used) / int(api_calls_limit)) * 100) if int(api_calls_limit) > 0 else 0,
+                "rate_limits": {
+                    "per_minute": 60,
+                    "per_day": 10000
+                }
+            },
+            # Sessions object
+            "sessions": sessions_data,
+            # Activity object
+            "activity": {
+                "recent_actions": [],
+                "total_actions": 0,
+                "timeline": []
+            },
+            # Roles array
+            "roles": [],
+            # Role details array
+            "role_details": [],
+            # Organizations array
+            "organizations": []
         }
 
         logger.info(f"Admin {admin.get('email')} retrieved profile for user {user_id}")
-        return profile
+        return {"profile": profile}
 
     except HTTPException:
         raise

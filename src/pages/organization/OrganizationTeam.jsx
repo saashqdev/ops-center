@@ -37,6 +37,12 @@ const itemVariants = {
 export default function OrganizationTeam() {
   const { theme, currentTheme } = useTheme();
   const { currentOrg, loading: orgLoading } = useOrganization();
+  
+  // Fallback: Get org from URL if context doesn't have it
+  const urlParams = new URLSearchParams(window.location.search);
+  const orgIdFromUrl = urlParams.get('org');
+  const [orgId, setOrgId] = useState(currentOrg?.id || orgIdFromUrl);
+  
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -153,20 +159,38 @@ export default function OrganizationTeam() {
   };
 
   const handleInviteMember = async () => {
-    if (!currentOrg) return;
+    alert('handleInviteMember called!');
+    console.log('[OrganizationTeam] Function called');
+    
+    const effectiveOrgId = currentOrg?.id || orgId;
+    
+    if (!effectiveOrgId) {
+      alert('No current org! orgId=' + orgId + ', currentOrg=' + JSON.stringify(currentOrg));
+      console.log('[OrganizationTeam] No current org, returning');
+      return;
+    }
+
+    console.log('[OrganizationTeam] Inviting member:', inviteData);
+    console.log('[OrganizationTeam] Using org ID:', effectiveOrgId);
 
     try {
-      const response = await fetch(`/api/v1/org/${currentOrg.id}/members`, {
+      const response = await fetch(`/api/v1/org/${effectiveOrgId}/members`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(inviteData)
       });
 
+      console.log('[OrganizationTeam] Response status:', response.status);
+
       if (!response.ok) {
         const error = await response.json();
+        console.error('[OrganizationTeam] Error response:', error);
         throw new Error(error.message || 'Failed to invite member');
       }
+
+      const result = await response.json();
+      console.log('[OrganizationTeam] Success:', result);
 
       showToast('Invitation sent successfully');
       setInviteModalOpen(false);
@@ -174,6 +198,7 @@ export default function OrganizationTeam() {
       fetchMembers();
       fetchStats();
     } catch (error) {
+      console.error('[OrganizationTeam] Error inviting member:', error);
       showToast(error.message, 'error');
     }
   };

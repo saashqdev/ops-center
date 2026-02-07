@@ -32,7 +32,10 @@ router = APIRouter(prefix="/api/v1/org", tags=["organizations"])
 
 class OrganizationMemberAdd(BaseModel):
     """Request model for adding a member to organization"""
-    user_id: str
+    user_id: Optional[str] = None  # Optional for backwards compatibility
+    email: Optional[str] = None    # For new invitations
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
     role: str = "member"
 
 
@@ -220,7 +223,9 @@ async def list_all_organizations(
     search: Optional[str] = None
 ):
     """
-    Get list of all organizations (admin only)
+    Get list of organizations
+    - Admins: See all organizations
+    - Regular users: See only organizations they are members of
 
     Args:
         request: FastAPI request object
@@ -255,8 +260,10 @@ async def list_all_organizations(
             "offset": 0
         }
     """
-    # Require admin access
-    await require_admin(request)
+    # Get current user
+    user = await get_current_user(request)
+    user_id = user.get("user_id") or user.get("sub") or user.get("id")
+    is_admin = user.get("role") == "admin"
 
     try:
         # Query database directly for accurate data
@@ -266,6 +273,12 @@ async def list_all_organizations(
         conditions = []
         params = []
         param_idx = 1
+
+        # For non-admin users, only show organizations they're members of
+        if not is_admin:
+            conditions.append(f"EXISTS (SELECT 1 FROM organization_members om WHERE om.organization_id = o.id AND om.user_id = ${param_idx})")
+            params.append(user_id)
+            param_idx += 1
 
         if status:
             if status == "active":
@@ -675,51 +688,109 @@ async def add_organization_member(
     request: Request
 ):
     """
-    Add a new member to the organization
+    Add a new member to the organization or invite a new user
 
     Args:
         org_id: Organization ID
-        member_data: User ID and role to assign
+        member_data: User info (user_id for existing user, or email/firstName/lastName for invitation)
 
     Returns:
         Success confirmation
 
     Example:
         POST /api/v1/org/org_12345/members
-        Body: {"user_id": "newuser@example.com", "role": "member"}
+        Body: {"email": "newuser@gridworkz.com", "role": "member", "firstName": "John", "lastName": "Doe"}
         Response: {
             "success": true,
-            "message": "User added to organization",
+            "message": "User invited to organization",
             "user_id": "newuser@example.com",
             "role": "member"
         }
     """
-    # Require owner role to add members
-    await verify_org_access(request, org_id, required_role="owner")
+    # Require owner or admin role to add members
+    await verify_org_access(request, org_id, required_role="admin")
 
     try:
-        # Add user to organization
-        success = org_manager.add_user_to_org(
-            org_id=org_id,
-            user_id=member_data.user_id,
-            role=member_data.role
-        )
+        # Determine user_id - either provided directly or use email
+        user_id = member_data.user_id or member_data.email
+        
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Either user_id or email must be provided")
 
-        if not success:
-            raise HTTPException(status_code=404, detail="Organization not found")
+        # If email provided (new invitation), create user in Keycloak if they don't exist
+        if member_data.email and not member_data.user_id:
+            from keycloak_integration import get_user_by_email, create_user
+            
+            # Check if user exists
+            existing_user = await get_user_by_email(member_data.email)
+            if existing_user:
+                # User exists, use their ID
+                user_id = existing_user["id"]
+                logger.info(f"User {member_data.email} already exists in Keycloak with ID {user_id}")
+            else:
+                # Create new user in Keycloak
+                user_id = await create_user(
+                    email=member_data.email,
+                    username=member_data.email,
+                    first_name=member_data.firstName or "",
+                    last_name=member_data.lastName or "",
+                    email_verified=False
+                )
+                
+                if not user_id:
+                    raise HTTPException(status_code=500, detail="Failed to create user in Keycloak")
+                
+                logger.info(f"Created new user in Keycloak: {member_data.email} with ID {user_id}")
+                # TODO: Send email invitation with password reset link
 
-        logger.info(f"Added user {member_data.user_id} to org {org_id} with role {member_data.role}")
+        # Get database connection
+        from database.connection import get_db_pool
+        pool = await get_db_pool()
+
+        # Check if organization exists in database
+        async with pool.acquire() as conn:
+            org_exists = await conn.fetchval(
+                "SELECT EXISTS(SELECT 1 FROM organizations WHERE id = $1)",
+                org_id
+            )
+            
+            if not org_exists:
+                raise HTTPException(status_code=404, detail="Organization not found")
+
+            # Check if user is already a member
+            existing_member = await conn.fetchval(
+                "SELECT EXISTS(SELECT 1 FROM organization_members WHERE organization_id = $1 AND user_id = $2)",
+                org_id, user_id
+            )
+            
+            if existing_member:
+                raise HTTPException(status_code=400, detail="User is already a member of this organization")
+
+            # Insert into organization_members table with generated UUID
+            import uuid
+            member_id = str(uuid.uuid4())
+            await conn.execute(
+                """
+                INSERT INTO organization_members (id, organization_id, user_id, role, joined_at, updated_at)
+                VALUES ($1, $2, $3, $4, NOW(), NOW())
+                """,
+                member_id, org_id, user_id, member_data.role.upper()
+            )
+
+        logger.info(f"Added user {user_id} to org {org_id} with role {member_data.role}")
 
         return {
             "success": True,
-            "message": "User added to organization",
-            "user_id": member_data.user_id,
+            "message": "User invited to organization" if member_data.email else "User added to organization",
+            "user_id": user_id,
             "role": member_data.role
         }
 
     except ValueError as e:
         # User already in organization or invalid role
         raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error adding member to org {org_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to add member: {str(e)}")
