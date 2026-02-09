@@ -240,6 +240,7 @@ from traefik_api import router as traefik_router
 from traefik_routes_api import router as traefik_routes_router
 from traefik_services_api import router as traefik_services_router
 from traefik_ssl_manager import router as traefik_ssl_router
+from traefik_ssl_manager import legacy_router as traefik_ssl_legacy_router
 from traefik_metrics_api import router as traefik_metrics_router
 from traefik_middlewares_api import router as traefik_middlewares_router
 from traefik_live_api import router as traefik_live_router  # NEW: Live data from Docker labels
@@ -1101,6 +1102,7 @@ logger.info("Traefik Routes API endpoints registered at /api/v1/traefik/routes")
 app.include_router(traefik_services_router)
 logger.info("Traefik Services API endpoints registered at /api/v1/traefik/services")
 app.include_router(traefik_ssl_router)
+app.include_router(traefik_ssl_legacy_router)
 logger.info("Traefik SSL Management API endpoints registered at /api/v1/traefik/ssl")
 app.include_router(traefik_metrics_router)
 logger.info("Traefik Metrics API endpoints registered at /api/v1/traefik/metrics")

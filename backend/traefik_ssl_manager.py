@@ -13,15 +13,29 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 import base64
+import os
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/traefik/ssl", tags=["Traefik SSL"])
+legacy_router = APIRouter(prefix="/api/v1/traefik", tags=["Traefik SSL (Legacy)"])
 
-# Path to Traefik's acme.json
-ACME_JSON_PATH = Path("/home/ubuntu/Ops-Center-OSS/traefik/letsencrypt/acme.json")
+# Paths to Traefik's acme.json (supports container and host mounts)
+TRAEFIK_DIR = Path(os.getenv("TRAEFIK_DIR", "/traefik"))
+ACME_JSON_PATHS = [
+    Path(os.getenv("TRAEFIK_ACME_PATH", "")) if os.getenv("TRAEFIK_ACME_PATH") else None,
+    TRAEFIK_DIR / "letsencrypt" / "acme.json",
+    Path("/home/ubuntu/Ops-Center-OSS/traefik/letsencrypt/acme.json")
+]
+
+
+def resolve_acme_json_path() -> Path:
+    for path in ACME_JSON_PATHS:
+        if path and path.exists():
+            return path
+    return ACME_JSON_PATHS[1]
 
 
 class Certificate(BaseModel):
@@ -122,15 +136,19 @@ def load_acme_json() -> Dict:
     Returns:
         Dictionary with ACME data
     """
-    if not ACME_JSON_PATH.exists():
-        logger.warning(f"ACME JSON file not found: {ACME_JSON_PATH}")
+    acme_path = resolve_acme_json_path()
+    if not acme_path.exists():
+        logger.warning(
+            "ACME JSON file not found. Tried: %s",
+            ", ".join([str(p) for p in ACME_JSON_PATHS if p])
+        )
         return {}
 
     try:
-        with open(ACME_JSON_PATH, 'r') as f:
+        with open(acme_path, 'r') as f:
             return json.load(f)
     except Exception as e:
-        logger.error(f"Error loading acme.json: {e}")
+        logger.error(f"Error loading acme.json from {acme_path}: {e}")
         return {}
 
 
@@ -176,6 +194,21 @@ async def list_certificates(admin: Dict = Depends(require_admin)):
     except Exception as e:
         logger.error(f"Error listing certificates: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@legacy_router.get("/certificates")
+async def list_certificates_legacy(admin: Dict = Depends(require_admin)):
+    """
+    Legacy endpoint for SSL certificates (frontend compatibility).
+
+    Returns:
+        Object with certificates list and count
+    """
+    certificates = await list_certificates(admin)
+    return {
+        "certificates": certificates,
+        "count": len(certificates)
+    }
 
 
 @router.get("/certificates/{domain}", response_model=Certificate)
@@ -305,6 +338,27 @@ async def renew_certificate(domain: str, admin: Dict = Depends(require_admin)):
     except Exception as e:
         logger.error(f"Error renewing certificate for {domain}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@legacy_router.post("/certificates/{domain}/renew")
+async def renew_certificate_legacy(domain: str, admin: Dict = Depends(require_admin)):
+    """
+    Legacy renew endpoint (frontend compatibility).
+    """
+    return await renew_certificate(domain, admin)
+
+
+@legacy_router.post("/certificates/renew")
+async def renew_all_certificates_legacy(admin: Dict = Depends(require_admin)):
+    """
+    Legacy bulk-renew endpoint (frontend compatibility).
+    """
+    certificates = await list_certificates(admin)
+    return {
+        "success": True,
+        "count": len(certificates),
+        "message": "Traefik handles renewals automatically. Certificates will be renewed as they approach expiration."
+    }
 
 
 @router.get("/check-rate-limits")

@@ -89,7 +89,22 @@ const TraefikSSL = () => {
       }
 
       const data = await response.json();
-      setCertificates(data.certificates || []);
+      const rawCertificates = Array.isArray(data) ? data : (data.certificates || []);
+      const normalizedCertificates = rawCertificates.map((cert, index) => {
+        const domain = cert.domain || cert.main_domain || cert.common_name || cert.subject || 'unknown';
+        const validFrom = cert.validFrom || cert.not_before || cert.notBefore || cert.not_before;
+        const expiresAt = cert.expiresAt || cert.not_after || cert.notAfter || cert.expires_at || cert.not_after;
+
+        return {
+          ...cert,
+          id: cert.id || cert.cert_id || domain || `cert-${index}`,
+          domain,
+          issuer: cert.issuer || cert.ca || "Let's Encrypt",
+          validFrom: validFrom || null,
+          expiresAt: expiresAt || null
+        };
+      });
+      setCertificates(normalizedCertificates);
       setError(null);
       setRetryCount(prev => ({ ...prev, certificates: 0 }));
     } catch (err) {
@@ -222,8 +237,10 @@ const TraefikSSL = () => {
   };
 
   const getDaysUntilExpiry = (expiryDate) => {
+    if (!expiryDate) return NaN;
     const now = new Date();
     const expiry = new Date(expiryDate);
+    if (Number.isNaN(expiry.getTime())) return NaN;
     const diff = expiry - now;
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
@@ -231,6 +248,15 @@ const TraefikSSL = () => {
   const getStatusChip = (cert) => {
     const daysLeft = getDaysUntilExpiry(cert.expiresAt);
 
+    if (Number.isNaN(daysLeft)) {
+      return (
+        <Chip
+          label="Unknown"
+          size="small"
+          color="default"
+        />
+      );
+    }
     if (daysLeft < 0) {
       return (
         <Chip
@@ -383,23 +409,23 @@ const TraefikSSL = () => {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
-                          {new Date(cert.validFrom).toLocaleDateString()}
+                          {cert.validFrom ? new Date(cert.validFrom).toLocaleDateString() : 'Unknown'}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
-                          {new Date(cert.expiresAt).toLocaleDateString()}
+                          {cert.expiresAt ? new Date(cert.expiresAt).toLocaleDateString() : 'Unknown'}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Box display="flex" alignItems="center" gap={1}>
                           <Typography
                             variant="body2"
-                            color={daysLeft < 30 ? 'error.main' : 'text.primary'}
+                            color={!Number.isNaN(daysLeft) && daysLeft < 30 ? 'error.main' : 'text.primary'}
                           >
-                            {daysLeft < 0 ? 'Expired' : `${daysLeft} days`}
+                            {Number.isNaN(daysLeft) ? 'Unknown' : (daysLeft < 0 ? 'Expired' : `${daysLeft} days`)}
                           </Typography>
-                          {daysLeft >= 0 && daysLeft < 30 && (
+                          {!Number.isNaN(daysLeft) && daysLeft >= 0 && daysLeft < 30 && (
                             <ClockIcon
                               style={{ width: 16, height: 16, color: 'orange' }}
                             />

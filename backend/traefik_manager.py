@@ -26,6 +26,9 @@ from enum import Enum
 import hashlib
 from collections import defaultdict
 import time
+import base64
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -507,6 +510,57 @@ class TraefikManager:
     # SSL Certificate Management
     # ========================================================================
 
+    def _load_x509_certificate(self, cert_data: Optional[str]):
+        if not cert_data:
+            return None
+
+        try:
+            if isinstance(cert_data, str) and cert_data.startswith("-----BEGIN"):
+                return x509.load_pem_x509_certificate(cert_data.encode(), default_backend())
+
+            cert_bytes = base64.b64decode(cert_data)
+            try:
+                return x509.load_der_x509_certificate(cert_bytes, default_backend())
+            except Exception:
+                return x509.load_pem_x509_certificate(cert_bytes, default_backend())
+        except Exception:
+            return None
+
+    def _extract_certificate_metadata(self, cert_data: Optional[str]) -> Dict[str, Any]:
+        cert = self._load_x509_certificate(cert_data)
+        if not cert:
+            return {}
+
+        try:
+            issuer = cert.issuer.get_attributes_for_oid(x509.NameOID.COMMON_NAME)[0].value
+        except Exception:
+            issuer = "Unknown"
+
+        not_before = cert.not_valid_before
+        not_after = cert.not_valid_after
+        days_remaining = (not_after - datetime.utcnow()).days
+
+        return {
+            "issuer": issuer,
+            "not_before": not_before.isoformat(),
+            "not_after": not_after.isoformat(),
+            "validFrom": not_before.isoformat(),
+            "expiresAt": not_after.isoformat(),
+            "days_remaining": days_remaining
+        }
+
+    def _certificate_status_from_expiry(self, expires_at: Optional[str]) -> CertificateStatus:
+        if not expires_at:
+            return CertificateStatus.PENDING
+        try:
+            expiry = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+            now = datetime.utcnow()
+            if expiry < now:
+                return CertificateStatus.EXPIRED
+            return CertificateStatus.ACTIVE
+        except Exception:
+            return CertificateStatus.PENDING
+
     def list_certificates(self) -> List[Dict[str, Any]]:
         """
         List all SSL certificates
@@ -530,6 +584,7 @@ class TraefikManager:
                     continue
 
                 for cert in resolver_data['Certificates']:
+                    metadata = self._extract_certificate_metadata(cert.get('certificate'))
                     cert_info = {
                         'domain': cert.get('domain', {}).get('main', 'unknown'),
                         'sans': cert.get('domain', {}).get('sans', []),
@@ -539,6 +594,9 @@ class TraefikManager:
                         'certificate': cert.get('certificate', '')[:50] + '...' if cert.get('certificate') else None,
                         'private_key_present': bool(cert.get('key'))
                     }
+                    if metadata:
+                        cert_info.update(metadata)
+                        cert_info['status'] = self._certificate_status_from_expiry(metadata.get('expiresAt'))
                     certificates.append(cert_info)
 
             return certificates
