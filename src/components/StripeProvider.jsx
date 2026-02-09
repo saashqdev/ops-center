@@ -3,7 +3,7 @@
  * Provides Stripe.js context to the application
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { Alert, Box } from '@mui/material';
@@ -17,22 +17,55 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
  * Wraps children with Stripe Elements provider for payment processing
  */
 export const StripeProvider = ({ children }) => {
-  // Memoize stripe promise to avoid recreating on every render
-  const stripePromise = useMemo(() => {
-    if (!STRIPE_PUBLISHABLE_KEY) {
-      console.warn('VITE_STRIPE_PUBLISHABLE_KEY not configured');
-      return null;
-    }
-    return loadStripe(STRIPE_PUBLISHABLE_KEY);
+  const [stripePromise, setStripePromise] = useState(null);
+  const [stripeError, setStripeError] = useState(null);
+  const [stripeLoading, setStripeLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const initStripe = async () => {
+      try {
+        if (STRIPE_PUBLISHABLE_KEY) {
+          if (isMounted) setStripePromise(loadStripe(STRIPE_PUBLISHABLE_KEY));
+          return;
+        }
+
+        const response = await fetch('/api/v1/checkout/config');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!data?.publishable_key) {
+          throw new Error('Stripe publishable key not available');
+        }
+
+        if (isMounted) setStripePromise(loadStripe(data.publishable_key));
+      } catch (error) {
+        console.warn('Stripe key not configured:', error);
+        if (isMounted) setStripeError(error);
+      } finally {
+        if (isMounted) setStripeLoading(false);
+      }
+    };
+
+    initStripe();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Show message if Stripe key is missing
   if (!stripePromise) {
     return (
       <>
-        <Alert severity="warning" sx={{ mb: 3 }}>
-          Stripe payment processing is not configured. Please add your Stripe publishable key to the environment configuration (VITE_STRIPE_PUBLISHABLE_KEY).
-        </Alert>
+        {!stripeLoading && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            Stripe payment processing is not configured. Please add your Stripe publishable key to the environment configuration (VITE_STRIPE_PUBLISHABLE_KEY).
+          </Alert>
+        )}
         {children}
       </>
     );
