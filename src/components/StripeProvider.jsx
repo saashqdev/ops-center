@@ -57,17 +57,15 @@ export const StripeProvider = ({ children }) => {
     };
   }, []);
 
-  // Show message if Stripe key is missing
-  if (!stripePromise) {
+  // Don't render Elements if Stripe is not available
+  if (!stripePromise && !stripeLoading) {
     return (
-      <>
-        {!stripeLoading && (
-          <Alert severity="warning" sx={{ mb: 3 }}>
-            Stripe payment processing is not configured. Please add your Stripe publishable key to the environment configuration (VITE_STRIPE_PUBLISHABLE_KEY).
-          </Alert>
-        )}
+      <Box>
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          Stripe payment processing is not configured. Please add your Stripe publishable key to the environment configuration (VITE_STRIPE_PUBLISHABLE_KEY).
+        </Alert>
         {children}
-      </>
+      </Box>
     );
   }
 

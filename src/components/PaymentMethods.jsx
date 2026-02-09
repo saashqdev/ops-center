@@ -35,7 +35,12 @@ export default function PaymentMethods() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Payment Methods</h2>
+        <h2
+          className="text-2xl font-bold text-gray-300"
+          style={{ color: 'rgb(209, 213, 219)' }}
+        >
+          Payment Methods
+        </h2>
         <p className="text-gray-600 mt-1">Manage your payment information and billing details</p>
       </div>
 

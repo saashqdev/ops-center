@@ -92,7 +92,6 @@ services:
       - EXTERNAL_HOST=${APP_DOMAIN:-kubeworkz.io}
       - EXTERNAL_PROTOCOL=https
       - OAUTH_CLIENT_ID=ops-center
-      - OPS_CENTER_OAUTH_CLIENT_SECRET=vz9cA8-kuX-oso3DC-w7
       - KEYCLOAK_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
       - KEYCLOAK_PUBLIC_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
       - KEYCLOAK_REALM=uchub
@@ -200,9 +199,9 @@ networks:
   web:
     external: true
   unicorn-network:
-#    external: true
+    external: true
   uchub-network:
-#    external: true
+    external: true
 
 volumes:
   redis-data:

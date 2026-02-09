@@ -217,9 +217,9 @@ const PaymentMethods = () => {
 
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'rgb(209, 213, 219)' }}>
           <CreditCardIcon sx={{ mr: 1, verticalAlign: 'middle', fontSize: '2rem' }} />
-          Payment Methods
+          <span style={{ color: '#d1d5db' }}>Payment Methods</span>
         </Typography>
         <Typography variant="body1" sx={{ color: 'rgb(243, 232, 255)' }}>
           Manage your saved payment methods and billing information
