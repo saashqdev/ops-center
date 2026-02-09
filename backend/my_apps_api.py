@@ -170,6 +170,9 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
     - User's tier includes the app's feature_key
     - User has purchased the app separately (future: check user_add_ons table)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     conn = await get_db_connection()
     try:
         # User's tier is now extracted from session via dependency injection
@@ -186,7 +189,12 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
             WHERE is_active = TRUE
             ORDER BY sort_order, name
         """
-        app_rows = await conn.fetch(apps_query)
+        try:
+            app_rows = await conn.fetch(apps_query)
+        except asyncpg.UndefinedTableError:
+            # add_ons table doesn't exist yet - return empty list
+            logger.warning("add_ons table does not exist - returning empty app list")
+            return []
 
         # Filter apps based on user's tier
         authorized_apps = []
@@ -227,6 +235,10 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
 
         return authorized_apps
 
+    except asyncpg.UndefinedTableError as e:
+        # Tables don't exist yet - return empty list instead of error
+        logger.warning(f"Database table missing: {e} - returning empty apps list")
+        return []
     except asyncpg.PostgresError as e:
         raise HTTPException(
             status_code=500,
@@ -300,6 +312,12 @@ async def get_marketplace_apps(user_tier: str = Depends(get_current_user_tier)):
 
         return marketplace_apps
 
+    except asyncpg.UndefinedTableError as e:
+        # Tables don't exist yet - return empty list instead of error
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Database table missing: {e} - returning empty marketplace list")
+        return []
     except asyncpg.PostgresError as e:
         raise HTTPException(
             status_code=500,

@@ -148,7 +148,18 @@ async def get_cart(
             WHERE c.user_id = $1 AND a.is_active = TRUE
             ORDER BY c.added_at DESC
         """
-        items = await conn.fetch(query, user_id)
+        try:
+            items = await conn.fetch(query, user_id)
+        except asyncpg.UndefinedTableError:
+            # Tables don't exist yet - return empty cart
+            logger.warning("cart_items or add_ons table does not exist - returning empty cart")
+            return CartResponse(
+                items=[],
+                subtotal=Decimal("0.00"),
+                discount=Decimal("0.00"),
+                total=Decimal("0.00"),
+                item_count=0
+            )
 
         # Build cart items with calculated subtotals
         cart_items = []
@@ -180,6 +191,16 @@ async def get_cart(
             discount=discount,
             total=total,
             item_count=len(cart_items)
+        )
+    except asyncpg.UndefinedTableError as e:
+        # Tables don't exist yet - return empty cart instead of error
+        logger.warning(f"Database table missing: {e} - returning empty cart")
+        return CartResponse(
+            items=[],
+            subtotal=Decimal("0.00"),
+            discount=Decimal("0.00"),
+            total=Decimal("0.00"),
+            item_count=0
         )
     except Exception as e:
         logger.error(f"Error fetching cart: {e}")

@@ -10,11 +10,32 @@ export default function Brigade() {
   const [loading, setLoading] = useState(false);
   const [usage, setUsage] = useState(null);
   const [showIframe, setShowIframe] = useState(true);
+  const [brigadeConfig, setBrigadeConfig] = useState({
+    apiUrl: 'http://localhost:8112',
+    uiUrl: 'http://localhost:8102'
+  });
 
   useEffect(() => {
+    fetchBrigadeConfig();
     fetchUsage();
     fetchTaskHistory();
   }, []);
+
+  const fetchBrigadeConfig = async () => {
+    try {
+      const response = await fetch('/api/v1/services/discovery');
+      const data = await response.json();
+      if (data.services?.brigade) {
+        setBrigadeConfig({
+          apiUrl: data.services.brigade.internal || 'http://localhost:8112',
+          uiUrl: data.external_urls?.brigade || 'http://localhost:8102'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching Brigade config:', error);
+      // Keep default values
+    }
+  };
 
   const fetchUsage = async () => {
     try {
@@ -41,7 +62,7 @@ export default function Brigade() {
 
     setLoading(true);
     try {
-      const response = await fetch('https://brigade.your-domain.com/api/v1/agents/execute', {
+      const response = await fetch(`${brigadeConfig.apiUrl}/api/v1/agents/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -65,7 +86,7 @@ export default function Brigade() {
   };
 
   const openFullUI = () => {
-    window.open('https://brigade.your-domain.com', '_blank', 'noopener,noreferrer');
+    window.open(brigadeConfig.uiUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -125,7 +146,7 @@ export default function Brigade() {
         {showIframe && (
           <div className="p-0">
             <iframe
-              src="https://brigade.your-domain.com"
+              src={brigadeConfig.uiUrl}
               title="Unicorn Brigade Dashboard"
               className="w-full border-0"
               style={{

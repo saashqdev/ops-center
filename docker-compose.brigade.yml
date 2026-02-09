@@ -1,0 +1,103 @@
+services:
+  # Unicorn Brigade - Multi-Agent AI Platform
+  unicorn-brigade:
+    image: brigade-ai:latest
+    container_name: unicorn-brigade
+    restart: unless-stopped
+    build:
+      context: ./brigade
+      dockerfile: Dockerfile
+    ports:
+      - "8112:8112"  # Brigade API port
+      - "8102:8102"  # Brigade Web UI port
+    volumes:
+      - brigade-data:/app/data
+      - brigade-logs:/app/logs
+      - ./brigade/config:/app/config
+    environment:
+      # Database Configuration
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-unicorn}:${POSTGRES_PASSWORD:-change-me}@postgresql:5432/brigade
+      - REDIS_URL=redis://unicorn-lago-redis:6379/3
+      
+      # Server Configuration
+      - HOST=0.0.0.0
+      - API_PORT=8112
+      - UI_PORT=8102
+      - LOG_LEVEL=${BRIGADE_LOG_LEVEL:-info}
+      
+      # LLM API Keys (BYOK Support)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      
+      # Brigade Configuration
+      - BRIGADE_ADMIN_EMAIL=${BRIGADE_ADMIN_EMAIL:-admin@localhost}
+      - BRIGADE_SECRET_KEY=${BRIGADE_SECRET_KEY:-change-me-in-production}
+      - BRIGADE_MAX_AGENTS=${BRIGADE_MAX_AGENTS:-47}
+      - BRIGADE_ENABLE_GUNNY=${BRIGADE_ENABLE_GUNNY:-true}
+      
+      # Integration with Ops-Center
+      - OPS_CENTER_URL=http://ops-center-direct:8084
+      - OPS_CENTER_API_KEY=${OPS_CENTER_API_KEY:-}
+      
+      # External URLs
+      - EXTERNAL_URL=${BRIGADE_EXTERNAL_URL:-https://brigade.your-domain.com}
+    networks:
+      - web
+      - unicorn-network
+      - uchub-network
+    labels:
+      # Traefik Configuration
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      
+      # Brigade Web UI (main interface)
+      - "traefik.http.routers.brigade-ui.rule=Host(`brigade.${EXTERNAL_HOST:-your-domain.com}`)"
+      - "traefik.http.routers.brigade-ui.entrypoints=websecure"
+      - "traefik.http.routers.brigade-ui.tls=true"
+      - "traefik.http.routers.brigade-ui.tls.certresolver=cloudflare"
+      - "traefik.http.routers.brigade-ui.service=brigade-ui-svc"
+      - "traefik.http.services.brigade-ui-svc.loadbalancer.server.port=8102"
+      
+      # Brigade API
+      - "traefik.http.routers.brigade-api.rule=Host(`brigade.${EXTERNAL_HOST:-your-domain.com}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.brigade-api.entrypoints=websecure"
+      - "traefik.http.routers.brigade-api.tls=true"
+      - "traefik.http.routers.brigade-api.tls.certresolver=cloudflare"
+      - "traefik.http.routers.brigade-api.service=brigade-api-svc"
+      - "traefik.http.services.brigade-api-svc.loadbalancer.server.port=8112"
+      
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.brigade-http.rule=Host(`brigade.${EXTERNAL_HOST:-your-domain.com}`)"
+      - "traefik.http.routers.brigade-http.entrypoints=web"
+      - "traefik.http.routers.brigade-http.middlewares=https-redirect"
+      
+      # Middleware
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      unicorn-lago-redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8112/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  brigade-data:
+    driver: local
+  brigade-logs:
+    driver: local
+
+networks:
+  web:
+    external: true
+  unicorn-network:
+    external: true
+  uchub-network:
+    external: true

@@ -127,7 +127,7 @@ export default function TierComparison() {
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <CircularProgress />
-          <Typography variant="body1" sx={{ mt: 2 }}>
+          <Typography variant="body1" sx={{ mt: 2, color: 'rgb(209, 213, 219)' }}>
             Loading subscription plans...
           </Typography>
         </Box>
@@ -143,7 +143,7 @@ export default function TierComparison() {
           <Typography variant="h5" color="error" gutterBottom>
             Failed to Load Plans
           </Typography>
-          <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
+          <Typography variant="body1" sx={{ color: 'rgb(209, 213, 219)', mb: 3 }}>
             {error}
           </Typography>
           <Button variant="contained" onClick={loadPlans}>
@@ -161,7 +161,7 @@ export default function TierComparison() {
         <Typography variant="h3" fontWeight={700} gutterBottom>
           Choose Your Plan
         </Typography>
-        <Typography variant="h6" color="textSecondary">
+        <Typography variant="h6" sx={{ color: 'rgb(156, 163, 175)' }}>
           Simple, transparent pricing for every stage of your journey
         </Typography>
       </Box>
@@ -235,7 +235,7 @@ export default function TierComparison() {
                   <Typography variant="h3" fontWeight={700} component="span">
                     ${tier.price}
                   </Typography>
-                  <Typography variant="body1" color="textSecondary" component="span">
+                  <Typography variant="body1" sx={{ color: 'rgb(209, 213, 219)' }} component="span">
                     /{tier.billingPeriod}
                   </Typography>
                 </Box>
@@ -249,7 +249,7 @@ export default function TierComparison() {
                 />
 
                 {/* Description */}
-                <Typography variant="body2" color="textSecondary" sx={{ mb: 3, minHeight: 40 }}>
+                <Typography variant="body2" sx={{ color: 'rgb(209, 213, 219)', mb: 3, minHeight: 40 }}>
                   {tier.description}
                 </Typography>
 
@@ -274,7 +274,7 @@ export default function TierComparison() {
                 {tier.limitations.length > 0 && (
                   <>
                     <Divider sx={{ my: 2 }} />
-                    <Typography variant="caption" color="textSecondary" display="block" gutterBottom>
+                    <Typography variant="caption" sx={{ color: 'rgb(209, 213, 219)' }} display="block" gutterBottom>
                       Limitations:
                     </Typography>
                     {tier.limitations.map((limitation, idx) => (
@@ -382,7 +382,7 @@ function ComparisonRow({ feature, values }) {
       {values.map((value, idx) => (
         <td key={idx} style={{ textAlign: 'center', padding: '12px' }}>
           {typeof value === 'boolean' ? (
-            value ? <Check color="success" /> : <Typography variant="body2" color="textSecondary">-</Typography>
+            value ? <Check color="success" /> : <Typography variant="body2" sx={{ color: 'rgb(209, 213, 219)' }}>-</Typography>
           ) : (
             <Typography variant="body2">{value}</Typography>
           )}
@@ -399,7 +399,7 @@ function FAQItem({ question, answer }) {
       <Typography variant="subtitle1" fontWeight={600} gutterBottom>
         {question}
       </Typography>
-      <Typography variant="body2" color="textSecondary">
+      <Typography variant="body2" sx={{ color: 'rgb(209, 213, 219)' }}>
         {answer}
       </Typography>
     </Box>

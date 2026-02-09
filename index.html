@@ -57,6 +57,15 @@
     <!-- Umami Analytics -->
     <script defer src="https://umami.your-domain.com/script.js" data-website-id="7a8bd2c2-5482-472b-8242-6a33919f8ba7"></script>
 
+    <!-- Global MUI CSS Override - Fix dark text issue (v2.1) -->
+    <style>
+      /* Override MUI Emotion-generated dark text classes */
+      .css-1xxr8zr,
+      .css-1n22q1a {
+        color: rgb(209, 213, 219) !important; /* gray-300 */
+      }
+    </style>
+
     <title>Unicorn Commander Pro - Admin Dashboard</title>
   </head>
   <body>
@@ -76,7 +85,7 @@
 
     <!-- VERSION CHECK - HTML loaded -->
     <script>
-      console.log('%c🔧 HTML VERSION: 2026-01-29-22:45-UPDATED', 'background: #1e40af; color: white; padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 16px;');
+      console.log('%c🔧 HTML VERSION: 2026-02-08-CSS-FIX', 'background: #1e40af; color: white; padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 16px;');
       console.log('%c✅ index.html loaded successfully', 'background: #059669; color: white; padding: 4px 8px; border-radius: 4px;');
     </script>
 

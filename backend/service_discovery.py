@@ -64,7 +64,9 @@ class ServiceDiscovery:
             'qdrant': 'unicorn-qdrant:6333',
             'postgresql': 'unicorn-postgresql:5432',
             'redis': 'unicorn-redis:6379',
-            'ops-center': 'unicorn-ops-center:8084'
+            'ops-center': 'unicorn-ops-center:8084',
+            'brigade': 'unicorn-brigade:8112',
+            'brigade-ui': 'unicorn-brigade:8102'
         }
 
         # Localhost fallback ports (for development)
@@ -133,7 +135,9 @@ class ServiceDiscovery:
             'qdrant': ['unicorn-qdrant', 'qdrant'],
             'postgresql': ['unicorn-postgresql', 'postgresql', 'postgres'],
             'redis': ['unicorn-redis', 'redis'],
-            'ops-center': ['unicorn-ops-center', 'ops-center']
+            'ops-center': ['unicorn-ops-center', 'ops-center'],
+            'brigade': ['unicorn-brigade', 'brigade'],
+            'brigade-ui': ['unicorn-brigade', 'brigade']
         }
 
         patterns = container_patterns.get(service, [service])
@@ -252,6 +256,7 @@ class ServiceDiscovery:
             'openwebui': f"{self.external_protocol}://chat.{self.external_host}",
             'centerdeep': f"{self.external_protocol}://search.{self.external_host}",
             'authentik': f"{self.external_protocol}://auth.{self.external_host}",
+            'brigade': f"{self.external_protocol}://brigade.{self.external_host}",
             'ops-center': f"{base_url}:8084" if self.external_host == 'localhost' else base_url,
             'vllm': f"{base_url}:8000",
             'ollama': f"{base_url}:11434"

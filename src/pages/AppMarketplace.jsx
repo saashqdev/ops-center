@@ -259,10 +259,10 @@ const AppMarketplace = () => {
 
       {apps.length === 0 && (
         <Box textAlign="center" py={8}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+          <Typography variant="h6" sx={{ color: '#D1D5DB' }} gutterBottom>
             No additional apps available
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: '#D1D5DB' }}>
             You have access to all apps in your subscription tier!
           </Typography>
           <Button

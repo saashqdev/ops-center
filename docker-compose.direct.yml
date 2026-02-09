@@ -112,7 +112,7 @@ services:
       # Lago Configuration
       - LAGO_API_URL=http://unicorn-lago-api:3000
       - LAGO_PUBLIC_URL=https://billing-api.${APP_DOMAIN:-localhost}
-      - LAGO_API_KEY=${LAGO_API_KEY}
+      # LAGO_API_KEY loaded from .env.auth via env_file
       # Redis for sessions
       - REDIS_HOST=unicorn-lago-redis
       - REDIS_PORT=6379
