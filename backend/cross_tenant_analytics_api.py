@@ -134,10 +134,13 @@ async def get_platform_stats(
             except Exception:
                 total_webhooks = 0
             
-            # Total API keys
-            total_api_keys = await conn.fetchval(
-                "SELECT COUNT(*) FROM api_keys"
-            )
+            # Total API keys (table may not exist)
+            try:
+                total_api_keys = await conn.fetchval(
+                    "SELECT COUNT(*) FROM api_keys"
+                )
+            except Exception:
+                total_api_keys = 0
             
             # Tier distribution - extract from metadata_json
             tier_rows = await conn.fetch(

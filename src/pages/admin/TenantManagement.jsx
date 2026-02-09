@@ -56,7 +56,10 @@ export default function TenantManagement() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState(null);
+  const [tenantToDelete, setTenantToDelete] = useState(null);
+  const [hardDelete, setHardDelete] = useState(false);
   const [platformStats, setPlatformStats] = useState(null);
   const [error, setError] = useState(null);
   
@@ -194,10 +197,6 @@ export default function TenantManagement() {
   };
 
   const handleDeleteTenant = async (tenantId, hardDelete = false) => {
-    if (!window.confirm(`Are you sure you want to ${hardDelete ? 'permanently delete' : 'deactivate'} this tenant?`)) {
-      return;
-    }
-
     try {
       // Get CSRF token
       const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
@@ -218,11 +217,19 @@ export default function TenantManagement() {
         throw new Error(errorData.detail || 'Failed to delete tenant');
       }
       
+      setDeleteDialogOpen(false);
+      setTenantToDelete(null);
       loadTenants();
       loadPlatformStats();
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const openDeleteDialog = (tenant, isHardDelete = false) => {
+    setTenantToDelete(tenant);
+    setHardDelete(isHardDelete);
+    setDeleteDialogOpen(true);
   };
 
   const openEditDialog = (tenant) => {
@@ -349,9 +356,6 @@ export default function TenantManagement() {
               <TableCell>
                 <Box>
                   <Typography variant="body1">{tenant.name}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {tenant.organization_id}
-                  </Typography>
                   {tenant.subdomain && (
                     <Typography variant="caption" display="block" color="primary">
                       {tenant.subdomain}.ops-center.com
@@ -392,12 +396,12 @@ export default function TenantManagement() {
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Deactivate">
-                  <IconButton size="small" onClick={() => handleDeleteTenant(tenant.organization_id, false)}>
+                  <IconButton size="small" onClick={() => openDeleteDialog(tenant, false)}>
                     <CloseIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Delete Permanently">
-                  <IconButton size="small" color="error" onClick={() => handleDeleteTenant(tenant.organization_id, true)}>
+                  <IconButton size="small" color="error" onClick={() => openDeleteDialog(tenant, true)}>
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>
@@ -595,6 +599,64 @@ export default function TenantManagement() {
         <DialogActions>
           <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleUpdateTenant} variant="contained">Update</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DeleteIcon color={hardDelete ? "error" : "warning"} />
+            {hardDelete ? 'Permanently Delete Tenant' : 'Deactivate Tenant'}
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {tenantToDelete && (
+            <>
+              <Alert severity={hardDelete ? "error" : "warning"} sx={{ mb: 2 }}>
+                {hardDelete ? (
+                  <>
+                    <strong>Warning:</strong> This action cannot be undone. All data associated with this tenant will be permanently deleted.
+                  </>
+                ) : (
+                  <>
+                    This will deactivate the tenant. The organization can be reactivated later.
+                  </>
+                )}
+              </Alert>
+              <Typography variant="body1" gutterBottom>
+                Are you sure you want to {hardDelete ? 'permanently delete' : 'deactivate'} the following tenant?
+              </Typography>
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                <Typography variant="subtitle2" color="text.secondary">Organization</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{tenantToDelete.name}</Typography>
+                <Typography variant="caption" color="text.secondary">ID: {tenantToDelete.organization_id}</Typography>
+              </Box>
+              {hardDelete && (
+                <Typography variant="body2" color="error" sx={{ mt: 2, fontWeight: 'bold' }}>
+                  ⚠️ This will delete all users, data, and configurations permanently.
+                </Typography>
+              )}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => handleDeleteTenant(tenantToDelete?.organization_id, hardDelete)}
+            variant="contained"
+            color={hardDelete ? "error" : "warning"}
+            startIcon={hardDelete ? <DeleteIcon /> : <CloseIcon />}
+          >
+            {hardDelete ? 'Delete Permanently' : 'Deactivate'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

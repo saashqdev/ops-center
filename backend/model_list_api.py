@@ -234,6 +234,12 @@ user_router = APIRouter(
     tags=["Model Preferences (User)"]
 )
 
+# Legacy/Public router for backwards compatibility with old frontend
+public_router = APIRouter(
+    prefix="/api/v1/app-model-lists",
+    tags=["Model Lists (Public/Legacy)"]
+)
+
 
 # =============================================================================
 # Admin Endpoints - List Management
@@ -619,12 +625,7 @@ async def update_user_preference(
 # Public Endpoint - Get Models for App
 # =============================================================================
 
-# This can be added to a separate public router if needed
-public_router = APIRouter(
-    prefix="/api/v1/model-lists",
-    tags=["Model Lists (Public)"]
-)
-
+# Note: This uses the public_router defined earlier with /api/v1/app-model-lists
 
 @public_router.get(
     "/{app_identifier}/default",
@@ -731,9 +732,37 @@ async def get_default_models_for_app(
             ]
         finally:
             await conn.close()
-
+    
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting default models for app: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error getting default models for app '{app_identifier}': {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch models for app: {str(e)}"
+        )
+
+
+# =============================================================================
+# Public/Legacy Endpoints - For backwards compatibility with old frontend
+# =============================================================================
+
+@public_router.get(
+    "",
+    response_model=List[ModelListResponse],
+    summary="List all model lists (Legacy endpoint)",
+    description="Legacy endpoint for backwards compatibility. Use /api/v1/admin/model-lists instead."
+)
+@public_router.get(
+    "/",
+    response_model=List[ModelListResponse],
+    summary="List all model lists (Legacy endpoint with trailing slash)",
+    description="Legacy endpoint for backwards compatibility. Use /api/v1/admin/model-lists instead."
+)
+async def legacy_list_model_lists(
+    app_identifier: Optional[str] = Query(None, description="Filter by app"),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
+):
+    """Legacy endpoint - redirects to admin endpoint"""
+    return await list_model_lists(app_identifier, is_active)
+

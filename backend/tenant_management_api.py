@@ -17,6 +17,7 @@ import asyncpg
 from auth_dependencies import require_admin_user
 from tenant_isolation import TenantIsolation, TenantQuotaManager
 from org_manager import org_manager, Organization, OrgUser
+from keycloak_integration import get_user_by_id
 
 logger = logging.getLogger(__name__)
 
@@ -117,12 +118,34 @@ async def get_db_pool() -> asyncpg.Pool:
     try:
         pool = await asyncpg.create_pool(db_url)
         return pool
-    except Exception as e:
-        logger.error(f"Failed to create database pool: {e}")
+    except Exception as exc:
+        logger.error(f"Failed to create database pool: {exc}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database connection failed"
         )
+
+
+async def resolve_owner_display(user_id: Optional[str]) -> str:
+    """Resolve owner display name/email from Keycloak user ID."""
+    if not user_id:
+        return "unknown"
+
+    try:
+        user = await get_user_by_id(str(user_id))
+        if not user:
+            return str(user_id)
+
+        email = user.get("email")
+        username = user.get("username")
+        first_name = user.get("firstName")
+        last_name = user.get("lastName")
+        full_name = " ".join([name for name in [first_name, last_name] if name])
+
+        return email or full_name or username or str(user_id)
+    except Exception as exc:
+        logger.warning(f"Failed to resolve owner from Keycloak: {exc}")
+        return str(user_id)
 
 
 async def check_subdomain_available(pool: asyncpg.Pool, subdomain: str, exclude_org_id: Optional[str] = None) -> bool:
@@ -366,7 +389,6 @@ async def list_tenants(
                     o.id,
                     o.name,
                     o.slug,
-                    o.website,
                     o.is_active,
                     o.created_at,
                     o.updated_at,
@@ -384,6 +406,7 @@ async def list_tenants(
             rows = await conn.fetch(list_query, *params)
             
             tenants = []
+            owner_cache: Dict[str, str] = {}
             for row in rows:
                 # Simple resource counts
                 resource_counts = {
@@ -395,7 +418,15 @@ async def list_tenants(
                 }
                 
                 # Get owner info - show user_id (could enhance to fetch email from Keycloak later)
-                owner_display = row['owner_id'] if row['owner_id'] else 'unknown'
+                owner_id = row['owner_id']
+                if owner_id:
+                    if owner_id in owner_cache:
+                        owner_display = owner_cache[owner_id]
+                    else:
+                        owner_display = await resolve_owner_display(owner_id)
+                        owner_cache[owner_id] = owner_display
+                else:
+                    owner_display = 'unknown'
                 
                 # Use plan_tier from database column, fallback to metadata_json if needed
                 plan_tier = row.get('plan_tier')
@@ -409,12 +440,12 @@ async def list_tenants(
                         plan_tier = 'trial'
                 
                 tenants.append(TenantResponse(
-                    organization_id=row['id'],
+                    organization_id=str(row['id']),
                     name=row['name'],
                     plan_tier=plan_tier,
                     owner_email=owner_display,  # Showing user_id for now
                     subdomain=row['slug'],  # Use slug as subdomain
-                    custom_domain=row['website'],
+                    custom_domain=None,  # Website column doesn't exist in schema
                     is_active=row['is_active'],
                     created_at=row['created_at'],
                     updated_at=row['updated_at'],
@@ -451,9 +482,8 @@ async def get_tenant(
                 SELECT 
                     o.id as organization_id,
                     o.name,
-                    o.plan_tier,
+                    o.tier as plan_tier,
                     o.slug as subdomain,
-                    o.website as custom_domain,
                     o.is_active,
                     o.created_at,
                     o.updated_at,
@@ -472,14 +502,15 @@ async def get_tenant(
                 )
             
             resource_counts = await get_resource_counts(pool, tenant_id)
+            owner_display = await resolve_owner_display(row['owner_email'])
             
             response_data = TenantResponse(
-                organization_id=row['organization_id'],
+                organization_id=str(row['organization_id']),
                 name=row['name'],
                 plan_tier=row['plan_tier'],
-                owner_email=row['owner_email'] or 'unknown',
+                owner_email=owner_display,
                 subdomain=row['subdomain'],
-                custom_domain=row['custom_domain'],
+                custom_domain=None,  # Website column doesn't exist
                 is_active=row['is_active'],
                 created_at=row['created_at'],
                 updated_at=row['updated_at'],
@@ -668,13 +699,14 @@ async def update_tenant(
             except Exception as sync_err:
                 logger.error(f"Failed to sync update to org_manager: {sync_err}", exc_info=True)
             
+            owner_display = await resolve_owner_display(owner_id)
             return TenantResponse(
-                organization_id=row['id'],
+                organization_id=str(row['id']),
                 name=row['name'],
                 plan_tier=plan_tier,
-                owner_email=owner_id or 'unknown',
+                owner_email=owner_display,
                 subdomain=row.get('slug'),
-                custom_domain=row.get('website'),
+                custom_domain=None,  # Website column doesn't exist
                 is_active=row['is_active'],
                 created_at=row['created_at'],
                 updated_at=row['updated_at'],

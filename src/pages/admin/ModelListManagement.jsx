@@ -90,10 +90,10 @@ const tierOptions = [
 
 // Default app tabs
 const defaultApps = [
-  { id: 'global', name: 'Global', description: 'Default models for all apps' },
-  { id: 'bolt', name: 'Bolt.diy', description: 'AI development environment' },
+  { id: null, name: 'Global', description: 'Default models for all apps' },
+  { id: 'bolt-diy', name: 'Bolt.diy', description: 'AI development environment' },
   { id: 'presenton', name: 'Presenton', description: 'AI presentations' },
-  { id: 'openwebui', name: 'Open-WebUI', description: 'Chat interface' }
+  { id: 'open-webui', name: 'Open-WebUI', description: 'Chat interface' }
 ];
 
 const ModelListManagement = () => {
@@ -545,7 +545,7 @@ const ModelListManagement = () => {
   useEffect(() => {
     if (lists.length > 0) {
       const appId = defaultApps[tabValue]?.id;
-      const list = lists.find(l => l.app_id === appId);
+      const list = lists.find(l => l.app_identifier === appId);
       if (list) {
         setSelectedList(list);
       } else {

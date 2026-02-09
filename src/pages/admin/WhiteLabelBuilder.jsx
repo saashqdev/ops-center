@@ -93,8 +93,26 @@ const WhiteLabelBuilder = () => {
       });
       if (!response.ok) throw new Error('Failed to fetch white-label configuration');
       const data = await response.json();
-      setConfig(data);
-      setLogoPreview(data.logoUrl);
+      
+      // Extract config from wrapped response and transform to flat structure
+      const rawConfig = data.config || data;
+      
+      // Transform nested backend structure to flat frontend structure
+      const transformedConfig = {
+        companyName: rawConfig.branding?.company_name || rawConfig.companyName || '',
+        companySubtitle: rawConfig.branding?.company_subtitle || rawConfig.companySubtitle || '',
+        logoUrl: rawConfig.branding?.logo_url || rawConfig.logoUrl || '',
+        templateBase: rawConfig.templateBase || 'default',
+        primaryColor: rawConfig.theme?.primary || rawConfig.primaryColor || '#6366f1',
+        secondaryColor: rawConfig.theme?.secondary || rawConfig.secondaryColor || '#8b5cf6',
+        accentColor: rawConfig.theme?.accent || rawConfig.accentColor || '#ec4899',
+        customDomain: rawConfig.customDomain || '',
+        hideAttribution: rawConfig.hideAttribution || false,
+        customCSS: rawConfig.customCSS || ''
+      };
+      
+      setConfig(transformedConfig);
+      setLogoPreview(transformedConfig.logoUrl);
     } catch (err) {
       setError(err.message);
       console.error('Error fetching config:', err);
@@ -110,7 +128,7 @@ const WhiteLabelBuilder = () => {
       });
       if (!response.ok) throw new Error('Failed to fetch templates');
       const data = await response.json();
-      setTemplates(data);
+      setTemplates(data.templates || data || []);
     } catch (err) {
       console.error('Error fetching templates:', err);
     }
@@ -123,7 +141,7 @@ const WhiteLabelBuilder = () => {
       });
       if (!response.ok) throw new Error('Failed to fetch color presets');
       const data = await response.json();
-      setColorPresets(data);
+      setColorPresets(data.presets || data || []);
     } catch (err) {
       console.error('Error fetching color presets:', err);
     }
@@ -236,11 +254,12 @@ const WhiteLabelBuilder = () => {
   };
 
   const applyColorPreset = (preset) => {
+    const colors = preset.colors || preset;
     setConfig(prev => ({
       ...prev,
-      primaryColor: preset.primary,
-      secondaryColor: preset.secondary,
-      accentColor: preset.accent
+      primaryColor: colors.primary,
+      secondaryColor: colors.secondary,
+      accentColor: colors.accent
     }));
     setSuccessMessage(`Applied "${preset.name}" color preset`);
   };
@@ -396,21 +415,24 @@ const WhiteLabelBuilder = () => {
             Quick Presets
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {colorPresets.map((preset) => (
-              <Chip
-                key={preset.id}
-                label={preset.name}
-                onClick={() => applyColorPreset(preset)}
-                sx={{
-                  background: `linear-gradient(135deg, ${preset.primary} 0%, ${preset.secondary} 50%, ${preset.accent} 100%)`,
-                  color: 'white',
-                  fontWeight: 'bold',
-                  '&:hover': {
-                    opacity: 0.8
-                  }
-                }}
-              />
-            ))}
+            {colorPresets.map((preset) => {
+              const colors = preset.colors || preset;
+              return (
+                <Chip
+                  key={preset.id}
+                  label={preset.name}
+                  onClick={() => applyColorPreset(preset)}
+                  sx={{
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.accent} 100%)`,
+                    color: 'white',
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      opacity: 0.8
+                    }
+                  }}
+                />
+              );
+            })}
           </Stack>
         </Box>
       )}
@@ -804,7 +826,7 @@ const WhiteLabelBuilder = () => {
           <PaletteIcon fontSize="large" />
           White Label Builder
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: '#D1D5DB' }}>
           Customize the branding and appearance of your Ops-Center instance
         </Typography>
       </Box>
