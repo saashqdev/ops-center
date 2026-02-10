@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/v1/my-apps", tags=["my-apps"])
 
 class AppResponse(BaseModel):
     """App available to user"""
-    id: int
+    id: str  # UUID as string
     name: str
     slug: str
     description: str
@@ -29,6 +29,8 @@ class AppResponse(BaseModel):
     category: str
     feature_key: Optional[str]
     access_type: str  # 'tier_included', 'premium_purchased', 'upgrade_required'
+    price: Optional[float] = 0.0
+    billing_type: Optional[str] = 'monthly'
 
 
 # =============================================================================
@@ -221,7 +223,7 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
                 continue
 
             authorized_apps.append({
-                'id': app_dict['id'],
+                'id': str(app_dict['id']),  # Convert UUID to string
                 'name': app_dict['name'],
                 'slug': app_dict['slug'],
                 'description': app_dict['description'] or '',
@@ -297,7 +299,7 @@ async def get_marketplace_apps(user_tier: str = Depends(get_current_user_tier)):
             access_type = 'premium_purchase' if app_dict['base_price'] > 0 else 'upgrade_required'
 
             marketplace_apps.append({
-                'id': app_dict['id'],
+                'id': str(app_dict['id']),  # Convert UUID to string
                 'name': app_dict['name'],
                 'slug': app_dict['slug'],
                 'description': app_dict['description'] or '',

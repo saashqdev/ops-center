@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardMedia,
+  CardActions,
   Typography,
   Button,
   CircularProgress,
@@ -42,6 +43,7 @@ const AppMarketplace = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('📦 AppMarketplace Component Loaded - v2.10.02:15');
     fetchMarketplaceApps();
   }, []);
 
@@ -113,26 +115,41 @@ const AppMarketplace = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Box 
+        sx={{ 
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)'
+          },
+          gap: 3,
+          width: '100%'
+        }}
+      >
         {apps.map((app) => {
           const hostBadge = getHostBadge(app.launch_url);
           const isPurchasable = app.access_type === 'premium_purchase';
           const requiresUpgrade = app.access_type === 'upgrade_required';
 
           return (
-            <Grid item xs={12} sm={6} md={4} key={app.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4
-                  }
-                }}
-              >
+            <Card
+              key={app.id}
+              sx={{
+                height: '100%',
+                minHeight: 480,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative',
+                overflow: 'hidden',
+                '&:hover': {
+                  boxShadow: 6,
+                  transform: 'translateY(-4px)',
+                  transition: 'all 0.3s'
+                }
+              }}
+            >
                 {/* App Icon */}
                 <Box
                   sx={{
@@ -141,7 +158,7 @@ const AppMarketplace = () => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     bgcolor: 'background.default',
-                    minHeight: 140,
+                    height: 140,
                     position: 'relative'
                   }}
                 >
@@ -173,29 +190,51 @@ const AppMarketplace = () => {
                 </Box>
 
                 {/* App Details */}
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h6" gutterBottom>
+                <CardContent sx={{ 
+                  flex: 1,
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  pt: 2,
+                  pb: 1,
+                  minHeight: 0,
+                  overflow: 'hidden'
+                }}>
+                  <Typography variant="h6" gutterBottom sx={{ 
+                    minHeight: 32,
+                    mb: 1,
+                    fontWeight: 'bold'
+                  }}>
                     {app.name}
                   </Typography>
 
-                  {app.description && (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mb: 2, flexGrow: 1 }}
-                    >
-                      {app.description}
-                    </Typography>
-                  )}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ 
+                      mb: 2,
+                      minHeight: 48,
+                      maxHeight: 48,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}
+                  >
+                    {app.description || 'No description available'}
+                  </Typography>
 
-                  <Divider sx={{ my: 2 }} />
+                  {/* Spacer */}
+                  <Box sx={{ flexGrow: 1 }} />
+
+                  <Divider sx={{ mb: 2 }} />
 
                   {/* Pricing Info */}
-                  <Box sx={{ mb: 2 }}>
+                  <Box sx={{ mt: 1, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
                     {isPurchasable && (
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <MoneyIcon color="primary" />
-                        <Typography variant="h6" color="primary">
+                      <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
+                        <MoneyIcon color="primary" fontSize="small" />
+                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                           ${app.price || 0}/{app.billing_type || 'month'}
                         </Typography>
                       </Stack>
@@ -206,33 +245,19 @@ const AppMarketplace = () => {
                         label="Upgrade Required"
                         color="warning"
                         size="small"
+                        sx={{ width: '100%' }}
                       />
                     )}
                   </Box>
+                </CardContent>
 
-                  {/* Features (if available) */}
-                  {app.features && app.features.length > 0 && (
-                    <List dense sx={{ mb: 2 }}>
-                      {app.features.slice(0, 3).map((feature, idx) => (
-                        <ListItem key={idx} disableGutters>
-                          <ListItemIcon sx={{ minWidth: 32 }}>
-                            <CheckIcon color="success" fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={feature}
-                            primaryTypographyProps={{ variant: 'body2' }}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
-
-                  {/* Action Button */}
+                <CardActions sx={{ p: 2, pt: 0, mt: 'auto' }}>
                   {isPurchasable && (
                     <Button
                       variant="contained"
                       color="primary"
                       fullWidth
+                      size="large"
                       startIcon={<ShoppingCartIcon />}
                       onClick={() => handlePurchase(app)}
                     >
@@ -244,18 +269,18 @@ const AppMarketplace = () => {
                       variant="outlined"
                       color="warning"
                       fullWidth
+                      size="large"
                       startIcon={<UpgradeIcon />}
                       onClick={() => handleUpgrade(app)}
                     >
                       Upgrade Tier
                     </Button>
                   )}
-                </CardContent>
+                </CardActions>
               </Card>
-            </Grid>
           );
         })}
-      </Grid>
+      </Box>
 
       {apps.length === 0 && (
         <Box textAlign="center" py={8}>
