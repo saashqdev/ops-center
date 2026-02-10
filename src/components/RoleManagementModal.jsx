@@ -120,25 +120,36 @@ const RoleManagementModal = ({
   // Initialize selected roles from user
   useEffect(() => {
     if (user && user.roles) {
-      setSelectedRoles(user.roles.filter(r => r.startsWith('brigade-')));
+      // Handle both string array and object array formats
+      const roleNames = user.roles.map(r => {
+        if (typeof r === 'string') return r;
+        if (r && typeof r === 'object' && r.name) return r.name;
+        return null;
+      }).filter(r => r && typeof r === 'string' && r.startsWith('brigade-'));
+      setSelectedRoles(roleNames);
     }
   }, [user]);
 
   // Filter available roles based on search and type
   const filteredRoles = availableRoles.filter(role => {
+    // Handle both string and object formats
+    const roleName = typeof role === 'string' ? role : role.name;
+    const roleDesc = typeof role === 'object' ? role.description : roleHierarchy[roleName]?.description;
+    
     // Filter by search query
     const matchesSearch =
       !searchQuery ||
-      role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      roleHierarchy[role]?.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      roleName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      roleDesc?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      roleHierarchy[roleName]?.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
     // Filter by role type
     const matchesType =
       roleTypeFilter === 'all' ||
-      roleHierarchy[role]?.type === roleTypeFilter;
+      roleHierarchy[roleName]?.type === roleTypeFilter;
 
     // Exclude already selected roles
-    const notSelected = !selectedRoles.includes(role);
+    const notSelected = !selectedRoles.includes(roleName);
 
     return matchesSearch && matchesType && notSelected;
   });
@@ -323,7 +334,7 @@ const RoleManagementModal = ({
           <Divider sx={{ mb: 3 }} />
 
           {/* Dual Panel Layout */}
-          <Grid container spacing={2} sx={{ height: '400px' }}>
+          <Grid container spacing={2} sx={{ minHeight: '300px', mb: 3 }}>
             {/* Left Panel - Available Roles */}
             <Grid item xs={12} md={5}>
               <Paper
@@ -375,39 +386,42 @@ const RoleManagementModal = ({
                 {/* Available roles list */}
                 <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
                   <List dense>
-                    {filteredRoles.map(role => (
+                    {filteredRoles.map(role => {
+                      const roleName = typeof role === 'string' ? role : role.name;
+                      const roleDesc = typeof role === 'object' ? role.description : roleHierarchy[roleName]?.description;
+                      return (
                       <ListItem
-                        key={role}
+                        key={roleName}
                         disablePadding
                         secondaryAction={
                           <IconButton
                             edge="end"
                             size="small"
-                            onClick={() => handleAssignRole(role)}
+                            onClick={() => handleAssignRole(roleName)}
                             disabled={loading}
                           >
                             <ArrowForwardIcon fontSize="small" />
                           </IconButton>
                         }
                       >
-                        <ListItemButton onClick={() => handleAssignRole(role)} disabled={loading}>
-                          <ListItemIcon>{getRoleIcon(role)}</ListItemIcon>
+                        <ListItemButton onClick={() => handleAssignRole(roleName)} disabled={loading}>
+                          <ListItemIcon>{getRoleIcon(roleName)}</ListItemIcon>
                           <ListItemText
                             primary={
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="body2">{typeof role === 'string' ? role.replace(/^brigade-(platform-)?/, '') : String(role || '')}</Typography>
+                                <Typography variant="body2">{roleName.replace(/^brigade-(platform-)?/, '')}</Typography>
                                 <Chip
-                                  label={roleHierarchy[role]?.level || 0}
+                                  label={roleHierarchy[roleName]?.level || 0}
                                   size="small"
-                                  color={getRoleLevelColor(role)}
+                                  color={getRoleLevelColor(roleName)}
                                 />
                               </Box>
                             }
-                            secondary={roleHierarchy[role]?.description || 'No description'}
+                            secondary={roleDesc || roleHierarchy[roleName]?.description || 'No description'}
                           />
                         </ListItemButton>
                       </ListItem>
-                    ))}
+                    )})}}
                     {filteredRoles.length === 0 && (
                       <Box sx={{ textAlign: 'center', py: 3 }}>
                         <Typography variant="body2" color="text.secondary">
@@ -514,11 +528,13 @@ const RoleManagementModal = ({
           </Grid>
 
           {/* Permission Matrix */}
-          <PermissionMatrix
-            roles={selectedRoles}
-            rolePermissions={getRolePermissions()}
-            expanded={selectedRoles.length > 0}
-          />
+          <Box sx={{ mt: 3 }}>
+            <PermissionMatrix
+              roles={selectedRoles}
+              rolePermissions={getRolePermissions()}
+              expanded={selectedRoles.length > 0}
+            />
+          </Box>
         </DialogContent>
 
         <DialogActions>

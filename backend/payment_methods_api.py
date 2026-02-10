@@ -151,12 +151,20 @@ async def list_payment_methods(
         PaymentMethodsListResponse with all cards and default
     """
     try:
+        # Check if Stripe is configured
+        import stripe
+        import os
+        if not os.getenv("STRIPE_SECRET_KEY") or not stripe.api_key:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Payment system is not configured. Please contact your administrator to set up Stripe integration."
+            )
+        
         # Get user's email using helper
         user_email = get_user_email(user)
 
         # Try to get or create Stripe customer directly
         # First, try to find existing customer by email
-        import stripe
         try:
             customers = stripe.Customer.list(email=user_email, limit=1)
             if customers.data:
