@@ -267,6 +267,15 @@ export const routes = {
             icon: 'ChatBubbleLeftRightIcon',
             status: 'active'
           },
+          claudeAgents: {
+            path: '/admin/claude-agents',
+            component: 'ClaudeAgents',
+            roles: ['admin'],
+            name: 'Claude Agents',
+            description: 'Visual flow builder for Claude AI agent workflows with pre-built templates',
+            icon: 'CpuChipIcon',
+            status: 'active'
+          },
           models: {
             path: '/admin/system/models',
             component: 'AIModelManagement',
