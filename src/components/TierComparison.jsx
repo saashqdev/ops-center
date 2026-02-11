@@ -13,7 +13,7 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Grid, Card, CardContent, Typography, Button,
+  Box, Card, CardContent, Typography, Button,
   Chip, List, ListItem, ListItemIcon, ListItemText,
   CircularProgress, Alert
 } from '@mui/material';
@@ -180,7 +180,15 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
       )}
 
       {/* Tier Cards */}
-      <Grid container spacing={3} sx={{ mb: 6, alignItems: 'stretch' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+          gap: 3,
+          mb: 6,
+          alignItems: 'stretch'
+        }}
+      >
         {Object.entries(tierFeatures).map(([tierCode, tier]) => {
           const TierIcon = tierIcons[tierCode];
           const isCurrentTier = tierCode === userTier;
@@ -188,10 +196,11 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
           const colors = tierColors[tierCode];
 
           return (
-            <Grid item xs={12} sm={6} md={3} key={tierCode} sx={{ display: 'flex' }}>
+            <Box key={tierCode} sx={{ display: 'flex' }}>
               <Card
                 sx={{
                   width: '100%',
+                  minHeight: 560,
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
@@ -247,21 +256,29 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   </Box>
                 )}
 
-                <CardContent sx={{ 
-                  flexGrow: 1, 
-                  pt: isPopular ? 5 : isCurrentTier ? 6 : 3, 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  height: '100%'
-                }}>
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    pt: isPopular ? 5 : isCurrentTier ? 6 : 3,
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
                   {/* Tier Icon & Name */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                     <TierIcon sx={{ fontSize: 40, color: colors.main }} />
                     <Box>
-                      <Typography variant="h5" fontWeight={600}>
+                      <Typography
+                        variant="h5"
+                        fontWeight={600}
+                        sx={{ color: isPopular ? 'rgb(209, 213, 219)' : undefined }}
+                      >
                         {tier.name}
                       </Typography>
-                      <Typography variant="body2" color="textSecondary">
+                      <Typography
+                        variant="body2"
+                        sx={{ color: isPopular ? 'rgb(209, 213, 219)' : 'text.secondary' }}
+                      >
                         {tier.tagline}
                       </Typography>
                     </Box>
@@ -272,7 +289,11 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                     <Typography variant="h3" fontWeight={700} component="span" sx={{ color: colors.main }}>
                       {tier.price}
                     </Typography>
-                    <Typography variant="body1" color="textSecondary" component="span">
+                    <Typography
+                      variant="body1"
+                      component="span"
+                      sx={{ color: isPopular ? 'rgb(209, 213, 219)' : 'text.secondary' }}
+                    >
                       /{tier.period}
                     </Typography>
                     {tierCode === 'trial' && (
@@ -283,7 +304,10 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   </Box>
 
                   {/* Description */}
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 3, minHeight: 64 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: isPopular ? 'rgb(209, 213, 219)' : 'text.secondary', mb: 3, minHeight: 64 }}
+                  >
                     {tier.description}
                   </Typography>
 
@@ -296,7 +320,10 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                         </ListItemIcon>
                         <ListItemText
                           primary={feature}
-                          primaryTypographyProps={{ variant: 'body2' }}
+                          primaryTypographyProps={{
+                            variant: 'body2',
+                            sx: isPopular ? { color: 'rgb(209, 213, 219)' } : undefined
+                          }}
                         />
                       </ListItem>
                     ))}
@@ -304,7 +331,10 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                       <ListItem disableGutters>
                         <ListItemText
                           primary={`+${tier.features.length - 6} more features`}
-                          primaryTypographyProps={{ variant: 'caption', color: 'textSecondary' }}
+                          primaryTypographyProps={{
+                            variant: 'caption',
+                            sx: { color: isPopular ? 'rgb(209, 213, 219)' : 'text.secondary' }
+                          }}
                         />
                       </ListItem>
                     )}
@@ -335,14 +365,14 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   </Button>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           );
         })}
-      </Grid>
+      </Box>
 
       {/* Feature Comparison Note */}
       <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography variant="body2" color="textSecondary">
+        <Typography variant="body2" sx={{ color: 'rgb(209, 213, 219)' }}>
           All plans include access to UC-Cloud infrastructure, OpenAI-compatible APIs, and community support.
         </Typography>
         <Button

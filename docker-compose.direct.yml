@@ -82,6 +82,8 @@ services:
       # Mount host user/group files as read-only for Local Users feature
       - /etc/passwd:/host/etc/passwd:ro
       - /etc/group:/host/etc/group:ro
+      # Serve latest frontend build
+      - ./dist:/app/dist:ro
       # Avatar storage (November 2025 - CORS fix)
       - ./avatars:/app/avatars
       # Mount Traefik directory for SSL management

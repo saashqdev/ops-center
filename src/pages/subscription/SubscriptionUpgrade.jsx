@@ -516,8 +516,7 @@ export default function SubscriptionUpgrade() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        style={{ alignItems: 'stretch' }}
+        style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}
       >
         {Array.isArray(plans) && plans.map((plan, index) => {
           const features = getFeaturesForTier(plan.id) || [];
@@ -530,14 +529,18 @@ export default function SubscriptionUpgrade() {
             <motion.div
               key={plan.id}
               variants={itemVariants}
-              className={`relative ${theme.card} rounded-xl p-6 border-2 transition-all flex flex-col h-full ${
-                isPopular
-                  ? 'border-purple-500 shadow-xl shadow-purple-500/20 scale-105'
-                  : isCurrentPlan
-                  ? 'border-blue-500 shadow-lg shadow-blue-500/20'
-                  : 'border-slate-700 hover:border-slate-600'
-              }`}
+              style={{ flex: '0 1 calc(25% - 18px)', minWidth: '270px', maxWidth: 'calc(25% - 18px)' }}
             >
+              <div
+                className={`relative ${theme.card} rounded-xl p-6 border-2 transition-all flex flex-col ${
+                  isPopular
+                    ? 'border-purple-500 shadow-xl shadow-purple-500/20'
+                    : isCurrentPlan
+                    ? 'border-blue-500 shadow-lg shadow-blue-500/20'
+                    : 'border-slate-700 hover:border-slate-600'
+                }`}
+                style={{ height: '620px', display: 'flex', flexDirection: 'column' }}
+              >
               {/* Popular Badge */}
               {isPopular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -553,7 +556,7 @@ export default function SubscriptionUpgrade() {
               )}
 
               {/* Plan Header */}
-              <div className="text-center mb-6 pt-4">
+              <div className="text-center mb-6 pt-4" style={{ minHeight: '140px' }}>
                 <h3 className={`text-2xl font-bold ${theme.text.primary} mb-2`}>
                   {plan.display_name}
                 </h3>
@@ -574,7 +577,7 @@ export default function SubscriptionUpgrade() {
               </div>
 
               {/* Features List */}
-              <div className="space-y-3 mb-6 flex-grow">
+              <div className="space-y-3 mb-6">
                 {features.slice(0, 6).map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
@@ -590,8 +593,11 @@ export default function SubscriptionUpgrade() {
                 )}
               </div>
 
+              {/* Spacer */}
+              <div style={{ flexGrow: 1 }} />
+
               {/* Action Button */}
-              <div className="mt-auto">
+              <div>
                 {isCurrentPlan ? (
                   <button
                     disabled
@@ -618,6 +624,7 @@ export default function SubscriptionUpgrade() {
                     </button>
                   </div>
                 )}
+              </div>
               </div>
             </motion.div>
           );

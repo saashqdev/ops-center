@@ -386,42 +386,43 @@ const RoleManagementModal = ({
                 {/* Available roles list */}
                 <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
                   <List dense>
-                    {filteredRoles.map(role => {
+                    {filteredRoles.map((role) => {
                       const roleName = typeof role === 'string' ? role : role.name;
                       const roleDesc = typeof role === 'object' ? role.description : roleHierarchy[roleName]?.description;
                       return (
-                      <ListItem
-                        key={roleName}
-                        disablePadding
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            size="small"
-                            onClick={() => handleAssignRole(roleName)}
-                            disabled={loading}
-                          >
-                            <ArrowForwardIcon fontSize="small" />
-                          </IconButton>
-                        }
-                      >
-                        <ListItemButton onClick={() => handleAssignRole(roleName)} disabled={loading}>
-                          <ListItemIcon>{getRoleIcon(roleName)}</ListItemIcon>
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="body2">{roleName.replace(/^brigade-(platform-)?/, '')}</Typography>
-                                <Chip
-                                  label={roleHierarchy[roleName]?.level || 0}
-                                  size="small"
-                                  color={getRoleLevelColor(roleName)}
-                                />
-                              </Box>
-                            }
-                            secondary={roleDesc || roleHierarchy[roleName]?.description || 'No description'}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    )})}}
+                        <ListItem
+                          key={roleName}
+                          disablePadding
+                          secondaryAction={
+                            <IconButton
+                              edge="end"
+                              size="small"
+                              onClick={() => handleAssignRole(roleName)}
+                              disabled={loading}
+                            >
+                              <ArrowForwardIcon fontSize="small" />
+                            </IconButton>
+                          }
+                        >
+                          <ListItemButton onClick={() => handleAssignRole(roleName)} disabled={loading}>
+                            <ListItemIcon>{getRoleIcon(roleName)}</ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Typography variant="body2">{roleName.replace(/^brigade-(platform-)?/, '')}</Typography>
+                                  <Chip
+                                    label={roleHierarchy[roleName]?.level || 0}
+                                    size="small"
+                                    color={getRoleLevelColor(roleName)}
+                                  />
+                                </Box>
+                              }
+                              secondary={roleDesc || roleHierarchy[roleName]?.description || 'No description'}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      );
+                    })}
                     {filteredRoles.length === 0 && (
                       <Box sx={{ textAlign: 'center', py: 3 }}>
                         <Typography variant="body2" color="text.secondary">

@@ -226,7 +226,7 @@ export default function TierComparison() {
 
               <CardContent sx={{ flexGrow: 1, pt: tier.popular ? 4 : 3 }}>
                 {/* Tier Name */}
-                <Typography variant="h5" fontWeight={600} gutterBottom>
+                <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: tier.popular ? 'rgb(209, 213, 219)' : undefined }}>
                   {tier.name}
                 </Typography>
 
@@ -245,7 +245,16 @@ export default function TierComparison() {
                   label={`${tier.credits === 10 ? '$10 free' : `$${tier.credits}`} in credits`}
                   color={tier.popular ? 'primary' : 'default'}
                   variant="outlined"
-                  sx={{ mb: 2 }}
+                  sx={{ 
+                    mb: 2,
+                    ...(tier.popular && { 
+                      color: 'rgb(209, 213, 219) !important',
+                      borderColor: 'rgb(209, 213, 219)',
+                      '& .MuiChip-label': {
+                        color: 'rgb(209, 213, 219)'
+                      }
+                    }) 
+                  }}
                 />
 
                 {/* Description */}
@@ -264,7 +273,10 @@ export default function TierComparison() {
                       </ListItemIcon>
                       <ListItemText
                         primary={feature}
-                        primaryTypographyProps={{ variant: 'body2' }}
+                        primaryTypographyProps={{ 
+                          variant: 'body2',
+                          sx: tier.popular ? { color: 'rgb(209, 213, 219)' } : undefined
+                        }}
                       />
                     </ListItem>
                   ))}

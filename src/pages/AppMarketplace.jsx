@@ -53,7 +53,20 @@ const AppMarketplace = () => {
       if (!response.ok) throw new Error('Failed to fetch marketplace apps');
 
       const data = await response.json();
-      setApps(data);
+      const normalizedApps = Array.isArray(data)
+        ? data.map((app) => {
+            const appName = app?.name?.trim().toLowerCase();
+            const iconUrl = app?.icon_url?.trim().toLowerCase();
+
+            if ((appName && appName.includes('claude')) || (iconUrl && iconUrl.includes('claude'))) {
+              return { ...app, icon_url: '/logos/claude-color.png' };
+            }
+
+            return app;
+          })
+        : data;
+
+      setApps(normalizedApps);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching marketplace apps:', err);
@@ -88,6 +101,19 @@ const AppMarketplace = () => {
     window.location.href = '/admin/upgrade';
   };
 
+  const getAppIconUrl = (app) => {
+    const appName = app?.name?.trim().toLowerCase();
+    const iconUrl = app?.icon_url?.trim().toLowerCase();
+
+    if ((appName && appName.includes('claude')) || (iconUrl && iconUrl.includes('claude'))) {
+      return '/logos/claude-color.png';
+    }
+
+    if (app?.icon_url) return app.icon_url;
+
+    return '';
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -117,12 +143,8 @@ const AppMarketplace = () => {
 
       <Box 
         sx={{ 
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            md: 'repeat(3, 1fr)'
-          },
+          display: 'flex',
+          flexWrap: 'wrap',
           gap: 3,
           width: '100%'
         }}
@@ -131,14 +153,28 @@ const AppMarketplace = () => {
           const hostBadge = getHostBadge(app.launch_url);
           const isPurchasable = app.access_type === 'premium_purchase';
           const requiresUpgrade = app.access_type === 'upgrade_required';
+          const appIconUrl = getAppIconUrl(app);
 
           return (
             <Card
               key={app.id}
               sx={{
-                height: '100%',
-                minHeight: 480,
-                width: '100%',
+                flex: {
+                  xs: '1 1 100%',
+                  sm: '0 1 calc(50% - 12px)',
+                  md: '0 1 calc(33.333% - 16px)'
+                },
+                minWidth: {
+                  xs: '100%',
+                  sm: 'calc(50% - 12px)',
+                  md: 'calc(33.333% - 16px)'
+                },
+                maxWidth: {
+                  xs: '100%',
+                  sm: 'calc(50% - 12px)',
+                  md: 'calc(33.333% - 16px)'
+                },
+                height: 500,
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
@@ -163,7 +199,7 @@ const AppMarketplace = () => {
                   }}
                 >
                   {/* Host Badge */}
-                  <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
+                  <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
                     <Chip
                       icon={hostBadge.icon}
                       label={hostBadge.label}
@@ -173,10 +209,10 @@ const AppMarketplace = () => {
                     />
                   </Box>
 
-                  {app.icon_url ? (
+                  {appIconUrl ? (
                     <CardMedia
                       component="img"
-                      image={app.icon_url}
+                      image={appIconUrl}
                       alt={app.name}
                       sx={{
                         width: 80,
