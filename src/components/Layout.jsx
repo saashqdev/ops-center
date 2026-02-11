@@ -920,9 +920,9 @@ export default function Layout({ children }) {
                       onToggle={() => toggleSection('platform')}
                     >
                       <NavigationItem collapsed={sidebarCollapsed}
-                        name="Unicorn Brigade"
-                        href="/admin/brigade"
-                        icon={iconMap.SparklesIcon}
+                        name="Claude Agents"
+                        href="/admin/claude-agents"
+                        icon={iconMap.CpuChipIcon}
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}

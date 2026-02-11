@@ -2198,6 +2198,64 @@ async def require_user(current_user: dict = Depends(get_current_user)):
         )
     return current_user
 
+# My Apps API
+
+@app.get("/api/v1/my-apps/authorized")
+async def get_my_apps_authorized(current_user: dict = Depends(get_current_user)):
+    """Get apps the user has access to based on their subscription and add-ons"""
+    try:
+        # Get user ID - fallback to 'default' if not specified
+        user_id = current_user.get("preferred_username") or current_user.get("username") or current_user.get("sub") or "default"
+        
+        logger.info(f"Fetching apps for user: {user_id}")
+        
+        # Connect to Lago database to fetch user add-ons
+        lago_conn = await asyncpg.connect(os.getenv('LAGO_DATABASE_URL', 'postgresql://unicorn:s3cr3t@lago-db:5432/lago'))
+        
+        try:
+            # Query user's active add-ons with app details
+            query = """
+                SELECT 
+                    a.id,
+                    a.name,
+                    a.slug,
+                    a.description,
+                    a.icon_url,
+                    a.launch_url,
+                    ua.status
+                FROM user_add_ons ua
+                JOIN add_ons a ON ua.add_on_id = a.id
+                WHERE ua.user_id = $1 
+                AND ua.status = 'active'
+                AND a.is_active = true
+                ORDER BY a.name
+            """
+            
+            rows = await lago_conn.fetch(query, user_id)
+            
+            logger.info(f"Found {len(rows)} active apps for user {user_id}")
+            
+            apps = []
+            for row in rows:
+                apps.append({
+                    "id": str(row["id"]),
+                    "name": row["name"],
+                    "slug": row["slug"],
+                    "description": row["description"] or "",
+                    "icon_url": row["icon_url"],
+                    "launch_url": row["launch_url"] or f"/{row['slug']}",
+                    "status": row["status"]
+                })
+            
+            return apps
+            
+        finally:
+            await lago_conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error fetching user apps: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch apps: {str(e)}")
+
 # API Routes
 
 @app.get("/api/v1/system/status")

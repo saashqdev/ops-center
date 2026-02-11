@@ -252,7 +252,13 @@ def encrypt_api_key(api_key: str, encryption_key: str) -> str:
     """Encrypt API key for storage"""
     try:
         from cryptography.fernet import Fernet
-        f = Fernet(encryption_key.encode())
+        # Fernet expects the key as bytes, but already base64-encoded
+        # If it's a string, encode to bytes without re-encoding the base64
+        if isinstance(encryption_key, str):
+            key_bytes = encryption_key.encode('ascii')
+        else:
+            key_bytes = encryption_key
+        f = Fernet(key_bytes)
         return f.encrypt(api_key.encode()).decode()
     except ImportError:
         logger.warning("cryptography package not installed, storing key as base64")
@@ -264,7 +270,12 @@ def decrypt_api_key(encrypted_key: str, encryption_key: str) -> str:
     """Decrypt API key from storage"""
     try:
         from cryptography.fernet import Fernet
-        f = Fernet(encryption_key.encode())
+        # Fernet expects the key as bytes, but already base64-encoded
+        if isinstance(encryption_key, str):
+            key_bytes = encryption_key.encode('ascii')
+        else:
+            key_bytes = encryption_key
+        f = Fernet(key_bytes)
         return f.decrypt(encrypted_key.encode()).decode()
     except ImportError:
         import base64

@@ -400,7 +400,11 @@ export default function UpgradeFlow() {
       <Stepper activeStep={activeStep} sx={{ mb: 6 }}>
         {steps.map((label) => (
           <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+            <StepLabel sx={{ 
+              '& .MuiStepLabel-label': { color: 'rgb(209, 213, 219)' },
+              '& .MuiStepLabel-label.Mui-active': { color: 'rgb(209, 213, 219)' },
+              '& .MuiStepLabel-label.Mui-completed': { color: 'rgb(209, 213, 219)' }
+            }}>{label}</StepLabel>
           </Step>
         ))}
       </Stepper>

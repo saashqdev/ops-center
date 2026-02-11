@@ -260,7 +260,7 @@ export default function MobileNavigation({ user, currentPath }) {
       icon: <AutoAwesomeIcon />,
       visible: userRole === 'admin',
       children: [
-        { label: 'Unicorn Brigade', path: '/admin/brigade', icon: <AutoAwesomeIcon /> },
+        { label: 'Claude Agents', path: '/admin/claude-agents', icon: <AutoAwesomeIcon /> },
         { label: 'Center-Deep Search', path: 'https://search.your-domain.com', icon: <SearchIcon />, external: true },
         { label: 'Email Settings', path: '/admin/platform/email-settings', icon: <EmailIcon /> },
         { label: 'Platform Settings', path: '/admin/platform/settings', icon: <SettingsIcon /> }

@@ -517,6 +517,7 @@ export default function SubscriptionUpgrade() {
         initial="hidden"
         animate="visible"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        style={{ alignItems: 'stretch' }}
       >
         {Array.isArray(plans) && plans.map((plan, index) => {
           const features = getFeaturesForTier(plan.id) || [];
@@ -529,7 +530,7 @@ export default function SubscriptionUpgrade() {
             <motion.div
               key={plan.id}
               variants={itemVariants}
-              className={`relative ${theme.card} rounded-xl p-6 border-2 transition-all ${
+              className={`relative ${theme.card} rounded-xl p-6 border-2 transition-all flex flex-col h-full ${
                 isPopular
                   ? 'border-purple-500 shadow-xl shadow-purple-500/20 scale-105'
                   : isCurrentPlan
@@ -573,7 +574,7 @@ export default function SubscriptionUpgrade() {
               </div>
 
               {/* Features List */}
-              <div className="space-y-3 mb-6 min-h-[240px]">
+              <div className="space-y-3 mb-6 flex-grow">
                 {features.slice(0, 6).map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
@@ -590,32 +591,34 @@ export default function SubscriptionUpgrade() {
               </div>
 
               {/* Action Button */}
-              {isCurrentPlan ? (
-                <button
-                  disabled
-                  className="w-full bg-slate-700 text-slate-500 rounded-lg py-3 text-sm font-medium cursor-not-allowed"
-                >
-                  Current Plan
-                </button>
-              ) : (
-                <div className="space-y-2">
+              <div className="mt-auto">
+                {isCurrentPlan ? (
                   <button
-                    onClick={() => handlePreviewUpgrade(plan)}
-                    className="w-full border border-purple-500 text-purple-400 hover:bg-purple-500/10 rounded-lg py-3 text-sm font-medium transition-colors"
+                    disabled
+                    className="w-full bg-slate-700 text-slate-500 rounded-lg py-3 text-sm font-medium cursor-not-allowed"
                   >
-                    Preview Upgrade
+                    Current Plan
                   </button>
-                  <button
-                    onClick={() => handleUpgrade(plan)}
-                    disabled={checkoutLoading}
-                    className={`w-full ${theme.button} rounded-lg py-3 text-sm font-medium ${
-                      checkoutLoading ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {checkoutLoading ? 'Processing...' : 'Upgrade Now'}
-                  </button>
-                </div>
-              )}
+                ) : (
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handlePreviewUpgrade(plan)}
+                      className="w-full border border-purple-500 text-purple-400 hover:bg-purple-500/10 rounded-lg py-3 text-sm font-medium transition-colors"
+                    >
+                      Preview Upgrade
+                    </button>
+                    <button
+                      onClick={() => handleUpgrade(plan)}
+                      disabled={checkoutLoading}
+                      className={`w-full ${theme.button} rounded-lg py-3 text-sm font-medium ${
+                        checkoutLoading ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {checkoutLoading ? 'Processing...' : 'Upgrade Now'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </motion.div>
           );
         })}

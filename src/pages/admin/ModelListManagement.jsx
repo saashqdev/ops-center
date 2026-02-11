@@ -545,7 +545,13 @@ const ModelListManagement = () => {
   useEffect(() => {
     if (lists.length > 0) {
       const appId = defaultApps[tabValue]?.id;
-      const list = lists.find(l => l.app_identifier === appId);
+      // Match empty string, null, or undefined for Global tab
+      const list = lists.find(l => {
+        if (appId === null) {
+          return !l.app_identifier || l.app_identifier === '';
+        }
+        return l.app_identifier === appId;
+      });
       if (list) {
         setSelectedList(list);
       } else {
@@ -904,7 +910,7 @@ const ModelListManagement = () => {
               onClick={() => {
                 setListFormData({
                   name: `${defaultApps[tabValue]?.name} Models`,
-                  app_id: defaultApps[tabValue]?.id,
+                  app_id: defaultApps[tabValue]?.id || '',
                   description: `Curated models for ${defaultApps[tabValue]?.name}`
                 });
                 setCreateListDialogOpen(true);

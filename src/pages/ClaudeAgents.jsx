@@ -84,7 +84,9 @@ export default function ClaudeAgents() {
   const fetchFlows = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/claude-agents/flows');
+      const response = await fetch('/api/v1/claude-agents/flows', {
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to fetch flows');
       const data = await response.json();
       setFlows(data.flows || []);
@@ -99,7 +101,9 @@ export default function ClaudeAgents() {
   // Fetch API keys
   const fetchAPIKeys = async () => {
     try {
-      const response = await fetch('/api/v1/claude-agents/api-keys');
+      const response = await fetch('/api/v1/claude-agents/api-keys', {
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to fetch API keys');
       const data = await response.json();
       setApiKeys(data.api_keys || []);
@@ -111,9 +115,19 @@ export default function ClaudeAgents() {
   // Create new flow
   const createFlow = async (flowData) => {
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch('/api/v1/claude-agents/flows', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
+        },
+        credentials: 'include',
         body: JSON.stringify(flowData)
       });
 
@@ -154,9 +168,19 @@ export default function ClaudeAgents() {
     setExecutionResult(null);
 
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch(`/api/v1/claude-agents/flows/${flow.id}/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
+        },
+        credentials: 'include',
         body: JSON.stringify({
           input_data: { prompt: executePrompt }
         })
@@ -183,8 +207,18 @@ export default function ClaudeAgents() {
     if (!confirm('Are you sure you want to delete this flow?')) return;
 
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch(`/api/v1/claude-agents/flows/${flowId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': csrfData.csrf_token
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error('Failed to delete flow');
@@ -211,11 +245,19 @@ export default function ClaudeAgents() {
     try {
       const { name, description, systemPrompt, modelParams, tools, agents } = flowData;
       
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch(`/api/v1/claude-agents/flows/${selectedFlow.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
         },
+        credentials: 'include',
         body: JSON.stringify({
           name,
           description,
@@ -245,9 +287,19 @@ export default function ClaudeAgents() {
   // Add API key
   const addAPIKey = async () => {
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch('/api/v1/claude-agents/api-keys', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
+        },
+        credentials: 'include',
         body: JSON.stringify({
           key_name: apiKeyName,
           provider: apiKeyProvider,
@@ -284,7 +336,9 @@ export default function ClaudeAgents() {
 
   const fetchFlowExecutions = async (flowId) => {
     try {
-      const response = await fetch(`/api/v1/claude-agents/flows/${flowId}/executions`);
+      const response = await fetch(`/api/v1/claude-agents/flows/${flowId}/executions`, {
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to fetch executions');
       const data = await response.json();
       setExecutions(data.executions || []);

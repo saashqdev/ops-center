@@ -167,7 +167,7 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
         <Typography variant="h3" fontWeight={700} gutterBottom>
           Choose Your Plan
         </Typography>
-        <Typography variant="h6" color="textSecondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+        <Typography variant="h6" sx={{ maxWidth: 600, mx: 'auto', color: 'rgb(209, 213, 219)' }}>
           Simple, transparent pricing for every stage of your journey. Upgrade or downgrade anytime.
         </Typography>
       </Box>
@@ -180,7 +180,7 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
       )}
 
       {/* Tier Cards */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      <Grid container spacing={3} sx={{ mb: 6, alignItems: 'stretch' }}>
         {Object.entries(tierFeatures).map(([tierCode, tier]) => {
           const TierIcon = tierIcons[tierCode];
           const isCurrentTier = tierCode === userTier;
@@ -188,9 +188,10 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
           const colors = tierColors[tierCode];
 
           return (
-            <Grid item xs={12} sm={6} md={3} key={tierCode}>
+            <Grid item xs={12} sm={6} md={3} key={tierCode} sx={{ display: 'flex' }}>
               <Card
                 sx={{
+                  width: '100%',
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
@@ -199,6 +200,7 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   borderColor: isCurrentTier ? 'success.main' : isPopular ? 'primary.main' : 'divider',
                   background: isPopular ? colors.bg : undefined,
                   transition: 'all 0.3s ease',
+                  overflow: 'visible',
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: 8
@@ -210,7 +212,7 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   <Box
                     sx={{
                       position: 'absolute',
-                      top: -12,
+                      top: -16,
                       left: '50%',
                       transform: 'translateX(-50%)',
                       zIndex: 1
@@ -230,8 +232,8 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   <Box
                     sx={{
                       position: 'absolute',
-                      top: -12,
-                      right: 16,
+                      top: 12,
+                      right: 12,
                       zIndex: 1
                     }}
                   >
@@ -245,7 +247,13 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   </Box>
                 )}
 
-                <CardContent sx={{ flexGrow: 1, pt: isPopular || isCurrentTier ? 4 : 3 }}>
+                <CardContent sx={{ 
+                  flexGrow: 1, 
+                  pt: isPopular ? 5 : isCurrentTier ? 6 : 3, 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  height: '100%'
+                }}>
                   {/* Tier Icon & Name */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                     <TierIcon sx={{ fontSize: 40, color: colors.main }} />
@@ -275,12 +283,12 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                   </Box>
 
                   {/* Description */}
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 3, minHeight: 40 }}>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 3, minHeight: 64 }}>
                     {tier.description}
                   </Typography>
 
                   {/* Features */}
-                  <List dense>
+                  <List dense sx={{ flexGrow: 1, mb: 2 }}>
                     {tier.features.slice(0, 6).map((feature, idx) => (
                       <ListItem key={idx} disableGutters>
                         <ListItemIcon sx={{ minWidth: 32 }}>
@@ -311,7 +319,17 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                     startIcon={getButtonIcon(tierCode)}
                     onClick={() => handleSelectTier(tierCode)}
                     disabled={isCurrentTier || loading}
-                    sx={{ mt: 3 }}
+                    sx={{ 
+                      mt: 'auto',
+                      ...(getButtonLabel(tierCode) === 'Select Plan' && {
+                        color: 'rgb(209, 213, 219)',
+                        borderColor: 'rgb(209, 213, 219)',
+                        '&:hover': {
+                          borderColor: 'rgb(229, 231, 235)',
+                          backgroundColor: 'rgba(209, 213, 219, 0.08)'
+                        }
+                      })
+                    }}
                   >
                     {loading ? <CircularProgress size={24} /> : getButtonLabel(tierCode)}
                   </Button>
