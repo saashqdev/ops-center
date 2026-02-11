@@ -72,12 +72,16 @@ services:
 
   # Direct routing to ops-center backend
   ops-center-direct:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: kubeworkz/ops_center:latest
     container_name: ops-center-direct
     restart: unless-stopped
     ports:
       - "8084:8084"
     volumes:
+      - ./backend:/app:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Mount host user/group files as read-only for Local Users feature
       - /etc/passwd:/host/etc/passwd:ro

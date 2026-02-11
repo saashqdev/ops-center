@@ -533,6 +533,11 @@ async def add_api_key(
                 "message": "API key added successfully"
             }
     
+    except asyncpg.exceptions.UniqueViolationError:
+        raise HTTPException(
+            status_code=409,
+            detail="API key name already exists. Choose a different name or delete the existing key."
+        )
     except Exception as e:
         logger.error(f"Error adding API key: {e}")
         raise HTTPException(status_code=500, detail=str(e))
