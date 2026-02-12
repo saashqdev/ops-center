@@ -82,7 +82,6 @@ const defaultTiers = [
     features: [
       '100 API calls/day (700 total)',
       'All features',
-      '7-day trial period',
       'Email support',
     ],
     limits: { api_calls: 700, period: 'week' },

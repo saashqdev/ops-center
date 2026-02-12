@@ -296,11 +296,6 @@ export default function TierComparison({ currentTier = null, onSelectTier }) {
                     >
                       /{tier.period}
                     </Typography>
-                    {tierCode === 'trial' && (
-                      <Typography variant="caption" display="block" color="textSecondary">
-                        7-day trial period
-                      </Typography>
-                    )}
                   </Box>
 
                   {/* Description */}

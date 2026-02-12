@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Grid, Card, CardContent, Typography, Button, List, ListItem,
-  ListItemIcon, ListItemText, Chip, Paper, Divider, Container, CircularProgress
+  Box, Card, CardContent, Typography, Button, List, ListItem,
+  ListItemIcon, ListItemText, Chip, Paper, Divider, Container, CircularProgress, Grid
 } from '@mui/material';
 import { Check, Star, ArrowForward } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
@@ -167,11 +167,26 @@ export default function TierComparison() {
       </Box>
 
       {/* Pricing Cards */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: `repeat(${Math.min(tiers.length, 5)}, 1fr)`
+          },
+          gap: 3,
+          mb: 6,
+          pt: 2,
+          alignItems: 'stretch'
+        }}
+      >
         {tiers.map((tier) => (
-          <Grid item xs={12} md={3} key={tier.name}>
+          <Box key={tier.name} sx={{ display: 'flex', width: '100%' }}>
             <Card
               sx={{
+                width: '100%',
+                minHeight: 560,
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -186,6 +201,7 @@ export default function TierComparison() {
                   ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%)'
                   : undefined,
                 transition: 'all 0.3s ease',
+                overflow: 'visible',
                 '&:hover': {
                   transform: 'translateY(-8px)',
                   boxShadow: 6
@@ -224,7 +240,14 @@ export default function TierComparison() {
                 </Box>
               )}
 
-              <CardContent sx={{ flexGrow: 1, pt: tier.popular ? 4 : 3 }}>
+              <CardContent
+                sx={{
+                  flexGrow: 1,
+                  pt: tier.popular ? 4 : 3,
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
                 {/* Tier Name */}
                 <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: tier.popular ? 'rgb(209, 213, 219)' : undefined }}>
                   {tier.name}
@@ -265,8 +288,8 @@ export default function TierComparison() {
                 <Divider sx={{ mb: 2 }} />
 
                 {/* Features */}
-                <List dense>
-                  {tier.features.map((feature, idx) => (
+                <List dense sx={{ flexGrow: 1, minHeight: 240 }}>
+                  {tier.features.slice(0, 6).map((feature, idx) => (
                     <ListItem key={idx} disableGutters>
                       <ListItemIcon sx={{ minWidth: 32 }}>
                         <Check color="success" fontSize="small" />
@@ -280,22 +303,18 @@ export default function TierComparison() {
                       />
                     </ListItem>
                   ))}
+                  {tier.features.length > 6 && (
+                    <ListItem disableGutters>
+                      <ListItemText
+                        primary={`+${tier.features.length - 6} more features`}
+                        primaryTypographyProps={{
+                          variant: 'caption',
+                          sx: { color: 'text.secondary', fontStyle: 'italic' }
+                        }}
+                      />
+                    </ListItem>
+                  )}
                 </List>
-
-                {/* Limitations */}
-                {tier.limitations.length > 0 && (
-                  <>
-                    <Divider sx={{ my: 2 }} />
-                    <Typography variant="caption" sx={{ color: 'rgb(209, 213, 219)' }} display="block" gutterBottom>
-                      Limitations:
-                    </Typography>
-                    {tier.limitations.map((limitation, idx) => (
-                      <Typography key={idx} variant="caption" color="error" display="block">
-                        • {limitation}
-                      </Typography>
-                    ))}
-                  </>
-                )}
 
                 {/* CTA Button */}
                 <Button
@@ -305,15 +324,15 @@ export default function TierComparison() {
                   endIcon={<ArrowForward />}
                   onClick={() => handleSelectPlan(tier)}
                   disabled={currentTier === tier.planId || checkoutLoading}
-                  sx={{ mt: 3 }}
+                  sx={{ mt: 'auto' }}
                 >
                   {checkoutLoading ? 'Processing...' : currentTier === tier.planId ? 'Current Plan' : tier.cta}
                 </Button>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {/* Feature Comparison Table */}
       <Paper sx={{ p: 3, mb: 4 }}>

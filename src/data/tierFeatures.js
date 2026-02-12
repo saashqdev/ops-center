@@ -18,14 +18,14 @@ export const tierFeatures = {
     name: 'Trial',
     code: 'trial',
     tagline: 'Try before you buy',
-    description: 'Explore UC-Cloud with limited features for 7 days',
+    description: 'Explore UC-Cloud with limited features for 30 days',
 
     // Pricing
-    price: '$1.00',
+    price: '$0.00',
     period: 'week',
     billingPeriod: 'Weekly',
     currency: 'USD',
-    trialDays: 7,
+    trialDays: 30,
 
     // Visual styling
     color: 'info',
@@ -35,7 +35,7 @@ export const tierFeatures = {
 
     // Features list (shown in UI)
     features: [
-      '100 API calls per day (700 total)',
+      '100 API calls per day (3,000 total)',
       'Open-WebUI chat access',
       'Basic AI models (GPT-3.5 equivalent)',
       'Community support',
@@ -55,7 +55,7 @@ export const tierFeatures = {
     // Quota limits
     limits: {
       api_calls_daily: 100,
-      api_calls_total: 700,
+      api_calls_total: 3000,
       models: ['gpt-3.5-turbo', 'qwen-2.5-7b'],
       organizations: 0,
       team_members: 1,
