@@ -307,6 +307,8 @@ EXTERNAL_HOST = os.environ.get("EXTERNAL_HOST", "192.168.1.135")
 EXTERNAL_PROTOCOL = os.environ.get("EXTERNAL_PROTOCOL", "http")
 OAUTH_CLIENT_ID = "ops-center"
 OAUTH_CLIENT_SECRET = os.environ.get("OPS_CENTER_OAUTH_CLIENT_SECRET", "a1b2c3d4e5f6789012345678901234567890abcd")
+print(f"====== OAUTH_CLIENT_SECRET LOADED AT MODULE INIT: {OAUTH_CLIENT_SECRET[:20]}... ======")
+print(f"====== ENV VAR OPS_CENTER_OAUTH_CLIENT_SECRET: {os.environ.get('OPS_CENTER_OAUTH_CLIENT_SECRET', 'NOT SET')[:20]}... ======")
 # When using HTTPS (via Traefik), don't include port since Traefik handles the mapping
 # When using HTTP (local dev), include port :8084
 if EXTERNAL_PROTOCOL == "https":
@@ -5616,11 +5618,13 @@ async def oauth_callback(request: Request, code: str, state: str = None):
         f.write(f"Client Secret exists: {bool(OAUTH_CLIENT_SECRET)}\n")
 
     # Build correct redirect URI based on the request and protocol
+    # This MUST match exactly what was used in the /auth/login endpoint
     redirect_uri = (
         f"{EXTERNAL_PROTOCOL}://{EXTERNAL_HOST}/auth/callback"
         if EXTERNAL_PROTOCOL == "https"
         else f"{EXTERNAL_PROTOCOL}://{EXTERNAL_HOST}:8084/auth/callback"
     )
+    print(f"Using redirect_uri: {redirect_uri}")
 
     # Keycloak realm (default to "uchub" for ops-center)
     keycloak_realm = os.getenv("KEYCLOAK_REALM", "uchub")
@@ -5629,22 +5633,29 @@ async def oauth_callback(request: Request, code: str, state: str = None):
     # Token exchange happens backend-to-backend, not via browser
     keycloak_url = os.getenv("KEYCLOAK_URL", "http://centerdeep-keycloak:8080")
     token_url = f"{keycloak_url}/realms/{keycloak_realm}/protocol/openid-connect/token"
+    print(f"DEBUG: keycloak_url from env = {keycloak_url}")
+    print(f"DEBUG: token_url constructed = {token_url}")
 
     # Exchange code for token
     async with httpx.AsyncClient() as client:
+        # Use Basic Auth for client authentication (more robust)
+        auth = httpx.BasicAuth(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
+        
         data = {
             "grant_type": "authorization_code",
             "code": code,
             "redirect_uri": redirect_uri,
-            "client_id": OAUTH_CLIENT_ID,
-            "client_secret": OAUTH_CLIENT_SECRET,
             "scope": "openid profile email"
         }
         
         try:
             print(f"Starting token exchange to: {token_url}")
             print(f"With data: client_id={OAUTH_CLIENT_ID}, code={code[:10]}...")
-            response = await client.post(token_url, data=data)
+            print(f"Using Basic Auth for client credentials")
+            print(f"DEBUG: OAUTH_CLIENT_ID={OAUTH_CLIENT_ID}")
+            print(f"DEBUG: OAUTH_CLIENT_SECRET (first 5 chars)={OAUTH_CLIENT_SECRET[:5] if OAUTH_CLIENT_SECRET else 'None'}")
+            
+            response = await client.post(token_url, data=data, auth=auth)
             print(f"Token exchange response: {response.status_code}")
             
             if response.status_code == 200:

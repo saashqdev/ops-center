@@ -323,6 +323,37 @@ export default function ClaudeAgents() {
     }
   };
 
+  // Delete API key
+  const deleteAPIKey = async (keyId, keyName) => {
+    if (!confirm(`Delete API key "${keyName}"?`)) return;
+
+    try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
+      const response = await fetch(`/api/v1/claude-agents/api-keys/${keyId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': csrfData.csrf_token
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to delete API key');
+      }
+
+      toast.success('API key deleted successfully');
+      fetchAPIKeys();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
 
 
   const openExecuteDialog = (flow) => {
@@ -757,6 +788,7 @@ export default function ClaudeAgents() {
                     key={key.id}
                     label={`${key.key_name} ${key.is_default ? '(default)' : ''}`}
                     size="small"
+                    onDelete={() => deleteAPIKey(key.id, key.key_name)}
                     sx={{ mr: 1, mb: 1 }}
                   />
                 ))}

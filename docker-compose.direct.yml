@@ -98,8 +98,10 @@ services:
       - EXTERNAL_HOST=${APP_DOMAIN:-kubeworkz.io}
       - EXTERNAL_PROTOCOL=https
       - OAUTH_CLIENT_ID=ops-center
-      - KEYCLOAK_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
+      - OPS_CENTER_OAUTH_CLIENT_SECRET=QNeBWyjw9koFASgWEYZDACELjejHCbcG
+      - KEYCLOAK_URL=https://auth.kubeworkz.io
       - KEYCLOAK_PUBLIC_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
+      - KEYCLOAK_EXTERNAL_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
       - KEYCLOAK_REALM=uchub
       - KEYCLOAK_LOGOUT_REDIRECT=https://${APP_DOMAIN:-kubeworkz.io}/auth/logged-out
       - KEYCLOAK_ADMIN_USER=admin
