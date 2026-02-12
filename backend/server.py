@@ -307,8 +307,6 @@ EXTERNAL_HOST = os.environ.get("EXTERNAL_HOST", "192.168.1.135")
 EXTERNAL_PROTOCOL = os.environ.get("EXTERNAL_PROTOCOL", "http")
 OAUTH_CLIENT_ID = "ops-center"
 OAUTH_CLIENT_SECRET = os.environ.get("OPS_CENTER_OAUTH_CLIENT_SECRET", "a1b2c3d4e5f6789012345678901234567890abcd")
-print(f"====== OAUTH_CLIENT_SECRET LOADED AT MODULE INIT: {OAUTH_CLIENT_SECRET[:20]}... ======")
-print(f"====== ENV VAR OPS_CENTER_OAUTH_CLIENT_SECRET: {os.environ.get('OPS_CENTER_OAUTH_CLIENT_SECRET', 'NOT SET')[:20]}... ======")
 # When using HTTPS (via Traefik), don't include port since Traefik handles the mapping
 # When using HTTP (local dev), include port :8084
 if EXTERNAL_PROTOCOL == "https":

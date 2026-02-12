@@ -92,6 +92,8 @@ services:
       - ./avatars:/app/avatars
       # Mount Traefik directory for SSL management
       - ./traefik:/traefik
+      # Mount .env.auth to allow runtime updates without rebuilding image
+      - ./.env.auth:/app/.env.auth:ro
     env_file:
       - .env.auth
     environment:
