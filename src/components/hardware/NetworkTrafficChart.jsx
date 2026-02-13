@@ -177,7 +177,7 @@ const NetworkTrafficChart = ({ networkData, onRefresh, loading }) => {
           <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
             {[
               { name: 'Open-WebUI', port: 8080, status: 'healthy' },
-              { name: 'Brigade API', port: 8101, status: 'healthy' },
+              { name: 'Claude Agents', port: 8084, status: 'healthy' },
               { name: 'Ops-Center', port: 8084, status: 'healthy' },
               { name: 'PostgreSQL', port: 5432, status: 'healthy' },
               { name: 'Redis', port: 6379, status: 'healthy' }

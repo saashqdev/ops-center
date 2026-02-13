@@ -77,7 +77,7 @@ const OverviewTab = ({ dateRange, setDateRange }) => {
         { name: 'Redis', status: 'healthy' },
         { name: 'LiteLLM', status: 'healthy' },
         { name: 'Ops-Center', status: 'healthy' },
-        { name: 'Brigade', status: 'degraded' },
+        { name: 'Claude Agents', status: 'degraded' },
       ]);
     } finally {
       setLoading(false);

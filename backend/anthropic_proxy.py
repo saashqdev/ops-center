@@ -35,7 +35,7 @@ logging.basicConfig(level=logging.INFO)
 router = APIRouter(prefix="/v1", tags=["anthropic-proxy"])
 
 # Configuration
-BRIGADE_URL = os.environ.get("BRIGADE_URL", "http://unicorn-brigade:8112")
+# BRIGADE_URL = os.environ.get("BRIGADE_URL", "http://unicorn-brigade:8112")  # Deprecated - replaced by Claude Agents
 LITELLM_URL = os.environ.get("LITELLM_URL", "http://localhost:4000")
 KEYCLOAK_URL = os.environ.get("KEYCLOAK_URL", "https://auth.your-domain.com")
 
@@ -362,16 +362,16 @@ def convert_sse_event(brigade_event: str, model: str) -> Dict[str, Any]:
 async def health_check():
     """Health check for the proxy service"""
     try:
-        # Check Brigade connectivity
+        # Check Claude Agents connectivity
         async with httpx.AsyncClient(timeout=5.0) as client:
-            brigade_health = await client.get(f"{BRIGADE_URL}/health")
-            brigade_status = brigade_health.status_code == 200
+            claude_agents_health = await client.get("http://localhost:8084/api/v1/claude-agents/health")
+            claude_agents_status = claude_agents_health.status_code == 200
     except:
-        brigade_status = False
+        claude_agents_status = False
 
     return {
-        "status": "healthy" if brigade_status else "degraded",
-        "brigade_connected": brigade_status,
+        "status": "healthy" if claude_agents_status else "degraded",
+        "claude_agents_connected": claude_agents_status,
         "timestamp": datetime.utcnow().isoformat()
     }
 

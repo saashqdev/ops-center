@@ -640,6 +640,46 @@ async def get_byok_manager(request: Request) -> BYOKManager:
     return request.app.state.byok_manager
 
 
+async def get_optional_user_id(
+    request: Request,
+    authorization: Optional[str] = Header(None)
+) -> Optional[str]:
+    """
+    Extract user ID from authorization header OR session cookie
+    Returns None if no authentication provided (for public endpoints)
+    """
+    # Try session-based authentication first (for browser requests)
+    if not authorization:
+        session_token = request.cookies.get("session_token")
+
+        if session_token and session_token in sessions:
+            session = sessions[session_token]
+            user_data = session.get("user", {})
+            user_id = user_data.get("user_id") or user_data.get("sub") or user_data.get("id")
+            if user_id:
+                return user_id
+
+    # Authorization header provided
+    if authorization and authorization.startswith('Bearer '):
+        token = authorization[7:]
+        
+        # Try API key lookup
+        if token.startswith('uc_'):
+            try:
+                async with db_pool.acquire() as conn:
+                    row = await conn.fetchrow(
+                        "SELECT user_id FROM api_keys WHERE key_hash = $1 AND enabled = true",
+                        hashlib.sha256(token.encode()).hexdigest()
+                    )
+                    if row:
+                        return str(row['user_id'])
+            except Exception:
+                pass
+    
+    # No valid authentication found - return None for public access
+    return None
+
+
 async def get_user_id(
     request: Request,
     authorization: Optional[str] = Header(None)
@@ -2432,15 +2472,15 @@ def get_model_pricing(model_id: str, model_info: dict, tier_markup: float) -> di
 
 @router.get("/models/categorized")
 async def list_models_categorized(
-    user_id: str = Depends(get_user_id),
+    user_id: Optional[str] = Depends(get_optional_user_id),
     byok_manager: BYOKManager = Depends(get_byok_manager),
     credit_system: CreditSystem = Depends(get_credit_system)
 ):
     """
     List models categorized by access method (BYOK vs Platform)
 
-    Dynamically fetches models from LiteLLM proxy and categorizes them based on
-    user's BYOK providers (OpenRouter, HuggingFace, etc.)
+    Fetches models from database and categorizes them based on
+    user's BYOK providers (OpenRouter, HuggingFace, Groq, etc.)
 
     Returns:
         {
@@ -2450,209 +2490,135 @@ async def list_models_categorized(
         }
     """
     try:
-        # Get user's tier and tier markup percentage
-        user_tier = await credit_system.get_user_tier(user_id)
-
-        # Fetch tier markup from database
+        # Set defaults for unauthenticated users
+        user_tier = "free"
         tier_markup = 0.0
-        try:
-            async with credit_system.db_pool.acquire() as conn:
-                tier_result = await conn.fetchrow(
-                    "SELECT llm_markup_percentage FROM subscription_tiers WHERE tier_code = $1",
-                    user_tier
-                )
-                if tier_result:
-                    tier_markup = float(tier_result['llm_markup_percentage'])
-                    logger.info(f"User {user_id} tier {user_tier} has markup {tier_markup}%")
-        except Exception as e:
-            logger.warning(f"Failed to fetch tier markup for {user_tier}: {e}")
-            tier_markup = 0.0
+        byok_provider_names = set()
 
-        # Get user's BYOK providers
-        byok_providers_list = await byok_manager.list_user_providers(user_id)
-        byok_provider_names = {p['provider'].lower() for p in byok_providers_list if p.get('enabled')}
+        # If user is authenticated, get their tier and BYOK providers
+        if user_id:
+            # Get user's tier and tier markup percentage
+            user_tier = await credit_system.get_user_tier(user_id)
 
-        # Fetch models directly from providers using user's BYOK keys
-        import httpx
-        
-        # Get user's OpenRouter BYOK key if available
-        openrouter_key = None
-        if 'openrouter' in byok_provider_names:
+            # Fetch tier markup from database
             try:
-                openrouter_key = await byok_manager.get_user_api_key(user_id, 'openrouter')
-                logger.info(f"Using user's OpenRouter BYOK key for model fetching")
-            except Exception as e:
-                logger.warning(f"Failed to get user's OpenRouter key: {e}")
-        
-        # Fallback to system OpenRouter key if no BYOK
-        if not openrouter_key:
-            openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
-        
-        models_data = {'data': []}  # Default empty response
-        
-        async with httpx.AsyncClient(timeout=15.0) as client:
-
-            # Fetch detailed model info from OpenRouter
-            openrouter_models = {}
-            if openrouter_key:  # Use BYOK key or system key
-                try:
-                    or_response = await client.get(
-                        "https://openrouter.ai/api/v1/models",
-                        headers={"Authorization": f"Bearer {openrouter_key}"},
-                        timeout=10.0
+                async with credit_system.db_pool.acquire() as conn:
+                    tier_result = await conn.fetchrow(
+                        "SELECT llm_markup_percentage FROM subscription_tiers WHERE tier_code = $1",
+                        user_tier
                     )
-                    if or_response.status_code == 200:
-                        or_data = or_response.json()
-                        # Convert OpenRouter models to standard format
-                        for model in or_data.get('data', []):
-                            model_id = model.get('id', '')
-                            openrouter_models[model_id] = {
-                                'context_length': model.get('context_length', 0),
-                                'pricing': model.get('pricing', {}),
-                                'description': model.get('description', ''),
-                                'architecture': model.get('architecture', {}),
-                                'top_provider': model.get('top_provider', {}),
-                            }
-                            # Add to models_data for processing
-                            models_data['data'].append({
-                                'id': model_id,
-                                'object': 'model',
-                                'created': 0
-                            })
-                        logger.info(f"Fetched {len(openrouter_models)} models from OpenRouter")
-                except Exception as e:
-                    logger.warning(f"Failed to fetch OpenRouter models: {e}")
-            else:
-                logger.info("No OpenRouter API key available, skipping model fetch")
+                    if tier_result:
+                        tier_markup = float(tier_result['llm_markup_percentage'])
+                        logger.info(f"User {user_id} tier {user_tier} has markup {tier_markup}%")
+            except Exception as e:
+                logger.warning(f"Failed to fetch tier markup for {user_tier}: {e}")
+                tier_markup = 0.0
 
-        # Process models
-        all_models = models_data.get('data', [])
+            # Get user's BYOK providers
+            byok_providers_list = await byok_manager.list_user_providers(user_id)
+            byok_provider_names = {p['provider'].lower() for p in byok_providers_list if p.get('enabled')}
+        else:
+            logger.info("Unauthenticated request - showing all models as platform models")
+
+        # Fetch models from database
+        async with credit_system.db_pool.acquire() as conn:
+            # Query models with provider information
+            query = """
+                SELECT 
+                    m.id,
+                    m.name,
+                    m.display_name,
+                    m.cost_per_1m_input_tokens,
+                    m.cost_per_1m_output_tokens,
+                    m.context_length,
+                    m.enabled,
+                    m.avg_latency_ms,
+                    m.power_level,
+                    m.quality_score,
+                    p.id as provider_id,
+                    p.name as provider_name,
+                    p.type as provider_type,
+                    p.enabled as provider_enabled
+                FROM llm_models m
+                JOIN llm_providers p ON m.provider_id = p.id
+                WHERE m.enabled = true
+                ORDER BY p.name, m.name
+            """
+            rows = await conn.fetch(query)
+            
+        logger.info(f"Fetched {len(rows)} models from database")
 
         # Group models by provider
         provider_models = {}
-        for model in all_models:
-            model_id = model.get('id', '')
-
-            # Skip wildcard entries
-            if '/*' in model_id or model_id == '*/*':
-                continue
-
-            # Determine provider from model ID
-            provider = None
-            if model_id.startswith('gpt-') or model_id.startswith('o1-'):
-                provider = 'openai'
-            elif model_id.startswith('claude-'):
-                provider = 'anthropic'
-            elif model_id.startswith('gemini-'):
-                provider = 'google'
-            elif model_id.startswith('llama-'):
-                provider = 'meta'
-            elif model_id.startswith('mistral-') or model_id.startswith('mixtral-'):
-                provider = 'mistral'
-            elif model_id.startswith('deepseek-'):
-                provider = 'deepseek'
-            elif '/' in model_id:
-                # Format like "openrouter/anthropic/claude-3.5-sonnet"
-                parts = model_id.split('/')
-                if len(parts) >= 2:
-                    provider = parts[0].lower()
-            else:
-                provider = 'other'
-
-            if provider not in provider_models:
-                provider_models[provider] = []
-
-            # Build model info with metadata
+        for row in rows:
+            provider_key = (row['provider_type'] or row['provider_name']).lower()
+            
+            if provider_key not in provider_models:
+                provider_models[provider_key] = {
+                    'provider': row['provider_name'],
+                    'provider_type': provider_key,
+                    'models': [],
+                    'provider_id': str(row['provider_id'])
+                }
+            
+            # Build model info
             model_info = {
-                'id': model_id,
+                'id': row['name'],  # Use name as id for compatibility
                 'object': 'model',
-                'name': model_id,
-                'display_name': model_id.replace('/', ' / '),
-                'created': model.get('created', 0)
+                'name': row['name'],
+                'display_name': row['display_name'] or row['name'],
+                'created': 0,
+                'context_length': row['context_length'] or 0,
+                'enabled': row['enabled'],
+                'provider': row['provider_name'],
+                'provider_type': provider_key
             }
-
-            # Add OpenRouter metadata if available
-            if model_id in openrouter_models:
-                or_meta = openrouter_models[model_id]
-                model_info['context_length'] = or_meta.get('context_length', 0)
-                model_info['description'] = or_meta.get('description', '')
-
-                # Add pricing info (convert from per-token to per-1M-tokens)
-                pricing = or_meta.get('pricing', {})
-                if pricing:
-                    try:
-                        # OpenRouter returns price per token (e.g., "0.000003")
-                        # Convert to price per 1M tokens
-                        prompt_price = float(pricing.get('prompt', '0'))
-                        completion_price = float(pricing.get('completion', '0'))
-
-                        model_info['cost_per_1m_input'] = prompt_price * 1_000_000
-                        model_info['cost_per_1m_output'] = completion_price * 1_000_000
-
-                        # Keep raw pricing for reference
-                        model_info['pricing'] = {
-                            'prompt': pricing.get('prompt', '0'),
-                            'completion': pricing.get('completion', '0'),
-                            'request': pricing.get('request', '0'),
-                            'image': pricing.get('image', '0')
-                        }
-                    except (ValueError, TypeError):
-                        logger.warning(f"Failed to parse pricing for {model_id}")
-                        model_info['cost_per_1m_input'] = 0
-                        model_info['cost_per_1m_output'] = 0
-
-                # Add architecture info (modality, instruct type)
-                arch = or_meta.get('architecture', {})
-                if arch:
-                    model_info['architecture'] = {
-                        'modality': arch.get('modality', 'text'),
-                        'tokenizer': arch.get('tokenizer', ''),
-                        'instruct_type': arch.get('instruct_type', '')
-                    }
-
-            # Add tier-based pricing for platform models
-            if model_info.get('pricing') or model_info.get('cost_per_1m_input'):
-                tier_pricing = get_model_pricing(model_id, model_info, tier_markup)
-                model_info['tier_pricing'] = tier_pricing
-                logger.info(f"[PRICING DEBUG] Model {model_id} has tier_pricing: {tier_pricing}")
-            else:
-                logger.info(f"[PRICING DEBUG] Model {model_id} missing pricing data: pricing={model_info.get('pricing')}, cost_per_1m_input={model_info.get('cost_per_1m_input')}")
-
-            provider_models[provider].append(model_info)
+            
+            # Add pricing if available
+            if row['cost_per_1m_input_tokens'] is not None:
+                model_info['cost_per_1m_input'] = float(row['cost_per_1m_input_tokens'])
+                model_info['cost_per_1m_output'] = float(row['cost_per_1m_output_tokens'] or 0)
+                
+                # Add tier markup for platform models
+                input_cost = float(row['cost_per_1m_input_tokens'])
+                output_cost = float(row['cost_per_1m_output_tokens'] or 0)
+                markup_multiplier = 1 + (tier_markup / 100.0)
+                
+                model_info['tier_pricing'] = {
+                    'input': input_cost * markup_multiplier,
+                    'output': output_cost * markup_multiplier,
+                    'markup_percentage': tier_markup
+                }
+            
+            # Add performance metrics if available
+            if row['avg_latency_ms'] is not None:
+                model_info['avg_latency_ms'] = float(row['avg_latency_ms'])
+            if row['power_level'] is not None:
+                # power_level can be string (eco, balanced, precision) or int
+                model_info['power_level'] = str(row['power_level'])
+            if row['quality_score'] is not None:
+                model_info['quality_score'] = float(row['quality_score'])
+            
+            provider_models[provider_key]['models'].append(model_info)
 
         # Categorize by BYOK vs Platform
         byok_models = []
         platform_models = []
 
-        # Provider display names
-        provider_names = {
-            'openai': 'OpenAI',
-            'anthropic': 'Anthropic',
-            'google': 'Google',
-            'meta': 'Meta',
-            'mistral': 'Mistral AI',
-            'deepseek': 'DeepSeek',
-            'openrouter': 'OpenRouter',
-            'huggingface': 'HuggingFace',
-            'cohere': 'Cohere',
-            'together': 'Together AI',
-            'groq': 'Groq',
-            'other': 'Other'
-        }
-
-        for provider_key, models_list in provider_models.items():
+        for provider_key, provider_data in provider_models.items():
+            models_list = provider_data['models']
             if not models_list:
                 continue
 
-            provider_display = provider_names.get(provider_key, provider_key.title())
-            is_byok = provider_key in byok_provider_names or 'openrouter' in byok_provider_names
+            provider_display = provider_data['provider']
+            is_byok = provider_key in byok_provider_names
 
             provider_info = {
                 'provider': provider_display,
                 'provider_type': provider_key,
                 'models': models_list,
                 'count': len(models_list),
-                'tier_markup': tier_markup  # Add tier markup percentage
+                'tier_markup': tier_markup if not is_byok else 0
             }
 
             if is_byok:
@@ -2668,6 +2634,8 @@ async def list_models_categorized(
         # Build summary
         total_byok = sum(p['count'] for p in byok_models)
         total_platform = sum(p['count'] for p in platform_models)
+
+        logger.info(f"Categorized models: {total_byok} BYOK, {total_platform} platform")
 
         return {
             'byok_models': byok_models,

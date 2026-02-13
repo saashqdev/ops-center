@@ -237,7 +237,7 @@ const ServiceAnalyticsTab = ({ dateRange, setDateRange }) => {
                 { name: 'Redis', status: 'healthy', uptime: 99.8, requests: 98234, errors: 156, response: 12 },
                 { name: 'LiteLLM', status: 'healthy', uptime: 99.7, requests: 8945, errors: 24, response: 342 },
                 { name: 'Ops-Center', status: 'healthy', uptime: 99.9, requests: 5234, errors: 3, response: 98 },
-                { name: 'Brigade', status: 'degraded', uptime: 98.5, requests: 1234, errors: 45, response: 456 },
+                { name: 'Claude Agents', status: 'degraded', uptime: 98.5, requests: 1234, errors: 45, response: 456 },
               ].map((service, index) => (
                 <tr key={index} className="border-b border-gray-800 hover:bg-gray-800/30">
                   <td className={`py-3 px-4 ${textClass} font-medium`}>{service.name}</td>
