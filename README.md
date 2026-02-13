@@ -312,8 +312,8 @@ DNS, users, billing, LLMs, services. One dashboard instead of 10 browser tabs.
 ### <img src="https://img.shields.io/badge/1-Clone-blue?style=for-the-badge" alt="Step 1"/>
 
 ```bash
-git clone https://github.com/Unicorn-Commander/Ops-Center-OSS.git
-cd Ops-Center-OSS
+git clone https://github.com/saashqdev/ops-center.git
+cd ops-center
 ```
 
 </td>
