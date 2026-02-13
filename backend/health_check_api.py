@@ -5,6 +5,7 @@ Comprehensive health monitoring for all system components
 
 import logging
 import asyncio
+import os
 from datetime import datetime
 from typing import Dict, Any, List
 from fastapi import APIRouter, HTTPException, status
@@ -382,12 +383,12 @@ async def services_health():
     
     services_status = []
     
-    async def check_service_endpoint(name: str, url: str, timeout: float = 5.0) -> Dict[str, Any]:
+    async def check_service_endpoint(name: str, url: str, timeout: float = 5.0, headers: Dict[str, str] = None) -> Dict[str, Any]:
         """Helper to check a service health endpoint"""
         try:
             start = datetime.utcnow()
             async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.get(url)
+                response = await client.get(url, headers=headers)
                 latency_ms = (datetime.utcnow() - start).total_seconds() * 1000
                 
                 is_healthy = response.status_code in [200, 201]
@@ -417,9 +418,29 @@ async def services_health():
         "http://uchub-keycloak:8080/health/ready"
     )
     
+    # LiteLLM: try multiple hostnames since env var may have non-resolving hostname
+    litellm_urls = [
+        os.getenv("LITELLM_PROXY_URL", "").rstrip("/"),
+        "http://unicorn-litellm-wilmer:4000",
+        "http://litellm:4000",
+    ]
+    # Pick first URL that has a resolvable host
+    litellm_url = "http://unicorn-litellm-wilmer:4000"
+    for url in litellm_urls:
+        if url:
+            try:
+                import urllib.parse
+                host = urllib.parse.urlparse(url).hostname
+                if host:
+                    import socket
+                    socket.gethostbyname(host)
+                    litellm_url = url
+                    break
+            except (socket.gaierror, Exception):
+                continue
     litellm_check = check_service_endpoint(
         "LiteLLM",
-        "http://localhost:4000/health"
+        f"{litellm_url}/"
     )
     
     claude_agents_check = check_service_endpoint(
