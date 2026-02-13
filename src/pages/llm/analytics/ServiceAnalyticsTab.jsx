@@ -47,6 +47,7 @@ const ServiceAnalyticsTab = ({ dateRange, setDateRange }) => {
   const [uptimeData, setUptimeData] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [responseTimeData, setResponseTimeData] = useState(null);
+  const [servicesStatus, setServicesStatus] = useState([]);
 
   useEffect(() => {
     fetchServiceAnalytics();
@@ -55,6 +56,14 @@ const ServiceAnalyticsTab = ({ dateRange, setDateRange }) => {
   const fetchServiceAnalytics = async () => {
     setLoading(true);
     try {
+      // Fetch service health status
+      const servicesResponse = await fetch('/api/v1/health/services');
+      const servicesData = await servicesResponse.json();
+      
+      if (servicesData.services) {
+        setServicesStatus(servicesData.services);
+      }
+      
       const response = await fetch('/api/v1/services/analytics?range=' + dateRange);
       const statusResponse = await fetch('/api/v1/system/status');
 
@@ -62,8 +71,8 @@ const ServiceAnalyticsTab = ({ dateRange, setDateRange }) => {
       const statusData = await statusResponse.json();
 
       setServiceMetrics({
-        servicesHealthy: statusData.services_healthy || 11,
-        servicesTotal: statusData.services_total || 12,
+        servicesHealthy: servicesData.healthy_services || statusData.services_healthy || 11,
+        servicesTotal: servicesData.total_services || statusData.services_total || 12,
         avgUptime: data.avg_uptime || 99.8,
         avgResponseTime: data.avg_response_time || 145,
       });
@@ -231,35 +240,36 @@ const ServiceAnalyticsTab = ({ dateRange, setDateRange }) => {
               </tr>
             </thead>
             <tbody>
-              {[
-                { name: 'Keycloak', status: 'healthy', uptime: 99.9, requests: 15234, errors: 12, response: 125 },
-                { name: 'PostgreSQL', status: 'healthy', uptime: 100, requests: 42156, errors: 8, response: 45 },
-                { name: 'Redis', status: 'healthy', uptime: 99.8, requests: 98234, errors: 156, response: 12 },
-                { name: 'LiteLLM', status: 'healthy', uptime: 99.7, requests: 8945, errors: 24, response: 342 },
-                { name: 'Ops-Center', status: 'healthy', uptime: 99.9, requests: 5234, errors: 3, response: 98 },
-                { name: 'Claude Agents', status: 'degraded', uptime: 98.5, requests: 1234, errors: 45, response: 456 },
-              ].map((service, index) => (
-                <tr key={index} className="border-b border-gray-800 hover:bg-gray-800/30">
-                  <td className={`py-3 px-4 ${textClass} font-medium`}>{service.name}</td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      service.status === 'healthy'
-                        ? 'bg-green-500/20 text-green-400'
-                        : service.status === 'degraded'
-                        ? 'bg-yellow-500/20 text-yellow-400'
-                        : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {service.status}
-                    </span>
+              {servicesStatus.length > 0 ? (
+                servicesStatus.map((service, index) => (
+                  <tr key={index} className="border-b border-gray-800 hover:bg-gray-800/30">
+                    <td className={`py-3 px-4 ${textClass} font-medium`}>{service.name}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        service.status === 'healthy'
+                          ? 'bg-green-500/20 text-green-400'
+                          : service.status === 'degraded'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        {service.status}
+                      </span>
+                    </td>
+                    <td className={`py-3 px-4 text-right ${textClass}`}>{service.uptime}%</td>
+                    <td className={`py-3 px-4 text-right ${textClass}`}>{service.requests.toLocaleString()}</td>
+                    <td className={`py-3 px-4 text-right ${service.errors > 30 ? 'text-red-400' : textClass}`}>
+                      {service.errors}
+                    </td>
+                    <td className={`py-3 px-4 text-right ${textClass}`}>{service.response}ms</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className={`py-8 text-center ${subtextClass}`}>
+                    Loading service status...
                   </td>
-                  <td className={`py-3 px-4 text-right ${textClass}`}>{service.uptime}%</td>
-                  <td className={`py-3 px-4 text-right ${textClass}`}>{service.requests.toLocaleString()}</td>
-                  <td className={`py-3 px-4 text-right ${service.errors > 30 ? 'text-red-400' : textClass}`}>
-                    {service.errors}
-                  </td>
-                  <td className={`py-3 px-4 text-right ${textClass}`}>{service.response}ms</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

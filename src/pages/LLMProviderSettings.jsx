@@ -253,6 +253,12 @@ const LLMProviderSettings = () => {
 
   const handleSaveKey = async (keyData) => {
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const url = keyData.id
         ? `/api/v1/llm-config/api-keys/${keyData.id}`
         : '/api/v1/llm-config/api-keys';
@@ -262,7 +268,8 @@ const LLMProviderSettings = () => {
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
         },
         credentials: 'include',
         body: JSON.stringify(keyData)
@@ -289,13 +296,23 @@ const LLMProviderSettings = () => {
 
   const handleDeleteKey = async (keyId) => {
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch(`/api/v1/llm-config/api-keys/${keyId}`, {
         method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': csrfData.csrf_token
+        },
         credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete API key');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to delete API key');
       }
 
       setDeleteKeyDialog(null);
@@ -311,10 +328,17 @@ const LLMProviderSettings = () => {
       const key = apiKeys.find((k) => k.id === keyId);
       if (!key) return;
 
+      // Get CSRF token
+      const csrfResponse = await fetch('/api/v1/auth/csrf-token', {
+        credentials: 'include'
+      });
+      const csrfData = await csrfResponse.json();
+
       const response = await fetch(`/api/v1/llm-config/api-keys/${keyId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token
         },
         credentials: 'include',
         body: JSON.stringify({
