@@ -258,7 +258,7 @@ class BYOKManager:
                 rows = await conn.fetch(
                     """
                     SELECT
-                        id, provider, enabled, metadata, created_at, updated_at
+                        id, provider, enabled, metadata, created_at, updated_at, api_key_encrypted
                     FROM user_provider_keys
                     WHERE user_id = $1
                     ORDER BY provider
@@ -266,18 +266,29 @@ class BYOKManager:
                     user_id
                 )
 
-                return [
-                    {
+                result = []
+                for row in rows:
+                    # Decrypt key to create a proper masked preview
+                    try:
+                        decrypted = self._decrypt_key(row['api_key_encrypted'])
+                        key_preview = self._mask_key(decrypted)
+                    except Exception:
+                        key_preview = '••••••••'
+
+                    metadata = json.loads(row['metadata']) if row['metadata'] else {}
+                    result.append({
                         'id': str(row['id']),
                         'provider': row['provider'],
                         'enabled': row['enabled'],
-                        'metadata': json.loads(row['metadata']) if row['metadata'] else {},
+                        'metadata': metadata,
                         'created_at': row['created_at'].isoformat(),
                         'updated_at': row['updated_at'].isoformat() if row['updated_at'] else None,
-                        'masked_key': self._mask_key(row['provider'])  # Show that key exists
-                    }
-                    for row in rows
-                ]
+                        'key_preview': key_preview,
+                        'masked_key': key_preview,
+                        'last_tested': metadata.get('last_tested'),
+                        'test_status': metadata.get('test_status'),
+                    })
+                return result
 
         except Exception as e:
             logger.error(f"Error listing providers: {e}")
@@ -355,9 +366,13 @@ class BYOKManager:
             logger.error(f"Error getting all user keys: {e}")
             return {}
 
-    def _mask_key(self, provider: str) -> str:
-        """Return masked key display (e.g., 'sk-...abcd')"""
-        return f"***...{provider[:4]}"
+    def _mask_key(self, api_key: str) -> str:
+        """Return masked key display (e.g., 'sk-••••••abcd')"""
+        if not api_key or len(api_key) < 8:
+            return '••••••••'
+        prefix = api_key[:3]
+        suffix = api_key[-4:]
+        return f"{prefix}••••••{suffix}"
 
     async def validate_api_key(
         self,

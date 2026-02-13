@@ -4,6 +4,7 @@ Allows users to store and manage their own API keys for LLM providers
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 import httpx
@@ -322,7 +323,7 @@ async def list_providers(request: Request):
         logger.error(f"Error listing providers: {e}")
         raise HTTPException(status_code=500, detail="Failed to list providers")
 
-@router.get("/keys", response_model=List[APIKeyResponse])
+@router.get("/keys")
 async def list_keys(request: Request):
     """List user's configured API keys (masked)"""
     try:
@@ -360,6 +361,8 @@ async def list_keys(request: Request):
                     FROM user_provider_keys
                     WHERE (user_id = $1 OR user_id = $2) AND enabled = true
                 """, user_id, user_email)
+            
+            logger.info(f"DB query returned {len(db_keys)} keys for user_id={user_id}, email={user_email}")
 
             # Process database keys
             for row in db_keys:
@@ -370,12 +373,42 @@ async def list_keys(request: Request):
                     continue
 
                 try:
-                    # Decrypt to mask properly
-                    decrypted = encryption.decrypt_key(row['api_key_encrypted'])
-                    key_preview = encryption.mask_key(decrypted)
+                    # Try to decrypt to show a proper masked key
+                    decrypted = None
+                    try:
+                        decrypted = encryption.decrypt_key(row['api_key_encrypted'])
+                    except Exception:
+                        # Try BYOK_ENCRYPTION_KEY as fallback
+                        byok_key = os.getenv('BYOK_ENCRYPTION_KEY', '')
+                        if byok_key:
+                            try:
+                                from cryptography.fernet import Fernet
+                                cipher = Fernet(byok_key.encode())
+                                decrypted = cipher.decrypt(row['api_key_encrypted'].encode()).decode()
+                            except Exception:
+                                pass
+                    
+                    if decrypted:
+                        key_preview = encryption.mask_key(decrypted)
+                    else:
+                        # Decryption failed - show a generic masked key instead of error
+                        # The key exists and may have been validated before
+                        provider_prefixes = {
+                            'openrouter': 'sk-or',
+                            'openai': 'sk',
+                            'anthropic': 'sk-ant',
+                            'google': 'AIza',
+                            'groq': 'gsk_',
+                            'mistral': 'mk-',
+                            'cohere': 'co-',
+                        }
+                        prefix = provider_prefixes.get(provider_id, 'key')
+                        key_preview = f"{prefix}-••••••••"
+                        logger.warning(f"Could not decrypt key for {provider_id}, showing generic mask")
                 except Exception as e:
-                    logger.error(f"Error decrypting key for {provider_id}: {e}")
-                    key_preview = "***error***"
+                    logger.error(f"Error processing key for {provider_id}: {e}")
+                    # Even on unexpected error, show generic mask instead of error
+                    key_preview = "••••••••"
 
                 # Parse metadata JSON string to dict
                 import json
@@ -399,10 +432,13 @@ async def list_keys(request: Request):
                 ))
 
             logger.info(f"Returning {len(keys)} BYOK keys for {user_email}")
-            return keys
+            response = JSONResponse(content=[k.dict() for k in keys])
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            return response
 
         except Exception as e:
-            logger.error(f"Error querying database for BYOK keys: {e}")
+            logger.error(f"Error querying database for BYOK keys: {e} - falling back to Keycloak attributes")
             # Fall back to Keycloak attributes for backward compatibility
             attributes = user.get("attributes", {})
 
@@ -417,9 +453,25 @@ async def list_keys(request: Request):
                     try:
                         decrypted = encryption.decrypt_key(encrypted_key)
                         key_preview = encryption.mask_key(decrypted)
-                    except Exception as e:
-                        logger.error(f"Error decrypting key for {provider_id}: {e}")
-                        key_preview = "***error***"
+                    except Exception:
+                        # Try BYOK_ENCRYPTION_KEY as fallback
+                        try:
+                            byok_key = os.getenv('BYOK_ENCRYPTION_KEY', '')
+                            if byok_key:
+                                from cryptography.fernet import Fernet
+                                cipher = Fernet(byok_key.encode())
+                                decrypted = cipher.decrypt(encrypted_key.encode()).decode()
+                                key_preview = encryption.mask_key(decrypted)
+                            else:
+                                raise ValueError("No BYOK key")
+                        except Exception as e2:
+                            logger.warning(f"Could not decrypt Keycloak key for {provider_id}, showing generic mask")
+                            provider_prefixes = {
+                                'openrouter': 'sk-or', 'openai': 'sk', 'anthropic': 'sk-ant',
+                                'google': 'AIza', 'groq': 'gsk_', 'mistral': 'mk-', 'cohere': 'co-',
+                            }
+                            prefix = provider_prefixes.get(provider_id, 'key')
+                            key_preview = f"{prefix}-••••••••"
 
                     keys.append(APIKeyResponse(
                         provider=provider_id,
@@ -543,15 +595,16 @@ async def delete_key(provider: str, request: Request):
         async with db_pool.acquire() as conn:
             result = await conn.execute("""
                 DELETE FROM user_provider_keys
-                WHERE user_id = $1 AND provider = $2
-            """, user_id, provider)
+                WHERE (user_id = $1 OR user_id = $2) AND provider = $3
+            """, user_id, user_email, provider)
         
         if result == "DELETE 0":
-            logger.warning(f"No key found to delete for {user_email}: {provider}")
+            logger.warning(f"No key found to delete for {user_email} (user_id={user_id}): {provider}")
+            raise HTTPException(status_code=404, detail="Key not found - may have already been deleted")
 
-        logger.info(f"Removed BYOK key for {user_email}: {provider}")
+        logger.info(f"Successfully removed BYOK key for {user_email}: {provider} (result: {result})")
 
-        return {"message": "API key removed successfully", "provider": provider}
+        return {"message": "API key removed successfully", "provider": provider, "success": True}
 
     except HTTPException:
         raise
@@ -594,8 +647,8 @@ async def test_key(provider: str, request: Request):
             row = await conn.fetchrow("""
                 SELECT api_key_encrypted, metadata
                 FROM user_provider_keys
-                WHERE user_id = $1 AND provider = $2 AND enabled = true
-            """, user_id, provider)
+                WHERE (user_id = $1 OR user_id = $3) AND provider = $2 AND enabled = true
+            """, user_id, provider, user_email)
 
             if not row:
                 raise HTTPException(status_code=404, detail="API key not found for this provider")
@@ -611,9 +664,18 @@ async def test_key(provider: str, request: Request):
                 except:
                     pass
 
-        # Decrypt key
+        # Decrypt key - try ENCRYPTION_KEY first, then BYOK_ENCRYPTION_KEY
         encryption = get_encryption()
-        api_key = encryption.decrypt_key(encrypted_key)
+        try:
+            api_key = encryption.decrypt_key(encrypted_key)
+        except Exception:
+            byok_key = os.getenv('BYOK_ENCRYPTION_KEY')
+            if byok_key:
+                from cryptography.fernet import Fernet
+                byok_cipher = Fernet(byok_key.encode())
+                api_key = byok_cipher.decrypt(encrypted_key.encode()).decode()
+            else:
+                raise HTTPException(status_code=500, detail="Failed to decrypt API key")
 
         # Test the key
         result = await test_api_key(provider, api_key, endpoint)

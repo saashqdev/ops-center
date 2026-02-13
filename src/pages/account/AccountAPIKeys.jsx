@@ -428,7 +428,7 @@ export default function AccountAPIKeys() {
       if (response.ok) {
         const data = await response.json();
         console.log('[BYOK DEBUG] Loaded keys from API:', data);
-        setBYOKKeys(data);
+        setBYOKKeys(data.providers || data || []);
       } else {
         console.error('[BYOK DEBUG] Failed to load keys, status:', response.status);
       }
@@ -533,11 +533,21 @@ export default function AccountAPIKeys() {
       });
 
       if (response.ok) {
-        showToast('success', `${providerInfo[provider].name} API key removed`);
+        showToast('success', `${providerInfo[provider]?.name || provider} API key removed`);
         setConfirmDelete(null);
+        // Immediately remove the key from local state for instant UI update
+        setBYOKKeys(prev => (prev || []).filter(k => k.provider !== provider));
+        // Then reload from server
+        await loadData();
+      } else if (response.status === 404) {
+        // Key was already deleted, refresh the UI
+        showToast('info', 'Key was already removed');
+        setConfirmDelete(null);
+        setBYOKKeys(prev => (prev || []).filter(k => k.provider !== provider));
         await loadData();
       } else {
-        showToast('error', 'Failed to remove API key');
+        const errData = await response.json().catch(() => ({}));
+        showToast('error', errData.detail || 'Failed to remove API key');
       }
     } catch (error) {
       console.error('Error deleting key:', error);
