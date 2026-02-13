@@ -1,0 +1,176 @@
+# LiteLLM Alerting Rules
+# Monitors LiteLLM proxy health, performance, and usage
+
+groups:
+  - name: litellm_availability
+    interval: 30s
+    rules:
+      # Alert if LiteLLM is down
+      - alert: LiteLLMDown
+        expr: up{job="litellm"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: litellm
+        annotations:
+          summary: "LiteLLM proxy is down"
+          description: "LiteLLM proxy {{ $labels.instance }} has been down for more than 2 minutes."
+
+      # Alert if LiteLLM health check fails
+      - alert: LiteLLMUnhealthy
+        expr: litellm_health_status == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM proxy health check failing"
+          description: "LiteLLM proxy {{ $labels.instance }} is unhealthy."
+
+  - name: litellm_performance
+    interval: 30s
+    rules:
+      # Alert if response time is too high
+      - alert: LiteLLMHighLatency
+        expr: histogram_quantile(0.95, rate(litellm_request_duration_seconds_bucket[5m])) > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM high latency detected"
+          description: "95th percentile latency is {{ $value }}s for {{ $labels.instance }}."
+
+      # Alert if error rate is high
+      - alert: LiteLLMHighErrorRate
+        expr: (rate(litellm_request_errors_total[5m]) / rate(litellm_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM high error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.instance }}."
+
+      # Alert if error rate is critical
+      - alert: LiteLLMCriticalErrorRate
+        expr: (rate(litellm_request_errors_total[5m]) / rate(litellm_requests_total[5m])) > 0.20
+        for: 2m
+        labels:
+          severity: critical
+          service: litellm
+        annotations:
+          summary: "LiteLLM critical error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.instance }}. Immediate action required."
+
+  - name: litellm_usage
+    interval: 1m
+    rules:
+      # Alert if request rate is very high (potential abuse)
+      - alert: LiteLLMHighRequestRate
+        expr: rate(litellm_requests_total[5m]) > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM experiencing high request rate"
+          description: "Request rate is {{ $value }} req/s for {{ $labels.instance }}. Potential abuse or traffic spike."
+
+      # Alert if token usage is approaching limits
+      - alert: LiteLLMTokenLimitApproaching
+        expr: litellm_tokens_used_total > 1000000
+        for: 1h
+        labels:
+          severity: info
+          service: litellm
+        annotations:
+          summary: "LiteLLM high token usage"
+          description: "Total tokens used: {{ $value }}. Monitor for cost optimization."
+
+      # Alert if model is failing frequently
+      - alert: LiteLLMModelFailures
+        expr: (rate(litellm_model_errors_total{model=~".+"}[10m]) / rate(litellm_model_requests_total{model=~".+"}[10m])) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM model {{ $labels.model }} has high failure rate"
+          description: "Model {{ $labels.model }} failure rate is {{ $value | humanizePercentage }}."
+
+  - name: litellm_costs
+    interval: 5m
+    rules:
+      # Alert if daily costs exceed threshold
+      - alert: LiteLLMHighDailyCost
+        expr: increase(litellm_total_cost_usd[24h]) > 100
+        for: 1h
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM daily costs exceeded $100"
+          description: "Total cost in last 24h: ${{ $value }}. Review usage patterns."
+
+      # Alert if cost spike detected
+      - alert: LiteLLMCostSpike
+        expr: (increase(litellm_total_cost_usd[1h]) / increase(litellm_total_cost_usd[1h] offset 1h)) > 2
+        for: 15m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM cost spike detected"
+          description: "Cost increased by {{ $value }}x compared to previous hour."
+
+  - name: litellm_database
+    interval: 1m
+    rules:
+      # Alert if database connection pool is exhausted
+      - alert: LiteLLMDatabasePoolExhausted
+        expr: litellm_db_pool_active_connections >= litellm_db_pool_max_connections
+        for: 5m
+        labels:
+          severity: critical
+          service: litellm
+        annotations:
+          summary: "LiteLLM database connection pool exhausted"
+          description: "All {{ $value }} database connections are in use. Service may be degraded."
+
+      # Alert if database queries are slow
+      - alert: LiteLLMSlowDatabaseQueries
+        expr: histogram_quantile(0.95, rate(litellm_db_query_duration_seconds_bucket[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "LiteLLM slow database queries detected"
+          description: "95th percentile query time is {{ $value }}s. Database performance may be degraded."
+
+  - name: litellm_providers
+    interval: 1m
+    rules:
+      # Alert if all Groq models are failing
+      - alert: LiteLLMGroqProviderDown
+        expr: sum(rate(litellm_model_errors_total{provider="groq"}[5m])) / sum(rate(litellm_model_requests_total{provider="groq"}[5m])) > 0.90
+        for: 5m
+        labels:
+          severity: critical
+          service: litellm
+          provider: groq
+        annotations:
+          summary: "Groq provider experiencing issues"
+          description: "Groq failure rate: {{ $value | humanizePercentage }}. Check API status."
+
+      # Alert if provider rate limit hit
+      - alert: LiteLLMProviderRateLimited
+        expr: increase(litellm_rate_limit_errors_total{provider=~".+"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: litellm
+        annotations:
+          summary: "Provider {{ $labels.provider }} rate limit hit"
+          description: "{{ $value }} rate limit errors in last 5 minutes. Consider load distribution."

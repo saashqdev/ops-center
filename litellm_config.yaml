@@ -42,9 +42,9 @@ model_list:
       privacy: high
 
   # --- Groq (Free Tier - Ultra Fast) ---
-  - model_name: llama3-70b-groq
+  - model_name: llama-3.3-70b-groq
     litellm_params:
-      model: groq/llama3-70b-8192
+      model: groq/llama-3.3-70b-versatile
       api_key: os.environ/GROQ_API_KEY
       rpm: 30  # Free tier limit
       tpm: 14400
@@ -53,22 +53,37 @@ model_list:
       tier: free
       cost_per_1k_tokens: 0.0
       max_tokens: 8192
-      use_cases: ["chat", "qa", "instant"]
+      use_cases: ["chat", "qa", "instant", "reasoning"]
       latency: ultrafast
       privacy: low
 
-  - model_name: mixtral-8x7b-groq
+  - model_name: llama-3.1-8b-groq
     litellm_params:
-      model: groq/mixtral-8x7b-32768
+      model: groq/llama-3.1-8b-instant
       api_key: os.environ/GROQ_API_KEY
       rpm: 30
-      tpm: 5000
+      tpm: 14400
+    model_info:
+      mode: cloud
+      tier: free
+      cost_per_1k_tokens: 0.0
+      max_tokens: 8192
+      use_cases: ["chat", "instant", "fast"]
+      latency: ultrafast
+      privacy: low
+
+  - model_name: qwen-32b-groq
+    litellm_params:
+      model: groq/qwen/qwen3-32b
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      tpm: 14400
     model_info:
       mode: cloud
       tier: free
       cost_per_1k_tokens: 0.0
       max_tokens: 32768
-      use_cases: ["long-context", "rag"]
+      use_cases: ["code", "long-context", "rag"]
       latency: ultrafast
       privacy: low
 
@@ -414,8 +429,7 @@ litellm_settings:
   timeout: 120  # 2 minutes
   retry_after: 5  # Wait 5 seconds before retry
 
-  # Enable fallback routing
-  fallbacks: true
+  # Note: Fallback routing configured via router_settings.model_group_fallbacks below
 
   # Loadbalancing strategy (for multiple instances of same model)
   router_settings:
@@ -455,12 +469,13 @@ router_settings:
 
     # Fast chat fallbacks
     chat:
-      - llama3-70b-groq
-      - llama3-70b-together
+      - llama-3.3-70b-groq
+      - llama-3.1-8b-groq
       - gpt-3.5-turbo
 
     # Long context fallbacks
     long-context:
+      - qwen-32b-groq
       - mixtral-8x22b-together
       - gpt-4-turbo-openrouter
       - claude-3-opus-openrouter

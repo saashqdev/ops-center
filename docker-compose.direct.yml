@@ -205,6 +205,93 @@ services:
       - "traefik.http.routers.ops-center-wildcard.tls.domains[0].sans=*.${APP_DOMAIN:-localhost}"
       - "traefik.http.routers.ops-center-wildcard.service=ops-center-svc"
 
+  # LiteLLM Proxy - Multi-Provider LLM Router
+  litellm-proxy:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: unicorn-litellm-wilmer
+    restart: unless-stopped
+    ports:
+      - "4000:4000"  # LiteLLM proxy API (OpenAI-compatible)
+    environment:
+      # Master API Key (for admin operations)
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+
+      # Database for request logging and analytics (dedicated database)
+      - DATABASE_URL=postgresql://unicorn:${POSTGRES_PASSWORD:-change-me}@postgresql:5432/litellm_db
+
+      # Provider API Keys (9 providers)
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY:-}
+      - TOGETHER_API_KEY=${TOGETHER_API_KEY:-}
+      - DEEPINFRA_API_KEY=${DEEPINFRA_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - FIREWORKS_API_KEY=${FIREWORKS_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+
+      # Local models (no API key needed)
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://unicorn-ollama:11434}
+      - VLLM_HOST=${VLLM_HOST:-http://unicorn-vllm:8000}
+
+      # LiteLLM Configuration
+      - LITELLM_CONFIG_PATH=/app/config.yaml
+      - LITELLM_MODE=PRODUCTION
+      - LITELLM_LOG=INFO
+
+      # Performance tuning
+      - NUM_WORKERS=4
+      - TIMEOUT=120
+
+      # Redis for caching and rate limiting
+      - REDIS_HOST=unicorn-lago-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+
+      # Enable features
+      - STORE_MODEL_IN_DB=True
+      - ENABLE_DETAILED_LOGGING=True
+      - ENABLE_FALLBACKS=True
+      - ENABLE_LOADBALANCING=True
+
+    volumes:
+      # Mount configuration file
+      - ./litellm_config.yaml:/app/config.yaml:ro
+
+      # Logs (optional, for debugging)
+      - ./logs/litellm:/app/logs
+
+    command: ["--config", "/app/config.yaml", "--port", "4000", "--detailed_debug"]
+
+    networks:
+      - unicorn-network
+      - web
+
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      unicorn-lago-redis:
+        condition: service_started
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    labels:
+      # Traefik routing for LiteLLM API
+      - "traefik.enable=true"
+      - "traefik.http.routers.litellm.rule=Host(`ai.${APP_DOMAIN:-kubeworkz.io}`)"
+      - "traefik.http.routers.litellm.entrypoints=websecure"
+      - "traefik.http.routers.litellm.tls.certresolver=letsencrypt"
+      - "traefik.http.services.litellm.loadbalancer.server.port=4000"
+
+      # Metadata
+      - "com.unicorncommander.service=litellm-proxy"
+      - "com.unicorncommander.ecosystem=uc-cloud"
+      - "com.unicorncommander.tier=core-infrastructure"
+
 networks:
   web:
     external: true

@@ -67,3 +67,21 @@ scrape_configs:
       - targets: ['ops-center-direct:8084']
     metrics_path: '/api/v1/deployment/metrics'
     scrape_interval: 30s
+
+  # LiteLLM Proxy metrics
+  - job_name: 'litellm'
+    static_configs:
+      - targets: ['unicorn-litellm-wilmer:4000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'litellm-proxy'
+
+  # LiteLLM usage analytics (custom endpoint)
+  - job_name: 'litellm-usage'
+    static_configs:
+      - targets: ['ops-center-direct:8084']
+    metrics_path: '/api/v1/llm/metrics'
+    scrape_interval: 30s
