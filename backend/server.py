@@ -896,10 +896,7 @@ logger.info("Usage tracking API endpoints registered at /api/v1/usage")
 app.include_router(admin_subscriptions_router)
 logger.info("Admin subscription management registered at /api/v1/admin/subscriptions")
 
-# Register admin apps management router (temporary stub)
-from admin_apps_api import router as admin_apps_router
-app.include_router(admin_apps_router)
-logger.info("Admin apps management registered at /api/v1/admin/apps")
+# Note: Admin apps management is handled by app_definitions_api (registered below)
 
 # Register tier check ForwardAuth router (for Traefik middleware)
 app.include_router(tier_check_router)

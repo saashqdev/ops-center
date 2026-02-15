@@ -4,42 +4,16 @@ Management endpoints for app definitions and toggles.
 """
 
 import os
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 import asyncpg
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel, Field
+from auth_dependencies import require_admin_user
 
 # Router configuration
 router = APIRouter(prefix="/api/v1/admin/apps", tags=["admin", "apps"])
-
-
-# =============================================================================
-# Authentication
-# =============================================================================
-
-async def get_current_admin(request: Request) -> str:
-    """Get current admin user from session"""
-    session_token = request.cookies.get("session_token")
-    if not session_token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
-    sessions = getattr(request.app.state, "sessions", {})
-    session_data = sessions.get(session_token)
-    if not session_data:
-        raise HTTPException(status_code=401, detail="Invalid session")
-
-    user = session_data.get("user", {})
-    username = user.get("username") or user.get("email", "unknown")
-
-    # Check if user has admin role
-    # Session stores role as singular string (not plural list)
-    role = user.get("role", "").lower()
-    if role != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-
-    return username
 
 
 # =============================================================================
@@ -143,10 +117,10 @@ class AppReorderRequest(BaseModel):
 async def get_db_connection():
     """Create database connection."""
     return await asyncpg.connect(
-        host=os.getenv("POSTGRES_HOST", "unicorn-postgresql"),
+        host=os.getenv("POSTGRES_HOST", "postgresql"),
         port=int(os.getenv("POSTGRES_PORT", "5432")),
         user=os.getenv("POSTGRES_USER", "unicorn"),
-        password=os.getenv("POSTGRES_PASSWORD", "unicorn"),
+        password=os.getenv("POSTGRES_PASSWORD", "change-me"),
         database=os.getenv("POSTGRES_DB", "unicorn_db")
     )
 
@@ -159,7 +133,7 @@ async def get_db_connection():
 async def list_apps(
     category: Optional[str] = None,
     active_only: bool = True,
-    admin: str = Depends(get_current_admin)
+    admin: Dict = Depends(require_admin_user)
 ):
     """
     List all app definitions.
@@ -197,7 +171,7 @@ async def list_apps(
 @router.get("/{app_id}", response_model=AppDefinitionResponse)
 async def get_app(
     app_id: int,
-    admin: str = Depends(get_current_admin)
+    admin: Dict = Depends(require_admin_user)
 ):
     """
     Get a single app definition by ID.
@@ -222,7 +196,7 @@ async def get_app(
 @router.post("/", response_model=AppDefinitionResponse, status_code=status.HTTP_201_CREATED)
 async def create_app(
     app: AppDefinitionCreate,
-    admin: str = Depends(get_current_admin)
+    admin: Dict = Depends(require_admin_user)
 ):
     """
     Create a new app definition.
@@ -269,7 +243,7 @@ async def create_app(
 async def update_app(
     app_id: int,
     app: AppDefinitionUpdate,
-    admin: str = Depends(get_current_admin)
+    admin: Dict = Depends(require_admin_user)
 ):
     """
     Update an existing app definition.
@@ -362,7 +336,7 @@ async def update_app(
 async def delete_app(
     app_id: int,
     hard_delete: bool = False,
-    admin: str = Depends(get_current_admin)
+    admin: Dict = Depends(require_admin_user)
 ):
     """
     Delete an app definition.
@@ -412,7 +386,7 @@ async def delete_app(
 @router.put("/reorder", status_code=status.HTTP_200_OK)
 async def reorder_apps(
     reorder: AppReorderRequest,
-    admin: str = Depends(get_current_admin)
+    admin: Dict = Depends(require_admin_user)
 ):
     """
     Bulk update sort_order for multiple apps.
@@ -450,7 +424,7 @@ async def reorder_apps(
 
 @router.get("/categories/list", response_model=List[str])
 async def list_categories(
-    admin: str = Depends(get_current_admin)
+    admin: Dict = Depends(require_admin_user)
 ):
     """
     Get list of all unique app categories.
