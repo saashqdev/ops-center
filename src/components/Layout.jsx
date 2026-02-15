@@ -932,6 +932,12 @@ export default function Layout({ children }) {
                         indent={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
+                        name="Unicorn Chat"
+                        href="/admin/chat"
+                        icon={iconMap.ChatBubbleLeftRightIcon}
+                        indent={true}
+                      />
+                      <NavigationItem collapsed={sidebarCollapsed}
                         name="Email Settings"
                         href="/admin/platform/email-settings"
                         icon={iconMap.EnvelopeIcon}

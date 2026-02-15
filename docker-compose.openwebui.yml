@@ -1,0 +1,113 @@
+# Open WebUI - AI Chat Interface
+# Full-featured chat UI backed by LiteLLM (OpenAI-compatible proxy)
+# Supports SSO via Keycloak OIDC, RAG, multi-model chat, conversation history
+#
+# Usage:
+#   docker compose -f docker-compose.openwebui.yml --env-file .env.openwebui up -d
+#
+# Access:
+#   Local:    http://localhost:3100
+#   External: https://chat.kubeworkz.io (via Traefik)
+
+services:
+  # Open WebUI - Chat interface for LLMs
+  unicorn-open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: unicorn-open-webui
+    restart: unless-stopped
+    ports:
+      - "3100:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      # ── General ──────────────────────────────────────────────
+      - ENV=prod
+      - WEBUI_NAME=Unicorn Chat
+      - WEBUI_URL=https://chat.${EXTERNAL_HOST:-kubeworkz.io}
+      - ENABLE_SIGNUP=${OPENWEBUI_ENABLE_SIGNUP:-false}
+      - DEFAULT_USER_ROLE=${OPENWEBUI_DEFAULT_ROLE:-user}
+      - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY:-change-me-openwebui-secret}
+
+      # ── LiteLLM Backend (OpenAI-compatible) ──────────────────
+      - OPENAI_API_BASE_URL=http://unicorn-litellm-wilmer:4000/v1
+      - OPENAI_API_KEY=${LITELLM_MASTER_KEY}
+      - ENABLE_OPENAI_API=true
+
+      # ── Disable bundled Ollama (we use LiteLLM) ─────────────
+      - OLLAMA_BASE_URL=
+      - ENABLE_OLLAMA_API=false
+
+      # ── Keycloak SSO (OIDC) ─────────────────────────────────
+      - ENABLE_OAUTH_SIGNUP=${OPENWEBUI_ENABLE_OAUTH_SIGNUP:-true}
+      - OAUTH_PROVIDER_NAME=Keycloak
+      - OPENID_PROVIDER_URL=https://auth.${EXTERNAL_HOST:-kubeworkz.io}/realms/${KEYCLOAK_REALM:-uchub}/.well-known/openid-configuration
+      - OAUTH_CLIENT_ID=${OPENWEBUI_OAUTH_CLIENT_ID:-open-webui}
+      - OAUTH_CLIENT_SECRET=${OPENWEBUI_OAUTH_CLIENT_SECRET}
+      - OAUTH_SCOPES=openid email profile
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
+
+      # ── RAG Configuration ───────────────────────────────────
+      - RAG_EMBEDDING_ENGINE=openai
+      - RAG_OPENAI_API_BASE_URL=http://unicorn-litellm-wilmer:4000/v1
+      - RAG_OPENAI_API_KEY=${LITELLM_MASTER_KEY}
+
+      # ── Security ─────────────────────────────────────────────
+      - SAFE_MODE=true
+      - WEBUI_AUTH=true
+
+    depends_on:
+      - open-webui-redis
+    networks:
+      - unicorn-network
+      - openwebui-internal
+      - web
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Dedicated Redis for Open WebUI caching
+  open-webui-redis:
+    image: redis:7-alpine
+    container_name: open-webui-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - open-webui-redis-data:/data
+    networks:
+      - openwebui-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  open-webui-data:
+  open-webui-redis-data:
+
+networks:
+  unicorn-network:
+    external: true
+  web:
+    external: true
+  openwebui-internal:
+    driver: bridge

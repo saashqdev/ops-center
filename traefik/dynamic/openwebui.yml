@@ -1,0 +1,46 @@
+# Open WebUI (Unicorn Chat) Routes
+# Routes chat.kubeworkz.io → Open WebUI container
+http:
+  routers:
+    openwebui:
+      rule: "Host(`chat.kubeworkz.io`)"
+      entryPoints:
+        - websecure
+      service: openwebui-service
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - openwebui-headers
+
+  middlewares:
+    openwebui-headers:
+      headers:
+        # Security headers
+        browserXssFilter: true
+        contentTypeNosniff: true
+        frameDeny: false
+        # Allow embedding in Ops-Center iframe
+        customFrameOptionsValue: "ALLOW-FROM https://kubeworkz.io"
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, nofollow"
+        # CORS for API calls from Ops-Center
+        accessControlAllowOriginList:
+          - "https://kubeworkz.io"
+        accessControlAllowMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "OPTIONS"
+        accessControlAllowHeaders:
+          - "Content-Type"
+          - "Authorization"
+          - "X-Requested-With"
+        accessControlAllowCredentials: true
+
+  services:
+    openwebui-service:
+      loadBalancer:
+        servers:
+          - url: "http://unicorn-open-webui:8080"
+        passHostHeader: true

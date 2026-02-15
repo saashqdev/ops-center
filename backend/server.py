@@ -953,6 +953,14 @@ try:
 except Exception as e:
     logger.warning(f"Center-Deep Search API not loaded: {e}")
 
+# Open WebUI (Unicorn Chat) API
+try:
+    from openwebui_api import router as openwebui_router
+    app.include_router(openwebui_router)
+    logger.info("💬 Open WebUI API registered at /api/v1/openwebui")
+except Exception as e:
+    logger.warning(f"Open WebUI API not loaded: {e}")
+
 # Epic 1.8: Credit & Usage Metering System
 app.include_router(credit_router)
 logger.info("Credit & Usage Metering API endpoints registered at /api/v1/credits")
