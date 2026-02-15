@@ -545,10 +545,10 @@ const ModelListManagement = () => {
   useEffect(() => {
     if (lists.length > 0) {
       const appId = defaultApps[tabValue]?.id;
-      // Match empty string, null, or undefined for Global tab
+      // Match empty string, null, undefined, or 'global' for Global tab
       const list = lists.find(l => {
         if (appId === null) {
-          return !l.app_identifier || l.app_identifier === '';
+          return !l.app_identifier || l.app_identifier === '' || l.app_identifier === 'global';
         }
         return l.app_identifier === appId;
       });
