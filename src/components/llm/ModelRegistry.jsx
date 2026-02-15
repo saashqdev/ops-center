@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Grid,
   Button,
   TextField,
   MenuItem,
@@ -47,9 +46,7 @@ export default function ModelRegistry({ showSnackbar }) {
 
     try {
       const response = await fetch('/api/v1/llm/models', {
-        headers: {
-          'X-Admin-Token': localStorage.getItem('adminToken') || ''
-        }
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -57,7 +54,20 @@ export default function ModelRegistry({ showSnackbar }) {
       }
 
       const data = await response.json();
-      setModels(data.models || []);
+      // API returns { object: 'list', data: [...] } or { models: [...] }
+      const rawModels = data.data || data.models || [];
+      // Normalize fields for ModelCard compatibility
+      const normalized = rawModels.map(m => ({
+        ...m,
+        model_id: m.model_id || m.id || '',
+        name: m.display_name || m.name || m.id || '',
+        status: m.status || (m.enabled !== false ? 'active' : 'inactive'),
+        cost_per_input_token: m.cost_per_input_token ?? (m.pricing?.input ?? 0),
+        cost_per_output_token: m.cost_per_output_token ?? (m.pricing?.output ?? 0),
+        latency_avg_ms: m.latency_avg_ms ?? m.avg_latency_ms ?? null,
+        usage_count: m.usage_count ?? 0,
+      }));
+      setModels(normalized);
     } catch (err) {
       setError(err.message);
       showSnackbar(err.message, 'error');
@@ -93,9 +103,9 @@ export default function ModelRegistry({ showSnackbar }) {
     try {
       const response = await fetch('/api/v1/llm/models', {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Token': localStorage.getItem('adminToken') || ''
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(modelData)
       });
@@ -121,9 +131,7 @@ export default function ModelRegistry({ showSnackbar }) {
     try {
       const response = await fetch(`/api/v1/llm/models/${model.model_id}`, {
         method: 'DELETE',
-        headers: {
-          'X-Admin-Token': localStorage.getItem('adminToken') || ''
-        }
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -140,9 +148,9 @@ export default function ModelRegistry({ showSnackbar }) {
   const handleTestModel = async (modelId, prompt) => {
     const response = await fetch(`/api/v1/llm/models/${modelId}/test`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Token': localStorage.getItem('adminToken') || ''
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ test_prompt: prompt })
     });
@@ -160,7 +168,7 @@ export default function ModelRegistry({ showSnackbar }) {
     setTestModalOpen(true);
   };
 
-  const providers = ['all', 'vllm', 'openai', 'anthropic', 'cohere', 'openrouter', 'byok'];
+  const providers = ['all', ...new Set(models.map(m => m.provider).filter(Boolean))];
   const statuses = ['all', 'active', 'inactive', 'error', 'testing'];
 
   if (loading) {
@@ -280,22 +288,22 @@ export default function ModelRegistry({ showSnackbar }) {
         </Alert>
       ) : (
         <>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <p className="text-gray-300 text-sm mb-3">
             Showing {filteredModels.length} of {models.length} models
-          </Typography>
+          </p>
 
-          <Grid container spacing={2}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredModels.map((model) => (
-              <Grid item xs={12} sm={6} md={4} key={model.model_id}>
+              <div key={model.model_id || model.id}>
                 <ModelCard
                   model={model}
                   onEdit={() => {}}
                   onDelete={handleDeleteModel}
                   onTest={handleOpenTest}
                 />
-              </Grid>
+              </div>
             ))}
-          </Grid>
+          </div>
         </>
       )}
 

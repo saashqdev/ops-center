@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 const ThemeContext = createContext();
 
@@ -189,6 +191,103 @@ export function ThemeProvider({ children }) {
     setIsDarkMode(!isDarkMode);
   };
 
+  // Create MUI theme that matches the current app theme
+  const muiTheme = useMemo(() => {
+    const isDark = currentTheme !== 'light';
+    return createTheme({
+      palette: {
+        mode: isDark ? 'dark' : 'light',
+        ...(isDark ? {
+          background: {
+            default: '#0f172a',
+            paper: '#1e293b',
+          },
+          text: {
+            primary: '#f1f5f9',
+            secondary: '#94a3b8',
+          },
+        } : {
+          background: {
+            default: '#f8fafc',
+            paper: '#ffffff',
+          },
+        }),
+        primary: {
+          main: currentTheme === 'unicorn' || currentTheme === 'galaxy' ? '#8b5cf6' : '#3b82f6',
+        },
+      },
+      components: {
+        MuiPaper: {
+          styleOverrides: {
+            root: isDark ? {
+              backgroundImage: 'none',
+              backgroundColor: 'rgba(30, 41, 59, 0.8)',
+              borderColor: 'rgba(51, 65, 85, 0.5)',
+            } : {},
+          },
+        },
+        MuiTab: {
+          styleOverrides: {
+            root: isDark ? {
+              color: '#94a3b8',
+              '&.Mui-selected': {
+                color: currentTheme === 'unicorn' || currentTheme === 'galaxy' ? '#a78bfa' : '#60a5fa',
+              },
+            } : {},
+          },
+        },
+        MuiTableCell: {
+          styleOverrides: {
+            root: isDark ? {
+              borderColor: 'rgba(51, 65, 85, 0.5)',
+              color: '#e2e8f0',
+            } : {},
+          },
+        },
+        MuiCard: {
+          styleOverrides: {
+            root: isDark ? {
+              backgroundImage: 'none',
+              backgroundColor: 'rgba(30, 41, 59, 0.8)',
+            } : {},
+          },
+        },
+        MuiAlert: {
+          styleOverrides: {
+            root: isDark ? {
+              backgroundColor: 'rgba(30, 41, 59, 0.9)',
+            } : {},
+          },
+        },
+        MuiDialog: {
+          styleOverrides: {
+            paper: isDark ? {
+              backgroundImage: 'none',
+              backgroundColor: '#1e293b',
+            } : {},
+          },
+        },
+        MuiTextField: {
+          styleOverrides: {
+            root: isDark ? {
+              '& .MuiInputBase-root': {
+                color: '#e2e8f0',
+              },
+              '& .MuiInputLabel-root': {
+                color: '#94a3b8',
+              },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'rgba(51, 65, 85, 0.5)',
+                },
+              },
+            } : {},
+          },
+        },
+      },
+    });
+  }, [currentTheme]);
+
   const value = {
     currentTheme,
     theme: themes[currentTheme],
@@ -200,7 +299,10 @@ export function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={value}>
-      {children}
+      <MuiThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        {children}
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 }

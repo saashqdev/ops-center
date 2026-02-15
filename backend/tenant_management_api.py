@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field, EmailStr, validator
 import asyncpg
 from auth_dependencies import require_admin_user
 from tenant_isolation import TenantIsolation, TenantQuotaManager
+from database.connection import get_db_pool as get_shared_db_pool
 from org_manager import org_manager, Organization, OrgUser
 from keycloak_integration import get_user_by_id
 
@@ -107,19 +108,12 @@ class TenantListResponse(BaseModel):
 
 # Database helpers
 async def get_db_pool() -> asyncpg.Pool:
-    """Get database connection pool"""
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="DATABASE_URL not configured"
-        )
-    
+    """Get shared database connection pool (singleton)"""
     try:
-        pool = await asyncpg.create_pool(db_url)
+        pool = await get_shared_db_pool()
         return pool
     except Exception as exc:
-        logger.error(f"Failed to create database pool: {exc}")
+        logger.error(f"Failed to get database pool: {exc}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database connection failed"
@@ -334,8 +328,6 @@ async def create_tenant(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create tenant: {str(e)}"
         )
-    finally:
-        await pool.close()
 
 
 @router.get("/", response_model=TenantListResponse)
@@ -460,9 +452,8 @@ async def list_tenants(
                 page_size=page_size,
                 has_more=(page * page_size) < total
             )
-        
-    finally:
-        await pool.close()
+    except Exception:
+        raise
 
 
 @router.get("/{tenant_id}", response_model=TenantResponse)
@@ -525,9 +516,8 @@ async def get_tenant(
                 response_data.quota_status = quota_status
             
             return response_data
-        
-    finally:
-        await pool.close()
+    except Exception:
+        raise
 
 
 @router.patch("/{tenant_id}", response_model=TenantResponse)
@@ -722,8 +712,6 @@ async def update_tenant(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update tenant: {str(e)}"
         )
-    finally:
-        await pool.close()
 
 
 @router.delete("/{tenant_id}")
@@ -783,9 +771,8 @@ async def delete_tenant(
                     "tenant_id": tenant_id,
                     "note": "Data preserved. Set is_active=true to reactivate."
                 }
-        
-    finally:
-        await pool.close()
+    except Exception:
+        raise
 
 
 @router.get("/{tenant_id}/stats", response_model=TenantStats)
@@ -848,9 +835,8 @@ async def get_tenant_stats(
                 api_calls_30d=api_calls_30d,
                 last_activity=last_activity
             )
-        
-    finally:
-        await pool.close()
+    except Exception:
+        raise
 
 
 @router.get("/{tenant_id}/quota")
@@ -871,6 +857,5 @@ async def get_tenant_quota(
             "tenant_id": tenant_id,
             "quotas": quota_status
         }
-        
-    finally:
-        await pool.close()
+    except Exception:
+        raise
