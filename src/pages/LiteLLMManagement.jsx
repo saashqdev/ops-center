@@ -55,17 +55,18 @@ ChartJS.register(
   Legend
 );
 
-// Provider logos mapping
+// Provider logos mapping (inline SVG data URIs for reliability)
 const PROVIDER_LOGOS = {
-  openrouter: '/assets/providers/openrouter.png',
-  openai: '/assets/providers/openai.png',
-  anthropic: '/assets/providers/anthropic.png',
-  together: '/assets/providers/together.png',
-  huggingface: '/assets/providers/huggingface.png',
-  cohere: '/assets/providers/cohere.png',
-  groq: '/assets/providers/groq.png',
-  mistral: '/assets/providers/mistral.png',
-  custom: '/assets/providers/custom.png'
+  openrouter: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#6D28D9"/><path d="M20 20h24v4H24v6h16v4H24v10h-4V20z" fill="white"/><path d="M32 34h12v4H36v6h-4V34z" fill="white" opacity="0.7"/></svg>')}`,
+  openai: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#10A37F"/><path d="M32 12c-11 0-20 9-20 20s9 20 20 20 20-9 20-20-9-20-20-20zm0 6a14 14 0 0 1 13.7 11H32V18zm-2 0v11H18.3A14 14 0 0 1 30 18zm-14 13h14v14A14 14 0 0 1 16 31zm16 14V31h14a14 14 0 0 1-14 14z" fill="white" opacity="0.9"/><circle cx="32" cy="32" r="6" fill="white"/></svg>')}`,
+  anthropic: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#D97706"/><path d="M22 44L32 16l10 28h-5l-2-6h-6l-2 6h-5zm8.5-10h3l-1.5-5-1.5 5z" fill="white"/></svg>')}`,
+  together: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#3B82F6"/><circle cx="24" cy="24" r="5" fill="white"/><circle cx="40" cy="24" r="5" fill="white"/><circle cx="24" cy="40" r="5" fill="white"/><circle cx="40" cy="40" r="5" fill="white"/><line x1="24" y1="24" x2="40" y2="24" stroke="white" stroke-width="2"/><line x1="24" y1="40" x2="40" y2="40" stroke="white" stroke-width="2"/><line x1="24" y1="24" x2="24" y2="40" stroke="white" stroke-width="2"/><line x1="40" y1="24" x2="40" y2="40" stroke="white" stroke-width="2"/></svg>')}`,
+  huggingface: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#FFD21E"/><circle cx="24" cy="28" r="4" fill="#1a1a1a"/><circle cx="40" cy="28" r="4" fill="#1a1a1a"/><circle cx="25" cy="27" r="1.5" fill="white"/><circle cx="41" cy="27" r="1.5" fill="white"/><path d="M22 38c0 0 4 6 10 6s10-6 10-6" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>')}`,
+  cohere: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#39594D"/><text x="32" y="40" font-family="Arial,sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">Co</text></svg>')}`,
+  groq: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#F55036"/><text x="32" y="42" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">Groq</text></svg>')}`,
+  mistral: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#1a1a1a"/><rect x="12" y="16" width="8" height="8" fill="#F7D046"/><rect x="28" y="16" width="8" height="8" fill="#F7D046"/><rect x="44" y="16" width="8" height="8" fill="#F7D046"/><rect x="12" y="28" width="8" height="8" fill="#F2A73B"/><rect x="20" y="28" width="8" height="8" fill="#F2A73B"/><rect x="36" y="28" width="8" height="8" fill="#F2A73B"/><rect x="44" y="28" width="8" height="8" fill="#F2A73B"/><rect x="12" y="40" width="8" height="8" fill="#EE792F"/><rect x="28" y="40" width="8" height="8" fill="#EE792F"/><rect x="44" y="40" width="8" height="8" fill="#EE792F"/></svg>')}`,
+  local: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#6366F1"/><rect x="16" y="20" width="32" height="24" rx="3" fill="none" stroke="white" stroke-width="2.5"/><line x1="16" y1="32" x2="48" y2="32" stroke="white" stroke-width="2"/><circle cx="22" cy="26" r="2" fill="#4ADE80"/><circle cx="22" cy="38" r="2" fill="#4ADE80"/><rect x="28" y="24" width="14" height="3" rx="1" fill="white" opacity="0.5"/><rect x="28" y="36" width="14" height="3" rx="1" fill="white" opacity="0.5"/></svg>')}`,
+  custom: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#6B7280"/><path d="M32 18l-2 4h-4l3 3-1 4 4-2 4 2-1-4 3-3h-4l-2-4z" fill="white"/><circle cx="32" cy="38" r="8" fill="none" stroke="white" stroke-width="2"/><path d="M28 38h8M32 34v8" stroke="white" stroke-width="1.5"/></svg>')}`,
 };
 
 // Provider colors
