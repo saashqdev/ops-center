@@ -165,8 +165,8 @@ export default function PublicLanding() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Open Center-Deep with the search query
-      window.open(`https://search.your-domain.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
+      // Navigate to in-app Center-Deep Search with the query
+      window.location.href = `/admin/search?q=${encodeURIComponent(searchQuery)}`;
     }
   };
 

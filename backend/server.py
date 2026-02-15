@@ -948,6 +948,14 @@ logger.info("Advanced Log Search API endpoints registered at /api/v1/logs/search
 app.include_router(backup_router)
 logger.info("Database Backup API endpoints registered at /api/backups")
 
+# Center-Deep Search API
+try:
+    from centerdeep_api import router as centerdeep_search_router
+    app.include_router(centerdeep_search_router)
+    logger.info("🔍 Center-Deep Search API registered at /api/v1/search")
+except Exception as e:
+    logger.warning(f"Center-Deep Search API not loaded: {e}")
+
 # Epic 1.8: Credit & Usage Metering System
 app.include_router(credit_router)
 logger.info("Credit & Usage Metering API endpoints registered at /api/v1/credits")

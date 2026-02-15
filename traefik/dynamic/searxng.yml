@@ -1,0 +1,33 @@
+# Center-Deep Search (SearXNG) Routes
+http:
+  routers:
+    # Public-facing: redirect search.kubeworkz.io → in-app Center-Deep Search
+    searxng-redirect:
+      rule: "Host(`search.kubeworkz.io`)"
+      priority: 100
+      entryPoints:
+        - websecure
+      middlewares:
+        - searxng-to-app
+      service: noop-service
+      tls:
+        certResolver: letsencrypt
+
+  middlewares:
+    searxng-to-app:
+      redirectRegex:
+        regex: "^https://search\\.kubeworkz\\.io/(.*)"
+        replacement: "https://kubeworkz.io/admin/search"
+        permanent: false
+
+  services:
+    # SearXNG backend (accessed internally by ops-center API proxy)
+    searxng-service:
+      loadBalancer:
+        servers:
+          - url: "http://unicorn-searxng:8080"
+    # Dummy service required by Traefik for redirect-only routers
+    noop-service:
+      loadBalancer:
+        servers:
+          - url: "http://unicorn-searxng:8080"

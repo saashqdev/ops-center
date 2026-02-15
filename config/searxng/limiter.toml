@@ -1,0 +1,4 @@
+# SearXNG rate limiter configuration
+[botdetection.ip_limit]
+# Max requests per IP per time window
+link_token = true

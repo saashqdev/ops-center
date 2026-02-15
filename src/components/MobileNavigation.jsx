@@ -261,7 +261,7 @@ export default function MobileNavigation({ user, currentPath }) {
       visible: userRole === 'admin',
       children: [
         { label: 'Claude Agents', path: '/admin/claude-agents', icon: <AutoAwesomeIcon /> },
-        { label: 'Center-Deep Search', path: 'https://search.your-domain.com', icon: <SearchIcon />, external: true },
+        { label: 'Center-Deep Search', path: '/admin/search', icon: <SearchIcon /> },
         { label: 'Email Settings', path: '/admin/platform/email-settings', icon: <EmailIcon /> },
         { label: 'Platform Settings', path: '/admin/platform/settings', icon: <SettingsIcon /> }
       ]

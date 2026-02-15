@@ -114,6 +114,7 @@ const OrganizationBillingPro = lazy(() => import('./pages/organization/Organizat
 // Services pages (lazy loaded)
 const Brigade = lazy(() => import('./pages/Brigade'));
 const ClaudeAgents = lazy(() => import('./pages/ClaudeAgents'));
+const CenterDeepSearch = lazy(() => import('./pages/CenterDeepSearch'));
 const LLMHub = lazy(() => import('./pages/LLMHub'));
 const LLMManagement = lazy(() => import('./pages/LLMManagement'));
 const LiteLLMManagement = lazy(() => import('./pages/LiteLLMManagement'));
@@ -499,6 +500,7 @@ function AppRoutes() {
                   {/* ============================================================ */}
                   <Route path="brigade" element={<Brigade />} />
                   <Route path="claude-agents" element={<ClaudeAgents />} />
+                  <Route path="search" element={<CenterDeepSearch />} /> {/* Center-Deep Search */}
                   <Route path="atlas" element={<AtlasChat />} /> {/* Epic 6.1 - AI Assistant */}
                   <Route path="colonel" element={<ColonelAgent />} /> {/* Epic 12 - The Colonel */}
                   <Route path="llm-hub" element={<LLMHub />} />

@@ -927,10 +927,9 @@ export default function Layout({ children }) {
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
                         name="Center-Deep Search"
-                        href="https://search.your-domain.com"
+                        href="/admin/search"
                         icon={iconMap.MagnifyingGlassIcon}
                         indent={true}
-                        external={true}
                       />
                       <NavigationItem collapsed={sidebarCollapsed}
                         name="Email Settings"
