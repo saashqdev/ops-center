@@ -17,7 +17,8 @@ window.fetch = function(...args) {
     if (response.status === 401 && 
         !args[0].includes('/auth/login') && 
         !args[0].includes('/auth/session') &&
-        !args[0].includes('/auth/callback')) {
+        !args[0].includes('/auth/callback') &&
+        !args[0].includes('/api/v1/openwebui/')) {
       console.warn('Session expired, redirecting to login...');
       window.location.href = '/auth/login';
     }

@@ -6,8 +6,8 @@ export default function ProviderCard({ provider, onEdit, onDelete, onTest }) {
   const getStatusColor = (status) => status === 'active' ? 'success' : 'error';
 
   return (
-    <Card>
-      <CardContent>
+    <Card sx={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h6" sx={{ wordBreak: 'break-word' }}>{provider.name}</Typography>
@@ -26,6 +26,7 @@ export default function ProviderCard({ provider, onEdit, onDelete, onTest }) {
         <Typography variant="body2" color="text.secondary">
           Usage: {(provider.usage_count || 0).toLocaleString()} requests
         </Typography>
+        <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
           <Tooltip title="Test Connection"><IconButton size="small" onClick={() => onTest(provider)}><PlayArrow /></IconButton></Tooltip>
           <Tooltip title="Edit"><IconButton size="small" onClick={() => onEdit(provider)}><Edit /></IconButton></Tooltip>

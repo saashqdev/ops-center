@@ -71,7 +71,12 @@ async def _proxy_get(path: str, params: dict = None, timeout: float = None) -> d
         raise HTTPException(status_code=504, detail="Open WebUI timed out")
     except httpx.HTTPStatusError as e:
         logger.error(f"Open WebUI error: {e.response.status_code} on {path}")
-        raise HTTPException(status_code=e.response.status_code, detail="Open WebUI returned an error")
+        # Don't pass upstream 401/403 to the client — those are Open WebUI's
+        # auth errors, not our session errors. Map them to 502 instead.
+        status = e.response.status_code
+        if status in (401, 403):
+            raise HTTPException(status_code=502, detail=f"Open WebUI auth error ({status}) — check WEBUI_SECRET_KEY / API key")
+        raise HTTPException(status_code=status, detail="Open WebUI returned an error")
     except httpx.ConnectError:
         raise HTTPException(status_code=503, detail="Open WebUI is not reachable")
     except Exception as e:

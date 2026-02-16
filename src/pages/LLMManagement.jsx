@@ -265,19 +265,39 @@ export default function LLMManagement() {
             ) : providers.length === 0 ? (
               <Alert severity="info">No providers configured yet.</Alert>
             ) : (
-              <Grid container spacing={3}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, width: '100%' }}>
                 {/* REFACTORED: Using safeMap for provider list */}
                 {safeMap(providers, (provider) => (
-                  <Grid item xs={12} sm={6} md={4} key={provider.id}>
+                  <Box
+                    key={provider.id}
+                    sx={{
+                      flex: {
+                        xs: '1 1 100%',
+                        sm: '0 1 calc(50% - 12px)',
+                        md: '0 1 calc(25% - 18px)'
+                      },
+                      minWidth: {
+                        xs: '100%',
+                        sm: 'calc(50% - 12px)',
+                        md: 'calc(25% - 18px)'
+                      },
+                      maxWidth: {
+                        xs: '100%',
+                        sm: 'calc(50% - 12px)',
+                        md: 'calc(25% - 18px)'
+                      },
+                      display: 'flex'
+                    }}
+                  >
                     <ProviderCard
                       provider={provider}
                       onEdit={handleEditProvider}
                       onDelete={handleDeleteProvider}
                       onTest={handleTestProvider}
                     />
-                  </Grid>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
             )}
           </Box>
         )}

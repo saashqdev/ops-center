@@ -87,7 +87,7 @@ const StatCard = ({ title, value, icon: Icon, color, trend, theme }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className={`${theme.card} rounded-xl p-6 border ${color}/20 hover:border-${color}/40 transition-all`}
+    className={`${theme.card} rounded-xl p-6 border ${color}/20 hover:border-${color}/40 transition-all h-full`}
   >
     <div className="flex items-center justify-between">
       <div>
@@ -121,23 +121,23 @@ const ProviderCard = ({ provider, onConfigure, onTest, onDisable, onDelete, them
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className={`${theme.card} rounded-xl p-6 border border-${statusColor}/20 hover:border-${statusColor}/40 transition-all`}
+      className={`${theme.card} rounded-xl p-6 border border-${statusColor}/20 hover:border-${statusColor}/40 transition-all h-full flex flex-col`}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${providerColor}20` }}>
+          <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${providerColor}20` }}>
             {PROVIDER_LOGOS[provider.type] ? (
               <img src={PROVIDER_LOGOS[provider.type]} alt={provider.name} className="w-8 h-8" />
             ) : (
               <Brain className="h-6 w-6" style={{ color: providerColor }} />
             )}
           </div>
-          <div>
-            <h3 className={`text-lg font-semibold ${theme.text.primary}`}>{provider.name}</h3>
+          <div className="min-w-0">
+            <h3 className={`text-lg font-semibold ${theme.text.primary} truncate`}>{provider.name}</h3>
             <p className={`text-sm ${theme.text.secondary}`}>{provider.type}</p>
           </div>
         </div>
-        <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${statusColor}/20 text-${statusColor}`}>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${statusColor}/20 text-${statusColor} flex-shrink-0`}>
           {provider.status}
         </span>
       </div>
@@ -148,14 +148,17 @@ const ProviderCard = ({ provider, onConfigure, onTest, onDisable, onDelete, them
           <p className={`text-lg font-semibold ${theme.text.primary}`}>{provider.models || 0}</p>
         </div>
         <div>
-          <p className={`text-xs ${theme.text.secondary} mb-1`}>Avg Cost</p>
+          <p className={`text-xs ${theme.text.secondary} mb-1`}>Usage</p>
           <p className={`text-lg font-semibold ${theme.text.primary}`}>
-            {provider.avg_cost_per_1m ? `$${provider.avg_cost_per_1m.toFixed(2)}` : '$0.00'}/1M
+            {provider.usage_count != null ? `${provider.usage_count} requests` : '0 requests'}
           </p>
         </div>
       </div>
 
-      <div className="flex gap-2">
+      {/* Spacer pushes actions to bottom */}
+      <div className="flex-grow" />
+
+      <div className="flex gap-2 mt-auto pt-2">
         <button
           onClick={() => onConfigure(provider)}
           className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
@@ -890,7 +893,7 @@ export default function LiteLLMManagement() {
             <p className={`${theme.text.secondary}`}>No providers configured yet. Click "Add Provider" to get started.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
             {providers.map(provider => (
               <ProviderCard
                 key={provider.id}
