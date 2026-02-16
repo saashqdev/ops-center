@@ -281,7 +281,7 @@ export const isCriticalProcess = (processName) => {
  * @returns {object} Warning message details
  */
 export const getCriticalProcessWarning = (processName, pid) => {
-  const impacts = {
+  const impactMap = {
     'ops-center': ['Service downtime', 'Loss of admin access', 'Interrupted user sessions'],
     'postgres': ['Database unavailable', 'Data access lost', 'All services affected'],
     'redis': ['Cache cleared', 'Session data lost', 'Performance degradation'],
@@ -292,7 +292,7 @@ export const getCriticalProcessWarning = (processName, pid) => {
 
   // Find matching impact list
   let impactList = ['Service downtime', 'Potential data loss', 'System instability'];
-  for (const [key, impacts] of Object.entries(impacts)) {
+  for (const [key, impacts] of Object.entries(impactMap)) {
     if (processName.toLowerCase().includes(key)) {
       impactList = impacts;
       break;

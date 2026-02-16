@@ -2293,7 +2293,7 @@ async def get_system_status(current_user: dict = Depends(get_current_user)):
                     "gpu": resource_monitor.get_gpu_metrics(),
                     "disk": resource_monitor.get_disk_metrics(),
                     "network": resource_monitor.get_network_metrics(),
-                    "processes": resource_monitor.get_top_processes()
+                    "processes": resource_monitor.get_process_metrics().get('top_cpu', [])
                 }
                 
                 # Format for API compatibility
@@ -2398,29 +2398,27 @@ async def get_system_status(current_user: dict = Depends(get_current_user)):
         boot_time = psutil.boot_time()
         uptime = int(time.time() - boot_time)
         
-        # Get top processes - skip for performance
+        # Get top processes
         processes = []
-        # Skip process enumeration for now to improve performance
-        # This was causing significant delays in the API response
-        # try:
-        #     for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info', 'status']):
-        #         try:
-        #             pinfo = proc.info
-        #             processes.append({
-        #                 'pid': pinfo['pid'],
-        #                 'name': pinfo['name'],
-        #                 'cpu_percent': pinfo['cpu_percent'] or 0,
-        #                 'memory_mb': pinfo['memory_info'].rss / (1024 * 1024) if pinfo['memory_info'] else 0,
-        #                 'status': pinfo['status']
-        #             })
-        #         except (psutil.NoSuchProcess, psutil.AccessDenied):
-        #             pass
-        #     
-        #     # Sort by CPU usage and take top 10
-        #     processes.sort(key=lambda x: x['cpu_percent'], reverse=True)
-        #     processes = processes[:10]
-        # except Exception as e:
-        #     print(f"Error getting processes: {e}")
+        try:
+            for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info', 'status']):
+                try:
+                    pinfo = proc.info
+                    processes.append({
+                        'pid': pinfo['pid'],
+                        'name': pinfo['name'],
+                        'cpu_percent': pinfo['cpu_percent'] or 0,
+                        'memory_mb': pinfo['memory_info'].rss / (1024 * 1024) if pinfo['memory_info'] else 0,
+                        'status': pinfo['status']
+                    })
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+            
+            # Sort by CPU usage and take top 20
+            processes.sort(key=lambda x: x['cpu_percent'], reverse=True)
+            processes = processes[:20]
+        except Exception as e:
+            print(f"Error getting processes: {e}")
         
         return {
             "cpu": {

@@ -330,25 +330,7 @@ export default function System() {
   const maxRetries = 3;
   const dataRef = useRef(historicalData);
 
-  // Fetch data on mount and interval
-  useEffect(() => {
-    fetchHardwareInfo();
-    fetchDiskIo();
-    fetchNetworkStats();
-
-    if (!autoRefresh) return;
-
-    const interval = setInterval(() => {
-      fetchSystemStatus();
-      fetchDiskIo();
-      fetchNetworkStats();
-      updateHistoricalData();
-    }, refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval]);
-
-  const fetchHardwareInfo = async () => {
+  async function fetchHardwareInfo() {
     try {
       const response = await fetch('/api/v1/system/hardware');
       if (!response.ok) {
@@ -373,9 +355,9 @@ export default function System() {
         toast.error(errorMsg);
       }
     }
-  };
+  }
 
-  const fetchDiskIo = async () => {
+  async function fetchDiskIo() {
     try {
       const response = await fetch('/api/v1/system/disk-io');
       if (!response.ok) {
@@ -400,9 +382,9 @@ export default function System() {
         toast.warning(errorMsg); // Use warning since disk I/O is less critical
       }
     }
-  };
+  }
 
-  const fetchNetworkStats = async () => {
+  async function fetchNetworkStats() {
     try {
       const response = await fetch('/api/v1/network/status');
       if (!response.ok) {
@@ -432,9 +414,9 @@ export default function System() {
         toast.warning(errorMsg);
       }
     }
-  };
+  }
 
-  const updateHistoricalData = () => {
+  function updateHistoricalData() {
     if (!systemStatus) return;
 
     const timestamp = new Date().toLocaleTimeString();
@@ -475,7 +457,31 @@ export default function System() {
 
     dataRef.current = newData;
     setHistoricalData(newData);
-  };
+  }
+
+  // Populate historical data whenever systemStatus updates
+  useEffect(() => {
+    if (systemStatus?.cpu) {
+      updateHistoricalData();
+    }
+  }, [systemStatus]);
+
+  // Fetch data on mount and interval
+  useEffect(() => {
+    fetchHardwareInfo();
+    fetchDiskIo();
+    fetchNetworkStats();
+
+    if (!autoRefresh) return;
+
+    const interval = setInterval(() => {
+      fetchSystemStatus();
+      fetchDiskIo();
+      fetchNetworkStats();
+    }, refreshInterval);
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, refreshInterval]);
 
   const handleKillProcess = async (pid) => {
     try {

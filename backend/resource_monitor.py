@@ -378,7 +378,7 @@ class ResourceMonitor:
         """Get top processes by CPU and memory"""
         processes = []
         
-        for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
+        for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent', 'memory_info', 'status']):
             try:
                 pinfo = proc.info
                 if pinfo['cpu_percent'] > 0 or pinfo['memory_percent'] > 0:
@@ -386,16 +386,18 @@ class ResourceMonitor:
                         'pid': pinfo['pid'],
                         'name': pinfo['name'],
                         'cpu_percent': pinfo['cpu_percent'],
-                        'memory_percent': pinfo['memory_percent']
+                        'memory_percent': pinfo['memory_percent'],
+                        'memory_mb': pinfo['memory_info'].rss / (1024 * 1024) if pinfo.get('memory_info') else 0,
+                        'status': pinfo.get('status', 'unknown')
                     })
             except:
                 pass
         
-        # Sort by CPU usage and get top 10
+        # Sort by CPU usage and get top 20
         processes.sort(key=lambda x: x['cpu_percent'], reverse=True)
         
         return {
-            "top_cpu": processes[:5],
+            "top_cpu": processes[:20],
             "total_processes": len(processes),
             "running": len([p for p in processes if p['cpu_percent'] > 0])
         }
