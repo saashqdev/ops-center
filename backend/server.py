@@ -520,6 +520,7 @@ csrf_protect, csrf_middleware_factory = create_csrf_protection(
         "/api/v1/admin/system/local-users/",  # Local user management API - REST API operations
         "/api/v1/org/",  # Organization management API - CRUD operations
         "/api/v1/org",    # Organization management API (without trailing slash)
+        "/api/v1/colonel/",  # The Colonel AI Agent - chat and tool endpoints (Epic 12)
         "/api/v1/alerts/",  # Email alert system - REST API operations
         "/api/v1/logs/",  # Log search system - REST API operations
         "/api/backups/",  # Database backup API - backup management endpoints
@@ -1136,6 +1137,14 @@ logger.info("🤖 Claude Agent SDK API registered at /api/v1/claude-agents")
 # Lt. Colonel Atlas - AI Infrastructure Assistant (Epic 6.1)
 app.include_router(atlas_router)
 logger.info("🎖️  Lt. Colonel Atlas AI Assistant registered at /api/v1/atlas (Epic 6.1)")
+
+# The Colonel - AI Agent (Epic 12)
+try:
+    from colonel_api import router as colonel_router
+    app.include_router(colonel_router)
+    logger.info("🎖️  The Colonel Agent registered at /api/v1/colonel (Epic 12)")
+except Exception as e:
+    logger.warning(f"Colonel Agent not available: {e}")
 
 # Multi-Server Fleet Management (Epic 15)
 app.include_router(fleet_router)

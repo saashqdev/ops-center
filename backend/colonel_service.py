@@ -12,9 +12,9 @@ from fastapi import HTTPException
 import anthropic
 import openai
 
-from backend.database import get_db_session
-from backend.auth_dependencies import get_current_user
-from backend.audit_logger import log_audit_event
+from database import get_db_session
+from auth_dependencies import get_current_user
+from audit_logger import log_audit_event
 
 
 class ColonelService:

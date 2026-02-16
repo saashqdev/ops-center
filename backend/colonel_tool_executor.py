@@ -11,7 +11,7 @@ import asyncio
 import inspect
 from fastapi import HTTPException
 
-from backend.database import get_db_session
+from database import get_db_session
 
 
 class Tool:
