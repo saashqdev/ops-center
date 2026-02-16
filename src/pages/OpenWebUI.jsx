@@ -47,7 +47,7 @@ export default function OpenWebUI() {
   const [models, setModels] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showIframe, setShowIframe] = useState(true);
+  const [showIframe, setShowIframe] = useState(false);
   const [chatUrl, setChatUrl] = useState('');
   const [adminAction, setAdminAction] = useState(null); // 'seeding' | 'syncing' | null
   const [actionResult, setActionResult] = useState(null);
@@ -170,15 +170,24 @@ export default function OpenWebUI() {
 
       {showIframe && chatUrl ? (
         /* ── Embedded Chat View ──────────────────────────── */
-        <div className={`rounded-xl border ${tc.border} overflow-hidden shadow-2xl`} style={{ height: 'calc(100vh - 160px)' }}>
+        <div className={`rounded-xl border ${tc.border} overflow-hidden shadow-2xl relative`} style={{ height: 'calc(100vh - 160px)' }}>
+          {/* Note: sandbox omits allow-same-origin to prevent iframe from navigating parent */}
           <iframe
             src={chatUrl}
             title="Unicorn Chat - Open WebUI"
             className="w-full h-full"
             style={{ border: 'none' }}
             allow="clipboard-read; clipboard-write; microphone"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
+            sandbox="allow-scripts allow-popups allow-forms allow-downloads"
+            referrerPolicy="no-referrer"
+            onError={() => setShowIframe(false)}
           />
+          {/* Fallback banner in case sandbox blocks SSO */}
+          <div className={`absolute bottom-0 left-0 right-0 p-3 ${currentTheme === 'light' ? 'bg-amber-50 border-t border-amber-200 text-amber-800' : 'bg-amber-900/80 border-t border-amber-700 text-amber-200'} text-xs text-center`}>
+            Embedded mode may have limited functionality.{' '}
+            <button onClick={openExternal} className="underline font-medium">Open in full window</button>{' '}
+            for the best experience.
+          </div>
         </div>
       ) : (
         /* ── Dashboard View ──────────────────────────────── */

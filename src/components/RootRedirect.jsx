@@ -86,9 +86,14 @@ export default function RootRedirect() {
     return <LoadingScreen />;
   }
 
-  // If authenticated, redirect to user landing page (search bar, apps, user dropdown)
-  // Users can access admin console via link in PublicLanding
+  // If authenticated, check for a saved redirect target (e.g. user was sent to login from /admin/chat)
+  // Then redirect to user landing page (search bar, apps, user dropdown)
   if (authenticated) {
+    const redirectTarget = sessionStorage.getItem('redirect_after_login');
+    if (redirectTarget && redirectTarget !== '/' && redirectTarget !== '/dashboard') {
+      sessionStorage.removeItem('redirect_after_login');
+      return <Navigate to={redirectTarget} replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
