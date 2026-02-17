@@ -55,6 +55,7 @@ import { ExtensionsProvider } from './contexts/ExtensionsContext';
 
 // Eagerly load RootRedirect (needed on first render for root route)
 import RootRedirect from './components/RootRedirect';
+import RequireAdmin from './components/RequireAdmin';
 
 // Lazy load all pages (loaded on-demand when route is accessed)
 const PublicLanding = lazy(() => import('./pages/PublicLanding'));
@@ -100,6 +101,7 @@ const SubscriptionDowngrade = lazy(() => import('./pages/subscription/Subscripti
 const SubscriptionCancel = lazy(() => import('./pages/subscription/SubscriptionCancel'));
 
 // Organization pages (lazy loaded)
+const OrgDashboard = lazy(() => import('./pages/organization/OrgDashboard'));
 const OrganizationsList = lazy(() => import('./pages/organization/OrganizationsList'));
 const OrganizationTeam = lazy(() => import('./pages/organization/OrganizationTeam'));
 const OrganizationRoles = lazy(() => import('./pages/organization/OrganizationRoles'));
@@ -492,6 +494,7 @@ function AppRoutes() {
                   {/* <Route path="organization/credits/purchase" element={<CreditPurchaseOrg />} /> */}
                   {/* <Route path="organization/credits/usage" element={<UsageAttribution />} /> */}
                   {/* Legacy routes for backwards compatibility */}
+                  <Route path="org/dashboard" element={<OrgDashboard />} />
                   <Route path="org/team" element={<OrganizationTeam />} />
                   <Route path="org/roles" element={<OrganizationRoles />} />
                   <Route path="org/settings" element={<OrganizationSettings />} />
@@ -518,97 +521,97 @@ function AppRoutes() {
                   {/* ============================================================ */}
                   {/* INTEGRATIONS SECTION - External APIs & Services */}
                   {/* ============================================================ */}
-                  <Route path="integrations/credentials" element={<PlatformSettings />} />
-                  <Route path="integrations/email" element={<EmailSettings />} />
+                  <Route path="integrations/credentials" element={<RequireAdmin><PlatformSettings /></RequireAdmin>} />
+                  <Route path="integrations/email" element={<RequireAdmin><EmailSettings /></RequireAdmin>} />
 
                   {/* Legacy Platform Settings routes (redirects) */}
                   <Route path="platform/email-settings" element={<Navigate to="/admin/integrations/email" replace />} />
                   <Route path="platform/settings" element={<Navigate to="/admin/integrations/credentials" replace />} />
-                  <Route path="platform/credentials" element={<CredentialsManagement />} />
-                  <Route path="platform/api-docs" element={<ApiDocumentation />} />
-                  <Route path="platform/performance" element={<PerformanceMonitor />} />
+                  <Route path="platform/credentials" element={<RequireAdmin><CredentialsManagement /></RequireAdmin>} />
+                  <Route path="platform/api-docs" element={<RequireAdmin><ApiDocumentation /></RequireAdmin>} />
+                  <Route path="platform/performance" element={<RequireAdmin><PerformanceMonitor /></RequireAdmin>} />
 
                   {/* ============================================================ */}
-                  {/* SYSTEM SECTION - Platform administration */}
+                  {/* SYSTEM SECTION - Platform administration (admin only) */}
                   {/* ============================================================ */}
-                  <Route path="system/models" element={<AIModelManagement />} />
-                  <Route path="system/model-lists" element={<ModelListManagement />} />
-                  <Route path="system/services" element={<Services />} />
-                  <Route path="system/resources" element={<System />} />
-                  <Route path="system/hardware" element={<HardwareManagement />} />
-                  <Route path="infrastructure/hardware" element={<HardwareManagement />} />
-                  <Route path="system/analytics" element={<AdvancedAnalytics />} />
-                  <Route path="system/usage-analytics" element={<UsageAnalytics />} />
-                  <Route path="system/billing" element={<BillingDashboard />} />
-                  <Route path="system/subscription-management" element={<SubscriptionManagement />} />
-                  <Route path="system/subscription-tiers" element={<SubscriptionTierManagement />} /> {/* Epic 4.4 */}
-                  <Route path="system/tier-features" element={<TierFeatureManagement />} /> {/* Epic 4.4 */}
-                  <Route path="system/organization-branding" element={<OrganizationBranding />} /> {/* Epic 4.5 */}
-                  <Route path="system/rbac" element={<RBACManagement />} /> {/* Epic 17 */}
-                  <Route path="system/compliance" element={<ComplianceDashboard />} /> {/* Epic 18 */}
-                  <Route path="system/terraform" element={<TerraformDashboard />} /> {/* Epic 19 */}
-                  <Route path="system/saml" element={<SAMLDashboard />} /> {/* Epic 20 */}
-                  <Route path="system/app-management" element={<AppManagement />} />
-                  <Route path="system/pricing-management" element={<DynamicPricingManagement />} />
-                  <Route path="platform/white-label" element={<WhiteLabelBuilder />} />
-                  <Route path="platform/tenants" element={<TenantManagement />} /> {/* Epic 10 */}
-                  <Route path="system/users" element={<UserManagement />} />
-                  <Route path="system/users/:userId" element={<UserDetail />} />
+                  <Route path="system/models" element={<RequireAdmin><AIModelManagement /></RequireAdmin>} />
+                  <Route path="system/model-lists" element={<RequireAdmin><ModelListManagement /></RequireAdmin>} />
+                  <Route path="system/services" element={<RequireAdmin><Services /></RequireAdmin>} />
+                  <Route path="system/resources" element={<RequireAdmin><System /></RequireAdmin>} />
+                  <Route path="system/hardware" element={<RequireAdmin><HardwareManagement /></RequireAdmin>} />
+                  <Route path="infrastructure/hardware" element={<RequireAdmin><HardwareManagement /></RequireAdmin>} />
+                  <Route path="system/analytics" element={<RequireAdmin><AdvancedAnalytics /></RequireAdmin>} />
+                  <Route path="system/usage-analytics" element={<RequireAdmin><UsageAnalytics /></RequireAdmin>} />
+                  <Route path="system/billing" element={<RequireAdmin><BillingDashboard /></RequireAdmin>} />
+                  <Route path="system/subscription-management" element={<RequireAdmin><SubscriptionManagement /></RequireAdmin>} />
+                  <Route path="system/subscription-tiers" element={<RequireAdmin><SubscriptionTierManagement /></RequireAdmin>} /> {/* Epic 4.4 */}
+                  <Route path="system/tier-features" element={<RequireAdmin><TierFeatureManagement /></RequireAdmin>} /> {/* Epic 4.4 */}
+                  <Route path="system/organization-branding" element={<RequireAdmin><OrganizationBranding /></RequireAdmin>} /> {/* Epic 4.5 */}
+                  <Route path="system/rbac" element={<RequireAdmin><RBACManagement /></RequireAdmin>} /> {/* Epic 17 */}
+                  <Route path="system/compliance" element={<RequireAdmin><ComplianceDashboard /></RequireAdmin>} /> {/* Epic 18 */}
+                  <Route path="system/terraform" element={<RequireAdmin><TerraformDashboard /></RequireAdmin>} /> {/* Epic 19 */}
+                  <Route path="system/saml" element={<RequireAdmin><SAMLDashboard /></RequireAdmin>} /> {/* Epic 20 */}
+                  <Route path="system/app-management" element={<RequireAdmin><AppManagement /></RequireAdmin>} />
+                  <Route path="system/pricing-management" element={<RequireAdmin><DynamicPricingManagement /></RequireAdmin>} />
+                  <Route path="platform/white-label" element={<RequireAdmin><WhiteLabelBuilder /></RequireAdmin>} />
+                  <Route path="platform/tenants" element={<RequireAdmin><TenantManagement /></RequireAdmin>} /> {/* Epic 10 */}
+                  <Route path="system/users" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
+                  <Route path="system/users/:userId" element={<RequireAdmin><UserDetail /></RequireAdmin>} />
                   {/* Local User Management - consolidated to single route */}
-                  <Route path="system/local-users" element={<LocalUserManagement />} />
-                  <Route path="system/usage-metrics" element={<UsageMetrics />} />
-                  <Route path="system/network" element={<Network />} />
-                  <Route path="system/storage" element={<StorageBackup />} />
-                  <Route path="backups" element={<BackupDashboard />} />
-                  <Route path="system/security" element={<Security />} />
-                  <Route path="system/authentication" element={<Authentication />} />
-                  <Route path="system/extensions" element={<Extensions />} />
-                  <Route path="system/landing" element={<LandingCustomization />} />
-                  <Route path="system/settings" element={<SystemSettings />} />
-                  <Route path="system/forgejo" element={<ForgejoManagement />} />
-                  <Route path="system/invite-codes" element={<InviteCodesManagement />} />
-                  <Route path="system/costs" element={<CostOptimizationAdmin />} /> {/* Epic 14 - Admin Cost Dashboard */}
+                  <Route path="system/local-users" element={<RequireAdmin><LocalUserManagement /></RequireAdmin>} />
+                  <Route path="system/usage-metrics" element={<RequireAdmin><UsageMetrics /></RequireAdmin>} />
+                  <Route path="system/network" element={<RequireAdmin><Network /></RequireAdmin>} />
+                  <Route path="system/storage" element={<RequireAdmin><StorageBackup /></RequireAdmin>} />
+                  <Route path="backups" element={<RequireAdmin><BackupDashboard /></RequireAdmin>} />
+                  <Route path="system/security" element={<RequireAdmin><Security /></RequireAdmin>} />
+                  <Route path="system/authentication" element={<RequireAdmin><Authentication /></RequireAdmin>} />
+                  <Route path="system/extensions" element={<RequireAdmin><Extensions /></RequireAdmin>} />
+                  <Route path="system/landing" element={<RequireAdmin><LandingCustomization /></RequireAdmin>} />
+                  <Route path="system/settings" element={<RequireAdmin><SystemSettings /></RequireAdmin>} />
+                  <Route path="system/forgejo" element={<RequireAdmin><ForgejoManagement /></RequireAdmin>} />
+                  <Route path="system/invite-codes" element={<RequireAdmin><InviteCodesManagement /></RequireAdmin>} />
+                  <Route path="system/costs" element={<RequireAdmin><CostOptimizationAdmin /></RequireAdmin>} /> {/* Epic 14 - Admin Cost Dashboard */}
 
                   {/* ============================================================ */}
                   {/* MONITORING & ANALYTICS SECTION - Metrics, Logs, Analytics */}
                   {/* ============================================================ */}
-                  <Route path="monitoring/overview" element={<MonitoringOverview />} />
-                  <Route path="monitoring/alerts" element={<SmartAlerts />} /> {/* Epic 13 - Smart Alerts */}
-                  <Route path="monitoring/grafana" element={<GrafanaConfig />} />
-                  <Route path="monitoring/grafana/dashboards" element={<GrafanaViewer />} />
-                  <Route path="monitoring/prometheus" element={<PrometheusConfig />} />
-                  <Route path="monitoring/umami" element={<UmamiConfig />} />
-                  <Route path="monitoring/logs" element={<Logs />} />
-                  <Route path="monitoring/geeses" element={<Geeses />} />
+                  <Route path="monitoring/overview" element={<RequireAdmin><MonitoringOverview /></RequireAdmin>} />
+                  <Route path="monitoring/alerts" element={<RequireAdmin><SmartAlerts /></RequireAdmin>} /> {/* Epic 13 - Smart Alerts */}
+                  <Route path="monitoring/grafana" element={<RequireAdmin><GrafanaConfig /></RequireAdmin>} />
+                  <Route path="monitoring/grafana/dashboards" element={<RequireAdmin><GrafanaViewer /></RequireAdmin>} />
+                  <Route path="monitoring/prometheus" element={<RequireAdmin><PrometheusConfig /></RequireAdmin>} />
+                  <Route path="monitoring/umami" element={<RequireAdmin><UmamiConfig /></RequireAdmin>} />
+                  <Route path="monitoring/logs" element={<RequireAdmin><Logs /></RequireAdmin>} />
+                  <Route path="monitoring/geeses" element={<RequireAdmin><Geeses /></RequireAdmin>} />
                   
                   {/* ============================================================ */}
                   {/* EDGE DEVICE MANAGEMENT SECTION - Epic 7.1 */}
                   {/* ============================================================ */}
-                  <Route path="edge/devices" element={<EdgeDeviceManagement />} />
+                  <Route path="edge/devices" element={<RequireAdmin><EdgeDeviceManagement /></RequireAdmin>} />
                   
                   {/* ============================================================ */}
                   {/* OTA DEPLOYMENT SECTION - Epic 7.2 */}
                   {/* ============================================================ */}
-                  <Route path="edge/ota" element={<OTADeployment />} />
+                  <Route path="edge/ota" element={<RequireAdmin><OTADeployment /></RequireAdmin>} />
 
                   {/* ============================================================ */}
                   {/* FLEET MANAGEMENT - Epic 15 */}
                   {/* ============================================================ */}
-                  <Route path="fleet" element={<FleetDashboard />} />
+                  <Route path="fleet" element={<RequireAdmin><FleetDashboard /></RequireAdmin>} />
 
                   {/* ============================================================ */}
                   {/* KUBERNETES INTEGRATION - Epic 16 */}
                   {/* ============================================================ */}
-                  <Route path="kubernetes" element={<KubernetesDashboard />} />
-                  <Route path="kubernetes/clusters/:clusterId" element={<ClusterDetail />} />
+                  <Route path="kubernetes" element={<RequireAdmin><KubernetesDashboard /></RequireAdmin>} />
+                  <Route path="kubernetes/clusters/:clusterId" element={<RequireAdmin><ClusterDetail /></RequireAdmin>} />
 
                   {/* ============================================================ */}
                   {/* WEBHOOK MANAGEMENT - Epic 8.1 */}
                   {/* ============================================================ */}
-                  <Route path="webhooks" element={<WebhookManagement />} />
+                  <Route path="webhooks" element={<RequireAdmin><WebhookManagement /></RequireAdmin>} />
 
                   {/* ATLAS Multi-Agent System (Geeses) */}
-                  <Route path="geeses" element={<Geeses />} />
+                  <Route path="geeses" element={<RequireAdmin><Geeses /></RequireAdmin>} />
 
                   {/* Legacy system/logs route (redirect) */}
                   <Route path="system/logs" element={<Navigate to="/admin/monitoring/logs" replace />} />
@@ -616,8 +619,8 @@ function AppRoutes() {
                   {/* ============================================================ */}
                   {/* INFRASTRUCTURE SECTION - Network & DNS */}
                   {/* ============================================================ */}
-                  <Route path="integrations/cloudflare" element={<CloudflareDNS />} />
-                  <Route path="infrastructure/migration" element={<MigrationWizard />} />
+                  <Route path="integrations/cloudflare" element={<RequireAdmin><CloudflareDNS /></RequireAdmin>} />
+                  <Route path="infrastructure/migration" element={<RequireAdmin><MigrationWizard /></RequireAdmin>} />
 
                   {/* Legacy cloudflare route (redirect) */}
                   <Route path="infrastructure/cloudflare" element={<Navigate to="/admin/integrations/cloudflare" replace />} />
@@ -625,14 +628,14 @@ function AppRoutes() {
                   {/* ============================================================ */}
                   {/* TRAEFIK SECTION - Reverse Proxy Management */}
                   {/* ============================================================ */}
-                  <Route path="traefik/dashboard" element={<TraefikDashboard />} />
-                  <Route path="traefik/routes" element={<TraefikRoutes />} />
-                  <Route path="traefik/services" element={<TraefikServices />} />
-                  <Route path="traefik/ssl" element={<TraefikSSL />} />
-                  <Route path="traefik/metrics" element={<TraefikMetrics />} />
+                  <Route path="traefik/dashboard" element={<RequireAdmin><TraefikDashboard /></RequireAdmin>} />
+                  <Route path="traefik/routes" element={<RequireAdmin><TraefikRoutes /></RequireAdmin>} />
+                  <Route path="traefik/services" element={<RequireAdmin><TraefikServices /></RequireAdmin>} />
+                  <Route path="traefik/ssl" element={<RequireAdmin><TraefikSSL /></RequireAdmin>} />
+                  <Route path="traefik/metrics" element={<RequireAdmin><TraefikMetrics /></RequireAdmin>} />
 
                   {/* System Traefik Config - Comprehensive management */}
-                  <Route path="system/traefik" element={<TraefikConfig />} />
+                  <Route path="system/traefik" element={<RequireAdmin><TraefikConfig /></RequireAdmin>} />
 
                   {/* ============================================================ */}
                   {/* CREDITS & USAGE SECTION - Credit metering system */}

@@ -122,7 +122,7 @@ export default function Layout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, currentTheme, switchTheme, availableThemes, isDarkMode, toggleDarkMode } = useTheme();
-  const { refreshOrganizations, switchOrganization } = useOrganization?.() || {};
+  const { organizations, currentOrg, getCurrentOrgRole, refreshOrganizations, switchOrganization } = useOrganization?.() || {};
 
   // Theme configurations for display names
   const themes = {
@@ -133,12 +133,11 @@ export default function Layout({ children }) {
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const userRole = userInfo.role || 'viewer';
-  const userOrgRole = userInfo.org_role || null;
-
-  // Debug logging
-  console.log('DEBUG Layout: userInfo from localStorage:', userInfo);
-  console.log('DEBUG Layout: userRole:', userRole);
-  console.log('DEBUG Layout: userOrgRole:', userOrgRole);
+  // Derive org role from OrganizationContext (live data) or fall back to localStorage
+  const orgContextRole = getCurrentOrgRole?.() || null;
+  const userOrgRole = orgContextRole || userInfo.org_role || null;
+  const hasAnyOrg = !!(organizations && organizations.length > 0);
+  const isOrgAdminOrOwner = userOrgRole === 'admin' || userOrgRole === 'owner';
 
   // Collapsible section state management - Load from localStorage
   const loadSectionState = () => {
@@ -452,49 +451,59 @@ export default function Layout({ children }) {
                 </NavigationSection>
 
                 {/* ============================ */}
-                {/* MY ORGANIZATION SECTION - ORG ADMINS/OWNERS */}
+                {/* MY ORGANIZATION SECTION - ALL AUTHENTICATED USERS */}
                 {/* ============================ */}
-                {(userOrgRole === 'admin' || userOrgRole === 'owner') && (
-                  <>
-                    {/* Section Header (hidden when collapsed) */}
-                    {!sidebarCollapsed && (
-                      <div className={`mt-4 mb-2 px-3 flex items-center gap-2 ${
-                        currentTheme === 'unicorn'
-                          ? 'text-purple-300/70'
-                          : currentTheme === 'light'
-                          ? 'text-gray-500'
-                          : 'text-gray-400'
-                      }`}>
-                        <div className="flex-1 h-px bg-current opacity-20"></div>
-                        <span className="text-xs font-bold uppercase tracking-wider">My Organization</span>
-                        <div className="flex-1 h-px bg-current opacity-20"></div>
-                      </div>
-                    )}
+                {/* Section Header (hidden when collapsed) */}
+                {!sidebarCollapsed && (
+                  <div className={`mt-4 mb-2 px-3 flex items-center gap-2 ${
+                    currentTheme === 'unicorn'
+                      ? 'text-purple-300/70'
+                      : currentTheme === 'light'
+                      ? 'text-gray-500'
+                      : 'text-gray-400'
+                  }`}>
+                    <div className="flex-1 h-px bg-current opacity-20"></div>
+                    <span className="text-xs font-bold uppercase tracking-wider">Organization</span>
+                    <div className="flex-1 h-px bg-current opacity-20"></div>
+                  </div>
+                )}
 
-                    <NavigationSection collapsed={sidebarCollapsed}
-                      title="My Organization"
-                      icon={iconMap.BuildingOfficeIcon}
-                      defaultOpen={sectionState.organization}
-                      onToggle={() => toggleSection('organization')}
-                    >
+                <NavigationSection collapsed={sidebarCollapsed}
+                  title="Organization"
+                  icon={iconMap.BuildingOfficeIcon}
+                  defaultOpen={sectionState.organization}
+                  onToggle={() => toggleSection('organization')}
+                >
+                  <NavigationItem collapsed={sidebarCollapsed}
+                    name="My Organizations"
+                    href="/admin/org/dashboard"
+                    icon={iconMap.BuildingOfficeIcon}
+                    indent={true}
+                  />
+                  {hasAnyOrg && (
+                    <>
                       <NavigationItem collapsed={sidebarCollapsed}
                         name="Team Members"
                         href="/admin/org/team"
                         icon={iconMap.UsersIcon}
                         indent={true}
                       />
-                      <NavigationItem collapsed={sidebarCollapsed}
-                        name="Roles & Permissions"
-                        href="/admin/org/roles"
-                        icon={iconMap.ShieldCheckIcon}
-                        indent={true}
-                      />
-                      <NavigationItem collapsed={sidebarCollapsed}
-                        name="Organization Settings"
-                        href="/admin/org/settings"
-                        icon={iconMap.CogIcon}
-                        indent={true}
-                      />
+                      {isOrgAdminOrOwner && (
+                        <NavigationItem collapsed={sidebarCollapsed}
+                          name="Roles & Permissions"
+                          href="/admin/org/roles"
+                          icon={iconMap.ShieldCheckIcon}
+                          indent={true}
+                        />
+                      )}
+                      {isOrgAdminOrOwner && (
+                        <NavigationItem collapsed={sidebarCollapsed}
+                          name="Organization Settings"
+                          href="/admin/org/settings"
+                          icon={iconMap.CogIcon}
+                          indent={true}
+                        />
+                      )}
                       {userOrgRole === 'owner' && (
                         <NavigationItem collapsed={sidebarCollapsed}
                           name="Organization Billing"
@@ -503,9 +512,9 @@ export default function Layout({ children }) {
                           indent={true}
                         />
                       )}
-                    </NavigationSection>
-                  </>
-                )}
+                    </>
+                  )}
+                </NavigationSection>
 
                 {/* ============================ */}
                 {/* INFRASTRUCTURE SECTION */}

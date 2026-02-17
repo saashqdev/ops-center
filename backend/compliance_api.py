@@ -16,7 +16,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
 
-from auth_dependencies import require_authenticated_user
+from auth_dependencies import require_authenticated_user, require_admin_user
 from compliance_manager import get_compliance_manager, ComplianceManager
 
 logger = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ async def list_controls(
     category: Optional[str] = Query(None, description="Filter by category"),
     status: Optional[str] = Query(None, description="Filter by implementation status"),
     automated_only: bool = Query(False, description="Show only automated controls"),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     List all compliance controls with optional filters
@@ -162,7 +162,7 @@ async def list_controls(
 @router.get("/controls/{control_id}", response_model=ControlResponse)
 async def get_control(
     control_id: str,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Get details of a specific compliance control
@@ -191,7 +191,7 @@ async def get_control(
 async def update_control_status(
     control_id: str,
     update: ControlStatusUpdate,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Update control implementation status
@@ -229,7 +229,7 @@ async def update_control_status(
 @router.post("/controls/{control_id}/check", response_model=AutomatedCheckResponse)
 async def run_automated_check(
     control_id: str,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Run automated compliance check for a control
@@ -261,7 +261,7 @@ async def run_automated_check(
 
 @router.post("/controls/check-all")
 async def run_all_automated_checks(
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Run all automated compliance checks
@@ -308,7 +308,7 @@ async def run_all_automated_checks(
 @router.post("/evidence", response_model=Dict[str, str])
 async def collect_evidence(
     evidence: EvidenceCreate,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Collect evidence for a compliance control
@@ -353,7 +353,7 @@ async def list_evidence(
     control_id: Optional[str] = Query(None, description="Filter by control ID"),
     evidence_type: Optional[str] = Query(None, description="Filter by evidence type"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of results"),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     List collected evidence with optional filters
@@ -382,7 +382,7 @@ async def list_evidence(
 @router.post("/incidents", response_model=Dict[str, str])
 async def create_incident(
     incident: IncidentCreate,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Create a security incident
@@ -427,7 +427,7 @@ async def create_incident(
 async def update_incident(
     incident_id: str,
     update: IncidentUpdate,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Update security incident
@@ -468,7 +468,7 @@ async def list_incidents(
     status: Optional[str] = Query(None, description="Filter by status"),
     severity: Optional[str] = Query(None, description="Filter by severity"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of results"),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     List security incidents with optional filters
@@ -496,7 +496,7 @@ async def list_incidents(
 
 @router.get("/dashboard/overview", response_model=ComplianceOverviewResponse)
 async def get_compliance_overview(
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Get compliance overview dashboard data
@@ -524,7 +524,7 @@ async def get_compliance_overview(
 @router.get("/dashboard/recent-incidents")
 async def get_recent_incidents(
     limit: int = Query(10, ge=1, le=50, description="Maximum number of incidents"),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Get recent security incidents for dashboard

@@ -455,6 +455,85 @@ async def get_user_groups(email: str) -> List[str]:
 # ROLE MANAGEMENT
 # ============================================================================
 
+async def create_realm_role(role_name: str, description: str = "") -> bool:
+    """
+    Create a realm role in Keycloak if it doesn't already exist.
+    
+    Args:
+        role_name: Name of the role to create
+        description: Role description
+    
+    Returns:
+        True if created or already exists, False on error
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            # Check if role already exists
+            check_response = await client.get(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/roles/{role_name}",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0
+            )
+
+            if check_response.status_code == 200:
+                logger.info(f"Realm role '{role_name}' already exists")
+                return True
+
+            # Create the role
+            create_response = await client.post(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/roles",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "name": role_name,
+                    "description": description,
+                    "composite": False
+                },
+                timeout=10.0
+            )
+
+            if create_response.status_code == 201:
+                logger.info(f"Created realm role '{role_name}'")
+                return True
+            elif create_response.status_code == 409:
+                logger.info(f"Realm role '{role_name}' already exists (409)")
+                return True
+            else:
+                logger.error(f"Failed to create role '{role_name}': {create_response.status_code} - {create_response.text}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error creating realm role '{role_name}': {e}")
+        return False
+
+
+async def ensure_org_roles_exist() -> bool:
+    """
+    Ensure the org_admin and org_member realm roles exist in Keycloak.
+    Called during application startup.
+    
+    Returns:
+        True if all roles exist/created successfully
+    """
+    roles = [
+        ("org_admin", "Organization administrator - can create and manage organizations"),
+        ("org_member", "Organization member - belongs to one or more organizations"),
+    ]
+    
+    success = True
+    for role_name, description in roles:
+        result = await create_realm_role(role_name, description)
+        if not result:
+            logger.error(f"Failed to ensure role '{role_name}' exists")
+            success = False
+    
+    return success
+
+
 async def get_realm_roles() -> List[Dict[str, Any]]:
     """
     Get all available realm roles

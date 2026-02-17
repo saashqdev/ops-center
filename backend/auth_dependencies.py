@@ -203,3 +203,83 @@ async def require_org_admin(request: Request, org_id: str) -> Dict[str, Any]:
 
     finally:
         await conn.close()
+
+
+async def require_org_role(request: Request, org_id: str, min_role: str = "member") -> Dict[str, Any]:
+    """
+    Dependency that checks org membership with a minimum role level.
+    
+    Supports role hierarchy: owner > admin > member
+    System admins bypass all checks.
+
+    Args:
+        request: FastAPI request object
+        org_id: Organization UUID to check membership
+        min_role: Minimum required role ('member', 'admin', or 'owner')
+
+    Returns:
+        Dict: User data from session, enriched with 'org_role' field
+
+    Raises:
+        HTTPException(401): If not authenticated
+        HTTPException(403): If not authorized
+    """
+    from database.connection import get_db_pool
+
+    ROLE_HIERARCHY = {"member": 1, "admin": 2, "owner": 3}
+
+    user = await require_authenticated_user(request)
+
+    # System admins bypass org checks
+    user_role = user.get("role")
+    user_roles = user.get("roles", [])
+    is_system_admin = (
+        user_role in ["admin", "system_admin"] or
+        "admin" in user_roles or
+        "system_admin" in user_roles
+    )
+
+    if is_system_admin:
+        user["org_role"] = "owner"  # Treat system admins as org owners
+        return user
+
+    # Check org membership
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT role FROM organization_members
+            WHERE organization_id = $1 AND user_id = $2
+            """,
+            org_id, user.get("user_id") or user.get("sub") or user.get("id")
+        )
+
+    if not row:
+        raise HTTPException(status_code=403, detail="Not a member of this organization")
+
+    member_role = row["role"].lower()
+    member_level = ROLE_HIERARCHY.get(member_role, 0)
+    required_level = ROLE_HIERARCHY.get(min_role.lower(), 99)
+
+    if member_level < required_level:
+        logger.warning(
+            f"User {user.get('email')} has role '{member_role}' in org {org_id}, "
+            f"but '{min_role}' required"
+        )
+        raise HTTPException(
+            status_code=403,
+            detail=f"Organization {min_role} access required"
+        )
+
+    user["org_role"] = member_role
+    return user
+
+
+async def require_org_owner_or_system_admin(request: Request, org_id: str) -> Dict[str, Any]:
+    """Shortcut: require org owner or system admin."""
+    return await require_org_role(request, org_id, min_role="owner")
+
+
+async def require_org_admin_or_higher(request: Request, org_id: str) -> Dict[str, Any]:
+    """Shortcut: require org admin, owner, or system admin."""
+    return await require_org_role(request, org_id, min_role="admin")

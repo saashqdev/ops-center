@@ -55,6 +55,16 @@ class OrganizationCreate(BaseModel):
     plan_tier: str = "founders_friend"
 
 
+class OrganizationUpdate(BaseModel):
+    """Request model for updating an organization"""
+    name: Optional[str] = None
+    display_name: Optional[str] = None
+
+
+# Maximum number of organizations a non-admin user can create
+MAX_ORGS_PER_USER = int(os.getenv("MAX_ORGS_PER_USER", "5"))
+
+
 # ==================== Helper Functions ====================
 
 async def get_current_user(request: Request) -> Dict:
@@ -432,6 +442,21 @@ async def create_organization(
     if not user_id:
         raise HTTPException(status_code=400, detail="Could not identify user")
 
+    # Enforce org creation quota for non-admin users
+    is_admin = user.get("role") == "admin" or user.get("is_admin")
+    if not is_admin:
+        existing_orgs = org_manager.get_user_orgs(user_id)
+        owner_orgs = [
+            o for o in existing_orgs
+            if org_manager.get_user_role_in_org(o.id, user_id) == "owner"
+        ]
+        if len(owner_orgs) >= MAX_ORGS_PER_USER:
+            raise HTTPException(
+                status_code=403,
+                detail=f"You can own a maximum of {MAX_ORGS_PER_USER} organizations. "
+                       f"Contact support to increase your limit."
+            )
+
     try:
         # Create organization using org_manager
         org_id = org_manager.create_organization(
@@ -478,6 +503,19 @@ async def create_organization(
         except Exception as e:
             logger.warning(f"Webhook trigger failed for organization.created: {e}")
 
+        # Assign org_admin realm role in Keycloak if user doesn't have it yet
+        try:
+            from keycloak_integration import get_user_realm_roles, assign_realm_role_to_user
+            kc_user_id = user.get("sub") or user.get("user_id") or user.get("id")
+            if kc_user_id:
+                current_roles = await get_user_realm_roles(kc_user_id)
+                role_names = [r.get("name") for r in (current_roles or [])]
+                if "org_admin" not in role_names:
+                    await assign_realm_role_to_user(kc_user_id, "org_admin")
+                    logger.info(f"Assigned org_admin Keycloak role to user {kc_user_id}")
+        except Exception as e:
+            logger.warning(f"Failed to assign org_admin Keycloak role: {e}")
+
         return {
             "success": True,
             "organization": {
@@ -500,6 +538,164 @@ async def create_organization(
     except Exception as e:
         logger.error(f"Error creating organization: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to create organization: {str(e)}")
+
+
+@router.put("/{org_id}")
+async def update_organization(
+    org_id: str,
+    org_data: OrganizationUpdate,
+    request: Request
+):
+    """
+    Update an organization's details.
+    Requires org owner role or system admin.
+
+    Args:
+        org_id: Organization ID
+        org_data: Fields to update (name, display_name)
+
+    Returns:
+        Updated organization details
+    """
+    user = await get_current_user(request)
+    await verify_org_access(request, org_id, required_role="owner")
+
+    try:
+        from database.connection import get_db_pool
+        pool = await get_db_pool()
+
+        async with pool.acquire() as conn:
+            # Verify org exists
+            org_row = await conn.fetchrow(
+                "SELECT * FROM organizations WHERE id = $1", org_id
+            )
+            if not org_row:
+                raise HTTPException(status_code=404, detail="Organization not found")
+
+            # Build update query dynamically
+            updates = []
+            params = []
+            param_idx = 1
+
+            if org_data.name is not None:
+                # Check for duplicate name
+                existing = await conn.fetchval(
+                    "SELECT EXISTS(SELECT 1 FROM organizations WHERE name = $1 AND id != $2)",
+                    org_data.name, org_id
+                )
+                if existing:
+                    raise HTTPException(status_code=400, detail="Organization name already taken")
+                updates.append(f"name = ${param_idx}")
+                params.append(org_data.name)
+                param_idx += 1
+
+            if org_data.display_name is not None:
+                updates.append(f"display_name = ${param_idx}")
+                params.append(org_data.display_name)
+                param_idx += 1
+
+            if not updates:
+                raise HTTPException(status_code=400, detail="No fields to update")
+
+            updates.append(f"updated_at = NOW()")
+            params.append(org_id)
+
+            query = f"UPDATE organizations SET {', '.join(updates)} WHERE id = ${param_idx} RETURNING *"
+            updated_row = await conn.fetchrow(query, *params)
+
+        logger.info(f"Updated organization {org_id} by user {user.get('email')}")
+
+        return {
+            "success": True,
+            "organization": {
+                "id": updated_row["id"],
+                "name": updated_row["name"],
+                "display_name": updated_row.get("display_name"),
+                "status": "active" if updated_row.get("is_active", True) else "suspended",
+                "updated_at": updated_row["updated_at"].isoformat() if updated_row.get("updated_at") else None
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating organization {org_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update organization: {str(e)}")
+
+
+@router.delete("/{org_id}")
+async def delete_organization(
+    org_id: str,
+    request: Request
+):
+    """
+    Delete an organization.
+    Requires org owner role or system admin.
+    Cascades to remove all members, quotas, and related data.
+
+    Args:
+        org_id: Organization ID
+
+    Returns:
+        Success confirmation
+    """
+    user = await get_current_user(request)
+    await verify_org_access(request, org_id, required_role="owner")
+
+    try:
+        from database.connection import get_db_pool
+        pool = await get_db_pool()
+
+        async with pool.acquire() as conn:
+            # Verify org exists
+            org_row = await conn.fetchrow(
+                "SELECT id, name FROM organizations WHERE id = $1", org_id
+            )
+            if not org_row:
+                raise HTTPException(status_code=404, detail="Organization not found")
+
+            org_name = org_row["name"]
+
+            # Delete org (CASCADE handles members, quotas, settings, etc.)
+            await conn.execute("DELETE FROM organizations WHERE id = $1", org_id)
+
+        # Also remove from org_manager JSON store
+        try:
+            org_manager.update_org_status(org_id, "deleted")
+        except Exception:
+            pass  # JSON store may not have this org
+
+        logger.info(f"Deleted organization {org_id} ({org_name}) by user {user.get('email')}")
+
+        # Trigger webhook
+        try:
+            db_url = os.getenv("DATABASE_URL")
+            if db_url and db_url.startswith("postgresql://"):
+                webhook_pool = await asyncpg.create_pool(db_url)
+                webhook_manager = WebhookManager(webhook_pool)
+                await webhook_manager.trigger_event(
+                    org_id=org_id,
+                    event='organization.deleted',
+                    data={
+                        'organization_id': org_id,
+                        'name': org_name,
+                        'deleted_by': user.get('email')
+                    }
+                )
+                await webhook_pool.close()
+        except Exception as e:
+            logger.warning(f"Webhook trigger failed for organization.deleted: {e}")
+
+        return {
+            "success": True,
+            "message": f"Organization '{org_name}' has been deleted"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting organization {org_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete organization: {str(e)}")
 
 
 @router.get("/roles")
@@ -534,6 +730,16 @@ async def list_available_roles():
                 "manage_billing",
                 "manage_settings",
                 "delete_org",
+                "view_all"
+            ]
+        },
+        {
+            "id": "admin",
+            "name": "Admin",
+            "description": "Manage members and organization settings",
+            "permissions": [
+                "manage_members",
+                "manage_settings",
                 "view_all"
             ]
         },

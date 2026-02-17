@@ -543,6 +543,108 @@ if TIER_ENFORCEMENT_ENABLED:
 app.add_middleware(CreditDeductionMiddleware)
 logger.info("Credit Deduction Middleware enabled (automatic credit tracking)")
 
+
+# ==================== Admin Path Enforcement Middleware ====================
+# Phase 3: Ensures /api/v1/system/*, /api/v1/admin/*, /api/backups/* require
+# system admin role. This is a safety net — individual endpoints should still
+# use Depends(require_admin_user) but this catches any that forget.
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse as StarletteJSONResponse
+
+class AdminPathMiddleware(BaseHTTPMiddleware):
+    """Middleware that enforces system admin role on sensitive API paths.
+    
+    Protects:
+      - /api/v1/system/*  (system metrics, keycloak, settings)
+      - /api/v1/admin/*   (user mgmt, tenants, tiers, etc.)
+      - /api/backups/*    (database backup operations)
+    
+    Bypasses:
+      - /api/v1/system/status  (used by AdminContent health check)
+      - OPTIONS requests (CORS preflight)
+    """
+
+    PROTECTED_PREFIXES = (
+        "/api/v1/system/",
+        "/api/v1/admin/",
+        "/api/backups/",
+    )
+
+    # Paths that should remain accessible to all authenticated users
+    BYPASS_PATHS = {
+        "/api/v1/system/status",
+    }
+
+    async def dispatch(self, request, call_next):
+        path = request.url.path.rstrip("/")
+
+        # Skip non-protected paths and OPTIONS (CORS preflight)
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
+        if not any(path.startswith(p.rstrip("/")) for p in self.PROTECTED_PREFIXES):
+            return await call_next(request)
+
+        # Allow bypass paths
+        if path in self.BYPASS_PATHS:
+            return await call_next(request)
+
+        # Check session for admin role
+        try:
+            session_token = request.cookies.get("session_token")
+            if not session_token:
+                return StarletteJSONResponse(
+                    status_code=401,
+                    content={"detail": "Authentication required for system administration"}
+                )
+
+            redis_host = os.getenv("REDIS_HOST", "unicorn-lago-redis")
+            redis_port = int(os.getenv("REDIS_PORT", "6379"))
+            from redis_session import RedisSessionManager
+            session_mgr = RedisSessionManager(host=redis_host, port=redis_port)
+            session_data = session_mgr.get(session_token)
+
+            if not session_data:
+                return StarletteJSONResponse(
+                    status_code=401,
+                    content={"detail": "Invalid or expired session"}
+                )
+
+            user = session_data.get("user", {})
+            user_role = user.get("role", "")
+            user_roles = user.get("roles", [])
+
+            is_system_admin = (
+                user_role in ("admin", "system_admin") or
+                "admin" in user_roles or
+                "system_admin" in user_roles
+            )
+
+            if not is_system_admin:
+                logger.warning(
+                    f"Non-admin user {user.get('email', 'unknown')} blocked from {path} "
+                    f"(role={user_role})"
+                )
+                return StarletteJSONResponse(
+                    status_code=403,
+                    content={"detail": "System administrator access required"}
+                )
+
+        except Exception as e:
+            logger.error(f"AdminPathMiddleware error on {path}: {e}")
+            return StarletteJSONResponse(
+                status_code=500,
+                content={"detail": "Internal server error during authorization"}
+            )
+
+        return await call_next(request)
+
+
+app.add_middleware(AdminPathMiddleware)
+logger.info("Admin Path Enforcement Middleware enabled (Phase 3 isolation)")
+
+
 logger.info(f"CSRF Protection: {'Enabled' if CSRF_ENABLED else 'Disabled'}")
 logger.info(f"Rate Limiting: {'Enabled' if RATE_LIMIT_ENABLED else 'Disabled'}")
 logger.info(f"Audit Logging: {'Enabled' if AUDIT_ENABLED else 'Disabled'}")
@@ -750,6 +852,15 @@ async def startup_event():
         except Exception as e:
             logger.error(f"Failed to start K8s workers: {e}")
             # Don't block startup if K8s workers fail
+
+    # Ensure Keycloak org roles exist
+    try:
+        from keycloak_integration import ensure_org_roles_exist
+        await ensure_org_roles_exist()
+        logger.info("Keycloak org roles (org_admin, org_member) ensured")
+    except Exception as e:
+        logger.warning(f"Failed to ensure Keycloak org roles: {e}")
+        # Don't block startup
 
 
 async def check_alerts_periodically():

@@ -17,7 +17,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
 
-from auth_dependencies import require_authenticated_user
+from auth_dependencies import require_authenticated_user, require_admin_user
 from terraform_manager import get_terraform_manager, TerraformManager
 
 logger = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ class TemplateResponse(BaseModel):
 @router.post("/workspaces")
 async def create_workspace(
     workspace: WorkspaceCreate,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     Create a new Terraform workspace
@@ -119,7 +119,7 @@ async def create_workspace(
 async def list_workspaces(
     cloud_provider: Optional[str] = Query(None),
     environment: Optional[str] = Query(None),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """List all Terraform workspaces with filters"""
     try:
@@ -141,7 +141,7 @@ async def list_workspaces(
 @router.get("/workspaces/{workspace_id}")
 async def get_workspace(
     workspace_id: str,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Get workspace details"""
     try:
@@ -165,7 +165,7 @@ async def get_workspace(
 @router.post("/workspaces/{workspace_id}/lock")
 async def lock_workspace(
     workspace_id: str,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Lock workspace to prevent concurrent modifications"""
     try:
@@ -189,7 +189,7 @@ async def lock_workspace(
 @router.post("/workspaces/{workspace_id}/unlock")
 async def unlock_workspace(
     workspace_id: str,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Unlock workspace"""
     try:
@@ -215,7 +215,7 @@ async def unlock_workspace(
 @router.get("/workspaces/{workspace_id}/state")
 async def get_state(
     workspace_id: str,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Get current Terraform state"""
     try:
@@ -242,7 +242,7 @@ async def get_state(
 async def list_resources(
     workspace_id: str,
     resource_type: Optional[str] = Query(None),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """List workspace resources"""
     try:
@@ -267,7 +267,7 @@ async def list_resources(
 async def get_executions(
     workspace_id: str,
     limit: int = Query(50, ge=1, le=200),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Get execution history for workspace"""
     try:
@@ -289,7 +289,7 @@ async def get_executions(
 @router.get("/executions/recent")
 async def get_recent_executions(
     limit: int = Query(50, ge=1, le=200),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Get recent executions across all workspaces"""
     try:
@@ -311,7 +311,7 @@ async def get_recent_executions(
 async def list_templates(
     cloud_provider: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """
     List IaC templates
@@ -338,7 +338,7 @@ async def list_templates(
 @router.get("/templates/{template_id}", response_model=TemplateResponse)
 async def get_template(
     template_id: str,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Get template by ID"""
     try:
@@ -365,7 +365,7 @@ async def get_template(
 async def set_variable(
     workspace_id: str,
     variable: VariableCreate,
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Set workspace variable"""
     try:
@@ -396,7 +396,7 @@ async def set_variable(
 async def list_variables(
     workspace_id: str,
     include_sensitive: bool = Query(False),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """List workspace variables"""
     try:
@@ -421,7 +421,7 @@ async def list_variables(
 async def get_drifts(
     workspace_id: str,
     resolved: bool = Query(False),
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Get drift detections for workspace"""
     try:
@@ -444,7 +444,7 @@ async def get_drifts(
 
 @router.get("/dashboard/statistics")
 async def get_statistics(
-    user: Dict = Depends(require_authenticated_user)
+    user: Dict = Depends(require_admin_user)
 ):
     """Get Terraform dashboard statistics"""
     try:
