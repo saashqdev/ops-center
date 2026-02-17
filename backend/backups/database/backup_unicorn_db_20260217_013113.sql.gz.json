@@ -1,0 +1,10 @@
+{
+  "filename": "backup_unicorn_db_20260217_013113.sql.gz",
+  "timestamp": "20260217_013113",
+  "created_at": "2026-02-17T01:31:13.693811",
+  "database": "unicorn_db",
+  "size_bytes": 70840,
+  "size_mb": 0.07,
+  "description": "Automated scheduled backup (catchup)",
+  "compressed": true
+}

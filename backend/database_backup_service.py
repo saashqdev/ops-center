@@ -338,9 +338,44 @@ class DatabaseBackupService:
             logger.error(f"Cleanup failed: {str(e)}")
     
     async def run_scheduled_backups(self):
-        """Run automatic backups on schedule."""
+        """Run automatic backups on schedule.
+        
+        On startup, checks if a backup is overdue (i.e. the most recent backup
+        is older than the configured interval) and runs one immediately if so.
+        Then sleeps for the interval before running subsequent backups.
+        """
         logger.info(f"Starting scheduled backup service (every {self.auto_backup_interval_hours} hours)")
         
+        # Check if a backup is overdue on startup
+        try:
+            existing = self.list_backups()
+            if existing:
+                from datetime import datetime, timezone
+                newest = max(existing, key=lambda b: b.get('created_at', ''))
+                created_str = newest['created_at']
+                newest_time = datetime.fromisoformat(created_str)
+                # Make timezone-aware if naive
+                if newest_time.tzinfo is None:
+                    newest_time = newest_time.replace(tzinfo=timezone.utc)
+                age_hours = (datetime.now(timezone.utc) - newest_time).total_seconds() / 3600
+                if age_hours >= self.auto_backup_interval_hours:
+                    logger.info(f"Last backup is {age_hours:.1f}h old (threshold: {self.auto_backup_interval_hours}h) — running catchup backup")
+                    result = self.create_backup(description="Automated scheduled backup (catchup)")
+                    if result['success']:
+                        logger.info(f"✅ Catchup backup completed: {result['backup_file']}")
+                    else:
+                        logger.error(f"❌ Catchup backup failed: {result.get('error')}")
+                else:
+                    logger.info(f"Last backup is {age_hours:.1f}h old — no catchup needed")
+            else:
+                # No backups at all — create one now
+                logger.info("No existing backups found — creating initial backup")
+                result = self.create_backup(description="Automated scheduled backup (initial)")
+                if result['success']:
+                    logger.info(f"✅ Initial backup completed: {result['backup_file']}")
+        except Exception as e:
+            logger.error(f"Error checking for overdue backup: {e}", exc_info=True)
+
         while True:
             try:
                 # Wait for the interval
