@@ -13,7 +13,7 @@
         </#list>
     </#if>
 
-    <title>${msg("loginTitle")}</title>
+    <title>${msg("loginTitle",(realm.displayName!''))}</title>
     <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
 
     <#if properties.stylesCommon?has_content>
@@ -55,7 +55,7 @@
                                 <img src="${url.resourcesPath}/img/colonel-logo.png" alt="The Colonel" class="uc1-logo" />
                             </div>
                             <h1 id="kc-page-title" class="uc1-title">
-                                ${msg("loginTitle")}
+                                ${msg("loginTitle",(realm.displayName!''))}
                             </h1>
                         </header>
 
@@ -122,8 +122,12 @@
                                             <a href="${actionUri}" class="btn btn-primary btn-block btn-lg uc1-submit-btn">
                                                 ${kcSanitize(actionUriText)?no_esc}
                                             </a>
+                                        <#elseif client?? && client.baseUrl?has_content>
+                                            <a href="${client.baseUrl}" class="btn btn-primary btn-block btn-lg uc1-submit-btn">
+                                                ${msg("backToApplication")}
+                                            </a>
                                         <#else>
-                                            <a href="${url.loginRestartFlowUrl}" class="btn btn-primary btn-block btn-lg uc1-submit-btn">
+                                            <a href="${properties.appUrl!'https://kubeworkz.io'}" class="btn btn-primary btn-block btn-lg uc1-submit-btn">
                                                 ${msg("backToApplication")}
                                             </a>
                                         </#if>

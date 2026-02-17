@@ -582,7 +582,6 @@ async def seed_app_records(request: Request):
             if existing:
                 results["add_ons"] = "already_exists"
             else:
-                import uuid
                 features_json = json.dumps([
                     "Multi-model AI chat",
                     "Conversation history & search",
@@ -592,12 +591,11 @@ async def seed_app_records(request: Request):
                     "Model switching",
                 ])
                 await conn.execute("""
-                    INSERT INTO add_ons (id, name, slug, description, icon_url, launch_url,
+                    INSERT INTO add_ons (name, slug, description, icon_url, launch_url,
                                          category, feature_key, base_price, billing_type,
                                          is_active, sort_order, features)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)
                 """,
-                    str(uuid.uuid4()),
                     "Unicorn Chat",
                     "open-webui",
                     "AI Chat Interface with multi-model support, RAG, and SSO",

@@ -12,7 +12,7 @@
 services:
   # Open WebUI - Chat interface for LLMs
   unicorn-open-webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui:v0.8.2
     container_name: unicorn-open-webui
     restart: unless-stopped
     ports:
