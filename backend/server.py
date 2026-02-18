@@ -2331,63 +2331,9 @@ async def require_user(current_user: dict = Depends(get_current_user)):
         )
     return current_user
 
-# My Apps API
-
-@app.get("/api/v1/my-apps/authorized")
-async def get_my_apps_authorized(current_user: dict = Depends(get_current_user)):
-    """Get apps the user has access to based on their subscription and add-ons"""
-    try:
-        # Get user ID - fallback to 'default' if not specified
-        user_id = current_user.get("preferred_username") or current_user.get("username") or current_user.get("sub") or "default"
-        
-        logger.info(f"Fetching apps for user: {user_id}")
-        
-        # Connect to Lago database to fetch user add-ons
-        lago_conn = await asyncpg.connect(os.getenv('LAGO_DATABASE_URL', 'postgresql://unicorn:s3cr3t@lago-db:5432/lago'))
-        
-        try:
-            # Query user's active add-ons with app details
-            query = """
-                SELECT 
-                    a.id,
-                    a.name,
-                    a.slug,
-                    a.description,
-                    a.icon_url,
-                    a.launch_url,
-                    ua.status
-                FROM user_add_ons ua
-                JOIN add_ons a ON ua.add_on_id = a.id
-                WHERE ua.user_id = $1 
-                AND ua.status = 'active'
-                AND a.is_active = true
-                ORDER BY a.name
-            """
-            
-            rows = await lago_conn.fetch(query, user_id)
-            
-            logger.info(f"Found {len(rows)} active apps for user {user_id}")
-            
-            apps = []
-            for row in rows:
-                apps.append({
-                    "id": str(row["id"]),
-                    "name": row["name"],
-                    "slug": row["slug"],
-                    "description": row["description"] or "",
-                    "icon_url": row["icon_url"],
-                    "launch_url": row["launch_url"] or f"/{row['slug']}",
-                    "status": row["status"]
-                })
-            
-            return apps
-            
-        finally:
-            await lago_conn.close()
-            
-    except Exception as e:
-        logger.error(f"Error fetching user apps: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch apps: {str(e)}")
+# My Apps API — deferred to my_apps_api.py router (app.include_router(my_apps_router))
+# The router at /api/v1/my-apps handles /authorized and /marketplace
+# using tier-based feature matching and is_default flags.
 
 # API Routes
 
@@ -5319,6 +5265,38 @@ async def register_user(request: Request):
             logger.error(f"Failed to create credit account during registration for {email}: {credit_error}")
             logger.warning(f"User will have credits auto-provisioned on first API call")
 
+        # Step 5.6: Auto-provision default apps (Unicorn Chat, Claude Agents, etc.)
+        default_apps_provisioned = False
+        try:
+            user_identifier = keycloak_user_id or local_user["id"]
+            db_conn = await asyncpg.connect(
+                host=os.getenv("POSTGRES_HOST", "unicorn-postgresql"),
+                port=int(os.getenv("POSTGRES_PORT", "5432")),
+                user=os.getenv("POSTGRES_USER", "unicorn"),
+                password=os.getenv("POSTGRES_PASSWORD", "unicorn"),
+                database=os.getenv("POSTGRES_DB", "unicorn_db")
+            )
+            try:
+                # Find all default apps and provision them for the new user
+                default_apps = await db_conn.fetch(
+                    "SELECT id, name FROM add_ons WHERE is_default = TRUE AND is_active = TRUE"
+                )
+                for app in default_apps:
+                    await db_conn.execute("""
+                        INSERT INTO user_add_ons (user_id, add_on_id, status, purchased_at)
+                        VALUES ($1, $2, 'active', NOW())
+                        ON CONFLICT (user_id, add_on_id) DO NOTHING
+                    """, user_identifier, app['id'])
+                    logger.info(f"Provisioned default app '{app['name']}' for user {email}")
+                default_apps_provisioned = True
+                logger.info(f"Provisioned {len(default_apps)} default app(s) for {email}")
+            finally:
+                await db_conn.close()
+        except Exception as apps_error:
+            # Don't fail registration if default app provisioning fails
+            logger.error(f"Failed to provision default apps for {email}: {apps_error}")
+            logger.warning(f"Default apps will be available via tier features fallback")
+
         # Step 6: Audit log successful registration
         if AUDIT_ENABLED:
             await log_auth_success(
@@ -5332,7 +5310,8 @@ async def register_user(request: Request):
                     "org_id": org_id,
                     "org_name": org_name,
                     "lago_customer_created": lago_customer_created,
-                    "credit_account_created": credit_account_created
+                    "credit_account_created": credit_account_created,
+                    "default_apps_provisioned": default_apps_provisioned
                 }
             )
 

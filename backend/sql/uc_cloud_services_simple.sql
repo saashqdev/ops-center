@@ -266,6 +266,37 @@ INSERT INTO add_ons (
 );
 
 -- ================================================================
+-- DEFAULT APP: Claude Agents (FREE, granted to all new users)
+-- ================================================================
+INSERT INTO add_ons (
+    name, slug, description, long_description, category, base_price, currency,
+    billing_type, version, author, icon_url, features, is_active, is_featured, is_default, sort_order
+) VALUES (
+    'Claude Agents',
+    'claude-agents',
+    'AI agent workflows powered by Claude — build, orchestrate, and execute multi-step pipelines',
+    E'Claude Agents lets you build and run powerful AI agent workflows using Anthropic''s Claude models.\n\n**Included FREE** with your UC-Cloud account.',
+    'AI Agents',
+    0.00,
+    'USD',
+    'included',
+    '1.0.0',
+    'UC-Cloud',
+    '/logos/claude-agents.png',
+    '{
+        "highlights": ["Multi-step agent flows", "API key management", "Execution history", "Streaming output", "Claude SDK integration"],
+        "use_cases": ["Automated workflows", "Code generation pipelines", "Research agents", "Data processing"]
+    }'::jsonb,
+    TRUE,
+    TRUE,
+    TRUE,
+    2
+);
+
+-- Mark default apps
+UPDATE add_ons SET is_default = TRUE WHERE slug IN ('open-webui', 'claude-agents');
+
+-- ================================================================
 -- VERIFICATION QUERIES
 -- ================================================================
 

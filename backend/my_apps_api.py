@@ -169,6 +169,7 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
     Get apps the current user is authorized to access based on their subscription tier.
 
     Returns apps where:
+    - App is marked as default (is_default=TRUE) — always included for all users
     - User's tier includes the app's feature_key
     - User has purchased the app separately (future: check user_add_ons table)
     """
@@ -183,10 +184,11 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
         # Get enabled features for user's tier
         enabled_features = await get_user_tier_features(user_tier, conn)
 
-        # Get all active apps
+        # Get all active apps (including is_default column)
         apps_query = """
             SELECT id, name, slug, description, icon_url, launch_url,
-                   category, feature_key, base_price, features
+                   category, feature_key, base_price, features,
+                   COALESCE(is_default, FALSE) as is_default
             FROM add_ons
             WHERE is_active = TRUE
             ORDER BY sort_order, name
@@ -197,21 +199,42 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
             # add_ons table doesn't exist yet - return empty list
             logger.warning("add_ons table does not exist - returning empty app list")
             return []
+        except asyncpg.UndefinedColumnError:
+            # is_default column doesn't exist yet - fall back to query without it
+            logger.warning("is_default column not found, falling back to legacy query")
+            apps_query = """
+                SELECT id, name, slug, description, icon_url, launch_url,
+                       category, feature_key, base_price, features,
+                       FALSE as is_default
+                FROM add_ons
+                WHERE is_active = TRUE
+                ORDER BY sort_order, name
+            """
+            app_rows = await conn.fetch(apps_query)
 
-        # Filter apps based on user's tier
+        # Filter apps based on user's tier and default status
         authorized_apps = []
+        seen_slugs = set()
         for app in app_rows:
             app_dict = dict(app)
             feature_key = app_dict.get('feature_key')
+            is_default = app_dict.get('is_default', False)
 
             # Skip apps without launch URLs
             if not app_dict.get('launch_url'):
                 continue
 
+            # Skip duplicates
+            if app_dict['slug'] in seen_slugs:
+                continue
+
             # Check if user has access
             access_type = None
 
-            if feature_key and feature_key in enabled_features:
+            if is_default:
+                # Default apps are always included for all authenticated users
+                access_type = 'default'
+            elif feature_key and feature_key in enabled_features:
                 # User's tier includes this app
                 access_type = 'tier_included'
             elif app_dict['base_price'] == 0 and not feature_key:
@@ -222,6 +245,7 @@ async def get_my_apps(user_tier: str = Depends(get_current_user_tier)):
                 # (Later: check if user purchased it separately)
                 continue
 
+            seen_slugs.add(app_dict['slug'])
             authorized_apps.append({
                 'id': str(app_dict['id']),  # Convert UUID to string
                 'name': app_dict['name'],
@@ -274,7 +298,8 @@ async def get_marketplace_apps(user_tier: str = Depends(get_current_user_tier)):
         # Get all active apps
         apps_query = """
             SELECT id, name, slug, description, icon_url, launch_url,
-                   category, feature_key, base_price, billing_type
+                   category, feature_key, base_price, billing_type,
+                   COALESCE(is_default, FALSE) as is_default
             FROM add_ons
             WHERE is_active = TRUE
             ORDER BY base_price DESC, name
@@ -286,9 +311,14 @@ async def get_marketplace_apps(user_tier: str = Depends(get_current_user_tier)):
         for app in app_rows:
             app_dict = dict(app)
             feature_key = app_dict.get('feature_key')
+            is_default = app_dict.get('is_default', False)
 
             # Skip apps without launch URLs
             if not app_dict.get('launch_url'):
+                continue
+
+            # Skip default apps (users already have them)
+            if is_default:
                 continue
 
             # Skip apps user already has access to

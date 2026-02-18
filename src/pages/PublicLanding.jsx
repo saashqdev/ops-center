@@ -800,7 +800,7 @@ export default function PublicLanding() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
             {services.map((service, index) => {
             const isLocked = !hasAccess(service.title);
             const requiredTier = serviceTiers[service.title];
@@ -811,12 +811,13 @@ export default function PublicLanding() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 * index }}
+                className="flex"
               >
                 <a
                   href={service.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`block group ${isLocked ? 'cursor-not-allowed' : ''}`}
+                  className={`block group w-full ${isLocked ? 'cursor-not-allowed' : ''}`}
                   onClick={(e) => handleServiceClick(e, service)}
                 >
                   <div className={`bg-gradient-to-br ${service.color} rounded-3xl shadow-lg transition-all duration-300 border border-white/20 overflow-hidden relative h-full ${
@@ -837,7 +838,7 @@ export default function PublicLanding() {
                       </div>
                     )}
 
-                    <div className="p-8">
+                    <div className="p-8 flex flex-col h-full">
                       {/* Logo/Icon Section */}
                       <div className="flex items-start justify-between mb-6">
                         <div className="flex-shrink-0">
@@ -867,7 +868,7 @@ export default function PublicLanding() {
                       </div>
 
                       {/* Content Section */}
-                      <div>
+                      <div className="flex-1 flex flex-col">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="text-2xl font-bold text-white leading-tight flex-1">
                             {service.title}
@@ -879,7 +880,7 @@ export default function PublicLanding() {
                             </span>
                           )}
                         </div>
-                        <p className="text-white/90 text-base leading-relaxed font-light">
+                        <p className="text-white/90 text-base leading-relaxed font-light line-clamp-2">
                           {service.description}
                         </p>
                       </div>

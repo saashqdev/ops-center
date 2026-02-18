@@ -593,8 +593,8 @@ async def seed_app_records(request: Request):
                 await conn.execute("""
                     INSERT INTO add_ons (name, slug, description, icon_url, launch_url,
                                          category, feature_key, base_price, billing_type,
-                                         is_active, sort_order, features)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)
+                                         is_active, is_default, sort_order, features)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb)
                 """,
                     "Unicorn Chat",
                     "open-webui",
@@ -606,6 +606,7 @@ async def seed_app_records(request: Request):
                     0.0,
                     "included",
                     True,
+                    True,   # is_default — always granted to new users
                     10,
                     features_json,
                 )

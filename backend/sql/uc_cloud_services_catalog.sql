@@ -636,6 +636,76 @@ UPDATE add_ons SET category = 'AI Agents' WHERE slug IN ('brigade');
 UPDATE add_ons SET category = 'Voice Services' WHERE slug IN ('amanuensis', 'orator');
 
 -- ================================================================
+-- DEFAULT APPS (Automatically granted to all new users)
+-- ================================================================
+
+-- Claude Agents - AI Agent Workflows (FREE DEFAULT)
+INSERT INTO add_ons (
+    name,
+    slug,
+    description,
+    long_description,
+    category,
+    base_price,
+    currency,
+    billing_type,
+    version,
+    author,
+    icon_url,
+    features,
+    is_active,
+    is_featured,
+    is_default,
+    sort_order,
+    created_at,
+    metadata
+) VALUES (
+    'Claude Agents',
+    'claude-agents',
+    'AI agent workflows powered by Claude — build, orchestrate, and execute multi-step pipelines',
+    E'Claude Agents lets you build and run powerful AI agent workflows using Anthropic''s Claude models.\n\n**Key Features:**\n• Visual flow builder for multi-step agent pipelines\n• API key management with encryption\n• Full execution history and streaming output\n• Claude SDK integration with tool use\n• Reusable flow templates\n\n**Use Cases:**\n• Automated research and analysis workflows\n• Code generation and review pipelines\n• Data processing and transformation\n• Content creation workflows\n• Multi-step reasoning tasks\n\n**Included FREE** with your UC-Cloud account.',
+    'AI Agents',
+    0.00,
+    'USD',
+    'included',
+    '1.0.0',
+    'UC-Cloud',
+    '/logos/claude-agents.png',
+    '{
+        "highlights": [
+            "Multi-step agent flows",
+            "API key management",
+            "Execution history",
+            "Streaming output",
+            "Claude SDK integration",
+            "Tool use support"
+        ],
+        "use_cases": [
+            "Automated workflows",
+            "Code generation pipelines",
+            "Research agents",
+            "Data processing",
+            "Content creation"
+        ]
+    }'::jsonb,
+    TRUE,
+    TRUE,
+    TRUE,
+    2,
+    NOW(),
+    '{
+        "access_url": "/admin/claude-agents",
+        "requires_api_key": true,
+        "included_in_base": true,
+        "setup_time": "instant",
+        "documentation": "https://docs.your-domain.com/services/claude-agents"
+    }'::jsonb
+);
+
+-- Mark Open-WebUI and Claude Agents as default apps for all users
+UPDATE add_ons SET is_default = TRUE WHERE slug IN ('open-webui', 'claude-agents');
+
+-- ================================================================
 -- PRICING TIERS (for reference)
 -- ================================================================
 

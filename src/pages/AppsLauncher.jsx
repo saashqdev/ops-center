@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  CircularProgress,
-  Alert,
-  Chip,
-  Stack
-} from '@mui/material';
-import { Launch as LaunchIcon, Public as PublicIcon, Business as BusinessIcon } from '@mui/icons-material';
+  ArrowTopRightOnSquareIcon,
+  GlobeAltIcon,
+  BuildingOfficeIcon,
+  ServerIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
+import { getGlassmorphismStyles } from '../styles/glassmorphism';
+import { useTheme } from '../contexts/ThemeContext';
 
 /**
  * AppsLauncher - Tier-Filtered Apps Dashboard
@@ -27,7 +23,34 @@ import { Launch as LaunchIcon, Public as PublicIcon, Business as BusinessIcon } 
  *
  * launch_url is the source of truth for where the app lives.
  */
+const getCategoryGradient = (category) => {
+  const gradients = {
+    'AI & Chat': 'from-blue-500 to-cyan-500',
+    'Search & Research': 'from-green-500 to-emerald-600',
+    'Development': 'from-purple-500 to-indigo-600',
+    'AI Agents': 'from-purple-600 to-pink-600',
+    'Productivity': 'from-orange-500 to-amber-600',
+    'Voice Services': 'from-pink-500 to-rose-600'
+  };
+  return gradients[category] || 'from-gray-500 to-slate-600';
+};
+
+const getHostBadge = (launch_url) => {
+  try {
+    const url = new URL(launch_url);
+    const host = url.hostname;
+    if (host.includes('kubeworkz.io') || host.includes('gridworkz.com')) {
+      return { label: 'Federated', icon: GlobeAltIcon, color: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30' };
+    }
+    return { label: 'External', icon: GlobeAltIcon, color: 'bg-purple-500/20 text-purple-300 border-purple-400/30' };
+  } catch (e) {
+    return { label: 'External', icon: GlobeAltIcon, color: 'bg-gray-500/20 text-gray-300 border-gray-400/30' };
+  }
+};
+
 const AppsLauncher = () => {
+  const { theme, currentTheme } = useTheme();
+  const glassStyles = getGlassmorphismStyles(currentTheme);
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,10 +61,8 @@ const AppsLauncher = () => {
 
   const fetchApps = async () => {
     try {
-      // NEW API: tier-filtered apps the user has access to
-      const response = await fetch('/api/v1/my-apps/authorized');
+      const response = await fetch('/api/v1/my-apps/authorized', { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch apps');
-
       const data = await response.json();
       setApps(data);
       setLoading(false);
@@ -53,173 +74,120 @@ const AppsLauncher = () => {
   };
 
   const handleLaunch = (app) => {
-    // Open app in new tab - launch_url can be ANYWHERE
     window.open(app.launch_url, '_blank', 'noopener,noreferrer');
-  };
-
-  const getHostBadge = (launch_url) => {
-    try {
-      const url = new URL(launch_url);
-      const host = url.hostname;
-
-      // Determine if hosted by UC or federated
-      if (host.includes('your-domain.com')) {
-        return { label: 'UC Hosted', icon: <BusinessIcon />, color: 'primary' };
-      } else {
-        return { label: 'Federated', icon: <PublicIcon />, color: 'secondary' };
-      }
-    } catch (e) {
-      return { label: 'External', icon: <PublicIcon />, color: 'default' };
-    }
   };
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Box p={3}>
-        <Alert severity="error">Error loading apps: {error}</Alert>
-      </Box>
+      <div className="p-6">
+        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-red-200">
+          Error loading apps: {error}
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box p={3}>
-      <Box mb={4}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className={`text-3xl font-bold ${theme.text.primary} mb-2`}>
           My Apps
-        </Typography>
-        <Typography variant="body1" sx={{ color: '#c084fc' }}>
+        </h1>
+        <p className="text-purple-400">
           Apps included in your subscription tier
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Grid container spacing={3}>
-        {apps.map((app) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {apps.map((app, index) => {
+          const gradient = getCategoryGradient(app.category);
           const hostBadge = getHostBadge(app.launch_url);
+          const BadgeIcon = hostBadge.icon;
 
           return (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={app.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  position: 'relative',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: 6,
-                    borderColor: 'primary.main',
-                    borderWidth: 2,
-                    borderStyle: 'solid'
-                  }
-                }}
-                onClick={() => handleLaunch(app)}
-              >
+            <motion.div
+              key={app.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.05 * index }}
+              whileHover={{ scale: 1.02, y: -4 }}
+              className={`${glassStyles.card} rounded-2xl overflow-hidden shadow-xl h-full flex flex-col cursor-pointer`}
+              onClick={() => handleLaunch(app)}
+            >
+              {/* App Icon/Image Header - fixed height like marketplace */}
+              <div className={`h-40 bg-gradient-to-br ${gradient} flex items-center justify-center relative`}>
                 {/* Host Badge */}
-                <Box sx={{ position: 'absolute', top: 12, right: 12, zIndex: 1 }}>
-                  <Chip
-                    icon={hostBadge.icon}
-                    label={hostBadge.label}
-                    size="small"
-                    color={hostBadge.color}
-                    sx={{ fontSize: '0.7rem' }}
+                <div className="absolute top-3 right-3 z-10">
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${hostBadge.color}`}>
+                    <BadgeIcon className="h-3.5 w-3.5" />
+                    {hostBadge.label}
+                  </span>
+                </div>
+
+                {app.icon_url ? (
+                  <img
+                    src={app.icon_url}
+                    alt={app.name}
+                    className="h-24 w-24 object-contain"
                   />
-                </Box>
+                ) : (
+                  <ServerIcon className="h-24 w-24 text-white opacity-90" />
+                )}
+              </div>
 
-                {/* App Icon */}
-                <Box
-                  sx={{
-                    p: 3,
-                    pt: 5,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    bgcolor: 'background.default',
-                    minHeight: 140
+              {/* App Content */}
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className={`text-xl font-bold ${theme.text.primary} mb-2 text-center`}>
+                  {app.name}
+                </h3>
+
+                <p className={`text-sm ${theme.text.secondary} line-clamp-2 mb-4 text-center flex-1`}>
+                  {app.description || '\u00A0'}
+                </p>
+
+                {/* Launch Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLaunch(app);
                   }}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mt-auto"
                 >
-                  {app.icon_url ? (
-                    <CardMedia
-                      component="img"
-                      image={app.icon_url}
-                      alt={app.name}
-                      sx={{
-                        width: 80,
-                        height: 80,
-                        objectFit: 'contain'
-                      }}
-                    />
-                  ) : (
-                    <LaunchIcon sx={{ fontSize: 80, color: 'text.secondary' }} />
-                  )}
-                </Box>
-
-                {/* App Info */}
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h6" gutterBottom textAlign="center">
-                    {app.name}
-                  </Typography>
-
-                  {app.description && (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mb: 2, flexGrow: 1, textAlign: 'center' }}
-                    >
-                      {app.description.length > 80
-                        ? app.description.substring(0, 80) + '...'
-                        : app.description
-                      }
-                    </Typography>
-                  )}
-
-                  <Button
-                    variant="contained"
-                    startIcon={<LaunchIcon />}
-                    fullWidth
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLaunch(app);
-                    }}
-                    sx={{ mt: 'auto' }}
-                  >
-                    Launch App
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+                  <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                  Launch App
+                </button>
+              </div>
+            </motion.div>
           );
         })}
-      </Grid>
+      </div>
 
       {apps.length === 0 && (
-        <Box textAlign="center" py={8}>
-          <Typography variant="h6" sx={{ color: '#e9d5ff' }} gutterBottom>
+        <div className="text-center py-16">
+          <SparklesIcon className="h-16 w-16 text-purple-400 mx-auto mb-4 opacity-50" />
+          <h3 className={`text-xl font-semibold ${theme.text.primary} mb-2`}>
             No apps in your tier
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#e9d5ff' }}>
+          </h3>
+          <p className={`${theme.text.secondary} mb-6`}>
             Upgrade your subscription to access more apps
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3 }}
-            onClick={() => window.location.href = '/admin/apps/marketplace'}
+          </p>
+          <a
+            href="/admin/apps/marketplace"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all"
           >
             Browse Marketplace
-          </Button>
-        </Box>
+          </a>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
