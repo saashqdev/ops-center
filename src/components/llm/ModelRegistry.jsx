@@ -6,11 +6,17 @@ import {
   MenuItem,
   Typography,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
 import { Add, Refresh } from '@mui/icons-material';
 import ModelCard from './ModelCard';
 import ModelAddModal from './ModelAddModal';
+import ModelEditModal from './ModelEditModal';
 import ModelTestModal from './ModelTestModal';
 
 /**
@@ -29,8 +35,11 @@ export default function ModelRegistry({ showSnackbar }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [testModalOpen, setTestModalOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchModels();
@@ -123,13 +132,16 @@ export default function ModelRegistry({ showSnackbar }) {
     }
   };
 
-  const handleDeleteModel = async (model) => {
-    if (!confirm(`Are you sure you want to delete ${model.name}?`)) {
-      return;
-    }
+  const handleDeleteModel = (model) => {
+    setSelectedModel(model);
+    setDeleteModalOpen(true);
+  };
 
+  const confirmDeleteModel = async () => {
+    if (!selectedModel) return;
+    setDeleteLoading(true);
     try {
-      const response = await fetch(`/api/v1/llm/models/${model.model_id}`, {
+      const response = await fetch(`/api/v1/llm/models/${selectedModel.model_id}`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -139,9 +151,13 @@ export default function ModelRegistry({ showSnackbar }) {
       }
 
       showSnackbar('Model deleted successfully', 'success');
+      setDeleteModalOpen(false);
+      setSelectedModel(null);
       fetchModels();
     } catch (err) {
       showSnackbar(err.message, 'error');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -161,6 +177,29 @@ export default function ModelRegistry({ showSnackbar }) {
     }
 
     return await response.json();
+  };
+
+  const handleEditModel = (model) => {
+    setSelectedModel(model);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveModel = async (model, updates) => {
+    const modelId = model.model_id || model.id;
+    const response = await fetch(`/api/v1/llm/models/${modelId}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.detail || 'Failed to update model');
+    }
+
+    showSnackbar('Model updated successfully', 'success');
+    fetchModels();
   };
 
   const handleOpenTest = (model) => {
@@ -297,7 +336,7 @@ export default function ModelRegistry({ showSnackbar }) {
               <div key={model.model_id || model.id}>
                 <ModelCard
                   model={model}
-                  onEdit={() => {}}
+                  onEdit={handleEditModel}
                   onDelete={handleDeleteModel}
                   onTest={handleOpenTest}
                 />
@@ -313,17 +352,47 @@ export default function ModelRegistry({ showSnackbar }) {
         onAdd={handleAddModel}
       />
 
-      {selectedModel && (
-        <ModelTestModal
-          open={testModalOpen}
-          model={selectedModel}
-          onClose={() => {
-            setTestModalOpen(false);
-            setSelectedModel(null);
-          }}
-          onTest={handleTestModel}
-        />
-      )}
+      <ModelEditModal
+        open={editModalOpen}
+        model={selectedModel}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedModel(null);
+        }}
+        onSave={handleSaveModel}
+      />
+
+      <ModelTestModal
+        open={testModalOpen}
+        model={selectedModel}
+        onClose={() => {
+          setTestModalOpen(false);
+          setSelectedModel(null);
+        }}
+        onTest={handleTestModel}
+      />
+
+      <Dialog
+        open={deleteModalOpen}
+        onClose={() => { setDeleteModalOpen(false); setSelectedModel(null); }}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete Model</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete <strong>{selectedModel?.name}</strong>? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setDeleteModalOpen(false); setSelectedModel(null); }}>
+            Cancel
+          </Button>
+          <Button onClick={confirmDeleteModel} color="error" variant="contained" disabled={deleteLoading}>
+            {deleteLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

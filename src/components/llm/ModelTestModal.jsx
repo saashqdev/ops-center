@@ -25,6 +25,8 @@ export default function ModelTestModal({ open, model, onClose, onTest }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
+  if (!open || !model) return null;
+
   const handleTest = async () => {
     setLoading(true);
     setError('');

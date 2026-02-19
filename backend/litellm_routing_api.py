@@ -263,6 +263,15 @@ class ModelCreate(BaseModel):
     metadata: Dict = Field(default_factory=dict)
 
 
+class ModelUpdate(BaseModel):
+    display_name: Optional[str] = None
+    cost_per_1m_input_tokens: Optional[Decimal] = None
+    cost_per_1m_output_tokens: Optional[Decimal] = None
+    context_length: Optional[int] = None
+    enabled: Optional[bool] = None
+    metadata: Optional[Dict] = None
+
+
 class ModelResponse(BaseModel):
     id: str
     provider_id: str
@@ -765,6 +774,110 @@ async def create_model(model: ModelCreate):
     except Exception as e:
         conn.rollback()
         logger.error(f"Failed to create model: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@router.put("/models/{model_id}", response_model=Dict)
+async def update_model(model_id: str, model: ModelUpdate):
+    """
+    Update an existing model's configuration
+
+    Path Parameters:
+        model_id: Model UUID
+
+    Body:
+        ModelUpdate schema (partial updates supported)
+
+    Returns:
+        Updated model info
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    try:
+        # Build dynamic SET clause from non-None fields
+        updates = {}
+        if model.display_name is not None:
+            updates['display_name'] = model.display_name
+        if model.cost_per_1m_input_tokens is not None:
+            updates['cost_per_1m_input_tokens'] = model.cost_per_1m_input_tokens
+        if model.cost_per_1m_output_tokens is not None:
+            updates['cost_per_1m_output_tokens'] = model.cost_per_1m_output_tokens
+        if model.context_length is not None:
+            updates['context_length'] = model.context_length
+        if model.enabled is not None:
+            updates['enabled'] = model.enabled
+        if model.metadata is not None:
+            updates['metadata'] = Json(model.metadata)
+
+        if not updates:
+            raise HTTPException(status_code=400, detail="No fields to update")
+
+        set_clause = ", ".join(f"{k} = %s" for k in updates.keys())
+        values = list(updates.values())
+        values.append(model_id)
+
+        cursor.execute(
+            f"UPDATE llm_models SET {set_clause} WHERE id = %s RETURNING id, name, display_name",
+            values
+        )
+
+        result = cursor.fetchone()
+        if not result:
+            raise HTTPException(status_code=404, detail="Model not found")
+
+        conn.commit()
+
+        return {
+            "id": str(result['id']),
+            "name": result['name'],
+            "display_name": result['display_name'],
+            "message": "Model updated successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Failed to update model: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@router.delete("/models/{model_id}")
+async def delete_model(model_id: str):
+    """
+    Delete a model
+
+    Path Parameters:
+        model_id: Model UUID
+
+    Returns:
+        Deletion confirmation
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM llm_models WHERE id = %s RETURNING id", (model_id,))
+        result = cursor.fetchone()
+
+        if not result:
+            raise HTTPException(status_code=404, detail="Model not found")
+
+        conn.commit()
+        return {"message": "Model deleted successfully", "id": model_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Failed to delete model: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
