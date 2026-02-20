@@ -244,6 +244,283 @@ def get_network_metrics() -> Dict:
         }
 
 
+def get_detailed_network_metrics() -> Dict:
+    """Get comprehensive network metrics including interfaces, connections, DNS, and gateway."""
+    import subprocess
+    import time
+
+    result = {
+        "interfaces": [],
+        "connections": {
+            "total": 0,
+            "by_state": {},
+            "top_connections": []
+        },
+        "dns": {
+            "nameservers": [],
+            "search_domains": []
+        },
+        "gateway": {
+            "default": None,
+            "interface": None
+        },
+        "aggregate_bandwidth": {
+            "total_in_per_sec": 0,
+            "total_out_per_sec": 0
+        }
+    }
+
+    # --- Interfaces with bandwidth ---
+    try:
+        addrs = psutil.net_if_addrs()
+        stats = psutil.net_if_stats()
+        io_before = psutil.net_io_counters(pernic=True)
+        time.sleep(1)
+        io_after = psutil.net_io_counters(pernic=True)
+
+        total_in_per_sec = 0
+        total_out_per_sec = 0
+
+        for iface_name, iface_addrs in addrs.items():
+            # Classify interface type
+            if iface_name == 'lo':
+                iface_type = 'loopback'
+            elif iface_name.startswith(('docker', 'br-', 'veth', 'cni', 'flannel')):
+                iface_type = 'virtual'
+            elif iface_name.startswith(('wl', 'wlan')):
+                iface_type = 'wifi'
+            else:
+                iface_type = 'ethernet'
+
+            # Get link stats
+            iface_stats = stats.get(iface_name)
+            is_up = iface_stats.isup if iface_stats else False
+            speed_mbps = iface_stats.speed if iface_stats else 0
+            mtu = iface_stats.mtu if iface_stats else 0
+            duplex_val = iface_stats.duplex if iface_stats else 0
+            duplex_str = {0: 'unknown', 1: 'half', 2: 'full'}.get(duplex_val, 'unknown')
+
+            # Parse addresses
+            mac = None
+            ipv4_list = []
+            ipv6_list = []
+            for addr in iface_addrs:
+                if addr.family.name == 'AF_LINK' or addr.family.name == 'AF_PACKET':
+                    mac = addr.address
+                elif addr.family.name == 'AF_INET':
+                    ipv4_list.append({"address": addr.address, "netmask": addr.netmask or ""})
+                elif addr.family.name == 'AF_INET6':
+                    ipv6_list.append({"address": addr.address, "prefix_length": addr.netmask or ""})
+
+            # I/O counters
+            before = io_before.get(iface_name)
+            after = io_after.get(iface_name)
+            io_data = {}
+            bandwidth = {"bytes_sent_per_sec": 0, "bytes_recv_per_sec": 0}
+            if after:
+                io_data = {
+                    "bytes_sent": after.bytes_sent,
+                    "bytes_recv": after.bytes_recv,
+                    "packets_sent": after.packets_sent,
+                    "packets_recv": after.packets_recv,
+                    "errors_in": after.errin,
+                    "errors_out": after.errout,
+                    "drops_in": after.dropin,
+                    "drops_out": after.dropout
+                }
+                if before:
+                    bw_in = after.bytes_recv - before.bytes_recv
+                    bw_out = after.bytes_sent - before.bytes_sent
+                    bandwidth = {
+                        "bytes_sent_per_sec": max(0, bw_out),
+                        "bytes_recv_per_sec": max(0, bw_in)
+                    }
+                    if iface_type not in ('loopback', 'virtual'):
+                        total_in_per_sec += max(0, bw_in)
+                        total_out_per_sec += max(0, bw_out)
+
+            result["interfaces"].append({
+                "name": iface_name,
+                "type": iface_type,
+                "state": "up" if is_up else "down",
+                "mac": mac,
+                "mtu": mtu,
+                "speed_mbps": speed_mbps,
+                "duplex": duplex_str,
+                "ipv4": ipv4_list,
+                "ipv6": ipv6_list,
+                "stats": io_data,
+                "bandwidth": bandwidth
+            })
+
+        result["aggregate_bandwidth"] = {
+            "total_in_per_sec": total_in_per_sec,
+            "total_out_per_sec": total_out_per_sec
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting detailed interface metrics: {e}")
+
+    # --- Active Connections ---
+    try:
+        connections = psutil.net_connections(kind='inet')
+        state_counts = {}
+        top_conns = []
+        pid_cache = {}
+
+        for conn in connections:
+            state = conn.status
+            state_counts[state] = state_counts.get(state, 0) + 1
+
+            if len(top_conns) < 50 and state in ('ESTABLISHED', 'LISTEN'):
+                proc_name = ""
+                if conn.pid:
+                    if conn.pid not in pid_cache:
+                        try:
+                            pid_cache[conn.pid] = psutil.Process(conn.pid).name()
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            pid_cache[conn.pid] = "unknown"
+                    proc_name = pid_cache[conn.pid]
+
+                local = f"{conn.laddr.ip}:{conn.laddr.port}" if conn.laddr else ""
+                remote = f"{conn.raddr.ip}:{conn.raddr.port}" if conn.raddr else ""
+
+                top_conns.append({
+                    "pid": conn.pid,
+                    "process": proc_name,
+                    "local_address": local,
+                    "remote_address": remote,
+                    "status": state,
+                    "type": "tcp" if conn.type == 1 else "udp"
+                })
+
+        result["connections"] = {
+            "total": len(connections),
+            "by_state": state_counts,
+            "top_connections": top_conns
+        }
+    except (psutil.AccessDenied, Exception) as e:
+        logger.warning(f"Cannot retrieve connections (may need root): {e}")
+
+    # --- DNS Configuration ---
+    try:
+        with open('/etc/resolv.conf', 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('nameserver'):
+                    result["dns"]["nameservers"].append(line.split()[1])
+                elif line.startswith('search') or line.startswith('domain'):
+                    result["dns"]["search_domains"].extend(line.split()[1:])
+    except Exception as e:
+        logger.debug(f"Could not read /etc/resolv.conf: {e}")
+
+    # --- Default Gateway ---
+    try:
+        gw_result = subprocess.run(
+            ['ip', '-j', 'route', 'show', 'default'],
+            capture_output=True, text=True, timeout=5
+        )
+        if gw_result.returncode == 0 and gw_result.stdout.strip():
+            routes = json.loads(gw_result.stdout)
+            if routes:
+                result["gateway"] = {
+                    "default": routes[0].get("gateway"),
+                    "interface": routes[0].get("dev")
+                }
+    except Exception as e:
+        logger.debug(f"Could not get default gateway: {e}")
+
+    return result
+
+
+@router.get("/network/detailed")
+async def get_network_detailed() -> Dict:
+    """
+    Get comprehensive network monitoring data.
+
+    Returns detailed information about all network interfaces,
+    live bandwidth per interface, active connections, DNS config,
+    and default gateway.
+    """
+    try:
+        return get_detailed_network_metrics()
+    except Exception as e:
+        logger.error(f"Error getting detailed network metrics: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve network details: {str(e)}")
+
+
+@router.get("/network/bandwidth/history")
+async def get_network_bandwidth_history(
+    interface: Optional[str] = Query(None, description="Interface name (e.g. eth0). Omit for aggregate."),
+    points: int = Query(30, ge=5, le=200, description="Number of data points")
+) -> Dict:
+    """
+    Get historical bandwidth data from Redis cache.
+
+    Returns time-series bandwidth data for charting.
+    """
+    try:
+        if not metrics_cache.redis:
+            return {"history": [], "interface": interface or "all"}
+
+        key = f"network_bw_history:{interface or 'aggregate'}"
+        raw = metrics_cache.redis.lrange(key, -points, -1)
+        history = [json.loads(item) for item in raw] if raw else []
+
+        return {
+            "interface": interface or "all",
+            "history": history
+        }
+    except Exception as e:
+        logger.error(f"Error getting bandwidth history: {e}")
+        return {"history": [], "interface": interface or "all"}
+
+
+def record_network_bandwidth_snapshot():
+    """Record a bandwidth snapshot for historical tracking. Call periodically."""
+    import time
+    try:
+        if not metrics_cache.redis:
+            return
+
+        io_before = psutil.net_io_counters(pernic=True)
+        time.sleep(1)
+        io_after = psutil.net_io_counters(pernic=True)
+
+        timestamp = datetime.utcnow().isoformat()
+        aggregate_in = 0
+        aggregate_out = 0
+
+        for iface, after in io_after.items():
+            if iface.startswith(('lo', 'docker', 'br-', 'veth')):
+                continue
+            before = io_before.get(iface)
+            if not before:
+                continue
+
+            bw_in = max(0, after.bytes_recv - before.bytes_recv)
+            bw_out = max(0, after.bytes_sent - before.bytes_sent)
+            aggregate_in += bw_in
+            aggregate_out += bw_out
+
+            # Per-interface history
+            key = f"network_bw_history:{iface}"
+            entry = json.dumps({"time": timestamp, "in": bw_in, "out": bw_out})
+            metrics_cache.redis.rpush(key, entry)
+            metrics_cache.redis.ltrim(key, -200, -1)  # Keep last 200 points
+            metrics_cache.redis.expire(key, 86400)  # TTL 24h
+
+        # Aggregate history
+        key = "network_bw_history:aggregate"
+        entry = json.dumps({"time": timestamp, "in": aggregate_in, "out": aggregate_out})
+        metrics_cache.redis.rpush(key, entry)
+        metrics_cache.redis.ltrim(key, -200, -1)
+        metrics_cache.redis.expire(key, 86400)
+
+    except Exception as e:
+        logger.debug(f"Error recording bandwidth snapshot: {e}")
+
+
 def get_gpu_metrics() -> Dict:
     """Get GPU metrics if available."""
     try:

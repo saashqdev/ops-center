@@ -17,7 +17,13 @@ import {
   ArrowDownTrayIcon,
   TrashIcon,
   StopIcon,
-  ShieldExclamationIcon
+  ShieldExclamationIcon,
+  GlobeAltIcon,
+  SignalIcon,
+  ArrowsRightLeftIcon,
+  FunnelIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
 } from '@heroicons/react/24/outline';
 import { useSystem } from '../contexts/SystemContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -315,16 +321,23 @@ export default function System() {
   const [hardwareInfo, setHardwareInfo] = useState(null);
   const [diskIoStats, setDiskIoStats] = useState(null);
   const [networkStats, setNetworkStats] = useState({ in: 0, out: 0 });
+  const [networkDetailed, setNetworkDetailed] = useState(null);
+  const [networkBwHistory, setNetworkBwHistory] = useState([]);
+  const [selectedInterface, setSelectedInterface] = useState('all');
+  const [connectionFilter, setConnectionFilter] = useState('all');
+  const [showVirtualInterfaces, setShowVirtualInterfaces] = useState(false);
   const [temperatures, setTemperatures] = useState({});
   const [errors, setErrors] = useState({
     hardware: null,
     diskIo: null,
-    network: null
+    network: null,
+    networkDetailed: null
   });
   const [retryCount, setRetryCount] = useState({
     hardware: 0,
     diskIo: 0,
-    network: 0
+    network: 0,
+    networkDetailed: 0
   });
   const maxDataPoints = 30;
   const maxRetries = 3;
@@ -416,6 +429,45 @@ export default function System() {
     }
   }
 
+  async function fetchNetworkDetailed() {
+    try {
+      const response = await fetch('/api/v1/system/network/detailed');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setNetworkDetailed(data);
+      setErrors(prev => ({ ...prev, networkDetailed: null }));
+      setRetryCount(prev => ({ ...prev, networkDetailed: 0 }));
+    } catch (error) {
+      console.error('Failed to fetch detailed network info:', error);
+      const errorMsg = `Failed to load detailed network info: ${error.message}`;
+      setErrors(prev => ({ ...prev, networkDetailed: errorMsg }));
+
+      if (retryCount.networkDetailed < maxRetries) {
+        setTimeout(() => {
+          setRetryCount(prev => ({ ...prev, networkDetailed: prev.networkDetailed + 1 }));
+          fetchNetworkDetailed();
+        }, 2000 * (retryCount.networkDetailed + 1));
+      } else {
+        toast.warning(errorMsg);
+      }
+    }
+  }
+
+  async function fetchBandwidthHistory(iface) {
+    try {
+      const params = new URLSearchParams({ points: '30' });
+      if (iface && iface !== 'all') params.set('interface', iface);
+      const response = await fetch(`/api/v1/system/network/bandwidth/history?${params}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      setNetworkBwHistory(data.history || []);
+    } catch (error) {
+      console.error('Failed to fetch bandwidth history:', error);
+    }
+  }
+
   function updateHistoricalData() {
     if (!systemStatus) return;
 
@@ -482,6 +534,21 @@ export default function System() {
 
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval]);
+
+  // Fetch detailed network data when network tab is selected
+  useEffect(() => {
+    if (selectedView === 'network') {
+      fetchNetworkDetailed();
+      fetchBandwidthHistory(selectedInterface);
+
+      if (!autoRefresh) return;
+      const interval = setInterval(() => {
+        fetchNetworkDetailed();
+        fetchBandwidthHistory(selectedInterface);
+      }, refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [selectedView, autoRefresh, refreshInterval, selectedInterface]);
 
   const handleKillProcess = async (pid) => {
     try {
@@ -1142,19 +1209,422 @@ export default function System() {
 
       {/* Network View */}
       {selectedView === 'network' && (
-        <div className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-6">
-          <h3 className={`text-lg font-semibold ${theme.text.primary} mb-4 flex items-center gap-2`}>
-            <WifiIcon className="h-5 w-5 text-blue-500" />
-            Network Statistics
-          </h3>
-          <div className="text-center py-8">
-            <p className={`${theme.text.secondary} mb-4`}>
-              Network statistics and configuration coming soon...
-            </p>
-            <p className={`text-sm ${theme.text.secondary}`}>
-              This feature will include network interfaces, bandwidth monitoring, and connection details.
-            </p>
-          </div>
+        <div className="space-y-6">
+          {/* Loading state */}
+          {!networkDetailed && !errors.networkDetailed && (
+            <div className="flex items-center justify-center py-12">
+              <ArrowPathIcon className="h-8 w-8 text-purple-500 animate-spin" />
+              <span className={`ml-3 ${theme.text.secondary}`}>Loading network data...</span>
+            </div>
+          )}
+
+          {/* Error state */}
+          {errors.networkDetailed && !networkDetailed && (
+            <div className="bg-red-900/20 border border-red-700/50 rounded-xl p-6 text-center">
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-400 mx-auto mb-2" />
+              <p className="text-red-400">{errors.networkDetailed}</p>
+              <button onClick={fetchNetworkDetailed} className="mt-3 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm">
+                Retry
+              </button>
+            </div>
+          )}
+
+          {networkDetailed && (
+            <>
+              {/* Aggregate Bandwidth Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowDownTrayIcon className="h-5 w-5 text-green-400" />
+                    <span className={`text-sm ${theme.text.secondary}`}>Download</span>
+                  </div>
+                  <p className={`text-2xl font-bold ${theme.text.primary}`}>
+                    {formatNetworkSpeed(networkDetailed.aggregate_bandwidth?.total_in_per_sec || 0)}
+                  </p>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowsRightLeftIcon className="h-5 w-5 text-amber-400" />
+                    <span className={`text-sm ${theme.text.secondary}`}>Upload</span>
+                  </div>
+                  <p className={`text-2xl font-bold ${theme.text.primary}`}>
+                    {formatNetworkSpeed(networkDetailed.aggregate_bandwidth?.total_out_per_sec || 0)}
+                  </p>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <SignalIcon className="h-5 w-5 text-blue-400" />
+                    <span className={`text-sm ${theme.text.secondary}`}>Interfaces</span>
+                  </div>
+                  <p className={`text-2xl font-bold ${theme.text.primary}`}>
+                    {networkDetailed.interfaces?.filter(i => i.state === 'up' && i.type !== 'loopback' && i.type !== 'virtual').length || 0}
+                    <span className={`text-sm font-normal ml-1 ${theme.text.secondary}`}>active</span>
+                  </p>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <GlobeAltIcon className="h-5 w-5 text-purple-400" />
+                    <span className={`text-sm ${theme.text.secondary}`}>Connections</span>
+                  </div>
+                  <p className={`text-2xl font-bold ${theme.text.primary}`}>
+                    {networkDetailed.connections?.total || 0}
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Network Interfaces */}
+              <div className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className={`text-lg font-semibold ${theme.text.primary} flex items-center gap-2`}>
+                    <WifiIcon className="h-5 w-5 text-blue-500" />
+                    Network Interfaces
+                  </h3>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showVirtualInterfaces}
+                      onChange={(e) => setShowVirtualInterfaces(e.target.checked)}
+                      className="rounded bg-gray-700 border-gray-600 text-purple-500 focus:ring-purple-500"
+                    />
+                    <span className={`text-sm ${theme.text.secondary}`}>Show virtual</span>
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {(networkDetailed.interfaces || [])
+                    .filter(iface => showVirtualInterfaces || (iface.type !== 'virtual' && iface.type !== 'loopback'))
+                    .map((iface, idx) => (
+                      <motion.div
+                        key={iface.name}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className={`border rounded-lg p-4 ${
+                          iface.state === 'up'
+                            ? 'bg-green-900/10 border-green-700/30'
+                            : 'bg-gray-900/30 border-gray-700/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2.5 h-2.5 rounded-full ${iface.state === 'up' ? 'bg-green-400' : 'bg-red-400'}`} />
+                            <span className={`font-semibold ${theme.text.primary}`}>{iface.name}</span>
+                          </div>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            iface.type === 'ethernet' ? 'bg-blue-500/20 text-blue-300' :
+                            iface.type === 'wifi' ? 'bg-purple-500/20 text-purple-300' :
+                            iface.type === 'virtual' ? 'bg-gray-500/20 text-gray-300' :
+                            'bg-gray-500/20 text-gray-300'
+                          }`}>
+                            {iface.type}
+                          </span>
+                        </div>
+                        <div className="space-y-1.5 text-sm">
+                          {iface.ipv4?.map((ip, i) => (
+                            <div key={i} className="flex justify-between">
+                              <span className={theme.text.secondary}>IPv4:</span>
+                              <span className={`${theme.text.primary} font-mono text-xs`}>{ip.address}</span>
+                            </div>
+                          ))}
+                          {iface.mac && (
+                            <div className="flex justify-between">
+                              <span className={theme.text.secondary}>MAC:</span>
+                              <span className={`${theme.text.primary} font-mono text-xs`}>{iface.mac}</span>
+                            </div>
+                          )}
+                          {iface.speed_mbps > 0 && (
+                            <div className="flex justify-between">
+                              <span className={theme.text.secondary}>Speed:</span>
+                              <span className={theme.text.primary}>
+                                {iface.speed_mbps >= 1000 ? `${(iface.speed_mbps / 1000).toFixed(0)} Gbps` : `${iface.speed_mbps} Mbps`}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex justify-between">
+                            <span className={theme.text.secondary}>MTU:</span>
+                            <span className={theme.text.primary}>{iface.mtu}</span>
+                          </div>
+                          {iface.state === 'up' && iface.stats && (
+                            <>
+                              <div className="border-t border-gray-700/50 mt-2 pt-2" />
+                              <div className="flex justify-between">
+                                <span className={theme.text.secondary}>
+                                  <span className="text-green-400">↓</span> RX:
+                                </span>
+                                <span className={theme.text.primary}>{formatBytes(iface.stats.bytes_recv)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className={theme.text.secondary}>
+                                  <span className="text-amber-400">↑</span> TX:
+                                </span>
+                                <span className={theme.text.primary}>{formatBytes(iface.stats.bytes_sent)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className={theme.text.secondary}>
+                                  <span className="text-green-400">↓</span> Speed:
+                                </span>
+                                <span className="text-green-400 text-xs">
+                                  {formatNetworkSpeed(iface.bandwidth?.bytes_recv_per_sec || 0)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className={theme.text.secondary}>
+                                  <span className="text-amber-400">↑</span> Speed:
+                                </span>
+                                <span className="text-amber-400 text-xs">
+                                  {formatNetworkSpeed(iface.bandwidth?.bytes_sent_per_sec || 0)}
+                                </span>
+                              </div>
+                              {(iface.stats.errors_in > 0 || iface.stats.errors_out > 0 || iface.stats.drops_in > 0 || iface.stats.drops_out > 0) && (
+                                <div className="border-t border-red-700/30 mt-2 pt-2">
+                                  <div className="flex justify-between text-red-400">
+                                    <span>Errors:</span>
+                                    <span>{iface.stats.errors_in + iface.stats.errors_out}</span>
+                                  </div>
+                                  <div className="flex justify-between text-red-400">
+                                    <span>Drops:</span>
+                                    <span>{iface.stats.drops_in + iface.stats.drops_out}</span>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Bandwidth Chart */}
+              <div className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className={`text-lg font-semibold ${theme.text.primary} flex items-center gap-2`}>
+                    <ChartBarIcon className="h-5 w-5 text-green-500" />
+                    Live Bandwidth
+                  </h3>
+                  <select
+                    value={selectedInterface}
+                    onChange={(e) => setSelectedInterface(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg bg-gray-700 border border-gray-600 text-white text-sm"
+                  >
+                    <option value="all">All Interfaces (Aggregate)</option>
+                    {(networkDetailed.interfaces || [])
+                      .filter(i => i.state === 'up' && i.type !== 'loopback' && i.type !== 'virtual')
+                      .map(i => (
+                        <option key={i.name} value={i.name}>{i.name}</option>
+                      ))}
+                  </select>
+                </div>
+                {(() => {
+                  // Build chart data: prefer history from Redis; fallback to overview historicalData
+                  const chartData = networkBwHistory.length > 0
+                    ? networkBwHistory.map(pt => ({
+                        time: new Date(pt.time).toLocaleTimeString(),
+                        download: pt.in,
+                        upload: pt.out
+                      }))
+                    : historicalData.network.map(pt => ({
+                        time: pt.time,
+                        download: pt.in,
+                        upload: pt.out
+                      }));
+
+                  return (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <AreaChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridColor} />
+                        <XAxis dataKey="time" stroke={chartTheme.textColor} tick={{ fill: chartTheme.textColor, fontSize: 11 }} />
+                        <YAxis
+                          stroke={chartTheme.textColor}
+                          tick={{ fill: chartTheme.textColor, fontSize: 11 }}
+                          tickFormatter={(v) => formatNetworkSpeed(v)}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: chartTheme.tooltipBackground,
+                            border: `1px solid ${chartTheme.tooltipBorder}`,
+                            borderRadius: '8px'
+                          }}
+                          formatter={(value) => [formatNetworkSpeed(value)]}
+                        />
+                        <Legend />
+                        <Area type="monotone" dataKey="download" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.3} name="Download" />
+                        <Area type="monotone" dataKey="upload" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} name="Upload" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  );
+                })()}
+              </div>
+
+              {/* Active Connections */}
+              <div className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className={`text-lg font-semibold ${theme.text.primary} flex items-center gap-2`}>
+                    <GlobeAltIcon className="h-5 w-5 text-purple-500" />
+                    Active Connections
+                    <span className={`text-sm font-normal ml-2 ${theme.text.secondary}`}>
+                      ({networkDetailed.connections?.total || 0} total)
+                    </span>
+                  </h3>
+                  <select
+                    value={connectionFilter}
+                    onChange={(e) => setConnectionFilter(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg bg-gray-700 border border-gray-600 text-white text-sm"
+                  >
+                    <option value="all">All States</option>
+                    {Object.keys(networkDetailed.connections?.by_state || {}).map(state => (
+                      <option key={state} value={state}>{state} ({networkDetailed.connections.by_state[state]})</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Connection state badges */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {Object.entries(networkDetailed.connections?.by_state || {}).map(([state, count]) => {
+                    const colors = {
+                      ESTABLISHED: 'bg-green-500/20 text-green-300',
+                      LISTEN: 'bg-blue-500/20 text-blue-300',
+                      TIME_WAIT: 'bg-yellow-500/20 text-yellow-300',
+                      CLOSE_WAIT: 'bg-red-500/20 text-red-300',
+                      SYN_SENT: 'bg-orange-500/20 text-orange-300',
+                      SYN_RECV: 'bg-orange-500/20 text-orange-300',
+                      FIN_WAIT1: 'bg-amber-500/20 text-amber-300',
+                      FIN_WAIT2: 'bg-amber-500/20 text-amber-300',
+                      NONE: 'bg-gray-500/20 text-gray-300'
+                    };
+                    return (
+                      <button
+                        key={state}
+                        onClick={() => setConnectionFilter(connectionFilter === state ? 'all' : state)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                          connectionFilter === state ? 'ring-2 ring-purple-500' : ''
+                        } ${colors[state] || 'bg-gray-500/20 text-gray-300'}`}
+                      >
+                        {state}: {count}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Connections table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className={`border-b border-gray-700/50 ${theme.text.secondary}`}>
+                        <th className="text-left py-2 px-3 font-medium">Process</th>
+                        <th className="text-left py-2 px-3 font-medium">PID</th>
+                        <th className="text-left py-2 px-3 font-medium">Protocol</th>
+                        <th className="text-left py-2 px-3 font-medium">Local Address</th>
+                        <th className="text-left py-2 px-3 font-medium">Remote Address</th>
+                        <th className="text-left py-2 px-3 font-medium">State</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(networkDetailed.connections?.top_connections || [])
+                        .filter(conn => connectionFilter === 'all' || conn.status === connectionFilter)
+                        .slice(0, 30)
+                        .map((conn, idx) => {
+                          const stateColor = {
+                            ESTABLISHED: 'text-green-400',
+                            LISTEN: 'text-blue-400',
+                            TIME_WAIT: 'text-yellow-400',
+                            CLOSE_WAIT: 'text-red-400'
+                          };
+                          return (
+                            <tr key={idx} className="border-b border-gray-800/50 hover:bg-gray-700/20 transition-colors">
+                              <td className={`py-2 px-3 ${theme.text.primary}`}>{conn.process || '—'}</td>
+                              <td className={`py-2 px-3 font-mono text-xs ${theme.text.secondary}`}>{conn.pid || '—'}</td>
+                              <td className={`py-2 px-3 ${theme.text.secondary}`}>
+                                <span className="uppercase text-xs font-medium">{conn.type}</span>
+                              </td>
+                              <td className={`py-2 px-3 font-mono text-xs ${theme.text.primary}`}>{conn.local_address}</td>
+                              <td className={`py-2 px-3 font-mono text-xs ${theme.text.primary}`}>{conn.remote_address || '—'}</td>
+                              <td className={`py-2 px-3 font-medium ${stateColor[conn.status] || theme.text.secondary}`}>
+                                {conn.status}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                  {(networkDetailed.connections?.top_connections || []).length === 0 && (
+                    <div className={`text-center py-6 ${theme.text.secondary}`}>
+                      No connection data available (may require elevated permissions)
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Network Configuration: DNS & Gateway */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* DNS */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-6"
+                >
+                  <h3 className={`text-lg font-semibold ${theme.text.primary} mb-4 flex items-center gap-2`}>
+                    <GlobeAltIcon className="h-5 w-5 text-cyan-500" />
+                    DNS Configuration
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <span className={`${theme.text.secondary} block mb-1`}>Nameservers:</span>
+                      {(networkDetailed.dns?.nameservers || []).length > 0 ? (
+                        <div className="space-y-1">
+                          {networkDetailed.dns.nameservers.map((ns, i) => (
+                            <div key={i} className={`font-mono text-xs px-2 py-1 rounded bg-gray-700/50 ${theme.text.primary}`}>
+                              {ns}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className={theme.text.secondary}>Not configured</span>
+                      )}
+                    </div>
+                    {(networkDetailed.dns?.search_domains || []).length > 0 && (
+                      <div>
+                        <span className={`${theme.text.secondary} block mb-1`}>Search Domains:</span>
+                        <div className="space-y-1">
+                          {networkDetailed.dns.search_domains.map((domain, i) => (
+                            <div key={i} className={`font-mono text-xs px-2 py-1 rounded bg-gray-700/50 ${theme.text.primary}`}>
+                              {domain}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* Gateway */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-6"
+                >
+                  <h3 className={`text-lg font-semibold ${theme.text.primary} mb-4 flex items-center gap-2`}>
+                    <ArrowsRightLeftIcon className="h-5 w-5 text-indigo-500" />
+                    Default Gateway
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className={theme.text.secondary}>Gateway:</span>
+                      <span className={`${theme.text.primary} font-mono text-xs`}>
+                        {networkDetailed.gateway?.default || '—'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={theme.text.secondary}>Interface:</span>
+                      <span className={theme.text.primary}>
+                        {networkDetailed.gateway?.interface || '—'}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
