@@ -46,6 +46,8 @@ export default function BackupManager() {
   const [restoreDialog, setRestoreDialog] = useState(false);
   const [rcloneDialog, setRcloneDialog] = useState(false);
   const [scheduleDialog, setScheduleDialog] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   
   // Form states
   const [backupDescription, setBackupDescription] = useState('');
@@ -123,12 +125,20 @@ export default function BackupManager() {
     }
   };
 
-  const deleteBackup = async (filename) => {
-    if (!window.confirm(`Are you sure you want to delete ${filename}?`)) return;
+  const confirmDeleteBackup = (filename) => {
+    setDeleteTarget(filename);
+    setDeleteDialog(true);
+  };
+
+  const deleteBackup = async () => {
+    if (!deleteTarget) return;
+    const filename = deleteTarget;
+    setDeleteDialog(false);
+    setDeleteTarget(null);
     
     try {
       setLoading(true);
-      const response = await fetch(`/api/backups/${filename}/`, {
+      const response = await fetch(`/api/backups/${filename}`, {
         method: 'DELETE'
       });
       
@@ -440,7 +450,7 @@ export default function BackupManager() {
                           <IconButton
                             size="small"
                             color="error"
-                            onClick={() => deleteBackup(backup.filename)}
+                            onClick={() => confirmDeleteBackup(backup.filename)}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -573,6 +583,30 @@ export default function BackupManager() {
             disabled={loading || !rcloneRemote}
           >
             {loading ? <CircularProgress size={24} /> : 'Upload'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialog} onClose={() => { setDeleteDialog(false); setDeleteTarget(null); }} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DeleteIcon color="error" />
+          Delete Backup
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mt: 1, mb: 2 }}>
+            This action cannot be undone.
+          </Alert>
+          {deleteTarget && (
+            <Typography variant="body1">
+              Are you sure you want to permanently delete <strong>{deleteTarget}</strong>?
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setDeleteDialog(false); setDeleteTarget(null); }}>Cancel</Button>
+          <Button onClick={deleteBackup} variant="contained" color="error" disabled={loading}>
+            {loading ? <CircularProgress size={24} /> : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -138,7 +138,7 @@ async def restore_backup(request: RestoreBackupRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{backup_filename}")
+@router.delete("/{backup_filename:path}")
 async def delete_backup(backup_filename: str):
     """
     Delete a specific backup file.
@@ -146,6 +146,8 @@ async def delete_backup(backup_filename: str):
     Args:
         backup_filename: Name of the backup file to delete
     """
+    # Strip trailing slashes (Traefik may append one)
+    backup_filename = backup_filename.strip("/")
     try:
         service = get_backup_service()
         result = service.delete_backup(backup_filename)
@@ -254,7 +256,7 @@ async def update_backup_settings(request: UpdateBackupSettingsRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/download/{backup_filename}")
+@router.get("/download/{backup_filename:path}")
 async def download_backup(backup_filename: str):
     """
     Download a backup file.
@@ -262,6 +264,8 @@ async def download_backup(backup_filename: str):
     Args:
         backup_filename: Name of the backup file to download
     """
+    # Strip trailing slashes (Traefik may append one)
+    backup_filename = backup_filename.strip("/")
     try:
         service = get_backup_service()
         backup_path = service.backup_dir / backup_filename

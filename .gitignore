@@ -24,6 +24,9 @@ Thumbs.db
 .env.test.local
 .env.production.local
 .env.keycloak
+.env.brigade
+.env.openwebui
+.env.openwebui.example
 tests/.env.test
 keycloak-theme/.env.keycloak
 

@@ -128,7 +128,7 @@ export default function BackupManager() {
     
     try {
       setLoading(true);
-      const response = await fetch(`/api/backups/${filename}/`, {
+      const response = await fetch(`/api/backups/${filename}`, {
         method: 'DELETE'
       });
       
