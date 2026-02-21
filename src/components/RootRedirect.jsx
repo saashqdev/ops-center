@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useSystem } from '../contexts/SystemContext';
 import MarketplaceLanding from '../pages/public/MarketplaceLanding';
+import EmailVerificationNotice from './EmailVerificationNotice';
 import LoadingScreen from './LoadingScreen';
 
 /**
@@ -30,6 +31,8 @@ export default function RootRedirect() {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [landingMode, setLandingMode] = useState('direct_sso');
+  const [searchParams] = useSearchParams();
+  const errorParam = searchParams.get('error');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -80,6 +83,20 @@ export default function RootRedirect() {
 
     checkAuth();
   }, []);
+
+  // If redirected with email_not_verified error, show verification notice
+  // Check BEFORE loading to avoid any race with auth check redirecting to Keycloak
+  if (errorParam === 'email_not_verified') {
+    return <EmailVerificationNotice />;
+  }
+
+  // If user just logged out or auth failed, show the landing page instead of
+  // immediately bouncing back to Keycloak SSO
+  // Check BEFORE loading to prevent the direct_sso redirect from firing
+  const loggedOut = searchParams.get('logged_out');
+  if (errorParam === 'authentication_failed' || loggedOut) {
+    return <MarketplaceLanding />;
+  }
 
   // Show loading screen while checking auth
   if (loading) {

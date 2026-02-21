@@ -114,6 +114,119 @@ TIER_FEATURES = {
 }
 
 
+@router.get("/summary")
+async def get_usage_summary(request: Request):
+    """
+    Get usage summary for the API Usage Dashboard.
+    Returns total requests, tokens, cost, response time, and breakdowns.
+    """
+    user_email = await get_current_user_email(request)
+    org_id = await get_user_org_id(request)
+    tier_info = await get_user_tier_data(user_email)
+
+    used = tier_info.get("api_calls_used", 0)
+
+    # Try to get Lago usage for richer data
+    lago_usage = {}
+    try:
+        lago_usage = await get_current_usage(org_id)
+    except Exception as e:
+        logger.warning(f"Could not retrieve Lago usage for summary: {e}")
+
+    api_calls = used
+    if lago_usage and "charges" in lago_usage:
+        api_calls = sum(charge.get("units", 0) for charge in lago_usage.get("charges", []))
+
+    return {
+        "total_requests": int(api_calls),
+        "total_tokens": 0,
+        "total_cost": 0.0,
+        "avg_response_time": None,
+        "event_breakdown": {},
+        "model_breakdown": {},
+        "period": "current_month",
+    }
+
+
+@router.get("/quota")
+async def get_usage_quota(request: Request):
+    """
+    Get quota status for the API Usage Dashboard.
+    Returns usage count, limits, remaining, percentage, and reset date.
+    """
+    user_email = await get_current_user_email(request)
+    org_id = await get_user_org_id(request)
+    tier_info = await get_user_tier_data(user_email)
+
+    tier = tier_info.get("subscription_tier", "trial")
+    used = tier_info.get("api_calls_used", 0)
+
+    # Try Lago
+    try:
+        lago_usage = await get_current_usage(org_id)
+        if lago_usage and "charges" in lago_usage:
+            used = int(sum(charge.get("units", 0) for charge in lago_usage.get("charges", [])))
+    except Exception:
+        pass
+
+    tier_limits = TIER_LIMITS.get(tier, TIER_LIMITS["trial"])
+    monthly_limit = tier_limits["monthly"]
+
+    if monthly_limit > 0:
+        remaining = max(0, monthly_limit - used)
+        percentage = min(100, round((used / monthly_limit) * 100, 1))
+        exceeded = used >= monthly_limit
+    else:
+        remaining = -1
+        percentage = 0
+        exceeded = False
+
+    # Calculate reset date (first of next month)
+    today = datetime.utcnow().date()
+    if today.month == 12:
+        reset_date = today.replace(year=today.year + 1, month=1, day=1)
+    else:
+        reset_date = today.replace(month=today.month + 1, day=1)
+
+    return {
+        "usage_count": int(used),
+        "quota_limit": monthly_limit if monthly_limit > 0 else None,
+        "remaining": remaining,
+        "usage_percentage": percentage,
+        "reset_date": reset_date.isoformat(),
+        "exceeded": exceeded,
+        "tier": tier,
+        "tier_name": tier_limits["name"],
+    }
+
+
+@router.get("/daily")
+async def get_daily_usage(request: Request, days: int = 30):
+    """
+    Get daily usage breakdown for the API Usage Dashboard charts.
+    Returns an array of daily usage data points.
+    """
+    user_email = await get_current_user_email(request)
+
+    # Generate date range with zero values
+    # TODO: Replace with actual daily tracking from database
+    today = datetime.utcnow().date()
+    daily_usage = []
+    for i in range(days - 1, -1, -1):
+        date = today - timedelta(days=i)
+        daily_usage.append({
+            "date": date.isoformat(),
+            "total_requests": 0,
+            "total_tokens": 0,
+            "total_cost": 0.0,
+        })
+
+    return {
+        "daily_usage": daily_usage,
+        "days": days,
+    }
+
+
 @router.get("/current")
 async def get_current_usage_endpoint(request: Request):
     """

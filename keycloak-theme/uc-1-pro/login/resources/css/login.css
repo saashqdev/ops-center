@@ -37,16 +37,41 @@ body.uc1-pro-login {
     padding: 0;
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: auto;
     position: relative;
 }
 
+/* Use before/after flex spacers for safe vertical centering */
 .login-pf-page {
     position: relative;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
     padding: 20px;
+}
+
+/* Flex spacers: push content to center, collapse when content overflows */
+.login-pf-page::before,
+.login-pf-page::after {
+    content: '' !important;
+    flex: 1 0 0px !important;
+    display: block !important;
+}
+
+/* Kill ALL Bootstrap/PatternFly grid overrides */
+.login-pf-page .container,
+.login-pf-page .row,
+.login-pf-page [class*="col-"] {
+    display: block !important;
+    float: none !important;
+    width: 100% !important;
+    max-width: 540px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
 }
 
 /* Purple Gradient Background */
@@ -99,6 +124,26 @@ body.uc1-pro-login {
 }
 
 /* === GLASSMORPHIC CARD === */
+/* Reset PatternFly's card-pf base styles - don't touch padding/margin (uc1-card handles those) */
+.card-pf {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Kill PatternFly login page backgrounds */
+.login-pf-page,
+.login-pf-page .container,
+.login-pf-page .row,
+.login-pf-page [class*="col-"],
+.login-pf-page #kc-content,
+.login-pf-page #kc-content-wrapper,
+.login-pf-page #kc-form,
+.login-pf-page #kc-form-wrapper {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
 .uc1-card {
     background: var(--uc1-glass-bg) !important;
     backdrop-filter: blur(10px) saturate(180%);
@@ -111,9 +156,8 @@ body.uc1-pro-login {
     padding: 40px;
     max-width: 500px;
     width: 100%;
-    animation: cardFloat 6s ease-in-out infinite;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* Subtle floating animation */
@@ -439,6 +483,54 @@ body.uc1-pro-login {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--uc1-text-secondary);
     font-size: 14px;
+}
+
+/* Registration page: compact layout to fit viewport */
+#kc-register-form .uc1-form-group {
+    margin-bottom: 12px;
+}
+
+#kc-register-form .uc1-input {
+    padding: 10px 14px;
+}
+
+#kc-register-form .uc1-label {
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+/* When register form is present, tighten the card */
+#kc-register-form ~ #kc-registration,
+#kc-register-form ~ .uc1-registration {
+    margin-top: 15px;
+    padding-top: 12px;
+}
+
+/* Tighter header on registration page */
+body.uc1-pro-login:has(#kc-register-form) .login-pf-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+body.uc1-pro-login:has(#kc-register-form) .uc1-card {
+    padding: 25px 35px;
+}
+
+body.uc1-pro-login:has(#kc-register-form) .uc1-logo {
+    max-width: 70px;
+}
+
+body.uc1-pro-login:has(#kc-register-form) .uc1-logo-container {
+    margin-bottom: 10px;
+}
+
+body.uc1-pro-login:has(#kc-register-form) .uc1-title {
+    font-size: 22px;
+}
+
+body.uc1-pro-login:has(#kc-register-form) .uc1-footer {
+    margin-top: 15px;
+    padding-top: 10px;
 }
 
 /* === SOCIAL PROVIDERS === */

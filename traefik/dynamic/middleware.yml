@@ -13,6 +13,7 @@ http:
       service: ops-center-service
       middlewares:
         - no-cache-headers
+        - rate-limit-per-ip
       tls:
         certResolver: letsencrypt
     
@@ -23,6 +24,8 @@ http:
       entryPoints:
         - websecure
       service: keycloak-service
+      middlewares:
+        - rate-limit-per-ip
       tls:
         certResolver: letsencrypt
     
@@ -33,6 +36,8 @@ http:
       entryPoints:
         - websecure
       service: docs-service
+      middlewares:
+        - rate-limit
       tls:
         certResolver: letsencrypt
     
@@ -43,6 +48,8 @@ http:
       entryPoints:
         - websecure
       service: default-backend
+      middlewares:
+        - rate-limit-per-ip
       tls:
         certResolver: letsencrypt
   

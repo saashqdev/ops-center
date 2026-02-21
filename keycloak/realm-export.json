@@ -8,7 +8,7 @@
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
   "rememberMe": true,
-  "verifyEmail": false,
+  "verifyEmail": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
@@ -233,7 +233,18 @@
   "actionTokenGeneratedByUserLifespan": 300,
   "oauth2DeviceCodeLifespan": 600,
   "oauth2DevicePollingInterval": 5,
-  "smtpServer": {},
+  "smtpServer": {
+    "host": "${SMTP_HOST:smtp-broadcasts.postmarkapp.com}",
+    "port": "${SMTP_PORT:587}",
+    "from": "${SMTP_FROM:support@kubeworkz.io}",
+    "fromDisplayName": "${SMTP_FROM_DISPLAY_NAME:Kubeworkz}",
+    "replyTo": "${SMTP_REPLY_TO:support@kubeworkz.io}",
+    "ssl": "${SMTP_SSL:false}",
+    "starttls": "${SMTP_STARTTLS:true}",
+    "auth": "${SMTP_AUTH:true}",
+    "user": "${SMTP_USER:}",
+    "password": "${SMTP_PASSWORD:}"
+  },
   "eventsEnabled": true,
   "eventsListeners": ["jboss-logging"],
   "enabledEventTypes": [

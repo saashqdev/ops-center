@@ -68,6 +68,7 @@ services:
       - "traefik.http.routers.keycloak.rule=Host(`auth.${APP_DOMAIN:-kubeworkz.io}`)"
       - "traefik.http.routers.keycloak.entrypoints=web,websecure"
       - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.keycloak.middlewares=rate-limit-per-ip@file"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
 
   # Direct routing to ops-center backend
@@ -100,7 +101,7 @@ services:
       - EXTERNAL_HOST=${APP_DOMAIN:-kubeworkz.io}
       - EXTERNAL_PROTOCOL=https
       - OAUTH_CLIENT_ID=ops-center
-      - OPS_CENTER_OAUTH_CLIENT_SECRET=QNeBWyjw9koFASgWEYZDACELjejHCbcG
+      - OPS_CENTER_OAUTH_CLIENT_SECRET=vz9cA8-kuX-oso3DC-w7
       - KEYCLOAK_URL=https://auth.kubeworkz.io
       - KEYCLOAK_PUBLIC_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
       - KEYCLOAK_EXTERNAL_URL=https://auth.${APP_DOMAIN:-kubeworkz.io}
@@ -161,6 +162,7 @@ services:
       - "traefik.http.routers.ops-center-admin.entrypoints=websecure"
       - "traefik.http.routers.ops-center-admin.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-admin.service=ops-center-svc"
+      - "traefik.http.routers.ops-center-admin.middlewares=rate-limit-per-ip@file"
 
       # API routes
       - "traefik.http.routers.ops-center-api-path.rule=Host(`${APP_DOMAIN:-localhost}`) && PathPrefix(`/api`)"
@@ -168,6 +170,7 @@ services:
       - "traefik.http.routers.ops-center-api-path.entrypoints=websecure"
       - "traefik.http.routers.ops-center-api-path.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-api-path.service=ops-center-svc"
+      - "traefik.http.routers.ops-center-api-path.middlewares=rate-limit-per-ip@file"
 
       # Auth routes
       - "traefik.http.routers.ops-center-auth.rule=Host(`${APP_DOMAIN:-localhost}`) && PathPrefix(`/auth`)"
@@ -175,6 +178,7 @@ services:
       - "traefik.http.routers.ops-center-auth.entrypoints=websecure"
       - "traefik.http.routers.ops-center-auth.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-auth.service=ops-center-svc"
+      - "traefik.http.routers.ops-center-auth.middlewares=rate-limit-per-ip@file"
 
       # Root route (lowest priority, catches landing page)
       - "traefik.http.routers.ops-center-root.rule=Host(`${APP_DOMAIN:-localhost}`)"
@@ -182,17 +186,20 @@ services:
       - "traefik.http.routers.ops-center-root.entrypoints=websecure"
       - "traefik.http.routers.ops-center-root.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-root.service=ops-center-svc"
+      - "traefik.http.routers.ops-center-root.middlewares=rate-limit-per-ip@file"
 
       # API subdomain HTTPS route
       - "traefik.http.routers.ops-center-api-subdomain.rule=Host(`api.${APP_DOMAIN:-localhost}`)"
       - "traefik.http.routers.ops-center-api-subdomain.entrypoints=https"
       - "traefik.http.routers.ops-center-api-subdomain.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ops-center-api-subdomain.service=ops-center-svc"
+      - "traefik.http.routers.ops-center-api-subdomain.middlewares=rate-limit-per-ip@file"
 
       # API subdomain HTTP route
       - "traefik.http.routers.ops-center-api-http.rule=Host(`api.${APP_DOMAIN:-localhost}`)"
       - "traefik.http.routers.ops-center-api-http.entrypoints=web"
       - "traefik.http.routers.ops-center-api-http.service=ops-center-svc"
+      - "traefik.http.routers.ops-center-api-http.middlewares=rate-limit-per-ip@file"
       # Note: No redirect middleware - Cloudflare handles HTTP→HTTPS redirect
 
       # Wildcard subdomain routing for multi-tenant (Epic 10)
@@ -204,6 +211,7 @@ services:
       - "traefik.http.routers.ops-center-wildcard.tls.domains[0].main=${APP_DOMAIN:-localhost}"
       - "traefik.http.routers.ops-center-wildcard.tls.domains[0].sans=*.${APP_DOMAIN:-localhost}"
       - "traefik.http.routers.ops-center-wildcard.service=ops-center-svc"
+      - "traefik.http.routers.ops-center-wildcard.middlewares=rate-limit-per-ip@file"
 
   # LiteLLM Proxy - Multi-Provider LLM Router
   litellm-proxy:

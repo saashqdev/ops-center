@@ -14,11 +14,18 @@ window.fetch = function(...args) {
   return originalFetch.apply(this, args).then(response => {
     // If session expired (401 only), redirect to login
     // Note: 403 means forbidden/insufficient permissions, not session timeout
+    // Skip redirect if on landing page (logged_out, auth error, or public page)
+    const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+    const onLandingPage = window.location.search.includes('logged_out') ||
+                          window.location.search.includes('error=authentication_failed') ||
+                          window.location.search.includes('error=email_not_verified');
     if (response.status === 401 && 
-        !args[0].includes('/auth/login') && 
-        !args[0].includes('/auth/session') &&
-        !args[0].includes('/auth/callback') &&
-        !args[0].includes('/api/v1/openwebui/')) {
+        !onLandingPage &&
+        !url.includes('/auth/login') && 
+        !url.includes('/auth/session') &&
+        !url.includes('/auth/callback') &&
+        !url.includes('/api/v1/system/settings') &&
+        !url.includes('/api/v1/openwebui/')) {
       console.warn('Session expired, redirecting to login...');
       window.location.href = '/auth/login';
     }

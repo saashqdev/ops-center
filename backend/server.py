@@ -496,6 +496,7 @@ csrf_protect, csrf_middleware_factory = create_csrf_protection(
         "/auth/login",
         "/auth/logout",
         "/auth/register",  # Public signup endpoint
+        "/auth/resend-verification",  # Email verification resend endpoint
         "/docs",
         "/redoc",
         "/openapi.json",
@@ -4282,28 +4283,28 @@ async def logout(request: Request, current_user: dict = Depends(get_current_user
             f"{external_protocol}://{external_host}/auth/logged-out"
         )
 
-        # Encode redirect URI
-        try:
-            import urllib.parse
-            encoded_redirect = urllib.parse.quote(logout_confirmation_url, safe='')
-        except Exception:
-            encoded_redirect = logout_confirmation_url
-
         # Prefer id_token_hint to bypass the Keycloak confirmation page and keep styles on our site
         if id_token:
-            # URL encode the id_token as well
+            # Build logout URL with id_token_hint - do NOT URL-encode the JWT,
+            # let urllib.parse.urlencode handle encoding properly
             import urllib.parse
-            encoded_id_token = urllib.parse.quote(id_token, safe='')
+            params = {
+                "id_token_hint": id_token,
+                "post_logout_redirect_uri": logout_confirmation_url
+            }
             keycloak_logout_url = (
                 f"{keycloak_external_url}/realms/{keycloak_realm}/protocol/openid-connect/logout"
-                f"?id_token_hint={encoded_id_token}"
-                f"&post_logout_redirect_uri={encoded_redirect}"
+                f"?{urllib.parse.urlencode(params)}"
             )
         else:
+            import urllib.parse
+            params = {
+                "client_id": os.getenv('KEYCLOAK_CLIENT_ID', 'ops-center'),
+                "post_logout_redirect_uri": logout_confirmation_url
+            }
             keycloak_logout_url = (
                 f"{keycloak_external_url}/realms/{keycloak_realm}/protocol/openid-connect/logout"
-                f"?client_id={os.getenv('KEYCLOAK_CLIENT_ID', 'ops-center')}"
-                f"&post_logout_redirect_uri={encoded_redirect}"
+                f"?{urllib.parse.urlencode(params)}"
             )
 
         print(f"Logout URL: {keycloak_logout_url}")
@@ -5039,6 +5040,69 @@ async def get_my_organizations(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Failed to retrieve organizations: {str(e)}")
 
 
+# Resend email verification endpoint
+@app.post("/auth/resend-verification")
+async def resend_verification_email(request: Request):
+    """
+    Resend email verification link for users who haven't verified yet.
+    Requires only an email address (no authentication needed).
+    """
+    try:
+        data = await request.json()
+        email = data.get("email", "").strip()
+
+        if not email:
+            raise HTTPException(status_code=400, detail="Email is required")
+
+        if not KEYCLOAK_ENABLED:
+            raise HTTPException(status_code=503, detail="Authentication system not available")
+
+        # Look up user in Keycloak
+        from keycloak_integration import get_user_by_email as kc_get_user_by_email
+        from keycloak_integration import send_verification_email
+
+        user = await kc_get_user_by_email(email)
+        if not user:
+            # Don't reveal whether email exists - always return success
+            return JSONResponse(content={
+                "success": True,
+                "message": "If an account with that email exists, a verification link has been sent."
+            })
+
+        # Check if already verified
+        if user.get("emailVerified", False):
+            return JSONResponse(content={
+                "success": True,
+                "message": "Your email is already verified. You can log in now.",
+                "already_verified": True
+            })
+
+        # Send verification email
+        user_id = user.get("id")
+        sent = await send_verification_email(user_id)
+
+        if sent:
+            logger.info(f"Resent verification email to {email}")
+        else:
+            logger.warning(f"Failed to resend verification email to {email}")
+
+        # Always return success to prevent email enumeration
+        return JSONResponse(content={
+            "success": True,
+            "message": "If an account with that email exists, a verification link has been sent."
+        })
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error resending verification email: {e}")
+        # Don't reveal internal errors
+        return JSONResponse(content={
+            "success": True,
+            "message": "If an account with that email exists, a verification link has been sent."
+        })
+
+
 # User Registration endpoint
 @app.post("/auth/register")
 async def register_user(request: Request):
@@ -5148,11 +5212,14 @@ async def register_user(request: Request):
                     )
 
                 # Create user in Keycloak with org_id in attributes
+                # email_verified=False requires user to verify via email link
                 keycloak_user_id = await keycloak_create_user(
                     email=email,
                     username=username,
                     first_name=first_name,
                     last_name=last_name,
+                    email_verified=False,
+                    required_actions=["VERIFY_EMAIL"],
                     attributes={
                         "subscription_tier": ["trial"],
                         "subscription_status": ["active"],
@@ -5185,7 +5252,18 @@ async def register_user(request: Request):
                         detail="Failed to set password in authentication system"
                     )
 
-                logger.info(f"Successfully created Keycloak user {keycloak_user_id} for {email}")
+                # Send email verification link
+                try:
+                    from keycloak_integration import send_verification_email
+                    email_sent = await send_verification_email(keycloak_user_id)
+                    if email_sent:
+                        logger.info(f"Verification email sent to {email}")
+                    else:
+                        logger.warning(f"Failed to send verification email to {email} - user can request resend on login")
+                except Exception as verify_err:
+                    logger.warning(f"Could not send verification email to {email}: {verify_err}")
+
+                logger.info(f"Successfully created Keycloak user {keycloak_user_id} for {email} (verification pending)")
 
             except HTTPException:
                 # Clean up on Keycloak error
@@ -5315,64 +5393,18 @@ async def register_user(request: Request):
                 }
             )
 
-        # Step 7: Auto-login: Create authenticated session for the new user
-        session_token = request.cookies.get("session_token")
-        if not session_token:
-            session_token = secrets.token_urlsafe(32)
+        # Step 7: Return verification-pending response (no auto-login)
+        # User must verify their email before they can log in
+        logger.info(f"New user {username} registered with org: {org_name} (ID: {org_id}) - email verification pending")
 
-        # Get existing session data to preserve CSRF token if exists
-        existing_session = sessions.get(session_token)
-        existing_csrf = existing_session.get("csrf_token") if existing_session else None
-
-        # Update session with authenticated user info and org data
-        sessions[session_token] = {
-            "user_id": local_user["id"],
-            "username": username,
-            "email": email,
-            "csrf_token": existing_csrf or csrf_protect.generate_token(),
-            "created": time.time(),
-            "authenticated": True,
-            "keycloak_user_id": keycloak_user_id,
-            "org_id": org_id,
-            "org_name": org_name,
-            "org_role": "owner"
-        }
-
-        logger.info(f"New user {username} registered with org: {org_name} (ID: {org_id})")
-
-        # Return response with session cookie
-        response = JSONResponse(content={
+        return JSONResponse(content={
             "success": True,
-            "message": "Account created successfully",
-            "user_id": local_user["id"],
-            "username": username,
+            "email_verification_required": True,
+            "message": "Account created successfully. Please check your email to verify your account before logging in.",
             "email": email,
             "org_id": org_id,
-            "org_name": org_name,
-            "org_role": "owner"
+            "org_name": org_name
         })
-
-        response.set_cookie(
-            key="session_token",
-            value=session_token,
-            httponly=True,
-            secure=False,  # Set to True in production with HTTPS
-            samesite="lax",
-            max_age=7200  # 2 hours
-        )
-
-        # Also set CSRF token cookie for double-submit pattern
-        csrf_token = sessions[session_token]["csrf_token"]
-        response.set_cookie(
-            key="csrf_token",
-            value=csrf_token,
-            httponly=False,  # Must be accessible to JavaScript
-            secure=False,  # Set to True in production with HTTPS
-            samesite="lax",
-            max_age=86400  # 24 hours
-        )
-
-        return response
 
     except HTTPException as http_exc:
         # Rollback on HTTP exceptions (validation errors, etc.)
@@ -5816,6 +5848,24 @@ async def oauth_callback(request: Request, code: str, state: str = None):
                     email = user_info.get('email')
                     org_context = await get_user_org_context(user_id, email)
 
+                    # Check email verification status
+                    # Keycloak includes email_verified in the userinfo/token claims
+                    email_verified = user_info.get('email_verified', False)
+                    if not email_verified:
+                        # Also check directly from Keycloak admin API for accuracy
+                        try:
+                            from keycloak_integration import get_user_by_id as kc_get_user
+                            kc_user = await kc_get_user(user_id)
+                            if kc_user:
+                                email_verified = kc_user.get('emailVerified', False)
+                        except Exception as e:
+                            logger.warning(f"Could not verify email status from Keycloak admin API: {e}")
+
+                    if not email_verified and role != "admin":
+                        logger.warning(f"User '{username}' login blocked - email not verified")
+                        print(f"User '{username}' email not verified, redirecting to verification page")
+                        return RedirectResponse(url="/?error=email_not_verified")
+
                     # Create session with org data (store id_token for logout!)
                     session_token = secrets.token_urlsafe(32)
                     sessions[session_token] = {
@@ -5945,84 +5995,114 @@ async def logged_out(request: Request):
     if session_token and session_token in sessions:
         del sessions[session_token]
 
-    html_content = """
+    keycloak_ext = os.getenv("KEYCLOAK_EXTERNAL_URL", "https://auth.kubeworkz.io")
+    kc_realm = os.getenv("KEYCLOAK_REALM", "uchub")
+
+    html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Logged Out - Unicorn Commander</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            body {{
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
                 min-height: 100vh;
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-            }
-            .card {
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
+                color: #e2e8f0;
+            }}
+            .card {{
+                background: rgba(30, 41, 59, 0.8);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(139, 92, 246, 0.2);
                 border-radius: 20px;
-                padding: 60px 80px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                padding: 48px 56px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
                 text-align: center;
-                max-width: 500px;
-            }
-            .icon {
-                font-size: 64px;
-                margin-bottom: 20px;
-            }
-            h1 {
-                color: #667eea;
-                font-size: 32px;
-                margin-bottom: 10px;
-            }
-            p {
-                color: #666;
-                font-size: 18px;
-                margin-bottom: 30px;
-            }
-            .spinner {
-                display: inline-block;
-                width: 40px;
-                height: 40px;
-                border: 4px solid rgba(102, 126, 234, 0.2);
-                border-top-color: #667eea;
+                max-width: 460px;
+                width: 90%;
+            }}
+            .logo {{
+                width: 72px;
+                height: 72px;
                 border-radius: 50%;
-                animation: spin 1s linear infinite;
-            }
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-            .redirect-info {
-                color: #999;
+                margin: 0 auto 20px;
+                object-fit: cover;
+            }}
+            .icon {{
+                font-size: 56px;
+                margin-bottom: 16px;
+            }}
+            h1 {{
+                color: #c4b5fd;
+                font-size: 26px;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }}
+            .brand {{
+                color: #a78bfa;
                 font-size: 14px;
-                margin-top: 20px;
-            }
+                font-weight: 500;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                margin-bottom: 20px;
+            }}
+            p {{
+                color: #94a3b8;
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 32px;
+            }}
+            .btn {{
+                display: inline-block;
+                padding: 14px 40px;
+                background: linear-gradient(135deg, #7c3aed, #6d28d9);
+                color: white;
+                font-size: 16px;
+                font-weight: 600;
+                border: none;
+                border-radius: 12px;
+                text-decoration: none;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            }}
+            .btn:hover {{
+                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                transform: translateY(-1px);
+                box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            }}
+            .footer {{
+                margin-top: 32px;
+                color: #475569;
+                font-size: 13px;
+            }}
         </style>
     </head>
     <body>
         <div class="card">
             <div class="icon">👋</div>
-            <h1>Logged Out Successfully</h1>
-            <p>You have been signed out of your account.</p>
-            <div class="spinner"></div>
-            <div class="redirect-info">Redirecting to home page...</div>
+            <div class="brand">Unicorn Commander</div>
+            <h1>Signed Out Successfully</h1>
+            <p>You have been securely signed out of your account.</p>
+            <a href="/auth/login" class="btn">Sign In Again</a>
         </div>
+        <div class="footer">&copy; 2026 Unicorn Commander</div>
         <script>
             // Clear Keycloak session via hidden iframe
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
-            iframe.src = 'https://auth.your-domain.com/realms/uchub/protocol/openid-connect/logout';
+            iframe.src = '{keycloak_ext}/realms/{kc_realm}/protocol/openid-connect/logout';
             document.body.appendChild(iframe);
-
-            // Redirect to home page after 2 seconds (not /auth/login to avoid auto-login)
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 2000);
         </script>
     </body>
     </html>

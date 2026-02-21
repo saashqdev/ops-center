@@ -242,10 +242,20 @@ async def update_user_attributes(email: str, attributes: Dict[str, List[str]]) -
 
 
 async def create_user(email: str, username: str, first_name: str = "", last_name: str = "",
-                     attributes: Dict[str, List[str]] = None, email_verified: bool = True) -> Optional[str]:
+                     attributes: Dict[str, List[str]] = None, email_verified: bool = False,
+                     required_actions: List[str] = None) -> Optional[str]:
     """
     Create a new user in Keycloak
     Returns user ID on success, None on failure
+    
+    Args:
+        email: User email address
+        username: Username
+        first_name: First name
+        last_name: Last name
+        attributes: User attributes dict
+        email_verified: Whether email is pre-verified (default: False)
+        required_actions: List of required actions (e.g. ['VERIFY_EMAIL'])
     """
     try:
         token = await get_admin_token()
@@ -259,6 +269,9 @@ async def create_user(email: str, username: str, first_name: str = "", last_name
             "lastName": last_name,
             "attributes": attributes or {}
         }
+
+        if required_actions:
+            user_data["requiredActions"] = required_actions
 
         async with httpx.AsyncClient(verify=False) as client:
             response = await client.post(
@@ -284,6 +297,44 @@ async def create_user(email: str, username: str, first_name: str = "", last_name
     except Exception as e:
         logger.error(f"Error creating user: {e}")
         return None
+
+
+async def send_verification_email(user_id: str, lifespan: int = 86400) -> bool:
+    """
+    Send email verification to a user via Keycloak's execute-actions-email API.
+    
+    Args:
+        user_id: Keycloak user ID
+        lifespan: Link validity in seconds (default 24 hours)
+    
+    Returns:
+        True if email sent successfully, False otherwise
+    """
+    try:
+        token = await get_admin_token()
+
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.put(
+                f"{KEYCLOAK_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/execute-actions-email",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                },
+                json=["VERIFY_EMAIL"],
+                params={"lifespan": lifespan},
+                timeout=10.0
+            )
+
+            if response.status_code == 204:
+                logger.info(f"Sent verification email to user {user_id}")
+                return True
+            else:
+                logger.error(f"Failed to send verification email: {response.status_code} - {response.text}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error sending verification email to user {user_id}: {e}")
+        return False
 
 
 async def delete_user(email: str) -> bool:

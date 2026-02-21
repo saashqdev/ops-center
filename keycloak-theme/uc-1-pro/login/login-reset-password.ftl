@@ -48,11 +48,12 @@
                     <div class="card-pf uc1-card">
                         <header class="login-pf-header">
                             <div class="uc1-logo-container">
-                                <img src="${url.resourcesPath}/img/colonel-logo.png" alt="The Colonel" class="uc1-logo" />
+                                <img src="${url.resourcesPath}/img/colonel-logo.png" alt="The Colonel" class="uc1-logo" onerror="this.style.display='none'" />
                             </div>
                             <h1 id="kc-page-title" class="uc1-title">
                                 ${msg("emailForgotTitle")}
                             </h1>
+                            <p class="uc1-subtitle">We'll help you get back in</p>
                         </header>
 
                         <div id="kc-content">
@@ -60,25 +61,17 @@
                                 <div id="kc-form">
                                     <div id="kc-form-wrapper">
                                         <#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
-                                            <div class="alert alert-${message.type} uc1-message">
-                                                <#if message.type = 'success'>
-                                                    <span class="${properties.kcFeedbackSuccessIcon!}"></span>
-                                                </#if>
-                                                <#if message.type = 'warning'>
-                                                    <span class="${properties.kcFeedbackWarningIcon!}"></span>
-                                                </#if>
-                                                <#if message.type = 'error'>
-                                                    <span class="${properties.kcFeedbackErrorIcon!}"></span>
-                                                </#if>
-                                                <#if message.type = 'info'>
-                                                    <span class="${properties.kcFeedbackInfoIcon!}"></span>
-                                                </#if>
+                                            <div class="alert alert-${message.type} uc1-alert">
+                                                <#if message.type = 'success'><span class="pficon pficon-ok"></span></#if>
+                                                <#if message.type = 'warning'><span class="pficon pficon-warning-triangle-o"></span></#if>
+                                                <#if message.type = 'error'><span class="pficon pficon-error-circle-o"></span></#if>
+                                                <#if message.type = 'info'><span class="pficon pficon-info"></span></#if>
                                                 <span class="kc-feedback-text">${kcSanitize(message.summary)?no_esc}</span>
                                             </div>
                                         </#if>
 
                                         <form id="kc-reset-password-form" class="form uc1-form" action="${url.loginAction}" method="post">
-                                            <div class="form-group">
+                                            <div class="form-group uc1-form-group">
                                                 <label for="username" class="uc1-label">${msg("usernameOrEmail")}</label>
                                                 <input tabindex="1" id="username" class="form-control uc1-input" name="username" type="text"
                                                        autofocus autocomplete="username"

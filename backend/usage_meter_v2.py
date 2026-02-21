@@ -3,7 +3,7 @@ Usage Metering System
 Tracks API usage, enforces limits, and generates analytics
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import logging
 from datetime import datetime, timedelta
 
