@@ -286,6 +286,10 @@ async def list_providers(request: Request):
     try:
         user_email = await get_user_email(request)
         
+        # Look up Keycloak user_id (keys may be stored by UUID)
+        user = await get_user_from_keycloak(user_email)
+        user_id = user.get("id") if user else None
+        
         # Get database pool from app state
         db_pool = request.app.state.db_pool
         configured_providers = set()
@@ -293,12 +297,20 @@ async def list_providers(request: Request):
         if db_pool:
             try:
                 # Query database for user's configured providers
+                # Check both user_id (UUID) and email since keys may be stored with either
                 async with db_pool.acquire() as conn:
-                    db_providers = await conn.fetch("""
-                        SELECT DISTINCT provider 
-                        FROM user_provider_keys 
-                        WHERE user_id = $1 AND enabled = true
-                    """, user_email)
+                    if user_id:
+                        db_providers = await conn.fetch("""
+                            SELECT DISTINCT provider 
+                            FROM user_provider_keys 
+                            WHERE (user_id = $1 OR user_id = $2) AND enabled = true
+                        """, user_id, user_email)
+                    else:
+                        db_providers = await conn.fetch("""
+                            SELECT DISTINCT provider 
+                            FROM user_provider_keys 
+                            WHERE user_id = $1 AND enabled = true
+                        """, user_email)
                     configured_providers = {row['provider'] for row in db_providers}
             except Exception as e:
                 logger.error(f"Error querying database for configured providers: {e}")

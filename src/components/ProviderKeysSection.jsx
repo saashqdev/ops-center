@@ -240,8 +240,8 @@ export default function ProviderKeysSection({
           ? configuredKeys.find(k => k.provider === provider.id)
           : null;
 
-        // Determine if configured - check both backend flag AND if we have key details
-        const isConfigured = provider.configured || (keyDetails && keyDetails.id);
+        // Determine if configured - check backend flag, key details existence, or key preview
+        const isConfigured = provider.configured || (keyDetails != null) || !!provider.key_preview;
         
         if (provider.id === 'openrouter') {
           console.log('DEBUG OpenRouter merge:', {
@@ -256,7 +256,7 @@ export default function ProviderKeysSection({
           provider_type: provider.id,
           name: provider.name,
           key_source: isConfigured ? 'database' : 'not_set',
-          key_preview: keyDetails?.masked_key || keyDetails?.key_preview || null,
+          key_preview: keyDetails?.masked_key || keyDetails?.key_preview || provider.key_preview || null,
           last_tested: keyDetails?.last_tested || null,
           test_status: keyDetails?.test_status || null,
           configured: isConfigured
